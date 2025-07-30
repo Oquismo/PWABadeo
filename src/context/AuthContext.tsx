@@ -2,17 +2,19 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// 1. Definimos la estructura de un objeto User
+// 1. Añadimos las nuevas propiedades para las fechas
 interface User {
   name: string;
   email: string;
   age: number;
   school: string;
   avatarUrl: string;
+  arrivalDate: string;
+  departureDate: string;
 }
 
 interface AuthContextType {
-  user: User | null; // El estado ahora guarda un objeto User o null
+  user: User | null;
   isAuthenticated: boolean;
   login: (userData: User) => void;
   logout: () => void;
@@ -43,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    // 2. isAuthenticated ahora se calcula automáticamente si existe un usuario
+    // isAuthenticated ahora se calcula automáticamente si existe un usuario
     <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
       {children}
     </AuthContext.Provider>

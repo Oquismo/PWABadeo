@@ -13,8 +13,10 @@ export default function RegistroPage() {
     lastName: '',
     email: '',
     password: '',
-    age: '', // 1. Añadimos el campo de edad
-    school: '', // 2. Añadimos el campo de escuela
+    age: '',
+    school: '',
+    arrivalDate: '', // Campo nuevo
+    departureDate: '', // Campo nuevo
   });
   const [errors, setErrors] = useState<any>({});
   const router = useRouter();
@@ -41,13 +43,14 @@ export default function RegistroPage() {
     } else if (formData.password.length < 8) {
       tempErrors.password = 'La contraseña debe tener al menos 8 caracteres.';
     }
-    // 3. Añadimos validación para los nuevos campos
     if (!formData.age) {
       tempErrors.age = 'La edad es obligatoria.';
     } else if (isNaN(Number(formData.age)) || Number(formData.age) <= 0) {
       tempErrors.age = 'Introduce una edad válida.';
     }
     if (!formData.school) tempErrors.school = 'El nombre de la escuela es obligatorio.';
+    if (!formData.arrivalDate) tempErrors.arrivalDate = 'La fecha de llegada es obligatoria.';
+    if (!formData.departureDate) tempErrors.departureDate = 'La fecha de salida es obligatoria.';
     
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -59,18 +62,21 @@ export default function RegistroPage() {
     age: 24,
     school: 'Centro Educativo Sol',
     avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
+    arrivalDate: '2025-09-01',
+    departureDate: '2026-06-30',
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (validate()) {
-      // 4. Pasamos los nuevos datos al crear el usuario
       login({
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         age: Number(formData.age),
         school: formData.school,
-        avatarUrl: mockUser.avatarUrl, // Usamos un avatar de ejemplo por ahora
+        avatarUrl: mockUser.avatarUrl,
+        arrivalDate: formData.arrivalDate,
+        departureDate: formData.departureDate,
       });
       router.push('/');
     }
@@ -89,7 +95,6 @@ export default function RegistroPage() {
         </Typography>
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
-            {/* ... Campos de Nombre y Apellidos (sin cambios) ... */}
             <Grid item xs={12} sm={6}>
               <TextField name="firstName" required fullWidth label="Nombre" autoFocus value={formData.firstName} onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName}/>
             </Grid>
@@ -99,30 +104,38 @@ export default function RegistroPage() {
             <Grid item xs={12}>
               <TextField required fullWidth label="Correo Electrónico" name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email}/>
             </Grid>
-            {/* 5. Añadimos los nuevos campos al formulario */}
+            <Grid item xs={12} sm={6}>
+              <TextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField name="school" required fullWidth label="Escuela" value={formData.school} onChange={handleChange} error={!!errors.school} helperText={errors.school} />
+            </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                name="age"
+                name="arrivalDate"
                 required
                 fullWidth
-                label="Edad"
-                type="number" // El tipo 'number' muestra un teclado numérico en móviles
-                value={formData.age}
+                label="Fecha de Llegada"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={formData.arrivalDate}
                 onChange={handleChange}
-                error={!!errors.age}
-                helperText={errors.age}
+                error={!!errors.arrivalDate}
+                helperText={errors.arrivalDate}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                name="school"
+                name="departureDate"
                 required
                 fullWidth
-                label="Escuela"
-                value={formData.school}
+                label="Fecha de Salida"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={formData.departureDate}
                 onChange={handleChange}
-                error={!!errors.school}
-                helperText={errors.school}
+                error={!!errors.departureDate}
+                helperText={errors.departureDate}
               />
             </Grid>
             <Grid item xs={12}>

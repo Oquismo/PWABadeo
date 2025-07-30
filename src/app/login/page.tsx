@@ -26,12 +26,15 @@ export default function LoginPage() {
     return Object.keys(tempErrors).length === 0;
   };
   
+  // 1. SOLUCIÓN: Añadimos las fechas que faltaban al usuario de ejemplo
   const mockUser = {
     name: 'Usuario Ejemplo',
     email: 'usuario@ejemplo.com',
     age: 24,
     school: 'Centro Educativo Sol',
     avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
+    arrivalDate: '2025-09-01', // Fecha de ejemplo
+    departureDate: '2026-06-30', // Fecha de ejemplo
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -88,7 +91,7 @@ export default function LoginPage() {
           </Box>
         </Box>
         
-        {/* Botón de Bypass ahora siempre visible */}
+        {/* Botón de Bypass siempre visible */}
         <Tooltip title="Entrada rápida para pruebas">
           <Button
             onClick={handleBypassLogin}
