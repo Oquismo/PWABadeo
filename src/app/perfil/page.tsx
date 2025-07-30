@@ -3,11 +3,12 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
+import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
 import EmailIcon from '@mui/icons-material/Email';
-import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar icono de Ajustes
+import SettingsIcon from '@mui/icons-material/Settings';
+import EditIcon from '@mui/icons-material/Edit'; // 1. Importar el icono de Editar
 import Link from 'next/link';
 
 export default function PerfilPage() {
@@ -15,7 +16,6 @@ export default function PerfilPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Protección de la ruta
     if (!isAuthenticated) {
       router.push('/login');
     }
@@ -32,13 +32,21 @@ export default function PerfilPage() {
 
   return (
     <Container component="main" maxWidth="sm">
-      {/* 2. Contenedor para posicionar el botón de ajustes */}
       <Box sx={{ position: 'relative', pt: 4 }}>
-        <Link href="/ajustes" passHref>
-          <IconButton sx={{ position: 'absolute', top: 0, right: 0 }}>
-            <SettingsIcon />
-          </IconButton>
-        </Link>
+        {/* 2. Contenedor para los botones de acción en la esquina */}
+        <Stack direction="row" spacing={1} sx={{ position: 'absolute', top: 0, right: 0 }}>
+          <Link href="/perfil/editar" passHref>
+            <IconButton aria-label="editar perfil">
+              <EditIcon />
+            </IconButton>
+          </Link>
+          <Link href="/ajustes" passHref>
+            <IconButton aria-label="ajustes">
+              <SettingsIcon />
+            </IconButton>
+          </Link>
+        </Stack>
+        
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Avatar 
             src={user.avatarUrl}

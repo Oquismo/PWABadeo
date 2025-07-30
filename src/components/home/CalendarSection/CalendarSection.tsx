@@ -54,17 +54,21 @@ export default function CalendarSection() {
   useEffect(() => { setIsClient(true); }, []);
 
   useEffect(() => {
-    if (isClient) {
-      const savedEvents = localStorage.getItem('userCustomEvents');
+    if (isClient && user) {
+      const savedEvents = localStorage.getItem(`userCustomEvents_${user.email}`);
       if (savedEvents) {
         const parsedEvents = JSON.parse(savedEvents).map((event: any) => ({
           ...event,
           date: new Date(event.date),
         }));
         setUserEvents(parsedEvents);
+      } else {
+        setUserEvents([]);
       }
+    } else if (!user) {
+        setUserEvents([]);
     }
-  }, [isClient]);
+  }, [isClient, user]);
 
   const allEvents = useMemo(() => {
     const personalEvents: Event[] = [];
@@ -92,11 +96,11 @@ export default function CalendarSection() {
   };
 
   const handleAddEvent = () => {
-    if (newEventTitle.trim() === '') return;
+    if (newEventTitle.trim() === '' || !user) return;
     const newEvent = { title: newEventTitle, date: newEventDate };
     const updatedEvents = [...userEvents, newEvent];
     setUserEvents(updatedEvents);
-    localStorage.setItem('userCustomEvents', JSON.stringify(updatedEvents));
+    localStorage.setItem(`userCustomEvents_${user.email}`, JSON.stringify(updatedEvents));
     handleClose();
     setNewEventTitle('');
   };
@@ -105,7 +109,6 @@ export default function CalendarSection() {
 
   return (
     <Box sx={{ py: 4 }}>
-      {/* --- ESTILO RESTAURADO --- */}
       <style>{`
         .react-calendar {
           width: 100%;
@@ -115,18 +118,23 @@ export default function CalendarSection() {
           border-radius: 16px;
           color: #fff;
         }
-        .react-calendar__tile--active, .react-calendar__tile--now {
+        .react-calendar__tile--now {
           background: rgba(190, 242, 100, 0.15) !important;
           color: #BEF264 !important;
           border-radius: 8px;
         }
+        /* --- ESTILO CORREGIDO PARA EL DÍA SELECCIONADO --- */
+        .react-calendar__tile--active {
+          background: #BEF264 !important; /* Fondo verde/lima sólido */
+          color: #18181B !important; /* Texto oscuro para contraste */
+          font-weight: bold;
+        }
         .react-calendar__navigation button { color: #BEF264; }
         .react-calendar__month-view__weekdays__weekday { color: #A1A1AA; }
-        .react-calendar__tile { color: #fff; }
+        .react-calendar__tile { color: #fff; border-radius: 8px; }
         .react-calendar__tile:disabled { color: #555; }
         .event-day {
           background-color: rgba(56, 164, 220, 0.3);
-          border-radius: 8px;
         }
       `}</style>
       
