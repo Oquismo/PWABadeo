@@ -1,35 +1,27 @@
 'use client';
 import { createTheme } from '@mui/material/styles';
 
-// Nueva paleta de colores extraída de la última imagen
-const palette = {
-  primary: '#BEF264', // El verde/lima brillante para elementos activos
-  secondary: '#D946EF', // El magenta/púrpura para otros acentos
-  background: '#18181B', // Un fondo oscuro casi negro
-  surface: 'rgba(39, 39, 42, 0.7)', // Gris oscuro translúcido para las superficies
-  surfaceBorder: 'rgba(255, 255, 255, 0.1)', // Borde blanco muy sutil
+// --- TEMA OSCURO (EL QUE YA TENÍAMOS) ---
+const darkPalette = {
+  primary: '#BEF264',
+  secondary: '#D946EF',
+  background: '#18181B',
+  surface: 'rgba(39, 39, 42, 0.7)',
+  surfaceBorder: 'rgba(255, 255, 255, 0.1)',
   textPrimary: '#FFFFFF',
-  textSecondary: '#A1A1AA', // Un gris más suave para texto secundario
+  textSecondary: '#A1A1AA',
 };
 
-const theme = createTheme({
+export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    primary: {
-      main: palette.primary,
-    },
-    secondary: {
-      main: palette.secondary,
-    },
-    background: {
-      default: palette.background,
-      paper: palette.surface, // Las superficies usarán el color translúcido
-    },
-    text: {
-      primary: palette.textPrimary,
-      secondary: palette.textSecondary,
-    },
+    primary: { main: darkPalette.primary },
+    secondary: { main: darkPalette.secondary },
+    background: { default: darkPalette.background, paper: darkPalette.surface },
+    text: { primary: darkPalette.textPrimary, secondary: darkPalette.textSecondary },
   },
+  // --- CORRECCIÓN AQUÍ ---
+  // Se ha añadido el objeto de tipografía que faltaba
   typography: {
     fontFamily: [ 'Inter', 'sans-serif' ].join(','),
     h1: { fontWeight: 700 },
@@ -38,12 +30,11 @@ const theme = createTheme({
     h4: { fontWeight: 700 },
   },
   components: {
-    // Definimos el estilo base para Paper y Card para que tengan el efecto cristal
     MuiPaper: {
       styleOverrides: {
         root: {
           backdropFilter: 'blur(10px)',
-          border: `1px solid ${palette.surfaceBorder}`,
+          border: `1px solid ${darkPalette.surfaceBorder}`,
           boxShadow: 'none',
         }
       }
@@ -51,9 +42,9 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: palette.surface,
+          backgroundColor: darkPalette.surface,
           backdropFilter: 'blur(10px)',
-          border: `1px solid ${palette.surfaceBorder}`,
+          border: `1px solid ${darkPalette.surfaceBorder}`,
           boxShadow: 'none',
           borderRadius: '16px',
         }
@@ -71,4 +62,62 @@ const theme = createTheme({
   },
 });
 
-export default theme;
+
+// --- TEMA CLARO (NUEVO) ---
+const lightPalette = {
+  primary: '#3B82F6',
+  background: '#F4F6F8',
+  surface: '#FFFFFF',
+  surfaceBorder: '#E5E7EB',
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+};
+
+export const lightTheme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: { main: lightPalette.primary },
+    background: { default: lightPalette.background, paper: lightPalette.surface },
+    text: { primary: lightPalette.textPrimary, secondary: lightPalette.textSecondary },
+  },
+  // --- CORRECCIÓN AQUÍ ---
+  // Se ha añadido el objeto de tipografía que faltaba
+  typography: {
+    fontFamily: [ 'Inter', 'sans-serif' ].join(','),
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 700 },
+    h3: { fontWeight: 700 },
+    h4: { fontWeight: 700 },
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${lightPalette.surfaceBorder}`,
+          boxShadow: 'none',
+        }
+      }
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: lightPalette.surface,
+          border: `1px solid ${lightPalette.surfaceBorder}`,
+          boxShadow: 'none',
+          borderRadius: '16px',
+        }
+      }
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '9999px',
+          textTransform: 'none',
+          fontWeight: 'bold',
+        },
+      },
+    },
+  },
+});
