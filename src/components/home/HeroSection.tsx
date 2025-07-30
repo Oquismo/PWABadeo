@@ -1,52 +1,47 @@
 'use client';
 
-import { Box, Container, Typography } from '@mui/material';
-import Image from 'next/image';
+import { Box, Typography, Avatar, Stack } from '@mui/material';
+import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 
 export default function HeroSection() {
-  return (
-    <Container>
-      <Box 
-        sx={{ 
-          py: { xs: 4, md: 8 }, // Menos padding en móvil
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-        }}
-      >
-        <Box sx={{ mb: 4 }}>
-          <Image 
-            src="/img/logo.png"
-            alt="Logo de Barrio de Oportunidades"
-            width={150} // Un poco más pequeño para móviles
-            height={150}
-            style={{ height: 'auto' }} 
-            priority
-          />
-        </Box>
+  // Usamos el hook para saber si el usuario está autenticado y obtener sus datos
+  const { isAuthenticated, user } = useAuth();
 
+  return (
+    <Box 
+      sx={{ 
+        py: { xs: 4, md: 6 }, // Padding vertical
+      }}
+    >
+      {/* Stack nos permite alinear elementos en fila con espaciado */}
+      <Stack direction="row" spacing={2} alignItems="center">
+        {/* Renderizado condicional del Avatar */}
+        {isAuthenticated && user ? (
+          // Si está logueado, el avatar es un enlace a su perfil
+          <Link href="/perfil" passHref>
+            <Avatar 
+              src={user.avatarUrl}
+              sx={{ width: 48, height: 48 }}
+            />
+          </Link>
+        ) : (
+          // Si no, mostramos un avatar genérico
+          <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main' }} />
+        )}
+
+        {/* El saludo */}
         <Box>
           <Typography 
             component="h1" 
-            variant="h2"
-            fontWeight="bold" 
-            gutterBottom
-            // Aquí está la magia: un tamaño para móvil (xs) y otro para escritorio (md)
-            sx={{ fontSize: { xs: '2.2rem', md: '3.5rem' } }}
+            variant="h4"
+            fontWeight="bold"
           >
-            Barrio de Oportunidades
-          </Typography>
-          <Typography 
-            variant="h5" 
-            color="text.secondary"
-            // También hacemos responsivo el subtítulo
-            sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}
-          >
-            Movilidad, comunidad e innovación para tu futuro internacional.
+            {/* Saludo condicional: "Hola, [Nombre]" o "Hola" */}
+            {isAuthenticated && user ? `Hola, ${user.name.split(' ')[0]}` : 'Hola'}
           </Typography>
         </Box>
-      </Box>
-    </Container>
+      </Stack>
+    </Box>
   );
 }

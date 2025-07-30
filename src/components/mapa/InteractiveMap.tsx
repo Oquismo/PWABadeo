@@ -7,7 +7,7 @@ import { LatLngExpression, LatLng } from 'leaflet';
 import { Box, Typography, Fab } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 
-// Arreglo para un bug conocido de Leaflet con los iconos por defecto en React
+// Arreglo para los iconos por defecto
 import L from 'leaflet';
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -16,36 +16,39 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
+interface LocationPoint {
+  position: LatLngExpression;
+  name: string;
+  description: string;
+}
 
-// Definimos los puntos de interés
-const locations = [
+const locations: LocationPoint[] = [
   {
-    position: [37.3891, -5.9845] as LatLngExpression,
+    position: [37.3891, -5.9845],
     name: 'Tu Alojamiento',
     description: 'Calle Falsa, 123'
   },
   {
-    position: [37.3828, -5.9732] as LatLngExpression,
+    position: [37.3828, -5.9732],
     name: 'Oficina Barrio de Oportunidades',
     description: 'Plaza de España'
   },
   {
-    position: [37.4023, -5.9965] as LatLngExpression,
+    position: [37.4023, -5.9965],
     name: 'Tu Empresa / Universidad',
     description: 'Isla de la Cartuja'
   },
 ];
 
-// Componente para el botón de geolocalización
 function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
-    const map = useMap(); // Hook para acceder a la instancia del mapa
+    const map = useMap();
 
     const handleClick = () => {
         map.locate().on('locationfound', function (e) {
             setUserPosition(e.latlng);
-            map.flyTo(e.latlng, 15); // Anima el mapa hasta la ubicación del usuario
+            map.flyTo(e.latlng, 15);
         }).on('locationerror', function(e){
-            alert(e.message); // Muestra un error si no se pudo obtener la ubicación
+            alert(e.message);
         });
     };
 
@@ -64,17 +67,26 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
 
 export default function InteractiveMap() {
   const defaultPosition: LatLngExpression = [37.3891, -5.9845];
+  // CORRECCIÓN: Se ha eliminado un '=' extra en esta línea
   const [userPosition, setUserPosition] = useState<LatLng | null>(null);
 
   return (
-    <MapContainer center={defaultPosition} zoom={14} style={{ height: '70vh', width: '100%', borderRadius: '16px', position: 'relative' }}>
-        {/* 1. Nuevo estilo de mapa (tema oscuro) */}
+    <MapContainer 
+      center={defaultPosition} 
+      zoom={14} 
+      style={{ 
+        height: '70vh', 
+        width: '100%', 
+        borderRadius: '16px', 
+        position: 'relative', 
+        zIndex: 0 
+      }}
+    >
         <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
-        {/* Marcadores de los puntos de interés */}
         {locations.map((loc) => (
             <Marker key={loc.name} position={loc.position}>
                 <Popup>
@@ -86,14 +98,12 @@ export default function InteractiveMap() {
             </Marker>
         ))}
 
-        {/* 2. Marcador para la ubicación del usuario (si existe) */}
         {userPosition && (
             <Marker position={userPosition}>
                 <Popup>Estás aquí</Popup>
             </Marker>
         )}
 
-        {/* 3. Botón para activar la geolocalización */}
         <LocationButton setUserPosition={setUserPosition} />
     </MapContainer>
   );

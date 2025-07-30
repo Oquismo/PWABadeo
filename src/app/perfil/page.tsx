@@ -3,16 +3,19 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
 import EmailIcon from '@mui/icons-material/Email';
+import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar icono de Ajustes
+import Link from 'next/link';
 
 export default function PerfilPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    // Protección de la ruta
     if (!isAuthenticated) {
       router.push('/login');
     }
@@ -23,51 +26,59 @@ export default function PerfilPage() {
     router.push('/');
   };
 
-  if (!user) { // Si no hay datos de usuario, no renderizamos nada hasta la redirección
+  if (!user) {
     return null; 
   }
 
   return (
     <Container component="main" maxWidth="sm">
-      <Box sx={{ marginTop: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Avatar 
-          src={user.avatarUrl}
-          sx={{ width: 100, height: 100, mb: 2 }}
-        />
-        <Typography component="h1" variant="h4" fontWeight="bold">
-          {user.name}
-        </Typography>
-        <Paper elevation={2} sx={{ width: '100%', mt: 4, p: 2, bgcolor: 'background.paper' }}>
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <EmailIcon />
-              </ListItemIcon>
-              <ListItemText primary="Email" secondary={user.email} />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <SchoolIcon />
-              </ListItemIcon>
-              <ListItemText primary="Escuela" secondary={user.school} />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CakeIcon />
-              </ListItemIcon>
-              <ListItemText primary="Edad" secondary={`${user.age} años`} />
-            </ListItem>
-          </List>
-        </Paper>
-        <Button
-          onClick={handleLogout}
-          fullWidth
-          variant="contained"
-          color="primary"
-          sx={{ mt: 4 }}
-        >
-          Cerrar Sesión
-        </Button>
+      {/* 2. Contenedor para posicionar el botón de ajustes */}
+      <Box sx={{ position: 'relative', pt: 4 }}>
+        <Link href="/ajustes" passHref>
+          <IconButton sx={{ position: 'absolute', top: 0, right: 0 }}>
+            <SettingsIcon />
+          </IconButton>
+        </Link>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Avatar 
+            src={user.avatarUrl}
+            sx={{ width: 100, height: 100, mb: 2 }}
+          />
+          <Typography component="h1" variant="h4" fontWeight="bold">
+            {user.name}
+          </Typography>
+          <Paper elevation={0} sx={{ width: '100%', mt: 4, p: 2 }}>
+            <List>
+              <ListItem>
+                <ListItemIcon>
+                  <EmailIcon />
+                </ListItemIcon>
+                <ListItemText primary="Email" secondary={user.email} />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Escuela" secondary={user.school} />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <CakeIcon />
+                </ListItemIcon>
+                <ListItemText primary="Edad" secondary={`${user.age} años`} />
+              </ListItem>
+            </List>
+          </Paper>
+          <Button
+            onClick={handleLogout}
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 4 }}
+          >
+            Cerrar Sesión
+          </Button>
+        </Box>
       </Box>
     </Container>
   );

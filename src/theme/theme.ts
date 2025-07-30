@@ -1,57 +1,70 @@
 'use client';
 import { createTheme } from '@mui/material/styles';
 
+// Nueva paleta de colores extraída de la última imagen
+const palette = {
+  primary: '#BEF264', // El verde/lima brillante para elementos activos
+  secondary: '#D946EF', // El magenta/púrpura para otros acentos
+  background: '#18181B', // Un fondo oscuro casi negro
+  surface: 'rgba(39, 39, 42, 0.7)', // Gris oscuro translúcido para las superficies
+  surfaceBorder: 'rgba(255, 255, 255, 0.1)', // Borde blanco muy sutil
+  textPrimary: '#FFFFFF',
+  textSecondary: '#A1A1AA', // Un gris más suave para texto secundario
+};
+
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#38A4DC', // Nuevo azul primario
+      main: palette.primary,
     },
     secondary: {
-      main: '#FCAE1F', // Nuevo amarillo/naranja secundario
-    },
-    success: {
-      main: '#A5CE39', // Nuevo verde de éxito
+      main: palette.secondary,
     },
     background: {
-      default: '#1F2937', 
-      paper: '#2C3A4B',   
+      default: palette.background,
+      paper: palette.surface, // Las superficies usarán el color translúcido
     },
     text: {
-      primary: '#ffffff',
-      secondary: '#bbbbbb',
+      primary: palette.textPrimary,
+      secondary: palette.textSecondary,
     },
   },
   typography: {
-    fontFamily: [
-      'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 
-      'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 
-      'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', 
-      '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'
-    ].join(','),
+    fontFamily: [ 'Inter', 'sans-serif' ].join(','),
     h1: { fontWeight: 700 },
     h2: { fontWeight: 700 },
     h3: { fontWeight: 700 },
+    h4: { fontWeight: 700 },
   },
   components: {
-    MuiButton: {
+    // Definimos el estilo base para Paper y Card para que tengan el efecto cristal
+    MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: '16px', 
-          textTransform: 'none',
-          fontWeight: 'bold',
-        },
-      },
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${palette.surfaceBorder}`,
+          boxShadow: 'none',
+        }
+      }
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 4px 20px 0 rgba(0,0,0,0.2)',
-          },
+          backgroundColor: palette.surface,
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${palette.surfaceBorder}`,
+          boxShadow: 'none',
+          borderRadius: '16px',
+        }
+      }
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '9999px',
+          textTransform: 'none',
+          fontWeight: 'bold',
         },
       },
     },
