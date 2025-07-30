@@ -26,7 +26,6 @@ export default function LoginPage() {
     return Object.keys(tempErrors).length === 0;
   };
   
-  // Objeto de usuario de ejemplo que se usará al iniciar sesión
   const mockUser = {
     name: 'Usuario Ejemplo',
     email: 'usuario@ejemplo.com',
@@ -38,14 +37,12 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (validate()) {
-      // Al hacer login, pasamos el objeto de usuario completo
-      login({ ...mockUser, email: email }); // Usamos el email del formulario
+      login({ ...mockUser, email: email });
       router.push('/');
     }
   };
 
   const handleBypassLogin = () => {
-    // El bypass también usa el objeto de usuario completo
     login(mockUser);
     router.push('/');
   };
@@ -91,18 +88,17 @@ export default function LoginPage() {
           </Box>
         </Box>
         
-        {process.env.NODE_ENV === 'development' && (
-          <Tooltip title="Entrada para desarrolladores">
-            <Button
-              onClick={handleBypassLogin}
-              variant="text"
-              startIcon={<EngineeringIcon />}
-              sx={{ mt: 4 }}
-            >
-              Bypass Login
-            </Button>
-          </Tooltip>
-        )}
+        {/* Botón de Bypass ahora siempre visible */}
+        <Tooltip title="Entrada rápida para pruebas">
+          <Button
+            onClick={handleBypassLogin}
+            variant="text"
+            startIcon={<EngineeringIcon />}
+            sx={{ mt: 4 }}
+          >
+            Bypass Login
+          </Button>
+        </Tooltip>
       </Box>
     </Container>
   );
