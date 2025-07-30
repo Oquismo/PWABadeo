@@ -7,28 +7,28 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 // Importamos todos los componentes de sección
 import HeroSection from "@/components/home/HeroSection";
 import FilterChips from "@/components/home/FilterChips";
-import PillarsSection from "@/components/home/PillarsSection";
+import FeaturedCard from "@/components/home/FeaturedCard"; // 1. Importar la nueva tarjeta
 import ProjectsSection from '@/components/home/ProjectsSection';
-import CalendarSection from '@/components/home/CalendarSection/CalendarSection'; // 1. Importar el calendario
+import CalendarSection from '@/components/home/CalendarSection/CalendarSection';
 
 export default function Home() {
-  // 2. Añadimos 'Calendario' como opción por defecto
   const [selectedContent, setSelectedContent] = useState('Calendario');
 
   return (
     <>
       <Container>
         <HeroSection />
-        {/* 3. Actualizamos los filtros disponibles */}
         <FilterChips 
-          filters={['Calendario', 'Pilares', 'Proyectos']}
+          filters={['Calendario', 'Proyectos']} // Simplificamos los filtros por ahora
           selected={selectedContent} 
           setSelected={setSelectedContent} 
         />
 
-        {/* 4. Añadimos el renderizado condicional para el calendario */}
+        {/* 2. Añadimos la tarjeta destacada */}
+        <FeaturedCard />
+
+        {/* Renderizado condicional del contenido principal */}
         {selectedContent === 'Calendario' && <CalendarSection />}
-        {selectedContent === 'Pilares' && <PillarsSection />}
         {selectedContent === 'Proyectos' && <ProjectsSection />}
         
       </Container>
