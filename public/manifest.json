@@ -1,0 +1,26 @@
+{
+  "name": "Barrio de Oportunidades",
+  "short_name": "B. Oportunidades",
+  "start_url": "/",
+  "display": "standalone",
+  "description": "App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.",
+  "lang": "es-ES",
+  "dir": "auto",
+  "theme_color": "#38A4DC",
+  "background_color": "#1F2937",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
