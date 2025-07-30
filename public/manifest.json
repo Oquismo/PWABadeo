@@ -6,8 +6,8 @@
   "description": "App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.",
   "lang": "es-ES",
   "dir": "auto",
-  "theme_color": "#38A4DC",
-  "background_color": "#1F2937",
+  "theme_color": "#BEF264",
+  "background_color": "#18181B",
   "orientation": "any",
   "icons": [
     {
