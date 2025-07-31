@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'; // --- CORRECCIÓN AQUÍ ---
 import { AuthProvider } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import BottomNavBar from '@/components/layout/BottomNavBar';
-import PageTransition from '@/components/layout/PageTransition';
+// import PageTransition from '@/components/layout/PageTransition'; // 1. Desactivamos la importación
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,21 +31,15 @@ export default function RootLayout({
           <AuthProvider> 
             <CustomThemeProvider>
               <CssBaseline />
-              {/* Contenedor principal de la app */}
               <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
                 
-                {/* Área de contenido principal */}
                 <Box component="main" sx={{ 
-                  // El padding inferior es crucial para que el contenido no quede oculto
-                  // detrás de la barra de navegación flotante.
                   pb: '90px' 
                 }}>
-                  <PageTransition>
-                    {children}
-                  </PageTransition>
+                  {/* 2. Mostramos el contenido directamente, sin el PageTransition */}
+                  {children}
                 </Box>
 
-                {/* La barra de navegación se renderiza aquí */}
                 <BottomNavBar />
 
               </Box>

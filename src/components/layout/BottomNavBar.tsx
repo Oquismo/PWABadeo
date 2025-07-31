@@ -1,4 +1,3 @@
-// src/components/layout/BottomNavBar.tsx
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
@@ -11,25 +10,28 @@ import LoginIcon from '@mui/icons-material/Login';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { vibrate } from '@/utils/haptics'; // Importa la función de vibración
+import { useState, useEffect } from 'react';
+import Link from 'next/link'; // 1. Importar el componente Link
 
 export default function BottomNavBar() {
-  const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
+  const [isClient, setIsClient] = useState(false);
 
-  // El valor del botón activo ahora es directamente la ruta de la URL
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    vibrate(); // ¡Añadimos la vibración aquí!
-    router.push(newValue);
-  };
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null; // Evita errores de hidratación
+  }
 
   return (
-    <Paper
+    <Paper 
       elevation={0}
-      sx={{
-        position: 'fixed',
-        bottom: 16,
+      sx={{ 
+        position: 'fixed', 
+        bottom: 16, 
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'auto',
@@ -42,9 +44,8 @@ export default function BottomNavBar() {
     >
       <BottomNavigation
         showLabels={false}
-        value={pathname} // El estado activo se controla con la ruta actual
-        onChange={handleChange}
-        sx={{
+        value={pathname} // El valor activo sigue siendo controlado por la ruta actual
+        sx={{ 
           backgroundColor: 'transparent',
           padding: '0 8px',
           '& .MuiBottomNavigationAction-root': {
@@ -61,25 +62,25 @@ export default function BottomNavBar() {
           },
         }}
       >
-        {/* Iconos base para todos los usuarios */}
-        <BottomNavigationAction value="/" icon={<HomeIcon />} sx={{ borderRadius: '9999px' }} />
-        <BottomNavigationAction value="/mapa" icon={<MapIcon />} sx={{ borderRadius: '9999px' }} />
+        {/* --- SOLUCIÓN: Cada botón es ahora un enlace independiente --- */}
+        <BottomNavigationAction component={Link} href="/" value="/" icon={<HomeIcon />} sx={{ borderRadius: '9999px' }} />
+        <BottomNavigationAction component={Link} href="/mapa" value="/mapa" icon={<MapIcon />} sx={{ borderRadius: '9999px' }} />
 
-        {/* Iconos condicionales basados en el rol del usuario */}
-        {user?.role === 'admin' ? (
-          <BottomNavigationAction value="/admin" icon={<AdminPanelSettingsIcon />} sx={{ borderRadius: '9999px' }} />
-        ) : (
+        {user?.role === 'admin' && (
+          <BottomNavigationAction component={Link} href="/admin" value="/admin" icon={<AdminPanelSettingsIcon />} sx={{ borderRadius: '9999px' }} />
+        )}
+
+        {user?.role !== 'admin' && (
           <>
-            <BottomNavigationAction value="/checklist" icon={<ChecklistIcon />} sx={{ borderRadius: '9999px' }} />
-            <BottomNavigationAction value="/telefonos" icon={<PhoneInTalkIcon />} sx={{ borderRadius: '9999px' }} />
+            <BottomNavigationAction component={Link} href="/checklist" value="/checklist" icon={<ChecklistIcon />} sx={{ borderRadius: '9999px' }} />
+            <BottomNavigationAction component={Link} href="/telefonos" value="/telefonos" icon={<PhoneInTalkIcon />} sx={{ borderRadius: '9999px' }} />
           </>
         )}
 
-        {/* Icono condicional basado en si la sesión está iniciada */}
         {isAuthenticated ? (
-          <BottomNavigationAction value="/perfil" icon={<AccountCircleIcon />} sx={{ borderRadius: '9999px' }} />
+          <BottomNavigationAction component={Link} href="/perfil" value="/perfil" icon={<AccountCircleIcon />} sx={{ borderRadius: '9999px' }} />
         ) : (
-          <BottomNavigationAction value="/login" icon={<LoginIcon />} sx={{ borderRadius: '9999px' }} />
+          <BottomNavigationAction component={Link} href="/login" value="/login" icon={<LoginIcon />} sx={{ borderRadius: '9999px' }} />
         )}
       </BottomNavigation>
     </Paper>
