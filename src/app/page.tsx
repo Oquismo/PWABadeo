@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Container, Fab } from "@mui/material";
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-
+import { Analytics } from "@vercel/analytics/next"
 import HeroSection from "@/components/home/HeroSection";
 import FilterChips from "@/components/home/FilterChips";
 import FeaturedCarousel from "@/components/home/FeaturedCarousel";
