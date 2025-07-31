@@ -1,10 +1,12 @@
 'use client';
 
-import { Box, Container, Typography, CircularProgress, Button } from '@mui/material'; // Importar Button
+import { useState } from 'react';
+import { Box, Container, Typography, CircularProgress, Fab, Drawer, IconButton } from '@mui/material';
 import dynamic from 'next/dynamic';
 import RoutePlanner from '@/components/mapa/RoutePlanner'; 
-import Link from 'next/link'; // Importar Link de Next.js
-import ListIcon from '@mui/icons-material/List'; // Icono para el botón
+import ListIcon from '@mui/icons-material/List';
+import CloseIcon from '@mui/icons-material/Close';
+import PlacesListSection from '@/components/mapa/PlacesListSection'; 
 
 const InteractiveMap = dynamic(
   () => import('@/components/mapa/InteractiveMap'),
@@ -19,6 +21,8 @@ const InteractiveMap = dynamic(
 );
 
 export default function MapaPage() {
+  const [openDrawer, setOpenDrawer] = useState(false);
+
   return (
     <Container>
       <Box sx={{ py: 4, textAlign: 'center' }}>
@@ -36,24 +40,40 @@ export default function MapaPage() {
         <RoutePlanner />
       </Box>
 
-      {/* Botón para ir a la lista de lugares */}
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-        <Link href="/lugares" passHref>
-          <Button 
-            variant="outlined" 
-            size="large" 
-            startIcon={<ListIcon />}
-            sx={{ 
-                borderRadius: '12px', 
-                py: 1.5, 
-                px: 3, 
-                fontWeight: 'bold' 
-            }}
-          >
-            Ver Lista de Lugares
-          </Button>
-        </Link>
-      </Box>
+      {/* Botón flotante que abre el panel */}
+      <Fab
+        color="secondary" 
+        aria-label="ver lista de lugares"
+        onClick={() => setOpenDrawer(true)} 
+        sx={{
+          position: 'fixed',
+          bottom: (theme) => `calc(64px + ${theme.spacing(2)})`, 
+          right: (theme) => theme.spacing(2),
+        }}
+      >
+        <ListIcon />
+      </Fab>
+
+      {/* El panel deslizable (Drawer) */}
+      <Drawer
+        anchor="bottom" 
+        open={openDrawer} 
+        onClose={() => setOpenDrawer(false)} 
+        PaperProps={{
+          sx: {
+            borderTopLeftRadius: '16px', 
+            borderTopRightRadius: '16px',
+            maxHeight: '85vh',
+          },
+        }}
+      >
+        <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end' }}>
+          <IconButton onClick={() => setOpenDrawer(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <PlacesListSection />
+      </Drawer>
     </Container>
   );
 }

@@ -1,9 +1,8 @@
-// src/app/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Container, Fab, Fade, Box } from "@mui/material"; // ¡IMPORTACIÓN DE BOX AÑADIDA AQUÍ!
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import { Container, Fab, Fade, Box } from "@mui/material";
+import WhatsAppIcon from '@mui/icons-material/WhatsApp'; // 1. Cambiamos el icono
 
 // Importamos todos los componentes de sección
 import HeroSection from "@/components/home/HeroSection";
@@ -19,6 +18,11 @@ export default function Home() {
   useEffect(() => {
     setFadeIn(true);
   }, []);
+
+  // 2. Definimos la información para el enlace de WhatsApp
+  const phoneNumber = "34000000000"; // Reemplaza con el número de teléfono real
+  const message = "Hola, me gustaría recibir más información sobre Barrio de Oportunidades.";
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
   return (
     <>
@@ -39,16 +43,22 @@ export default function Home() {
         </Fade>
       </Container>
 
+      {/* 3. El botón flotante ahora abre WhatsApp */}
       <Fab
-        color="secondary"
-        aria-label="solicitar información"
+        color="primary" // Cambiado a primary para que use el color verde/lima
+        aria-label="contactar por WhatsApp"
+        component="a" // Lo convertimos en un enlace
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         sx={{
           position: 'fixed',
           bottom: (theme) => `calc(64px + ${theme.spacing(2)})`,
           right: (theme) => theme.spacing(2),
+          color: 'background.default' // Para que el icono sea oscuro
         }}
       >
-        <QuestionAnswerIcon />
+        <WhatsAppIcon />
       </Fab>
     </>
   );
