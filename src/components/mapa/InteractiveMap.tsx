@@ -1,7 +1,8 @@
+// src/components/mapa/InteractiveMap.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
 import { Box, Typography, Fab, TextField, IconButton, InputAdornment, Button } from '@mui/material';
@@ -11,9 +12,9 @@ import DirectionsIcon from '@mui/icons-material/Directions';
 import Image from 'next/image';
 
 // Importar los nuevos datos de lugares
-import { placesData, Place } from '@/data/places'; 
+import { placesData, Place } from '@/data/places';
 // Importar el nuevo modal
-import AddPlaceModal from './AddPlaceModal'; 
+import AddPlaceModal from './AddPlaceModal';
 
 // Arreglo para los iconos por defecto
 import L from 'leaflet';
@@ -48,72 +49,43 @@ const locations: LocationPoint[] = [
   },
 ];
 
-// Componente que nos da acceso a la instancia del mapa y maneja la pulsación larga
-function MapEventHandler({ setMap, onLongPress }: { setMap: (map: L.Map) => void; onLongPress: (latlng: LatLng) => void }) {
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const longPressDuration = 700; // Milisegundos para considerar una pulsación larga
-
-  const startLongPressTimer = (latlng: LatLng) => {
-    clearLongPressTimer();
-    longPressTimer.current = setTimeout(() => {
-      onLongPress(latlng);
-      longPressTimer.current = null;
-    }, longPressDuration);
-  };
-
-  const clearLongPressTimer = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
-
-  const map = useMapEvents({
-    load: (e) => setMap(e.target as L.Map),
-    mousedown: (e) => startLongPressTimer(e.latlng),
-    mouseup: () => clearLongPressTimer(),
-    mouseout: () => clearLongPressTimer(), 
-  });
-
+// Componente que nos da acceso a la instancia del mapa
+function MapController({ setMap }: { setMap: (map: L.Map) => void }) {
+  const map = useMap();
   useEffect(() => {
-    return () => clearLongPressTimer();
-  }, []);
-
+    setMap(map);
+  }, [map, setMap]);
   return null;
 }
 
 // Componente para el botón de geolocalización
 function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
-    const map = useMapEvents({
-      locationfound: (e) => {
-          setUserPosition(e.latlng);
-          map.flyTo(e.latlng, 15);
-      },
-      locationerror: (e) => {
-          alert(e.message);
-      }
+  const map = useMap();
+  const handleClick = () => {
+    map.locate().on('locationfound', function (e) {
+      setUserPosition(e.latlng);
+      map.flyTo(e.latlng, 15);
+    }).on('locationerror', function(e){
+      alert(e.message);
     });
+  };
 
-    const handleClick = () => {
-      map.locate();
-    };
-
-    return (
-        <Fab 
-            color="primary" 
-            size="small"
-            onClick={handleClick}
-            sx={{ position: 'absolute', top: 85, right: 10, zIndex: 1000 }}
-            aria-label="find my location"
-        >
-            <MyLocationIcon />
-        </Fab>
-    );
+  return (
+    <Fab
+      color="primary"
+      size="small"
+      onClick={handleClick}
+      sx={{ position: 'absolute', top: 85, right: 10, zIndex: 1000 }}
+      aria-label="find my location"
+    >
+      <MyLocationIcon />
+    </Fab>
+  );
 }
 
 // Componente para ajustar el tamaño del mapa cuando su contenedor cambia
 function MapResizer() {
-  const map = useMapEvents({});
+  const map = useMap();
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
       map.invalidateSize();
@@ -128,7 +100,7 @@ function MapResizer() {
       if (mapElement && mapElement.parentElement) {
         resizeObserver.unobserve(mapElement.parentElement);
       }
-      map.invalidateSize(); // Forzar un último resize al desmontar
+      map.invalidateSize();
     };
   }, [map]);
   return null;
@@ -143,9 +115,69 @@ export default function InteractiveMap() {
   const [customPlaces, setCustomPlaces] = useState<Place[]>([]);
   const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR'; // Tu clave API de MapTiler
 
-  // Estados para el modal de añadir lugar
   const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
   const [coordsToAddPlace, setCoordsToAddPlace] = useState<LatLng | null>(null);
+
+  // --- Lógica de pulsación larga: MOVIDA AQUÍ PARA QUE SE DECLARE ANTES ---
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressDuration = 700; // Milisegundos para considerar una pulsación larga
+
+  // Función que se llamará cuando se detecte una pulsación larga (llamada por el useEffect de los pointer events)
+  const handleMapLongPress = (latlng: LatLng) => {
+    setCoordsToAddPlace(latlng);
+    setShowAddPlaceModal(true);
+  };
+
+  const startLongPressTimer = (latlng: LatLng) => {
+    clearLongPressTimer();
+    longPressTimer.current = setTimeout(() => {
+      handleMapLongPress(latlng); // <-- Ahora handleMapLongPress ya está definida
+      longPressTimer.current = null;
+    }, longPressDuration);
+  };
+
+  const clearLongPressTimer = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+  // --- FIN Lógica de pulsación larga ---
+
+
+  useEffect(() => {
+    // Listener de eventos de puntero directamente en el contenedor del mapa
+    if (map) {
+      const mapContainer = map.getContainer();
+
+      const handlePointerDown = (e: PointerEvent) => {
+        if ((e.button === 0 || e.pointerType === 'touch') && e.isPrimary) {
+          const latlng = map.mouseEventToLatLng(e);
+          startLongPressTimer(latlng);
+        }
+      };
+
+      const handlePointerUp = () => clearLongPressTimer();
+      const handlePointerLeave = () => clearLongPressTimer();
+      const handlePointerCancel = () => clearLongPressTimer();
+
+
+      mapContainer.addEventListener('pointerdown', handlePointerDown);
+      mapContainer.addEventListener('pointerup', handlePointerUp);
+      mapContainer.addEventListener('pointerleave', handlePointerLeave);
+      mapContainer.addEventListener('pointercancel', handlePointerCancel);
+
+
+      return () => {
+        clearLongPressTimer();
+        mapContainer.removeEventListener('pointerdown', handlePointerDown);
+        mapContainer.removeEventListener('pointerup', handlePointerUp);
+        mapContainer.removeEventListener('pointerleave', handlePointerLeave);
+        mapContainer.removeEventListener('pointercancel', handlePointerCancel);
+      };
+    }
+  }, [map, handleMapLongPress]);
+
 
   // Cargar puntos personalizados del localStorage al inicio
   useEffect(() => {
@@ -188,18 +220,12 @@ export default function InteractiveMap() {
     }
   };
 
-  // Función que se llamará cuando se detecte una pulsación larga
-  const handleMapLongPress = (latlng: LatLng) => {
-    setCoordsToAddPlace(latlng);
-    setShowAddPlaceModal(true); // Abrir el modal
-  };
-
   // Función para manejar el envío del formulario del modal
   const handleAddPlaceSubmit = (newPlace: Place) => {
-    setCustomPlaces((prevPlaces) => [...prevPlaces, newPlace]); // Añadir al estado
-    setShowAddPlaceModal(false); // Cerrar modal
-    setCoordsToAddPlace(null); // Limpiar coordenadas
-    alert('¡Lugar personalizado añadido con éxito!'); // Confirmación al usuario
+    setCustomPlaces((prevPlaces) => [...prevPlaces, newPlace]);
+    setShowAddPlaceModal(false);
+    setCoordsToAddPlace(null);
+    alert('¡Lugar personalizado añadido con éxito!');
   };
 
   const handleCloseAddPlaceModal = () => {
@@ -341,8 +367,7 @@ export default function InteractiveMap() {
               <Marker key={place.id} position={place.coordinates}>
                   <Popup>
                       <Box sx={{ maxWidth: 200 }}>
-                          {/* Las imágenes de customPlaces podrían no tener URL segura, aquí podrías añadir una validación o fallback */}
-                          {place.imageUrl && place.imageUrl.startsWith('http') && ( // Asegura que la URL es válida
+                          {place.imageUrl && place.imageUrl.startsWith('http') && (
                             <Image
                                 src={place.imageUrl}
                                 alt={place.name}
@@ -402,7 +427,7 @@ export default function InteractiveMap() {
             </Marker>
         )}
 
-        <MapEventHandler setMap={setMap} onLongPress={handleMapLongPress} /> 
+        <MapController setMap={setMap} />
         <LocationButton setUserPosition={setUserPosition} />
         <MapResizer />
       </MapContainer>
