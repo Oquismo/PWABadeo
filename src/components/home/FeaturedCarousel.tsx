@@ -1,6 +1,8 @@
+// src/components/home/FeaturedCarousel.tsx
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Image from 'next/image';
@@ -8,35 +10,27 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { projectsData, Project } from '@/data/projects';
-
-// Importaciones de Swiper
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
 
+import { vibrate } from '@/utils/haptics'; // ¡Importa la función aquí!
+
 interface Event {
   date: Date;
   title: string;
 }
 
+const featuredProjects = projectsData.filter(p => p.eventDate);
+
 export default function FeaturedCarousel() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const open = Boolean(anchorEl);
   const { user } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    const dynamicEventsRaw = localStorage.getItem('dynamicProjectsData');
-    const dynamicEvents = dynamicEventsRaw ? JSON.parse(dynamicEventsRaw).map((e: any) => ({...e, eventDate: new Date(e.eventDate)})) : [];
-    const staticEvents = projectsData.filter(p => p.eventDate);
-    
-    const allEvents = [...dynamicEvents, ...staticEvents.filter(p => !dynamicEvents.find((dp: Project) => dp.id === p.id))];
-    setFeaturedProjects(allEvents);
-  }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>, project: Project) => {
     setAnchorEl(event.currentTarget);
@@ -62,20 +56,13 @@ export default function FeaturedCarousel() {
     localStorage.setItem(`userCustomEvents_${user.email}`, JSON.stringify(updatedEvents));
     
     alert(`"${newEvent.title}" ha sido añadido a tu calendario.`);
+    vibrate(); // ¡Añade la vibración aquí!
     handleClose();
     router.push('/');
   };
 
   return (
     <Box sx={{ py: 2 }}>
-      <style>{`
-        .swiper-pagination-bullet {
-          background-color: rgba(255, 255, 255, 0.5) !important;
-        }
-        .swiper-pagination-bullet-active {
-          background-color: #BEF264 !important;
-        }
-      `}</style>
       <Swiper
         effect={'coverflow'}
         grabCursor={true}
@@ -86,10 +73,11 @@ export default function FeaturedCarousel() {
           stretch: 0,
           depth: 100,
           modifier: 1,
-          slideShadows: false,
+          slideShadows: true,
         }}
         pagination={{ clickable: true }}
         modules={[EffectCoverflow, Pagination]}
+        className="mySwiper"
       >
         {featuredProjects.map((project) => (
           <SwiperSlide key={project.id} style={{ width: '80%', maxWidth: '350px' }}>
@@ -122,8 +110,6 @@ export default function FeaturedCarousel() {
                 </IconButton>
               </Box>
 
-              {/* --- SOLUCIÓN MÁS ROBUSTA: Renderizado condicional de la imagen --- */}
-              {/* Solo mostramos la imagen si la URL existe y empieza con http */}
               {project.imageUrl && project.imageUrl.startsWith('http') && (
                 <Image
                   src={project.imageUrl}
