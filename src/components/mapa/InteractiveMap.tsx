@@ -1,8 +1,8 @@
 // src/components/mapa/InteractiveMap.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react'; // Importar useRef
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'; // Cambiar useMap a useMapEvents
+import { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'; // useMapEvents
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
 import { Box, Typography, Fab, TextField, IconButton, InputAdornment, Button } from '@mui/material';
@@ -12,7 +12,7 @@ import DirectionsIcon from '@mui/icons-material/Directions';
 import Image from 'next/image';
 
 // Importar los nuevos datos de lugares
-import { placesData, Place } from '@/data/places';
+import { placesData, Place } from '@/data/places'; 
 
 // Arreglo para los iconos por defecto
 import L from 'leaflet';
@@ -49,21 +49,6 @@ const locations: LocationPoint[] = [
 
 // Componente que nos da acceso a la instancia del mapa y maneja la pulsación larga
 function MapEventHandler({ setMap, onLongPress }: { setMap: (map: L.Map) => void; onLongPress: (latlng: LatLng) => void }) {
-  const map = useMapEvents({
-    // Al cargar, establece la instancia del mapa
-    load: (e) => setMap(e.target as L.Map),
-    
-    // Lógica para la pulsación larga
-    mousedown: (e) => startLongPressTimer(e.latlng),
-    mouseup: () => clearLongPressTimer(),
-    touchstart: (e) => startLongPressTimer(e.latlng),
-    touchend: () => clearLongPressTimer(),
-    
-    // Clear timer if mouse leaves map area
-    mouseout: () => clearLongPressTimer(),
-    touchcancel: () => clearLongPressTimer(),
-  });
-
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const longPressDuration = 700; // Milisegundos para considerar una pulsación larga
 
@@ -82,6 +67,15 @@ function MapEventHandler({ setMap, onLongPress }: { setMap: (map: L.Map) => void
     }
   };
 
+  const map = useMapEvents({
+    load: (e) => setMap(e.target as L.Map),
+    mousedown: (e) => startLongPressTimer(e.latlng),
+    mouseup: () => clearLongPressTimer(),
+    // 'mouseout' también para limpiar el temporizador si el ratón sale del mapa
+    mouseout: () => clearLongPressTimer(), 
+    // Los eventos touchstart y touchend no se declaran directamente aquí, Leaflet los normaliza.
+  });
+
   useEffect(() => {
     // Asegurarse de limpiar el temporizador si el componente se desmonta
     return () => clearLongPressTimer();
@@ -92,7 +86,7 @@ function MapEventHandler({ setMap, onLongPress }: { setMap: (map: L.Map) => void
 
 // Componente para el botón de geolocalización
 function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
-    const map = useMapEvents({ // Cambiado de useMap a useMapEvents
+    const map = useMapEvents({
       locationfound: (e) => {
           setUserPosition(e.latlng);
           map.flyTo(e.latlng, 15);
@@ -121,7 +115,7 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
 
 // Componente para ajustar el tamaño del mapa cuando su contenedor cambia
 function MapResizer() {
-  const map = useMapEvents({}); // Cambiado de useMap a useMapEvents
+  const map = useMapEvents({});
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
       map.invalidateSize();
@@ -147,14 +141,18 @@ export default function InteractiveMap() {
   const [userPosition, setUserPosition] = useState<LatLng | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState<L.Map | null>(null);
-  const [customPlaces, setCustomPlaces] = useState<Place[]>([]); // Estado para los puntos de interés del usuario
+  const [customPlaces, setCustomPlaces] = useState<Place[]>([]);
   const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR'; // Tu clave API de MapTiler
 
-  // Cargar puntos personalizados del localStorage al inicio
   useEffect(() => {
     const savedPlacesRaw = localStorage.getItem('userCustomPlaces');
     if (savedPlacesRaw) {
-      setCustomPlaces(JSON.parse(savedPlacesRaw));
+      try {
+        setCustomPlaces(JSON.parse(savedPlacesRaw));
+      } catch (e) {
+        console.error("Error al parsear lugares personalizados desde localStorage:", e);
+        setCustomPlaces([]); // Reset if parsing fails
+      }
     }
   }, []);
 
@@ -180,10 +178,10 @@ export default function InteractiveMap() {
     }
   };
 
-  // Función que se llamará cuando se detecte una pulsación larga
   const handleMapLongPress = (latlng: LatLng) => {
-    alert(`Pulsación larga detectada en: ${latlng.lat}, ${latlng.lng}. Aquí abriríamos el modal.`);
-    // Aquí es donde en el siguiente paso mostraremos el modal para añadir el punto
+    alert(`Pulsación larga detectada en: ${latlng.lat}, ${latlng.lng}. Aquí abriríamos el modal para añadir el punto.`);
+    // En el siguiente paso, aquí abriremos un modal/formulario para que el usuario añada los detalles del lugar.
+    // Por ahora, solo muestra la alerta para confirmar que funciona.
   };
 
   return (
@@ -226,7 +224,7 @@ export default function InteractiveMap() {
         {/* Marcadores de ubicaciones predefinidas */}
         {locations.map((loc) => {
             const [lat, lng] = Array.isArray(loc.position) ? loc.position : [loc.position.lat, loc.position.lng];
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`; // URL de Google Maps para transporte público
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`;
             
             return (
               <Marker key={loc.name} position={loc.position}>
@@ -311,7 +309,7 @@ export default function InteractiveMap() {
             );
         })}
 
-        {/* NUEVOS Marcadores de Puntos de Interés Personalizados por el Usuario */}
+        {/* Marcadores de Puntos de Interés Personalizados por el Usuario */}
         {customPlaces.map((place) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
             
