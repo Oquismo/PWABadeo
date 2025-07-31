@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Image from 'next/image';
@@ -21,15 +21,24 @@ interface Event {
   title: string;
 }
 
-// Filtramos solo los proyectos que tienen fecha de evento
-const featuredProjects = projectsData.filter(p => p.eventDate);
-
 export default function FeaturedCarousel() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const open = Boolean(anchorEl);
   const { user } = useAuth();
   const router = useRouter();
+
+  // 1. Leemos los eventos desde localStorage al cargar el componente
+  useEffect(() => {
+    const dynamicEventsRaw = localStorage.getItem('dynamicProjectsData');
+    const dynamicEvents = dynamicEventsRaw ? JSON.parse(dynamicEventsRaw).map((e: any) => ({...e, eventDate: new Date(e.eventDate)})) : [];
+    const staticEvents = projectsData.filter(p => p.eventDate);
+    
+    // Combinamos y eliminamos duplicados si los hubiera
+    const allEvents = [...dynamicEvents, ...staticEvents.filter(p => !dynamicEvents.find((dp: Project) => dp.id === p.id))];
+    setFeaturedProjects(allEvents);
+  }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>, project: Project) => {
     setAnchorEl(event.currentTarget);
@@ -61,6 +70,14 @@ export default function FeaturedCarousel() {
 
   return (
     <Box sx={{ py: 2 }}>
+      <style>{`
+        .swiper-pagination-bullet {
+          background-color: rgba(255, 255, 255, 0.5) !important;
+        }
+        .swiper-pagination-bullet-active {
+          background-color: #BEF264 !important;
+        }
+      `}</style>
       <Swiper
         effect={'coverflow'}
         grabCursor={true}
@@ -71,11 +88,10 @@ export default function FeaturedCarousel() {
           stretch: 0,
           depth: 100,
           modifier: 1,
-          slideShadows: true,
+          slideShadows: false,
         }}
         pagination={{ clickable: true }}
         modules={[EffectCoverflow, Pagination]}
-        className="mySwiper"
       >
         {featuredProjects.map((project) => (
           <SwiperSlide key={project.id} style={{ width: '80%', maxWidth: '350px' }}>

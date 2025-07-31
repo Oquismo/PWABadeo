@@ -2,10 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// 1. Definimos un tipo para los datos que se pueden actualizar
-type UserUpdateData = Partial<Omit<User, 'email' | 'avatarUrl'>>;
-
-interface User {
+// 1. SOLUCIÓN: Añadimos 'export' para que otros archivos puedan usar esta interfaz
+export interface User {
   name: string;
   email: string;
   age: number;
@@ -13,14 +11,18 @@ interface User {
   avatarUrl: string;
   arrivalDate: string;
   departureDate: string;
+  role: 'admin' | 'user';
 }
+
+// Definimos un tipo para los datos que se pueden actualizar
+type UserUpdateData = Partial<Omit<User, 'email' | 'avatarUrl' | 'role'>>;
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (userData: User) => void;
   logout: () => void;
-  updateUser: (data: UserUpdateData) => void; // 2. Añadimos la nueva función
+  updateUser: (data: UserUpdateData) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,7 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  // 3. Implementamos la lógica para actualizar al usuario
   const updateUser = (data: UserUpdateData) => {
     setUser(prevUser => {
       if (!prevUser) return null;

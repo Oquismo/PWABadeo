@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material';
@@ -10,38 +9,17 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LoginIcon from '@mui/icons-material/Login';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
-
-// Mapeo de rutas a un índice numérico actualizado
-const routeToIndex: { [key: string]: number } = {
-  '/': 0,
-  '/checklist': 1,
-  '/mapa': 2,
-  '/telefonos': 3,
-  '/perfil': 4,
-  '/login': 4,
-};
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 export default function BottomNavBar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
-  
-  const [value, setValue] = useState(routeToIndex[pathname] ?? 0);
+  const { user, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    setValue(routeToIndex[pathname] ?? 0);
-  }, [pathname]);
-
-  // Array de acciones de navegación sin Proyectos y Servicios
-  const navActions = [
-    { label: "Inicio", value: "/", icon: <HomeIcon /> },
-    { label: "Checklist", value: "/checklist", icon: <ChecklistIcon /> },
-    { label: "Mapa", value: "/mapa", icon: <MapIcon /> },
-    { label: "Teléfonos", value: "/telefonos", icon: <PhoneInTalkIcon /> },
-    isAuthenticated
-      ? { label: "Perfil", value: "/perfil", icon: <AccountCircleIcon /> }
-      : { label: "Login", value: "/login", icon: <LoginIcon /> },
-  ];
+  // El valor del botón activo ahora es directamente la ruta de la URL
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    router.push(newValue);
+  };
 
   return (
     <Paper 
@@ -61,10 +39,8 @@ export default function BottomNavBar() {
     >
       <BottomNavigation
         showLabels={false}
-        value={value}
-        onChange={(event, newValue) => {
-          router.push(navActions[newValue].value);
-        }}
+        value={pathname} // El estado activo se controla con la ruta actual
+        onChange={handleChange}
         sx={{ 
           backgroundColor: 'transparent',
           padding: '0 8px',
@@ -82,13 +58,26 @@ export default function BottomNavBar() {
           },
         }}
       >
-        {navActions.map((action) => (
-          <BottomNavigationAction 
-            key={action.value} 
-            icon={action.icon}
-            sx={{ borderRadius: '9999px' }}
-          />
-        ))}
+        {/* Iconos base para todos los usuarios */}
+        <BottomNavigationAction value="/" icon={<HomeIcon />} sx={{ borderRadius: '9999px' }} />
+        <BottomNavigationAction value="/mapa" icon={<MapIcon />} sx={{ borderRadius: '9999px' }} />
+
+        {/* Iconos condicionales basados en el rol del usuario */}
+        {user?.role === 'admin' ? (
+          <BottomNavigationAction value="/admin" icon={<AdminPanelSettingsIcon />} sx={{ borderRadius: '9999px' }} />
+        ) : (
+          <>
+            <BottomNavigationAction value="/checklist" icon={<ChecklistIcon />} sx={{ borderRadius: '9999px' }} />
+            <BottomNavigationAction value="/telefonos" icon={<PhoneInTalkIcon />} sx={{ borderRadius: '9999px' }} />
+          </>
+        )}
+
+        {/* Icono condicional basado en si la sesión está iniciada */}
+        {isAuthenticated ? (
+          <BottomNavigationAction value="/perfil" icon={<AccountCircleIcon />} sx={{ borderRadius: '9999px' }} />
+        ) : (
+          <BottomNavigationAction value="/login" icon={<LoginIcon />} sx={{ borderRadius: '9999px' }} />
+        )}
       </BottomNavigation>
     </Paper>
   );

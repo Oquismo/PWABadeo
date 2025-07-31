@@ -7,7 +7,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 // Importamos todos los componentes de sección
 import HeroSection from "@/components/home/HeroSection";
 import FilterChips from "@/components/home/FilterChips";
-import FeaturedCard from "@/components/home/FeaturedCard"; // 1. Importar la nueva tarjeta
+import FeaturedCarousel from "@/components/home/FeaturedCarousel";
 import ProjectsSection from '@/components/home/ProjectsSection';
 import CalendarSection from '@/components/home/CalendarSection/CalendarSection';
 
@@ -19,28 +19,26 @@ export default function Home() {
       <Container>
         <HeroSection />
         <FilterChips 
-          filters={['Calendario', 'Proyectos']} // Simplificamos los filtros por ahora
+          filters={['Calendario', 'Proyectos']}
           selected={selectedContent} 
           setSelected={setSelectedContent} 
         />
+        <FeaturedCarousel />
 
-        {/* 2. Añadimos la tarjeta destacada */}
-        <FeaturedCard />
-
-        {/* Renderizado condicional del contenido principal */}
         {selectedContent === 'Calendario' && <CalendarSection />}
         {selectedContent === 'Proyectos' && <ProjectsSection />}
         
       </Container>
 
+      {/* --- BOTÓN FLOTANTE CORREGIDO --- */}
       <Fab 
-        color="primary"
+        color="secondary" // 1. Color restaurado para que destaque
         aria-label="solicitar información"
         sx={{
           position: 'fixed',
-          bottom: (theme) => `calc(64px + ${theme.spacing(2)})`, 
+          // 2. Posición ajustada a la esquina inferior derecha
+          bottom: (theme) => `calc(64px + ${theme.spacing(2)})`, // 64px de la barra + 16px de margen
           right: (theme) => theme.spacing(2),
-          color: 'background.default'
         }}
       >
         <QuestionAnswerIcon />

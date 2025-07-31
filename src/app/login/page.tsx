@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack } from '@mui/material';
 import Link from 'next/link';
 import EngineeringIcon from '@mui/icons-material/Engineering';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,27 +27,50 @@ export default function LoginPage() {
     return Object.keys(tempErrors).length === 0;
   };
   
-  // 1. SOLUCIÓN: Añadimos las fechas que faltaban al usuario de ejemplo
-  const mockUser = {
+  // 1. Definimos dos usuarios de ejemplo: uno admin y uno normal
+  const mockAdminUser = {
+    name: 'Admin User',
+    email: 'admin@badeo.app',
+    age: 30,
+    school: 'Badeo Staff',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
+    arrivalDate: '2025-01-01',
+    departureDate: '2026-12-31',
+    role: 'admin' as 'admin',
+  };
+
+  const mockRegularUser = {
     name: 'Usuario Ejemplo',
     email: 'usuario@ejemplo.com',
     age: 24,
     school: 'Centro Educativo Sol',
     avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
-    arrivalDate: '2025-09-01', // Fecha de ejemplo
-    departureDate: '2026-06-30', // Fecha de ejemplo
+    arrivalDate: '2025-09-01',
+    departureDate: '2026-06-30',
+    role: 'user' as 'user',
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (validate()) {
-      login({ ...mockUser, email: email });
+      // Si el email es el del admin, logueamos como admin, si no, como usuario normal
+      if (email === mockAdminUser.email) {
+        login(mockAdminUser);
+      } else {
+        login({ ...mockRegularUser, email: email });
+      }
       router.push('/');
     }
   };
 
-  const handleBypassLogin = () => {
-    login(mockUser);
+  // 2. Dos funciones de bypass separadas
+  const handleBypassUserLogin = () => {
+    login(mockRegularUser);
+    router.push('/');
+  };
+
+  const handleBypassAdminLogin = () => {
+    login(mockAdminUser);
     router.push('/');
   };
 
@@ -91,17 +115,28 @@ export default function LoginPage() {
           </Box>
         </Box>
         
-        {/* Botón de Bypass siempre visible */}
-        <Tooltip title="Entrada rápida para pruebas">
-          <Button
-            onClick={handleBypassLogin}
-            variant="text"
-            startIcon={<EngineeringIcon />}
-            sx={{ mt: 4 }}
-          >
-            Bypass Login
-          </Button>
-        </Tooltip>
+        {/* 3. Dos botones de bypass en un Stack */}
+        <Stack spacing={2} sx={{ mt: 4, alignItems: 'center' }}>
+          <Tooltip title="Entrada rápida como Usuario Normal">
+            <Button
+              onClick={handleBypassUserLogin}
+              variant="text"
+              startIcon={<EngineeringIcon />}
+            >
+              Bypass Usuario
+            </Button>
+          </Tooltip>
+          <Tooltip title="Entrada rápida como Administrador">
+            <Button
+              onClick={handleBypassAdminLogin}
+              variant="text"
+              startIcon={<AdminPanelSettingsIcon />}
+              color="secondary"
+            >
+              Bypass Admin
+            </Button>
+          </Tooltip>
+        </Stack>
       </Box>
     </Container>
   );
