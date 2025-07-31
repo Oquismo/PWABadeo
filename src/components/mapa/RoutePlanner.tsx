@@ -8,18 +8,8 @@ export default function RoutePlanner() {
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
 
-  const handlePlanRoute = () => {
-    if (!destination) {
-      alert('Por favor, introduce un destino.');
-      return;
-    }
-
-    // Si el origen está vacío, Google Maps usará la ubicación actual del usuario
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=transit`;
-
-    // Abrimos el enlace en una nueva pestaña (o en la app de Google Maps en el móvil)
-    window.open(googleMapsUrl, '_blank');
-  };
+  // Construimos la URL dinámicamente basándonos en el estado de los campos
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=transit`;
 
   return (
     <Paper elevation={0} sx={{ p: 2, borderRadius: '16px' }}>
@@ -43,7 +33,15 @@ export default function RoutePlanner() {
           fullWidth
           required
         />
-        <Button variant="contained" onClick={handlePlanRoute}>
+        {/* --- SOLUCIÓN: Convertimos el botón en un enlace --- */}
+        <Button
+          variant="contained"
+          component="a" // 1. Le decimos a MUI que renderice un <a> en lugar de un <button>
+          href={destination ? googleMapsUrl : '#'} // 2. Usamos el href para el enlace
+          target="_blank" // 3. Esto abre el enlace en una nueva pestaña (o en la app de mapas)
+          rel="noopener noreferrer"
+          disabled={!destination} // 4. El botón está desactivado si no hay destino
+        >
           Buscar Ruta
         </Button>
       </Stack>
