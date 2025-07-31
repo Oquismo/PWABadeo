@@ -1,8 +1,7 @@
-// src/components/mapa/InteractiveMap.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'; // useMapEvents
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
 import { Box, Typography, Fab, TextField, IconButton, InputAdornment, Button } from '@mui/material';
@@ -13,6 +12,8 @@ import Image from 'next/image';
 
 // Importar los nuevos datos de lugares
 import { placesData, Place } from '@/data/places'; 
+// Importar el nuevo modal
+import AddPlaceModal from './AddPlaceModal'; 
 
 // Arreglo para los iconos por defecto
 import L from 'leaflet';
@@ -53,10 +54,10 @@ function MapEventHandler({ setMap, onLongPress }: { setMap: (map: L.Map) => void
   const longPressDuration = 700; // Milisegundos para considerar una pulsación larga
 
   const startLongPressTimer = (latlng: LatLng) => {
-    clearLongPressTimer(); // Clear any existing timer
+    clearLongPressTimer();
     longPressTimer.current = setTimeout(() => {
       onLongPress(latlng);
-      longPressTimer.current = null; // Reset timer after it fires
+      longPressTimer.current = null;
     }, longPressDuration);
   };
 
@@ -71,13 +72,10 @@ function MapEventHandler({ setMap, onLongPress }: { setMap: (map: L.Map) => void
     load: (e) => setMap(e.target as L.Map),
     mousedown: (e) => startLongPressTimer(e.latlng),
     mouseup: () => clearLongPressTimer(),
-    // 'mouseout' también para limpiar el temporizador si el ratón sale del mapa
     mouseout: () => clearLongPressTimer(), 
-    // Los eventos touchstart y touchend no se declaran directamente aquí, Leaflet los normaliza.
   });
 
   useEffect(() => {
-    // Asegurarse de limpiar el temporizador si el componente se desmonta
     return () => clearLongPressTimer();
   }, []);
 
@@ -130,6 +128,7 @@ function MapResizer() {
       if (mapElement && mapElement.parentElement) {
         resizeObserver.unobserve(mapElement.parentElement);
       }
+      map.invalidateSize(); // Forzar un último resize al desmontar
     };
   }, [map]);
   return null;
@@ -144,6 +143,11 @@ export default function InteractiveMap() {
   const [customPlaces, setCustomPlaces] = useState<Place[]>([]);
   const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR'; // Tu clave API de MapTiler
 
+  // Estados para el modal de añadir lugar
+  const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
+  const [coordsToAddPlace, setCoordsToAddPlace] = useState<LatLng | null>(null);
+
+  // Cargar puntos personalizados del localStorage al inicio
   useEffect(() => {
     const savedPlacesRaw = localStorage.getItem('userCustomPlaces');
     if (savedPlacesRaw) {
@@ -151,15 +155,21 @@ export default function InteractiveMap() {
         setCustomPlaces(JSON.parse(savedPlacesRaw));
       } catch (e) {
         console.error("Error al parsear lugares personalizados desde localStorage:", e);
-        setCustomPlaces([]); // Reset if parsing fails
+        setCustomPlaces([]);
       }
     }
   }, []);
 
+  // Función para guardar puntos personalizados en localStorage
+  useEffect(() => {
+    localStorage.setItem('userCustomPlaces', JSON.stringify(customPlaces));
+  }, [customPlaces]);
+
+
   const handleSearch = async () => {
     if (!searchQuery || !map) return;
     
-    const bbox = "-6.1,37.3,-5.8,37.5"; // [minLon, minLat, maxLon, maxLat]
+    const bbox = "-6.1,37.3,-5.8,37.5";
     
     try {
       const response = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${apiKey}&bbox=${bbox}`);
@@ -178,11 +188,25 @@ export default function InteractiveMap() {
     }
   };
 
+  // Función que se llamará cuando se detecte una pulsación larga
   const handleMapLongPress = (latlng: LatLng) => {
-    alert(`Pulsación larga detectada en: ${latlng.lat}, ${latlng.lng}. Aquí abriríamos el modal para añadir el punto.`);
-    // En el siguiente paso, aquí abriremos un modal/formulario para que el usuario añada los detalles del lugar.
-    // Por ahora, solo muestra la alerta para confirmar que funciona.
+    setCoordsToAddPlace(latlng);
+    setShowAddPlaceModal(true); // Abrir el modal
   };
+
+  // Función para manejar el envío del formulario del modal
+  const handleAddPlaceSubmit = (newPlace: Place) => {
+    setCustomPlaces((prevPlaces) => [...prevPlaces, newPlace]); // Añadir al estado
+    setShowAddPlaceModal(false); // Cerrar modal
+    setCoordsToAddPlace(null); // Limpiar coordenadas
+    alert('¡Lugar personalizado añadido con éxito!'); // Confirmación al usuario
+  };
+
+  const handleCloseAddPlaceModal = () => {
+    setShowAddPlaceModal(false);
+    setCoordsToAddPlace(null);
+  };
+
 
   return (
     <Box>
@@ -317,13 +341,43 @@ export default function InteractiveMap() {
               <Marker key={place.id} position={place.coordinates}>
                   <Popup>
                       <Box sx={{ maxWidth: 200 }}>
+                          {/* Las imágenes de customPlaces podrían no tener URL segura, aquí podrías añadir una validación o fallback */}
+                          {place.imageUrl && place.imageUrl.startsWith('http') && ( // Asegura que la URL es válida
+                            <Image
+                                src={place.imageUrl}
+                                alt={place.name}
+                                width={180}
+                                height={100}
+                                objectFit="cover"
+                                style={{ borderRadius: '8px', marginBottom: 8 }}
+                            />
+                          )}
                           <Typography variant="subtitle1" component="div" fontWeight="bold">{place.name} (Personalizado)</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                             Categoría: {place.category}
                           </Typography>
+                          {place.address && (
+                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+                              {place.address}
+                            </Typography>
+                          )}
                           <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
                             {place.description}
                           </Typography>
+                          
+                          {place.link && (
+                            <Button
+                                variant="text"
+                                size="small"
+                                href={place.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ textTransform: 'none', mb: 0.5 }}
+                            >
+                                Más info
+                            </Button>
+                          )}
+                          
                           <Button
                             variant="contained"
                             size="small"
@@ -348,11 +402,18 @@ export default function InteractiveMap() {
             </Marker>
         )}
 
-        {/* Se usa MapEventHandler en lugar de MapController para la lógica de eventos */}
         <MapEventHandler setMap={setMap} onLongPress={handleMapLongPress} /> 
         <LocationButton setUserPosition={setUserPosition} />
         <MapResizer />
       </MapContainer>
+
+      {/* El Modal para añadir lugares personalizado */}
+      <AddPlaceModal
+        open={showAddPlaceModal}
+        onClose={handleCloseAddPlaceModal}
+        onSubmit={handleAddPlaceSubmit}
+        coords={coordsToAddPlace}
+      />
     </Box>
   );
 }
