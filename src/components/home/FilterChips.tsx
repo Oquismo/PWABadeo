@@ -1,8 +1,9 @@
+// src/components/home/FilterChips.tsx
 'use client';
 
 import { Stack, Chip } from '@mui/material';
 
-// 1. La interfaz ahora incluye la propiedad 'filters'
+// La interfaz ahora incluye la propiedad 'filters'
 interface FilterChipsProps {
   filters: string[];
   selected: string;
@@ -12,14 +13,16 @@ interface FilterChipsProps {
 export default function FilterChips({ filters, selected, setSelected }: FilterChipsProps) {
   return (
     <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', py: 2, '::-webkit-scrollbar': { display: 'none' } }}>
-      {/* 2. Ahora usamos el array 'filters' que llega por las props */}
+      {/* Usamos el array 'filters' que llega por las props */}
       {filters.map((filter) => (
         <Chip
           key={filter}
           label={filter}
           onClick={() => setSelected(filter)}
           sx={{
-            color: selected === filter ? 'primary.main' : 'text.secondary',
+            // MODIFICACIÓN CLAVE: Solo aplicamos el color 'text.secondary' si NO está seleccionado.
+            // Si está seleccionado, Material-UI aplicará automáticamente el color de contraste (primary.contrastText).
+            color: selected !== filter ? 'text.secondary' : undefined,
             borderColor: selected === filter ? 'primary.main' : 'rgba(255, 255, 255, 0.23)',
             fontWeight: 'bold',
             fontSize: '0.875rem',
