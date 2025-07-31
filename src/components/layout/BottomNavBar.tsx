@@ -10,8 +10,8 @@ import LoginIcon from '@mui/icons-material/Login';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { useState, useEffect } from 'react';
-import Link from 'next/link'; // 1. Importar el componente Link
+import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 
 export default function BottomNavBar() {
   const pathname = usePathname();
@@ -22,8 +22,39 @@ export default function BottomNavBar() {
     setIsClient(true);
   }, []);
 
+  // --- SOLUCIÓN: Construimos la lista de acciones de forma dinámica ---
+  const navActions = useMemo(() => {
+    const baseActions = [
+      { value: "/", icon: <HomeIcon /> },
+      { value: "/mapa", icon: <MapIcon /> },
+    ];
+
+    const userActions = [
+      { value: "/checklist", icon: <ChecklistIcon /> },
+      { value: "/telefonos", icon: <PhoneInTalkIcon /> },
+    ];
+
+    const adminActions = [
+      { value: "/admin", icon: <AdminPanelSettingsIcon /> },
+    ];
+
+    const authAction = isAuthenticated
+      ? { value: "/perfil", icon: <AccountCircleIcon /> }
+      : { value: "/login", icon: <LoginIcon /> };
+
+    // Si no estamos en el cliente, mostramos una versión mínima
+    if (!isClient) {
+      return [...baseActions, authAction];
+    }
+
+    // Si estamos en el cliente, mostramos la versión completa según el rol
+    return [...baseActions, ...(user?.role === 'admin' ? adminActions : userActions), authAction];
+  }, [isClient, user, isAuthenticated]);
+
+
   if (!isClient) {
-    return null; // Evita errores de hidratación
+    // Renderizamos un placeholder o nada en el servidor para evitar errores de hidratación
+    return null;
   }
 
   return (
@@ -44,7 +75,7 @@ export default function BottomNavBar() {
     >
       <BottomNavigation
         showLabels={false}
-        value={pathname} // El valor activo sigue siendo controlado por la ruta actual
+        value={pathname}
         sx={{ 
           backgroundColor: 'transparent',
           padding: '0 8px',
@@ -62,26 +93,16 @@ export default function BottomNavBar() {
           },
         }}
       >
-        {/* --- SOLUCIÓN: Cada botón es ahora un enlace independiente --- */}
-        <BottomNavigationAction component={Link} href="/" value="/" icon={<HomeIcon />} sx={{ borderRadius: '9999px' }} />
-        <BottomNavigationAction component={Link} href="/mapa" value="/mapa" icon={<MapIcon />} sx={{ borderRadius: '9999px' }} />
-
-        {user?.role === 'admin' && (
-          <BottomNavigationAction component={Link} href="/admin" value="/admin" icon={<AdminPanelSettingsIcon />} sx={{ borderRadius: '9999px' }} />
-        )}
-
-        {user?.role !== 'admin' && (
-          <>
-            <BottomNavigationAction component={Link} href="/checklist" value="/checklist" icon={<ChecklistIcon />} sx={{ borderRadius: '9999px' }} />
-            <BottomNavigationAction component={Link} href="/telefonos" value="/telefonos" icon={<PhoneInTalkIcon />} sx={{ borderRadius: '9999px' }} />
-          </>
-        )}
-
-        {isAuthenticated ? (
-          <BottomNavigationAction component={Link} href="/perfil" value="/perfil" icon={<AccountCircleIcon />} sx={{ borderRadius: '9999px' }} />
-        ) : (
-          <BottomNavigationAction component={Link} href="/login" value="/login" icon={<LoginIcon />} sx={{ borderRadius: '9999px' }} />
-        )}
+        {navActions.map((action) => (
+          <BottomNavigationAction 
+            key={action.value}
+            component={Link} 
+            href={action.value} 
+            value={action.value} 
+            icon={action.icon} 
+            sx={{ borderRadius: '9999px' }} 
+          />
+        ))}
       </BottomNavigation>
     </Paper>
   );
