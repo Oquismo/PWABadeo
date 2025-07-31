@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
-import { Box, Typography, Fab } from '@mui/material';
+import { Box, Typography, Fab, Button } from '@mui/material'; // 1. Importar Button
 import MyLocationIcon from '@mui/icons-material/MyLocation';
+import DirectionsIcon from '@mui/icons-material/Directions'; // 2. Importar el icono de direcciones
 
 // Arreglo para los iconos por defecto
 import L from 'leaflet';
@@ -65,19 +66,16 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
     );
 }
 
-// --- SOLUCIÓN DEFINITIVA: Usamos un ResizeObserver para actualizar el tamaño del mapa ---
+// --- SOLUCIÓN: Componente para forzar la actualización del tamaño del mapa ---
 function MapResizer() {
   const map = useMap();
   useEffect(() => {
-    const observer = new ResizeObserver(() => {
+    const timer = setTimeout(() => {
       map.invalidateSize();
-    });
-    
-    const mapContainer = map.getContainer();
-    observer.observe(mapContainer);
+    }, 400); // 400ms es un poco más que la duración de nuestra animación de página
 
     return () => {
-      observer.unobserve(mapContainer);
+      clearTimeout(timer);
     };
   }, [map]);
   return null;
@@ -101,20 +99,37 @@ export default function InteractiveMap() {
       }}
     >
         <TileLayer
-            url={`https://api.maptiler.com/maps/basic-v2/{z}/{x}/{y}.png?key=${apiKey}`}
+            url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${apiKey}`}
             attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
         />
         
-        {locations.map((loc) => (
-            <Marker key={loc.name} position={loc.position}>
-                <Popup>
-                    <Box>
-                        <Typography variant="subtitle2" component="div" fontWeight="bold">{loc.name}</Typography>
-                        <Typography variant="caption">{loc.description}</Typography>
-                    </Box>
-                </Popup>
-            </Marker>
-        ))}
+        {locations.map((loc) => {
+            // Extraemos las coordenadas para crear el enlace
+            const [lat, lng] = Array.isArray(loc.position) ? loc.position : [loc.position.lat, loc.position.lng];
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+
+            return (
+              <Marker key={loc.name} position={loc.position}>
+                  <Popup>
+                      <Box>
+                          <Typography variant="subtitle2" component="div" fontWeight="bold">{loc.name}</Typography>
+                          <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>{loc.description}</Typography>
+                          {/* 3. Botón para abrir las indicaciones */}
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<DirectionsIcon />}
+                            href={directionsUrl}
+                            target="_blank" // Abre en una nueva pestaña (o en la app de mapas)
+                            rel="noopener noreferrer"
+                          >
+                            Cómo llegar
+                          </Button>
+                      </Box>
+                  </Popup>
+              </Marker>
+            );
+        })}
 
         {userPosition && (
             <Marker position={userPosition}>
@@ -124,7 +139,6 @@ export default function InteractiveMap() {
 
         <LocationButton setUserPosition={setUserPosition} />
         
-        {/* Añadimos el componente de actualización aquí */}
         <MapResizer />
     </MapContainer>
   );
