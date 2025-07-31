@@ -1,45 +1,67 @@
-// src/components/home/FeaturedCarousel.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, IconButton, Menu, MenuItem, Skeleton } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Image from 'next/image';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { projectsData, Project } from '@/data/projects';
+
+// Importaciones de Swiper
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
-import { vibrate } from '@/utils/haptics';
 
 interface Event {
   date: Date;
   title: string;
 }
 
-// Filtramos solo los proyectos que tienen fecha de evento
-const featuredProjects = projectsData.filter(p => p.eventDate);
+// Helper para obtener la lista completa y actualizada de eventos
+const getFeaturedProjects = (): Project[] => {
+  const dynamicEventsRaw = localStorage.getItem('dynamicProjectsData');
+  const dynamicEvents = dynamicEventsRaw ? JSON.parse(dynamicEventsRaw).map((e: any) => ({...e, eventDate: new Date(e.eventDate)})) : [];
+  
+  const deletedIdsRaw = localStorage.getItem('deletedStaticEventIds');
+  const deletedIds = deletedIdsRaw ? JSON.parse(deletedIdsRaw) : [];
+  
+  const staticEvents = projectsData.filter(p => p.eventDate && !deletedIds.includes(p.id));
+  
+  const allEvents = [...dynamicEvents, ...staticEvents.filter(p => !dynamicEvents.find((dp: Project) => dp.id === p.id))];
+  return allEvents;
+};
+
 
 export default function FeaturedCarousel() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true); // Estado de carga
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const open = Boolean(anchorEl);
   const { user } = useAuth();
   const router = useRouter();
 
+  // --- SOLUCIÓN: Hacemos que el carrusel reaccione a los cambios ---
   useEffect(() => {
-    // Simular una carga de datos
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000); // Simula 1 segundo de carga
+    // 1. Cargamos los datos al iniciar
+    setFeaturedProjects(getFeaturedProjects());
 
-    return () => clearTimeout(timer);
+    // 2. Creamos un "oyente" que se activa cuando los datos cambian en otra pestaña/página
+    const handleStorageChange = () => {
+      setFeaturedProjects(getFeaturedProjects());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // 3. Limpiamos el oyente cuando el componente se desmonta
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
+
 
   const handleClick = (event: React.MouseEvent<HTMLElement>, project: Project) => {
     setAnchorEl(event.currentTarget);
@@ -54,7 +76,7 @@ export default function FeaturedCarousel() {
     if (!user || !selectedProject || !selectedProject.eventDate) return;
 
     const savedEventsRaw = localStorage.getItem(`userCustomEvents_${user.email}`);
-    const existingEvents: Event[] = savedEventsRaw ? JSON.parse(savedEventsRaw).map((e: any) => ({ ...e, date: new Date(e.date) })) : [];
+    const existingEvents: Event[] = savedEventsRaw ? JSON.parse(savedEventsRaw).map((e: any) => ({...e, date: new Date(e.date)})) : [];
     
     const newEvent: Event = {
       title: `${selectedProject.title} (Destacado)`,
@@ -65,97 +87,79 @@ export default function FeaturedCarousel() {
     localStorage.setItem(`userCustomEvents_${user.email}`, JSON.stringify(updatedEvents));
     
     alert(`"${newEvent.title}" ha sido añadido a tu calendario.`);
-    vibrate();
     handleClose();
-    // router.push('/'); // Comentado para que puedas ver el efecto sin salir de la página
+    router.push('/');
   };
 
   return (
     <Box sx={{ py: 2 }}>
-      {loading ? (
-        // Skeleton para simular la carga
-        <Box sx={{ 
-            p: 3, 
-            borderRadius: '24px', 
-            position: 'relative', // Asegura que el skeleton se posicione correctamente si hay un layout similar al real
-            overflow: 'hidden',
-            background: 'linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%)', // Mismo fondo que las tarjetas reales
-            color: 'white', 
-            minHeight: '200px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            justifyContent: 'space-between' 
-          }}
-        >
-          <Skeleton variant="text" width="60%" height={24} sx={{ bgcolor: 'rgba(255,255,255,0.3)', mb: 1 }} />
-          <Skeleton variant="text" width="80%" height={40} sx={{ bgcolor: 'rgba(255,255,255,0.3)', mb: 2 }} />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'rgba(255,255,255,0.3)' }} />
-          </Box>
-        </Box>
-      ) : (
-        // Contenido del carrusel una vez cargado
-        <Swiper
-          effect={'coverflow'}
-          grabCursor={true}
-          centeredSlides={true}
-          slidesPerView={'auto'}
-          coverflowEffect={{
-            rotate: 50,
-            stretch: 0,
-            depth: 100,
-            modifier: 1,
-            slideShadows: true,
-          }}
-          pagination={{ clickable: true }}
-          modules={[EffectCoverflow, Pagination]}
-          className="mySwiper"
-        >
-          {featuredProjects.map((project) => (
-            <SwiperSlide key={project.id} style={{ width: '80%', maxWidth: '350px' }}>
-              <Box
-                sx={{
-                  p: 3,
-                  borderRadius: '24px',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  background: 'linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%)',
-                  color: 'white',
-                  minHeight: '200px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <Box sx={{ position: 'relative', zIndex: 2 }}>
-                  <Typography variant="overline" sx={{ fontWeight: 'bold' }}>
-                    Evento Destacado
-                  </Typography>
-                  <Typography variant="h5" component="h3" fontWeight="bold">
-                    {project.title}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                  <IconButton sx={{ color: 'white' }} onClick={(e) => handleClick(e, project)}>
-                    <MoreHorizIcon />
-                  </IconButton>
-                </Box>
-
-                {project.imageUrl && project.imageUrl.startsWith('http') && (
-                  <Image
-                    src={project.imageUrl}
-                    alt={project.title}
-                    layout="fill"
-                    objectFit="cover"
-                    style={{ zIndex: 1, opacity: 0.2 }}
-                  />
-                )}
+      <style>{`
+        .swiper-pagination-bullet {
+          background-color: rgba(255, 255, 255, 0.5) !important;
+        }
+        .swiper-pagination-bullet-active {
+          background-color: #BEF264 !important;
+        }
+      `}</style>
+      <Swiper
+        effect={'coverflow'}
+        grabCursor={true}
+        centeredSlides={true}
+        slidesPerView={'auto'}
+        coverflowEffect={{
+          rotate: 50,
+          stretch: 0,
+          depth: 100,
+          modifier: 1,
+          slideShadows: false,
+        }}
+        pagination={{ clickable: true }}
+        modules={[EffectCoverflow, Pagination]}
+      >
+        {featuredProjects.map((project) => (
+          <SwiperSlide key={project.id} style={{ width: '80%', maxWidth: '350px' }}>
+            <Box 
+              sx={{ 
+                p: 3,
+                borderRadius: '24px',
+                position: 'relative',
+                overflow: 'hidden',
+                background: 'linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%)',
+                color: 'white',
+                minHeight: '200px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}
+            >
+              <Box sx={{ position: 'relative', zIndex: 2 }}>
+                <Typography variant="overline" sx={{ fontWeight: 'bold' }}>
+                  Evento Destacado
+                </Typography>
+                <Typography variant="h5" component="h3" fontWeight="bold">
+                  {project.title}
+                </Typography>
               </Box>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      )}
+
+              <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                <IconButton sx={{ color: 'white' }} onClick={(e) => handleClick(e, project)}>
+                  <MoreHorizIcon />
+                </IconButton>
+              </Box>
+
+              {project.imageUrl && project.imageUrl.startsWith('http') && (
+                <Image
+                  src={project.imageUrl}
+                  alt={project.title}
+                  layout="fill"
+                  objectFit="cover"
+                  style={{ zIndex: 1, opacity: 0.2 }}
+                />
+              )}
+            </Box>
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
       <Menu
         anchorEl={anchorEl}

@@ -3,28 +3,40 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button, Stack, Paper, List, ListItem, ListItemText, IconButton, Divider } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Project, projectsData } from '@/data/projects'; // Usaremos la misma estructura
+import SaveIcon from '@mui/icons-material/Save';
+import { Project, projectsData } from '@/data/projects';
 
-// Helper para obtener los eventos (combinando los estáticos y los dinámicos)
+// Helper para obtener los IDs de eventos estáticos eliminados
+const getDeletedStaticIds = (): string[] => {
+  const idsRaw = localStorage.getItem('deletedStaticEventIds');
+  return idsRaw ? JSON.parse(idsRaw) : [];
+};
+
+// Helper para obtener la lista completa de eventos
 const getEvents = (): Project[] => {
   const dynamicEventsRaw = localStorage.getItem('dynamicProjectsData');
   const dynamicEvents = dynamicEventsRaw ? JSON.parse(dynamicEventsRaw).map((e: any) => ({...e, eventDate: new Date(e.eventDate)})) : [];
-  // Damos prioridad a los eventos dinámicos
-  return [...dynamicEvents, ...projectsData.filter(p => p.eventDate)];
+  
+  const deletedIds = getDeletedStaticIds();
+  const staticEvents = projectsData.filter(p => p.eventDate && !deletedIds.includes(p.id));
+
+  return [...dynamicEvents, ...staticEvents];
 };
 
 export default function EventManagement() {
   const [events, setEvents] = useState<Project[]>([]);
+  const [deletedStaticIds, setDeletedStaticIds] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     imageUrl: '',
     eventDate: '',
-    school: '', // Nuevo campo para la escuela
+    school: '',
   });
 
   useEffect(() => {
     setEvents(getEvents());
+    setDeletedStaticIds(getDeletedStaticIds());
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,18 +51,33 @@ export default function EventManagement() {
       eventDate: new Date(formData.eventDate),
     };
 
-    const updatedEvents = [newEvent, ...events];
-    localStorage.setItem('dynamicProjectsData', JSON.stringify(updatedEvents.filter(e => projectsData.findIndex(p => p.id === e.id) === -1)));
-    setEvents(updatedEvents);
+    setEvents(prevEvents => [newEvent, ...prevEvents]);
     setFormData({ title: '', description: '', imageUrl: '', eventDate: '', school: '' });
-    alert('Evento añadido con éxito.');
   };
 
   const handleDelete = (eventId: string) => {
-    const updatedEvents = events.filter(e => e.id !== eventId);
-    localStorage.setItem('dynamicProjectsData', JSON.stringify(updatedEvents.filter(e => projectsData.findIndex(p => p.id === e.id) === -1)));
-    setEvents(updatedEvents);
-    alert('Evento eliminado.');
+    // Si el evento a eliminar es uno de los originales, lo añadimos a la lista de borrados
+    if (projectsData.some(p => p.id === eventId)) {
+      setDeletedStaticIds(prevIds => [...prevIds, eventId]);
+    }
+    // Siempre lo quitamos de la vista actual
+    setEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
+  };
+
+  const handleSaveChanges = () => {
+    try {
+      // Guardamos los eventos creados por el admin
+      const dynamicEventsToSave = events.filter(e => !projectsData.some(p => p.id === e.id));
+      localStorage.setItem('dynamicProjectsData', JSON.stringify(dynamicEventsToSave));
+      
+      // Guardamos la lista de IDs de eventos originales que se han eliminado
+      localStorage.setItem('deletedStaticEventIds', JSON.stringify(deletedStaticIds));
+      
+      alert('¡Cambios guardados con éxito!');
+    } catch (error) {
+      console.error("Error al guardar los cambios:", error);
+      alert('No se pudieron guardar los cambios.');
+    }
   };
 
   return (
@@ -62,10 +89,10 @@ export default function EventManagement() {
           <Stack spacing={2}>
             <TextField label="Título del Evento" name="title" value={formData.title} onChange={handleChange} required />
             <TextField label="Descripción Corta" name="description" value={formData.description} onChange={handleChange} required />
-            <TextField label="URL de la Imagen" name="imageUrl" value={formData.imageUrl} onChange={handleChange} required />
+            <TextField label="URL de la Imagen" name="imageUrl" value={formData.imageUrl} onChange={handleChange} />
             <TextField label="Escuela Asociada" name="school" value={formData.school} onChange={handleChange} required />
             <TextField label="Fecha del Evento" name="eventDate" type="date" InputLabelProps={{ shrink: true }} value={formData.eventDate} onChange={handleChange} required />
-            <Button type="submit" variant="contained">Añadir Evento</Button>
+            <Button type="submit" variant="contained">Añadir a la Lista</Button>
           </Stack>
         </form>
       </Paper>
@@ -92,6 +119,16 @@ export default function EventManagement() {
             </Box>
           ))}
         </List>
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            startIcon={<SaveIcon />}
+            onClick={handleSaveChanges}
+          >
+            Guardar Cambios
+          </Button>
+        </Box>
       </Paper>
     </Stack>
   );
