@@ -2,14 +2,12 @@
 
 import { Box, Container, Typography, CircularProgress } from '@mui/material';
 import dynamic from 'next/dynamic';
+import RoutePlanner from '@/components/mapa/RoutePlanner'; // 1. Importar el nuevo componente
 
-// --- SOLUCIÓN: Definimos el mapa dinámico FUERA del componente ---
-// Esto crea una referencia estable que no cambia en cada renderizado.
 const InteractiveMap = dynamic(
   () => import('@/components/mapa/InteractiveMap'),
   { 
-    ssr: false, // Es crucial para que el mapa funcione
-    // Mostramos un spinner de carga mientras el mapa se prepara
+    ssr: false,
     loading: () => (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '70vh' }}>
         <CircularProgress />
@@ -30,6 +28,11 @@ export default function MapaPage() {
         </Typography>
       </Box>
       <InteractiveMap />
+
+      {/* 2. Reemplazamos la sección de información por el planificador de rutas */}
+      <Box sx={{ mt: 4 }}>
+        <RoutePlanner />
+      </Box>
     </Container>
   );
 }

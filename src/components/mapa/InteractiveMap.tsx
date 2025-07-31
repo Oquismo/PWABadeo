@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
-import { Box, Typography, Fab, Button } from '@mui/material'; // 1. Importar Button
+import { Box, Typography, Fab, TextField, IconButton, InputAdornment, Button } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import DirectionsIcon from '@mui/icons-material/Directions'; // 2. Importar el icono de direcciones
+import SearchIcon from '@mui/icons-material/Search';
+import DirectionsIcon from '@mui/icons-material/Directions';
+
 
 // Arreglo para los iconos por defecto
 import L from 'leaflet';
@@ -41,6 +43,16 @@ const locations: LocationPoint[] = [
   },
 ];
 
+// Componente que nos da acceso a la instancia del mapa
+function MapController({ setMap }: { setMap: (map: L.Map) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    setMap(map);
+  }, [map, setMap]);
+  return null;
+}
+
+// Componente para el botón de geolocalización
 function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
     const map = useMap();
 
@@ -58,7 +70,7 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
             color="primary" 
             size="small"
             onClick={handleClick}
-            sx={{ position: 'absolute', top: 10, right: 10, zIndex: 1000 }}
+            sx={{ position: 'absolute', top: 85, right: 10, zIndex: 1000 }}
             aria-label="find my location"
         >
             <MyLocationIcon />
@@ -66,61 +78,91 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
     );
 }
 
-// --- SOLUCIÓN: Componente para forzar la actualización del tamaño del mapa ---
-function MapResizer() {
-  const map = useMap();
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 400); // 400ms es un poco más que la duración de nuestra animación de página
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [map]);
-  return null;
-}
-
 export default function InteractiveMap() {
   const defaultPosition: LatLngExpression = [37.3891, -5.9845];
   const [userPosition, setUserPosition] = useState<LatLng | null>(null);
-  const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR'; // Tu clave API
+  const [searchQuery, setSearchQuery] = useState('');
+  const [map, setMap] = useState<L.Map | null>(null);
+  const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR';
+
+  const handleSearch = async () => {
+    if (!searchQuery || !map) return;
+    
+    // --- BÚSQUEDA HIPERPRECISA CON BBOX ---
+    // Definimos una "valla" geográfica alrededor de Sevilla y su área metropolitana
+    const bbox = "-6.1,37.3,-5.8,37.5"; // [minLon, minLat, maxLon, maxLat]
+    
+    try {
+      // Usamos el parámetro 'bbox' para forzar los resultados dentro de esta área
+      const response = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${apiKey}&bbox=${bbox}`);
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const [lon, lat] = data.features[0].center;
+        const newPosition = new LatLng(lat, lon);
+        map.flyTo(newPosition, 15);
+      } else {
+        alert('No se encontraron resultados para tu búsqueda en el área de Sevilla.');
+      }
+    } catch (error) {
+      console.error("Error en la búsqueda:", error);
+      alert('Ocurrió un error al realizar la búsqueda.');
+    }
+  };
 
   return (
-    <MapContainer 
-      center={defaultPosition} 
-      zoom={14} 
-      style={{ 
-        height: '70vh', 
-        width: '100%', 
-        borderRadius: '16px', 
-        position: 'relative', 
-        zIndex: 0 
-      }}
-    >
+    <Box>
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Buscar un lugar en Sevilla..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+        sx={{ mb: 2 }}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={handleSearch} edge="end">
+                <SearchIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+
+      <MapContainer 
+        center={defaultPosition} 
+        zoom={14} 
+        style={{ 
+          height: '65vh',
+          width: '100%', 
+          borderRadius: '16px', 
+          position: 'relative', 
+          zIndex: 0 
+        }}
+      >
         <TileLayer
             url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${apiKey}`}
             attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
         />
         
         {locations.map((loc) => {
-            // Extraemos las coordenadas para crear el enlace
             const [lat, lng] = Array.isArray(loc.position) ? loc.position : [loc.position.lat, loc.position.lng];
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-
+            
             return (
               <Marker key={loc.name} position={loc.position}>
                   <Popup>
                       <Box>
                           <Typography variant="subtitle2" component="div" fontWeight="bold">{loc.name}</Typography>
                           <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>{loc.description}</Typography>
-                          {/* 3. Botón para abrir las indicaciones */}
                           <Button
                             variant="contained"
                             size="small"
                             startIcon={<DirectionsIcon />}
                             href={directionsUrl}
-                            target="_blank" // Abre en una nueva pestaña (o en la app de mapas)
+                            target="_blank"
                             rel="noopener noreferrer"
                           >
                             Cómo llegar
@@ -138,8 +180,8 @@ export default function InteractiveMap() {
         )}
 
         <LocationButton setUserPosition={setUserPosition} />
-        
-        <MapResizer />
-    </MapContainer>
+        <MapController setMap={setMap} />
+      </MapContainer>
+    </Box>
   );
 }
