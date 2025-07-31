@@ -29,13 +29,11 @@ export default function FeaturedCarousel() {
   const { user } = useAuth();
   const router = useRouter();
 
-  // 1. Leemos los eventos desde localStorage al cargar el componente
   useEffect(() => {
     const dynamicEventsRaw = localStorage.getItem('dynamicProjectsData');
     const dynamicEvents = dynamicEventsRaw ? JSON.parse(dynamicEventsRaw).map((e: any) => ({...e, eventDate: new Date(e.eventDate)})) : [];
     const staticEvents = projectsData.filter(p => p.eventDate);
     
-    // Combinamos y eliminamos duplicados si los hubiera
     const allEvents = [...dynamicEvents, ...staticEvents.filter(p => !dynamicEvents.find((dp: Project) => dp.id === p.id))];
     setFeaturedProjects(allEvents);
   }, []);
@@ -124,13 +122,17 @@ export default function FeaturedCarousel() {
                 </IconButton>
               </Box>
 
-              <Image
-                src={project.imageUrl}
-                alt={project.title}
-                layout="fill"
-                objectFit="cover"
-                style={{ zIndex: 1, opacity: 0.2 }}
-              />
+              {/* --- SOLUCIÓN MÁS ROBUSTA: Renderizado condicional de la imagen --- */}
+              {/* Solo mostramos la imagen si la URL existe y empieza con http */}
+              {project.imageUrl && project.imageUrl.startsWith('http') && (
+                <Image
+                  src={project.imageUrl}
+                  alt={project.title}
+                  layout="fill"
+                  objectFit="cover"
+                  style={{ zIndex: 1, opacity: 0.2 }}
+                />
+              )}
             </Box>
           </SwiperSlide>
         ))}

@@ -3,14 +3,13 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack, Divider } from '@mui/material';
+import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
 import EmailIcon from '@mui/icons-material/Email';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
 import Link from 'next/link';
-import AdminPanel from '@/components/admin/AdminPanel';
 
 export default function PerfilPage() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -55,7 +54,6 @@ export default function PerfilPage() {
           <Typography component="h1" variant="h4" fontWeight="bold">
             {user.name}
           </Typography>
-          {/* --- SECCIÓN DE DATOS RESTAURADA --- */}
           <Paper elevation={0} sx={{ width: '100%', mt: 4, p: 2 }}>
             <List>
               <ListItem>
@@ -79,15 +77,7 @@ export default function PerfilPage() {
             </List>
           </Paper>
 
-          {/* --- SECCIÓN DE ADMINISTRADOR --- */}
-          {user.role === 'admin' && (
-            <Box sx={{ width: '100%', mt: 4 }}>
-              <Divider sx={{ mb: 2 }}>
-                <Typography variant="overline">Panel de Administrador</Typography>
-              </Divider>
-              <AdminPanel />
-            </Box>
-          )}
+          {/* Se ha eliminado el panel de administrador de esta vista */}
 
           <Button
             onClick={handleLogout}

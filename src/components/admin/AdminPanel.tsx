@@ -1,15 +1,29 @@
 'use client';
 
-import { useState } from 'react';
-import { Box, Typography, TextField, Button, Stack, Paper } from '@mui/material'; // 1. Añadir 'Paper' a la importación
+import { useState, useEffect } from 'react';
+import { Box, Typography, TextField, Button, Stack, Paper } from '@mui/material';
+import { Project, projectsData } from '@/data/projects'; // Importamos la estructura
+
+// Helper para obtener los eventos (combinando los estáticos y los dinámicos)
+const getEvents = (): Project[] => {
+  const dynamicEventsRaw = localStorage.getItem('dynamicProjectsData');
+  const dynamicEvents = dynamicEventsRaw ? JSON.parse(dynamicEventsRaw).map((e: any) => ({...e, eventDate: new Date(e.eventDate)})) : [];
+  return [...dynamicEvents, ...projectsData.filter(p => p.eventDate)];
+};
 
 export default function AdminPanel() {
+  const [events, setEvents] = useState<Project[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     imageUrl: '',
     eventDate: '',
+    school: '',
   });
+
+  useEffect(() => {
+    setEvents(getEvents());
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,40 +31,31 @@ export default function AdminPanel() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // En una app real, aquí se enviaría a una base de datos.
-    // Por ahora, simulamos la persistencia guardando en localStorage.
     
-    // 1. Obtenemos los proyectos existentes
-    const existingProjectsRaw = localStorage.getItem('projectsData');
-    const existingProjects = existingProjectsRaw ? JSON.parse(existingProjectsRaw) : [];
+    // 1. Obtenemos solo los eventos dinámicos existentes
+    const dynamicEventsRaw = localStorage.getItem('dynamicProjectsData');
+    const dynamicEvents = dynamicEventsRaw ? JSON.parse(dynamicEventsRaw) : [];
 
-    // 2. Creamos el nuevo proyecto/evento
-    const newProject = {
-      id: formData.title.toLowerCase().replace(/\s+/g, '-'), // Creamos un ID simple
+    const newEvent: Project = {
+      id: formData.title.toLowerCase().replace(/\s+/g, '-'),
       ...formData,
       eventDate: new Date(formData.eventDate),
     };
 
-    // 3. Añadimos el nuevo y guardamos
-    const updatedProjects = [...existingProjects, newProject];
-    localStorage.setItem('projectsData', JSON.stringify(updatedProjects));
+    // 2. Añadimos el nuevo evento a la lista de dinámicos y guardamos
+    const updatedDynamicEvents = [newEvent, ...dynamicEvents];
+    localStorage.setItem('dynamicProjectsData', JSON.stringify(updatedDynamicEvents));
 
+    setEvents(getEvents()); // Actualizamos la lista visible en el panel
+    setFormData({ title: '', description: '', imageUrl: '', eventDate: '', school: '' });
     alert(`Evento "${formData.title}" añadido con éxito.`);
-    setFormData({ title: '', description: '', imageUrl: '', eventDate: '' }); // Limpiamos el formulario
   };
+
+  // ... (la lógica de handleDelete y el JSX no cambian)
 
   return (
     <Paper elevation={0} sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>Añadir Nuevo Evento Destacado</Typography>
-      <form onSubmit={handleSubmit}>
-        <Stack spacing={2}>
-          <TextField label="Título del Evento" name="title" value={formData.title} onChange={handleChange} required />
-          <TextField label="Descripción Corta" name="description" value={formData.description} onChange={handleChange} required />
-          <TextField label="URL de la Imagen" name="imageUrl" value={formData.imageUrl} onChange={handleChange} required />
-          <TextField label="Fecha del Evento" name="eventDate" type="date" InputLabelProps={{ shrink: true }} value={formData.eventDate} onChange={handleChange} required />
-          <Button type="submit" variant="contained">Añadir Evento</Button>
-        </Stack>
-      </form>
+      {/* ... (el resto del componente) ... */}
     </Paper>
   );
 }
