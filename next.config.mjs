@@ -1,3 +1,4 @@
+// next.config.js
 import withPWAInit from '@ducanh2912/next-pwa';
 
 const withPWA = withPWAInit({
@@ -10,13 +11,17 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Añadimos esta sección para permitir imágenes de Unsplash
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org', // ¡Este es el dominio que faltaba!
+      },
+      // Si usas más dominios para imágenes, añádelos aquí.
     ],
   },
 };

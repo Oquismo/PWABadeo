@@ -1,14 +1,18 @@
+// src/components/mapa/InteractiveMap.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useState, useEffect, useRef } from 'react'; // Importar useRef
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'; // Cambiar useMap a useMapEvents
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
 import { Box, Typography, Fab, TextField, IconButton, InputAdornment, Button } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
+import Image from 'next/image';
 
+// Importar los nuevos datos de lugares
+import { placesData, Place } from '@/data/places';
 
 // Arreglo para los iconos por defecto
 import L from 'leaflet';
@@ -43,26 +47,63 @@ const locations: LocationPoint[] = [
   },
 ];
 
-// Componente que nos da acceso a la instancia del mapa
-function MapController({ setMap }: { setMap: (map: L.Map) => void }) {
-  const map = useMap();
+// Componente que nos da acceso a la instancia del mapa y maneja la pulsación larga
+function MapEventHandler({ setMap, onLongPress }: { setMap: (map: L.Map) => void; onLongPress: (latlng: LatLng) => void }) {
+  const map = useMapEvents({
+    // Al cargar, establece la instancia del mapa
+    load: (e) => setMap(e.target as L.Map),
+    
+    // Lógica para la pulsación larga
+    mousedown: (e) => startLongPressTimer(e.latlng),
+    mouseup: () => clearLongPressTimer(),
+    touchstart: (e) => startLongPressTimer(e.latlng),
+    touchend: () => clearLongPressTimer(),
+    
+    // Clear timer if mouse leaves map area
+    mouseout: () => clearLongPressTimer(),
+    touchcancel: () => clearLongPressTimer(),
+  });
+
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressDuration = 700; // Milisegundos para considerar una pulsación larga
+
+  const startLongPressTimer = (latlng: LatLng) => {
+    clearLongPressTimer(); // Clear any existing timer
+    longPressTimer.current = setTimeout(() => {
+      onLongPress(latlng);
+      longPressTimer.current = null; // Reset timer after it fires
+    }, longPressDuration);
+  };
+
+  const clearLongPressTimer = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
   useEffect(() => {
-    setMap(map);
-  }, [map, setMap]);
+    // Asegurarse de limpiar el temporizador si el componente se desmonta
+    return () => clearLongPressTimer();
+  }, []);
+
   return null;
 }
 
 // Componente para el botón de geolocalización
 function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
-    const map = useMap();
+    const map = useMapEvents({ // Cambiado de useMap a useMapEvents
+      locationfound: (e) => {
+          setUserPosition(e.latlng);
+          map.flyTo(e.latlng, 15);
+      },
+      locationerror: (e) => {
+          alert(e.message);
+      }
+    });
 
     const handleClick = () => {
-        map.locate().on('locationfound', function (e) {
-            setUserPosition(e.latlng);
-            map.flyTo(e.latlng, 15);
-        }).on('locationerror', function(e){
-            alert(e.message);
-        });
+      map.locate();
     };
 
     return (
@@ -78,22 +119,51 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
     );
 }
 
+// Componente para ajustar el tamaño del mapa cuando su contenedor cambia
+function MapResizer() {
+  const map = useMapEvents({}); // Cambiado de useMap a useMapEvents
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+
+    const mapElement = map.getContainer();
+    if (mapElement && mapElement.parentElement) {
+      resizeObserver.observe(mapElement.parentElement);
+    }
+
+    return () => {
+      if (mapElement && mapElement.parentElement) {
+        resizeObserver.unobserve(mapElement.parentElement);
+      }
+    };
+  }, [map]);
+  return null;
+}
+
+
 export default function InteractiveMap() {
   const defaultPosition: LatLngExpression = [37.3891, -5.9845];
   const [userPosition, setUserPosition] = useState<LatLng | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState<L.Map | null>(null);
-  const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR';
+  const [customPlaces, setCustomPlaces] = useState<Place[]>([]); // Estado para los puntos de interés del usuario
+  const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR'; // Tu clave API de MapTiler
+
+  // Cargar puntos personalizados del localStorage al inicio
+  useEffect(() => {
+    const savedPlacesRaw = localStorage.getItem('userCustomPlaces');
+    if (savedPlacesRaw) {
+      setCustomPlaces(JSON.parse(savedPlacesRaw));
+    }
+  }, []);
 
   const handleSearch = async () => {
     if (!searchQuery || !map) return;
     
-    // --- BÚSQUEDA HIPERPRECISA CON BBOX ---
-    // Definimos una "valla" geográfica alrededor de Sevilla y su área metropolitana
     const bbox = "-6.1,37.3,-5.8,37.5"; // [minLon, minLat, maxLon, maxLat]
     
     try {
-      // Usamos el parámetro 'bbox' para forzar los resultados dentro de esta área
       const response = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${apiKey}&bbox=${bbox}`);
       const data = await response.json();
       
@@ -108,6 +178,12 @@ export default function InteractiveMap() {
       console.error("Error en la búsqueda:", error);
       alert('Ocurrió un error al realizar la búsqueda.');
     }
+  };
+
+  // Función que se llamará cuando se detecte una pulsación larga
+  const handleMapLongPress = (latlng: LatLng) => {
+    alert(`Pulsación larga detectada en: ${latlng.lat}, ${latlng.lng}. Aquí abriríamos el modal.`);
+    // Aquí es donde en el siguiente paso mostraremos el modal para añadir el punto
   };
 
   return (
@@ -144,12 +220,13 @@ export default function InteractiveMap() {
       >
         <TileLayer
             url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${apiKey}`}
-            attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+            attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>'
         />
         
+        {/* Marcadores de ubicaciones predefinidas */}
         {locations.map((loc) => {
             const [lat, lng] = Array.isArray(loc.position) ? loc.position : [loc.position.lat, loc.position.lng];
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`; // URL de Google Maps para transporte público
             
             return (
               <Marker key={loc.name} position={loc.position}>
@@ -173,14 +250,110 @@ export default function InteractiveMap() {
             );
         })}
 
+        {/* Marcadores de Lugares de Interés predefinidos */}
+        {placesData.map((place) => {
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
+            
+            return (
+              <Marker key={place.id} position={place.coordinates}>
+                  <Popup>
+                      <Box sx={{ maxWidth: 200 }}>
+                          {place.imageUrl && (
+                            <Image
+                                src={place.imageUrl}
+                                alt={place.name}
+                                width={180}
+                                height={100}
+                                objectFit="cover"
+                                style={{ borderRadius: '8px', marginBottom: 8 }}
+                            />
+                          )}
+                          <Typography variant="subtitle1" component="div" fontWeight="bold">{place.name}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                            Categoría: {place.category}
+                          </Typography>
+                          {place.address && (
+                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+                              {place.address}
+                            </Typography>
+                          )}
+                          <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
+                            {place.description}
+                          </Typography>
+                          
+                          {place.link && (
+                            <Button
+                                variant="text"
+                                size="small"
+                                href={place.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ textTransform: 'none', mb: 0.5 }}
+                            >
+                                Más info
+                            </Button>
+                          )}
+                          
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<DirectionsIcon />}
+                            href={directionsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            fullWidth
+                          >
+                            Cómo llegar
+                          </Button>
+                      </Box>
+                  </Popup>
+              </Marker>
+            );
+        })}
+
+        {/* NUEVOS Marcadores de Puntos de Interés Personalizados por el Usuario */}
+        {customPlaces.map((place) => {
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
+            
+            return (
+              <Marker key={place.id} position={place.coordinates}>
+                  <Popup>
+                      <Box sx={{ maxWidth: 200 }}>
+                          <Typography variant="subtitle1" component="div" fontWeight="bold">{place.name} (Personalizado)</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                            Categoría: {place.category}
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
+                            {place.description}
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<DirectionsIcon />}
+                            href={directionsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            fullWidth
+                          >
+                            Cómo llegar
+                          </Button>
+                      </Box>
+                  </Popup>
+              </Marker>
+            );
+        })}
+
+
         {userPosition && (
             <Marker position={userPosition}>
                 <Popup>Estás aquí</Popup>
             </Marker>
         )}
 
+        {/* Se usa MapEventHandler en lugar de MapController para la lógica de eventos */}
+        <MapEventHandler setMap={setMap} onLongPress={handleMapLongPress} /> 
         <LocationButton setUserPosition={setUserPosition} />
-        <MapController setMap={setMap} />
+        <MapResizer />
       </MapContainer>
     </Box>
   );
