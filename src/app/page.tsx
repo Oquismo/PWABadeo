@@ -1,7 +1,8 @@
+// src/app/page.tsx
 'use client';
 
-import { useState } from 'react';
-import { Container, Fab } from "@mui/material";
+import { useState, useEffect } from 'react';
+import { Container, Fab, Fade, Box } from "@mui/material"; // ¡IMPORTACIÓN DE BOX AÑADIDA AQUÍ!
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 
 // Importamos todos los componentes de sección
@@ -13,31 +14,37 @@ import CalendarSection from '@/components/home/CalendarSection/CalendarSection';
 
 export default function Home() {
   const [selectedContent, setSelectedContent] = useState('Calendario');
+  const [fadeIn, setFadeIn] = useState(false);
+
+  useEffect(() => {
+    setFadeIn(true);
+  }, []);
 
   return (
     <>
       <Container>
-        <HeroSection />
-        <FilterChips 
-          filters={['Calendario', 'Proyectos']}
-          selected={selectedContent} 
-          setSelected={setSelectedContent} 
-        />
-        <FeaturedCarousel />
+        <Fade in={fadeIn} timeout={1000}>
+          <Box sx={{ pt: 2, pb: 2 }}>
+            <HeroSection />
+            <FilterChips
+              filters={['Calendario', 'Proyectos']}
+              selected={selectedContent}
+              setSelected={setSelectedContent}
+            />
+            <FeaturedCarousel />
 
-        {selectedContent === 'Calendario' && <CalendarSection />}
-        {selectedContent === 'Proyectos' && <ProjectsSection />}
-        
+            {selectedContent === 'Calendario' && <CalendarSection />}
+            {selectedContent === 'Proyectos' && <ProjectsSection />}
+          </Box>
+        </Fade>
       </Container>
 
-      {/* --- BOTÓN FLOTANTE CORREGIDO --- */}
-      <Fab 
-        color="secondary" // 1. Color restaurado para que destaque
+      <Fab
+        color="secondary"
         aria-label="solicitar información"
         sx={{
           position: 'fixed',
-          // 2. Posición ajustada a la esquina inferior derecha
-          bottom: (theme) => `calc(64px + ${theme.spacing(2)})`, // 64px de la barra + 16px de margen
+          bottom: (theme) => `calc(64px + ${theme.spacing(2)})`,
           right: (theme) => theme.spacing(2),
         }}
       >

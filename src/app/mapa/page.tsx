@@ -1,8 +1,10 @@
 'use client';
 
-import { Box, Container, Typography, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, CircularProgress, Button } from '@mui/material'; // Importar Button
 import dynamic from 'next/dynamic';
-import RoutePlanner from '@/components/mapa/RoutePlanner'; // 1. Importar el nuevo componente
+import RoutePlanner from '@/components/mapa/RoutePlanner'; 
+import Link from 'next/link'; // Importar Link de Next.js
+import ListIcon from '@mui/icons-material/List'; // Icono para el botón
 
 const InteractiveMap = dynamic(
   () => import('@/components/mapa/InteractiveMap'),
@@ -29,9 +31,28 @@ export default function MapaPage() {
       </Box>
       <InteractiveMap />
 
-      {/* 2. Reemplazamos la sección de información por el planificador de rutas */}
+      {/* Sección del planificador de rutas */}
       <Box sx={{ mt: 4 }}>
         <RoutePlanner />
+      </Box>
+
+      {/* Botón para ir a la lista de lugares */}
+      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+        <Link href="/lugares" passHref>
+          <Button 
+            variant="outlined" 
+            size="large" 
+            startIcon={<ListIcon />}
+            sx={{ 
+                borderRadius: '12px', 
+                py: 1.5, 
+                px: 3, 
+                fontWeight: 'bold' 
+            }}
+          >
+            Ver Lista de Lugares
+          </Button>
+        </Link>
       </Box>
     </Container>
   );

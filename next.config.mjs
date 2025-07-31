@@ -19,9 +19,13 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'upload.wikimedia.org', // ¡Este es el dominio que faltaba!
+        hostname: 'upload.wikimedia.org',
       },
-      // Si usas más dominios para imágenes, añádelos aquí.
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com', // ¡NUEVO: Para los iconos de colores!
+      },
+      // Puedes añadir más dominios si los usas para otras imágenes
     ],
   },
 };

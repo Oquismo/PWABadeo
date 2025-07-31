@@ -42,6 +42,44 @@ export const placesData: Place[] = [
     address: 'Av. Portugal, s/n, 41004 Sevilla',
     link: 'https://www.tussam.es/es/paradas'
   },
+  // --- NUEVAS PARADAS DE METRO ---
+  {
+    id: 'metro-puerta-jerez',
+    name: 'Metro Puerta Jerez',
+    description: 'Estación de metro céntrica, ideal para conectar con el centro histórico.',
+    category: 'Transporte',
+    coordinates: { lat: 37.3828, lng: -5.9961 },
+    address: 'Av. de la Constitución, s/n, 41001 Sevilla',
+    link: 'https://www.metrodesevilla.es/estaciones/puerta-jerez'
+  },
+  {
+    id: 'metro-prado-san-sebastian',
+    name: 'Metro Prado S. S.',
+    description: 'Estación de metro y autobús, un gran intercambiador de transporte.',
+    category: 'Transporte',
+    coordinates: { lat: 37.3769, lng: -5.9904 },
+    address: 'Av. de Carlos V, s/n, 41004 Sevilla',
+    link: 'https://www.metrodesevilla.es/estaciones/prado-de-san-sebastian'
+  },
+  {
+    id: 'metro-san-bernardo',
+    name: 'Metro San Bernardo',
+    description: 'Conexión con tren de cercanías y varias líneas de autobús.',
+    category: 'Transporte',
+    coordinates: { lat: 37.3769, lng: -5.9818 },
+    address: 'Av. de la Buhaira, s/n, 41018 Sevilla',
+    link: 'https://www.metrodesevilla.es/estaciones/san-bernardo'
+  },
+  {
+    id: 'metro-nervion',
+    name: 'Metro Nervión',
+    description: 'Estación que da servicio a la zona comercial y al estadio Ramón Sánchez-Pizjuán.',
+    category: 'Transporte',
+    coordinates: { lat: 37.3879, lng: -5.9723 },
+    address: 'Av. Eduardo Dato, 41005 Sevilla',
+    link: 'https://www.metrodesevilla.es/estaciones/nervion'
+  },
+  // --- FIN NUEVAS PARADAS DE METRO ---
   {
     id: 'hospital-virgen-rocio',
     name: 'Hospital Universitario Virgen del Rocío',
