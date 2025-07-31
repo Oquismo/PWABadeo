@@ -8,7 +8,7 @@ import Head from 'next/head';
 export default function MapaPage() {
   const InteractiveMap = useMemo(() => dynamic(
     () => import('@/components/mapa/InteractiveMap'),
-    { ssr: false }
+    { ssr: false } // Es crucial para que el mapa funcione
   ), []);
 
   return (
@@ -17,9 +17,6 @@ export default function MapaPage() {
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-          // --- CORRECCIÓN AQUÍ ---
-          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-          crossOrigin=""
         />
       </Head>
       <Container>
