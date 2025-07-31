@@ -6,12 +6,14 @@ import { useAuth } from '@/context/AuthContext';
 import { Container, Box, Typography, IconButton, Tabs, Tab } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EventManagement from '@/components/admin/EventManagement';
-import UserManagement from '@/components/admin/UserManagement'; // 1. Importar el nuevo panel
+import UserManagement from '@/components/admin/UserManagement';
+import LogViewer from '@/components/admin/LogViewer';
+import AnnouncementManager from '@/components/admin/AnnouncementManager'; // 1. Asegurarse de que está importado
 
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [tab, setTab] = useState(0); // Estado para controlar la pestaña activa
+  const [tab, setTab] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'admin') {
@@ -37,17 +39,21 @@ export default function AdminPage() {
           Panel de Administración
         </Typography>
 
-        {/* 2. Sistema de Pestañas */}
+        {/* 2. Pestañas de navegación del panel */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', my: 3 }}>
           <Tabs value={tab} onChange={handleChange} centered>
-            <Tab label="Gestionar Eventos" />
-            <Tab label="Gestionar Usuarios" />
+            <Tab label="Eventos" />
+            <Tab label="Usuarios" />
+            <Tab label="Logs" />
+            <Tab label="Anuncios" />
           </Tabs>
         </Box>
 
-        {/* 3. Contenido condicional basado en la pestaña seleccionada */}
+        {/* 3. Contenido que cambia según la pestaña seleccionada */}
         {tab === 0 && <EventManagement />}
         {tab === 1 && <UserManagement />}
+        {tab === 2 && <LogViewer />}
+        {tab === 3 && <AnnouncementManager />}
       </Box>
     </Container>
   );

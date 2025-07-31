@@ -7,7 +7,7 @@ import { Container, Box, Typography, IconButton, Tabs, Tab } from '@mui/material
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EventManagement from '@/components/admin/EventManagement';
 import UserManagement from '@/components/admin/UserManagement';
-import LogViewer from '@/components/admin/LogViewer'; // 1. Importar el nuevo visualizador
+import LogViewer from '@/components/admin/LogViewer';
 
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuth();
@@ -42,13 +42,14 @@ export default function AdminPage() {
           <Tabs value={tab} onChange={handleChange} centered>
             <Tab label="Gestionar Eventos" />
             <Tab label="Gestionar Usuarios" />
-            <Tab label="Registro de Actividad" /> {/* 2. Añadir la nueva pestaña */}
+            <Tab label="Registro de Actividad" />
           </Tabs>
         </Box>
 
+        {/* Contenido condicional basado en la pestaña seleccionada */}
         {tab === 0 && <EventManagement />}
         {tab === 1 && <UserManagement />}
-        {tab === 2 && <LogViewer />} {/* 3. Mostrar el nuevo componente */}
+        {tab === 2 && <LogViewer />}
       </Box>
     </Container>
   );
