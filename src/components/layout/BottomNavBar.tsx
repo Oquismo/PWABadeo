@@ -10,7 +10,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function BottomNavBar() {
@@ -22,39 +22,8 @@ export default function BottomNavBar() {
     setIsClient(true);
   }, []);
 
-  // --- SOLUCIÓN: Construimos la lista de acciones de forma dinámica ---
-  const navActions = useMemo(() => {
-    const baseActions = [
-      { value: "/", icon: <HomeIcon /> },
-      { value: "/mapa", icon: <MapIcon /> },
-    ];
-
-    const userActions = [
-      { value: "/checklist", icon: <ChecklistIcon /> },
-      { value: "/telefonos", icon: <PhoneInTalkIcon /> },
-    ];
-
-    const adminActions = [
-      { value: "/admin", icon: <AdminPanelSettingsIcon /> },
-    ];
-
-    const authAction = isAuthenticated
-      ? { value: "/perfil", icon: <AccountCircleIcon /> }
-      : { value: "/login", icon: <LoginIcon /> };
-
-    // Si no estamos en el cliente, mostramos una versión mínima
-    if (!isClient) {
-      return [...baseActions, authAction];
-    }
-
-    // Si estamos en el cliente, mostramos la versión completa según el rol
-    return [...baseActions, ...(user?.role === 'admin' ? adminActions : userActions), authAction];
-  }, [isClient, user, isAuthenticated]);
-
-
   if (!isClient) {
-    // Renderizamos un placeholder o nada en el servidor para evitar errores de hidratación
-    return null;
+    return null; // Evita errores de hidratación
   }
 
   return (
@@ -79,30 +48,40 @@ export default function BottomNavBar() {
         sx={{ 
           backgroundColor: 'transparent',
           padding: '0 8px',
+          // --- SOLUCIÓN AQUÍ ---
           '& .MuiBottomNavigationAction-root': {
             color: 'text.secondary',
             minWidth: '48px',
+            padding: '8px 0', // 1. Añadimos un padding consistente para todos los botones
+            borderRadius: '9999px',
           },
           '& .Mui-selected': {
             '& .MuiSvgIcon-root': {
               color: 'primary.main',
             },
             background: 'rgba(190, 242, 100, 0.15)',
-            borderRadius: '9999px',
-            margin: '6px 0',
+            // 2. Eliminamos el margen que causaba el encogimiento
           },
         }}
       >
-        {navActions.map((action) => (
-          <BottomNavigationAction 
-            key={action.value}
-            component={Link} 
-            href={action.value} 
-            value={action.value} 
-            icon={action.icon} 
-            sx={{ borderRadius: '9999px' }} 
-          />
-        ))}
+        {/* Cada botón es ahora un enlace independiente */}
+        <BottomNavigationAction component={Link} href="/" value="/" icon={<HomeIcon />} />
+        <BottomNavigationAction component={Link} href="/mapa" value="/mapa" icon={<MapIcon />} />
+
+        {user?.role === 'admin' ? (
+          <BottomNavigationAction component={Link} href="/admin" value="/admin" icon={<AdminPanelSettingsIcon />} />
+        ) : (
+          <>
+            <BottomNavigationAction component={Link} href="/checklist" value="/checklist" icon={<ChecklistIcon />} />
+            <BottomNavigationAction component={Link} href="/telefonos" value="/telefonos" icon={<PhoneInTalkIcon />} />
+          </>
+        )}
+
+        {isAuthenticated ? (
+          <BottomNavigationAction component={Link} href="/perfil" value="/perfil" icon={<AccountCircleIcon />} />
+        ) : (
+          <BottomNavigationAction component={Link} href="/login" value="/login" icon={<LoginIcon />} />
+        )}
       </BottomNavigation>
     </Paper>
   );
