@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
@@ -17,12 +17,37 @@ import TaskManager from '@/components/admin/TaskManager';
 export default function PerfilPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+  const [profileImage, setProfileImage] = useState<string>('');
+  
+  // Emoji de huevo por defecto (como el antiguo Twitter)
+  const defaultEggAvatar = '🥚';
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
     }
   }, [isAuthenticated, router]);
+
+  // Cargar imagen de perfil al inicializar
+  useEffect(() => {
+    const savedProfileImage = localStorage.getItem('userProfileImage');
+    if (savedProfileImage) {
+      setProfileImage(savedProfileImage);
+    }
+  }, []);
+
+  // Escuchar cambios en la imagen de perfil
+  useEffect(() => {
+    const handleProfileImageChange = () => {
+      const savedProfileImage = localStorage.getItem('userProfileImage');
+      setProfileImage(savedProfileImage || '');
+    };
+
+    window.addEventListener('profileImageChanged', handleProfileImageChange);
+    return () => {
+      window.removeEventListener('profileImageChanged', handleProfileImageChange);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -51,9 +76,17 @@ export default function PerfilPage() {
         
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Avatar 
-            src={user.avatarUrl}
-            sx={{ width: 100, height: 100, mb: 2 }}
-          />
+            src={profileImage}
+            sx={{ 
+              width: 100, 
+              height: 100, 
+              mb: 2,
+              fontSize: profileImage && !profileImage.startsWith('data:') ? '3rem' : 'inherit',
+              bgcolor: 'primary.light'
+            }}
+          >
+            {!profileImage ? defaultEggAvatar : profileImage.startsWith('data:') ? null : profileImage}
+          </Avatar>
           <Typography component="h1" variant="h4" fontWeight="bold">
             {user.name}
           </Typography>

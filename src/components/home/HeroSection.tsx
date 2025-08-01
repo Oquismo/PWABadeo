@@ -2,12 +2,44 @@
 
 import { Box, Typography, Avatar, Stack, IconButton } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar el icono de Ajustes
 
 export default function HeroSection() {
   const { isAuthenticated, user } = useAuth();
+  const [profileImage, setProfileImage] = useState<string>('');
+  
+  // Emoji de huevo por defecto (como el antiguo Twitter)
+  const defaultEggAvatar = '🥚';
+
+  // Cargar imagen de perfil al inicializar
+  useEffect(() => {
+    const savedProfileImage = localStorage.getItem('userProfileImage');
+    if (savedProfileImage) {
+      setProfileImage(savedProfileImage);
+    }
+  }, []);
+
+  // Escuchar cambios en localStorage para actualizar la imagen en tiempo real
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedProfileImage = localStorage.getItem('userProfileImage');
+      setProfileImage(savedProfileImage || '');
+    };
+
+    // Escuchar cambios en localStorage desde otras pestañas/ventanas
+    window.addEventListener('storage', handleStorageChange);
+    
+    // También escuchar un evento personalizado para cambios en la misma pestaña
+    window.addEventListener('profileImageChanged', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('profileImageChanged', handleStorageChange);
+    };
+  }, []);
 
   return (
     <Box 
@@ -20,14 +52,19 @@ export default function HeroSection() {
         <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1 }}>
           <Link href={isAuthenticated ? "/perfil" : "/login"} passHref>
             <Avatar 
-              src={isAuthenticated && user ? user.avatarUrl : undefined}
+              src={isAuthenticated ? profileImage : undefined}
               sx={{ 
                 width: 48, 
                 height: 48, 
                 cursor: 'pointer',
-                bgcolor: !isAuthenticated ? 'primary.main' : undefined 
+                fontSize: profileImage && !profileImage.startsWith('data:') ? '1.5rem' : 'inherit',
+                bgcolor: !isAuthenticated ? 'primary.main' : 'primary.light'
               }}
-            />
+            >
+              {isAuthenticated && !profileImage ? defaultEggAvatar : 
+               isAuthenticated && profileImage && !profileImage.startsWith('data:') ? profileImage : 
+               !isAuthenticated ? undefined : null}
+            </Avatar>
           </Link>
 
           <Box>
