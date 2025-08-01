@@ -3,9 +3,12 @@
 import { Typography, Card, CardContent, Box, LinearProgress, Avatar, AvatarGroup, IconButton } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { carouselTasks, carouselConfig } from '@/data/tasks';
+import { carouselConfig } from '@/data/tasks';
+import { useTasks } from '@/context/TasksContext';
 
 export default function ProjectsDashboard() {
+  const { tasks } = useTasks();
+  
   return (
     <Box sx={{ py: 4 }}>
       <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, px: 2, color: 'text.primary' }}>
@@ -30,7 +33,7 @@ export default function ProjectsDashboard() {
           '-ms-overflow-style': 'none',
           'scrollbar-width': 'none'
         }}>
-          {carouselTasks.map((task, index) => (
+          {tasks.map((task, index) => (
             <Card 
               key={index}
               sx={{ 

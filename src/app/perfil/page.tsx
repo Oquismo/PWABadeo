@@ -3,13 +3,16 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack } from '@mui/material';
+import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
 import EmailIcon from '@mui/icons-material/Email';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Link from 'next/link';
+import TaskManager from '@/components/admin/TaskManager';
 
 export default function PerfilPage() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -76,6 +79,23 @@ export default function PerfilPage() {
               </ListItem>
             </List>
           </Paper>
+
+          {/* Gestión de tareas personales */}
+          <Accordion sx={{ width: '100%', mt: 3 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AssignmentIcon />
+                <Typography variant="h6">Mis Tareas Personalizadas</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Gestiona las tareas que aparecen en tu dashboard principal. 
+                Puedes agregar, editar o eliminar tareas según tus necesidades.
+              </Typography>
+              <TaskManager />
+            </AccordionDetails>
+          </Accordion>
 
           {/* Se ha eliminado el panel de administrador de esta vista */}
 

@@ -1,5 +1,6 @@
 // Datos de las tarjetas del carrusel de tareas
 export interface TaskData {
+  id?: string;
   title: string;
   description: string;
   progress: number;

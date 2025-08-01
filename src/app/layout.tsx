@@ -4,6 +4,7 @@ import './globals.css'; // 1. Importar el archivo de estilos globales
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { AuthProvider } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
+import { TasksProvider } from '@/context/TasksContext';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import BottomNavBar from '@/components/layout/BottomNavBar';
@@ -34,18 +35,20 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <AuthProvider> 
             <CustomThemeProvider>
-              <CssBaseline />
-              <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-                
-                <Box component="main" sx={{ pb: '90px' }}>
-                  <PageTransition>
-                    {children}
-                  </PageTransition>
+              <TasksProvider>
+                <CssBaseline />
+                <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+                  
+                  <Box component="main" sx={{ pb: '90px' }}>
+                    <PageTransition>
+                      {children}
+                    </PageTransition>
+                  </Box>
+
+                  <BottomNavBar />
+
                 </Box>
-
-                <BottomNavBar />
-
-              </Box>
+              </TasksProvider>
             </CustomThemeProvider>
           </AuthProvider>
         </AppRouterCacheProvider>
