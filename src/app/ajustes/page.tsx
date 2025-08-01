@@ -1,13 +1,29 @@
 'use client';
 
-import { Container, Typography, Box, Paper, Stack, Switch } from '@mui/material';
+import { Container, Typography, Box, Paper, Stack, Switch, CircularProgress } from '@mui/material';
 import { useThemeContext } from '@/context/ThemeContext';
-import Brightness4Icon from '@mui/icons-material/Brightness4'; // Icono para modo oscuro
-import Brightness7Icon from '@mui/icons-material/Brightness7'; // Icono para modo claro
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 export default function AjustesPage() {
-  // Usamos nuestro hook para obtener el modo actual y la función para cambiarlo
-  const { mode, toggleTheme } = useThemeContext();
+  // Usamos una variable temporal para el contexto para poder verificarlo
+  const themeContext = useThemeContext();
+
+  // --- SOLUCIÓN: Verificación de seguridad ---
+  // Si el contexto aún no está disponible, mostramos un indicador de carga.
+  // Esto previene el error de renderizado.
+  if (!themeContext) {
+    return (
+      <Container>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
+
+  // Si el contexto ya está cargado, extraemos los valores
+  const { mode, setTheme } = themeContext;
 
   return (
     <Container>
@@ -25,7 +41,7 @@ export default function AjustesPage() {
               <Brightness7Icon sx={{ color: mode === 'light' ? 'primary.main' : 'text.disabled' }} />
               <Switch
                 checked={mode === 'dark'}
-                onChange={toggleTheme}
+                onChange={() => setTheme(mode === 'light' ? 'dark' : 'light')}
                 color="primary"
               />
               <Brightness4Icon sx={{ color: mode === 'dark' ? 'primary.main' : 'text.disabled' }} />

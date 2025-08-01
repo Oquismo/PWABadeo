@@ -1,112 +1,82 @@
 'use client';
 
-import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
-import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
+import React, { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react';
+import { ThemeProvider as MuiThemeProvider, createTheme, useMediaQuery, Dialog, DialogTitle, DialogContent, Stack, Button } from '@mui/material';
+import { darkTheme, lightTheme } from '@/theme/theme'; // Asumimos que theme.ts sigue existiendo
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 
-// --- DEFINICIÓN DEL TEMA OSCURO ---
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: { main: '#BEF264' },
-    secondary: { main: '#D946EF' },
-    background: { default: '#18181B', paper: 'rgba(39, 39, 42, 0.7)' },
-    text: { primary: '#FFFFFF', secondary: '#A1A1AA' },
-  },
-  typography: { fontFamily: [ 'Inter', 'sans-serif' ].join(',') },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: 'none',
-        }
-      }
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          backgroundColor: 'rgba(39, 39, 42, 0.7)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: 'none',
-          borderRadius: '16px',
-        }
-      }
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: { borderRadius: '9999px', textTransform: 'none', fontWeight: 'bold' },
-      },
-    },
-  },
-});
+type ThemePreference = 'light' | 'dark' | 'system';
 
-// --- DEFINICIÓN DEL TEMA CLARO ---
-const lightTheme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: { main: '#3B82F6' },
-    background: { default: '#F4F6F8', paper: '#FFFFFF' },
-    text: { primary: '#111827', secondary: '#6B7280' },
-  },
-  typography: { fontFamily: [ 'Inter', 'sans-serif' ].join(',') },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid #E5E7EB',
-          boxShadow: 'none',
-        }
-      }
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#FFFFFF',
-          border: '1px solid #E5E7EB',
-          boxShadow: 'none',
-          borderRadius: '16px',
-        }
-      }
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: { borderRadius: '9999px', textTransform: 'none', fontWeight: 'bold' },
-      },
-    },
-  },
-});
-
-
-// --- LÓGICA DEL PROVEEDOR Y DEL CONTEXTO ---
 interface ThemeContextType {
-  toggleTheme: () => void;
+  setTheme: (theme: ThemePreference) => void;
   mode: 'light' | 'dark';
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function CustomThemeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<'light' | 'dark'>('dark');
+  const [themePreference, setThemePreference] = useState<ThemePreference>('system');
+  const [open, setOpen] = useState(false);
 
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+  // Detecta la preferencia del sistema operativo
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  
+  // Determina el modo actual (light o dark) basándose en la preferencia y el sistema
+  const mode = useMemo(() => {
+    if (themePreference === 'system') {
+      return prefersDarkMode ? 'dark' : 'light';
+    }
+    return themePreference;
+  }, [themePreference, prefersDarkMode]);
+
+  // Al cargar, comprueba si ya se ha hecho una elección
+  useEffect(() => {
+    const savedPreference = localStorage.getItem('themePreference') as ThemePreference | null;
+    if (savedPreference) {
+      setThemePreference(savedPreference);
+    } else {
+      // Si es la primera vez, abrimos el pop-up
+      setOpen(true);
+    }
+  }, []);
+
+  const setTheme = (preference: ThemePreference) => {
+    localStorage.setItem('themePreference', preference);
+    setThemePreference(preference);
+    setOpen(false); // Cierra el pop-up al hacer una elección
   };
 
   const theme = useMemo(() => (mode === 'light' ? lightTheme : darkTheme), [mode]);
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme }}>
+    <ThemeContext.Provider value={{ mode, setTheme }}>
       <MuiThemeProvider theme={theme}>
         {children}
+        {/* El Pop-up (Dialog) para elegir el tema */}
+        <Dialog open={open} onClose={() => setTheme('system')}>
+          <DialogTitle fontWeight="bold">Elige tu apariencia</DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Button variant="outlined" startIcon={<Brightness7Icon />} onClick={() => setTheme('light')}>
+                Modo Claro
+              </Button>
+              <Button variant="outlined" startIcon={<Brightness4Icon />} onClick={() => setTheme('dark')}>
+                Modo Oscuro
+              </Button>
+              <Button variant="outlined" startIcon={<SettingsBrightnessIcon />} onClick={() => setTheme('system')}>
+                Usar configuración del sistema
+              </Button>
+            </Stack>
+          </DialogContent>
+        </Dialog>
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 }
 
+// Hook personalizado para usar el contexto
 export function useThemeContext() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
