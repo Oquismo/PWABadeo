@@ -1,14 +1,12 @@
 {
   "name": "Barrio de Oportunidades",
-  "short_name": "B. Oportunidades",
+  "short_name": "Badeo PWA",
   "start_url": "/",
   "display": "standalone",
   "description": "App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.",
   "lang": "es-ES",
-  "dir": "auto",
-  "theme_color": "#BEF264",
+  "theme_color": "#18181B",
   "background_color": "#18181B",
-  "orientation": "any",
   "icons": [
     {
       "src": "/public/icons/icon_192x192.png",
