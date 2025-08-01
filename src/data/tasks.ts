@@ -11,64 +11,64 @@ export interface TaskData {
 
 export const carouselTasks: TaskData[] = [
   {
-    title: 'Programa Erasmus+',
-    description: 'Gestión de nuevos participantes europeos',
+    title: 'Erasmus+',
+    description: 'Nuevos participantes europeos',
     progress: 85,
     color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     avatars: ['E', 'U', 'M', '+15'],
     date: 'Ago 20'
   },
   {
-    title: 'Formación Lingüística',
-    description: 'Cursos de español para estudiantes internacionales',
+    title: 'Formación',
+    description: 'Cursos de español e inmersión',
     progress: 72,
     color: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
     avatars: ['ES', 'EN', 'IT', '+8'],
     date: 'Sep 01'
   },
   {
-    title: 'Alojamiento Sevilla',
-    description: 'Coordinación de pisos para movilidad',
+    title: 'Alojamiento',
+    description: 'Coordinación de pisos Sevilla',
     progress: 65,
     color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     avatars: ['H', 'L', '+12'],
     date: 'Ago 25'
   },
   {
-    title: 'Prácticas Formativas',
-    description: 'Tirocini en empresas colaboradoras',
+    title: 'Prácticas',
+    description: 'Tirocini en empresas locales',
     progress: 78,
     color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
     avatars: ['T', 'P', 'E', '+20'],
     date: 'Sep 10'
   },
   {
-    title: 'Visitas Culturales',
-    description: 'Tours por monumentos y museos de Sevilla',
+    title: 'Cultura',
+    description: 'Tours monumentos y museos',
     progress: 90,
     color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
     avatars: ['C', 'G', '+25'],
-    date: 'Cada Vie'
+    date: 'Viernes'
   },
   {
-    title: 'Coordinación PCTO',
-    description: 'Programas de competencias transversales',
+    title: 'PCTO',
+    description: 'Competencias transversales',
     progress: 55,
     color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
     avatars: ['PC', 'TO', '+10'],
     date: 'Sep 15'
   },
   {
-    title: 'Partnerships EU',
-    description: 'Nuevas colaboraciones con instituciones',
+    title: 'Partnerships',
+    description: 'Nuevas instituciones EU',
     progress: 45,
     color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     avatars: ['EU', 'IT', 'DE', '+6'],
     date: 'Oct 01'
   },
   {
-    title: 'Evaluación Perfiles',
-    description: 'Valoración de candidatos para programas',
+    title: 'Evaluación',
+    description: 'Valoración de candidatos',
     progress: 88,
     color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
     avatars: ['V', 'A', '+4'],
@@ -78,7 +78,7 @@ export const carouselTasks: TaskData[] = [
 
 // Configuración adicional del carrusel
 export const carouselConfig = {
-  title: 'Programas de Movilidad Internacional',
+  title: 'Proyectos Activos',
   cardWidth: '280px',
   cardHeight: '200px',
   gap: 2,
