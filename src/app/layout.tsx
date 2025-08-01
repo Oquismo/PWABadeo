@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import './globals.css'; // 1. Importar el archivo de estilos globales
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { AuthProvider } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import BottomNavBar from '@/components/layout/BottomNavBar';
+import PageTransition from '@/components/layout/PageTransition';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,12 +28,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Badeo PWA" />
-        {/* --- SOLUCIÓN PARA EVITAR LA RECARGA POR GESTO --- */}
-        <style>{`
-          body {
-            overscroll-behavior-y: contain;
-          }
-        `}</style>
+        {/* 2. Hemos eliminado el bloque <style> de aquí */}
       </head>
       <body>
         <AppRouterCacheProvider>
@@ -41,7 +38,9 @@ export default function RootLayout({
               <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
                 
                 <Box component="main" sx={{ pb: '90px' }}>
-                  {children}
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
                 </Box>
 
                 <BottomNavBar />

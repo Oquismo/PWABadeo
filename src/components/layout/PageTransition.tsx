@@ -2,21 +2,31 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 
 export default function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // --- SOLUCIÓN DEFINITIVA ---
+  // Si el componente aún no se ha "montado" en el navegador,
+  // devolvemos el contenido sin animación para que coincida con el renderizado del servidor.
+  if (!isMounted) {
+    return <>{children}</>;
+  }
 
   return (
-    // AnimatePresence es clave: permite que los componentes tengan una animación de "salida"
     <AnimatePresence mode="wait">
-      {/* Usamos el pathname como 'key' para que AnimatePresence sepa que el componente ha cambiado */}
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 15 }} // Estado inicial: invisible y ligeramente desplazado
-        animate={{ opacity: 1, y: 0 }} // Estado final: visible y en su posición original
-        exit={{ opacity: 0, y: -15 }} // Estado de salida: se desvanece y se desplaza
-        transition={{ duration: 0.3 }} // Duración de la animación
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 20 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         {children}
       </motion.div>
