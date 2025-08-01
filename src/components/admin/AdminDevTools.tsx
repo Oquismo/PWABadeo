@@ -44,7 +44,7 @@ import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminDevTools() {
-  const { tasks, resetToDefault } = useTasks();
+  const { tasks, resetToDefault, addTask } = useTasks();
   const { user } = useAuth();
   const [debugMode, setDebugMode] = useState(false);
   const [showStorage, setShowStorage] = useState(false);
@@ -53,7 +53,7 @@ export default function AdminDevTools() {
 
   // Función para generar datos de prueba
   const generateTestData = () => {
-    const testTasks = Array.from({ length: 10 }, (_, i) => ({
+    const testTasks = Array.from({ length: 5 }, (_, i) => ({
       title: `Tarea de Prueba ${i + 1}`,
       description: `Descripción generada automáticamente para testing ${i + 1}`,
       progress: Math.floor(Math.random() * 100),
@@ -62,8 +62,9 @@ export default function AdminDevTools() {
       date: new Date().toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })
     }));
 
-    localStorage.setItem('testTasks', JSON.stringify(testTasks));
-    setTestAlert('✅ 10 tareas de prueba generadas y guardadas');
+    // Usar el contexto para agregar las tareas
+    testTasks.forEach(task => addTask(task));
+    setTestAlert(`✅ ${testTasks.length} tareas de prueba generadas y guardadas`);
     setTimeout(() => setTestAlert(''), 3000);
   };
 
