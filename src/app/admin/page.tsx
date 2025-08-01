@@ -9,6 +9,7 @@ import EventManagement from '@/components/admin/EventManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import LogViewer from '@/components/admin/LogViewer';
 import AnnouncementManager from '@/components/admin/AnnouncementManager'; // 1. Asegurarse de que está importado
+import AdminDevTools from '@/components/admin/AdminDevTools';
 
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuth();
@@ -41,11 +42,12 @@ export default function AdminPage() {
 
         {/* 2. Pestañas de navegación del panel */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', my: 3 }}>
-          <Tabs value={tab} onChange={handleChange} centered>
+          <Tabs value={tab} onChange={handleChange} centered variant="scrollable" scrollButtons="auto">
             <Tab label="Eventos" />
             <Tab label="Usuarios" />
             <Tab label="Logs" />
             <Tab label="Anuncios" />
+            <Tab label="Dev Tools" />
           </Tabs>
         </Box>
 
@@ -54,6 +56,7 @@ export default function AdminPage() {
         {tab === 1 && <UserManagement />}
         {tab === 2 && <LogViewer />}
         {tab === 3 && <AnnouncementManager />}
+        {tab === 4 && <AdminDevTools />}
       </Box>
     </Container>
   );

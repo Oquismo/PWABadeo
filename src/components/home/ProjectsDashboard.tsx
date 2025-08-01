@@ -1,19 +1,65 @@
 'use client';
 
-import { Typography, Card, CardContent, Box, LinearProgress, Avatar, AvatarGroup, IconButton } from '@mui/material';
+import { Typography, Card, CardContent, Box, LinearProgress, Avatar, AvatarGroup, IconButton, Fab, Tooltip } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import { carouselConfig } from '@/data/tasks';
 import { useTasks } from '@/context/TasksContext';
+import { useAuth } from '@/context/AuthContext';
+import { useState } from 'react';
+import DebugMetrics from '@/components/admin/DebugMetrics';
 
 export default function ProjectsDashboard() {
   const { tasks } = useTasks();
+  const { user } = useAuth();
+  const [debugInfo, setDebugInfo] = useState(false);
+  
+  // Función de debug para administradores
+  const showDebugInfo = () => {
+    console.group('🔧 DEBUG INFO - ProjectsDashboard');
+    console.log('📊 Total de tareas:', tasks.length);
+    console.log('👤 Usuario actual:', user?.name, `(${user?.role})`);
+    console.log('🎨 Configuración del carrusel:', carouselConfig);
+    console.log('📋 Datos de tareas:', tasks);
+    console.log('🏪 LocalStorage keys:', Object.keys(localStorage));
+    console.log('⏰ Timestamp:', new Date().toISOString());
+    console.groupEnd();
+    
+    setDebugInfo(!debugInfo);
+  };
   
   return (
-    <Box sx={{ py: 4 }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, px: 2, color: 'text.primary' }}>
-        {carouselConfig.title}
-      </Typography>
+    <Box sx={{ py: 4, position: 'relative' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, px: 2 }}>
+        <Typography variant="h5" fontWeight="bold" sx={{ color: 'text.primary' }}>
+          {carouselConfig.title}
+        </Typography>
+        
+        {/* Herramientas de debug solo para admin */}
+        {user?.role === 'admin' && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="caption" sx={{ 
+              color: debugInfo ? 'error.main' : 'text.secondary',
+              fontSize: '0.7rem'
+            }}>
+              {tasks.length} tareas • Admin Mode
+            </Typography>
+            <Tooltip title="Debug Info (Solo Admin)">
+              <IconButton 
+                size="small" 
+                onClick={showDebugInfo}
+                sx={{ 
+                  color: debugInfo ? 'error.main' : 'text.secondary',
+                  backgroundColor: debugInfo ? 'error.50' : 'transparent'
+                }}
+              >
+                <BugReportIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
+      </Box>
       
       {/* Carrusel horizontal */}
       <Box sx={{ 
@@ -35,7 +81,7 @@ export default function ProjectsDashboard() {
         }}>
           {tasks.map((task, index) => (
             <Card 
-              key={index}
+              key={task.id || index}
               sx={{ 
                 background: task.color,
                 color: 'white', 
@@ -49,6 +95,7 @@ export default function ProjectsDashboard() {
                 flexShrink: 0,
                 cursor: 'pointer',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                border: user?.role === 'admin' && debugInfo ? '2px solid #ff5722' : 'none',
                 '&:hover': {
                   transform: 'translateY(-2px)',
                   boxShadow: '0 12px 48px rgba(0,0,0,0.25)'
@@ -64,8 +111,30 @@ export default function ProjectsDashboard() {
                   borderRadius: 'inherit'
                 }
               }}
+              onClick={() => {
+                if (user?.role === 'admin' && debugInfo) {
+                  console.log('🎯 Card clickeada:', task);
+                }
+              }}
             >
               <CardContent sx={{ height: '100%', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column' }}>
+                {/* Indicador de debug para admin */}
+                {user?.role === 'admin' && debugInfo && (
+                  <Box sx={{ 
+                    position: 'absolute', 
+                    top: 0, 
+                    right: 0, 
+                    backgroundColor: 'error.main', 
+                    color: 'white', 
+                    px: 1, 
+                    py: 0.5, 
+                    fontSize: '0.6rem',
+                    borderRadius: '0 0 0 8px'
+                  }}>
+                    ID: {task.id?.slice(-4) || 'N/A'}
+                  </Box>
+                )}
+                
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                   <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.1rem' }}>
                     {task.title}
@@ -135,6 +204,9 @@ export default function ProjectsDashboard() {
           ))}
         </Box>
       </Box>
+      
+      {/* Métricas de debug para admin */}
+      <DebugMetrics show={debugInfo && user?.role === 'admin'} />
     </Box>
   );
 }
