@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { TaskData, carouselTasks as defaultTasks } from '@/data/tasks';
+import { barrioDeTasks } from '@/data/barrioTasks';
 
 interface TasksContextType {
   tasks: TaskData[];
@@ -9,6 +10,8 @@ interface TasksContextType {
   updateTask: (id: string, task: Partial<TaskData>) => void;
   deleteTask: (id: string) => void;
   resetToDefault: () => void;
+  loadBarrioTasks: () => void;
+  loadMixedTasks: () => void;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -16,8 +19,8 @@ const TasksContext = createContext<TasksContextType | undefined>(undefined);
 // Generar ID único
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
-// Agregar ID a las tareas por defecto
-const defaultTasksWithId = defaultTasks.map(task => ({
+// Agregar ID a las tareas por defecto (usar las del barrio como predeterminadas)
+const defaultTasksWithId = [...defaultTasks.slice(0, 3), ...barrioDeTasks.slice(0, 5)].map(task => ({
   ...task,
   id: generateId()
 }));
@@ -75,6 +78,26 @@ export function TasksProvider({ children }: TasksProviderProps) {
     setTasks(resetTasks);
   };
 
+  const loadBarrioTasks = () => {
+    const tasksWithId = barrioDeTasks.map(task => ({
+      ...task,
+      id: generateId()
+    }));
+    setTasks(tasksWithId);
+  };
+
+  const loadMixedTasks = () => {
+    // Combinar algunas tareas originales con las del barrio
+    const mixed = [
+      ...defaultTasks.slice(0, 3),
+      ...barrioDeTasks.slice(0, 5)
+    ].map(task => ({
+      ...task,
+      id: generateId()
+    }));
+    setTasks(mixed);
+  };
+
   return (
     <TasksContext.Provider
       value={{
@@ -82,7 +105,9 @@ export function TasksProvider({ children }: TasksProviderProps) {
         addTask,
         updateTask,
         deleteTask,
-        resetToDefault
+        resetToDefault,
+        loadBarrioTasks,
+        loadMixedTasks
       }}
     >
       {children}

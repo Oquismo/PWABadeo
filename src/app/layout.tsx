@@ -9,6 +9,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import BottomNavBar from '@/components/layout/BottomNavBar';
 import PageTransition from '@/components/layout/PageTransition';
+import DebugInitializer from '@/components/debug/DebugInitializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
             <CustomThemeProvider>
               <TasksProvider>
                 <CssBaseline />
+                <DebugInitializer />
                 <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
                   
                   <Box component="main" sx={{ pb: '90px' }}>

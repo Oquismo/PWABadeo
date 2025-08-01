@@ -54,9 +54,10 @@ import {
 } from '@mui/icons-material';
 import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
+import AdvancedDebugMetrics from './AdvancedDebugMetrics';
 
 export default function AdminDevTools() {
-  const { tasks, resetToDefault, addTask } = useTasks();
+  const { tasks, resetToDefault, addTask, loadBarrioTasks, loadMixedTasks } = useTasks();
   const { user } = useAuth();
   const [debugMode, setDebugMode] = useState(false);
   const [showStorage, setShowStorage] = useState(false);
@@ -375,7 +376,29 @@ export default function AdminDevTools() {
                 onClick={resetToDefault}
                 startIcon={<RefreshIcon />}
               >
-                Reset Tareas
+                Reset Tareas Originales
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={loadBarrioTasks}
+                startIcon={<RefreshIcon />}
+                color="secondary"
+              >
+                Cargar Tareas del Barrio
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={loadMixedTasks}
+                startIcon={<RefreshIcon />}
+                color="info"
+              >
+                Cargar Tareas Mixtas
               </Button>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -763,6 +786,9 @@ export default function AdminDevTools() {
           )}
         </AccordionDetails>
       </Accordion>
+
+      {/* Renderizar métricas avanzadas */}
+      <AdvancedDebugMetrics show={showAdvancedMetrics} />
     </Box>
   );
 }
