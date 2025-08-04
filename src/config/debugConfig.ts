@@ -58,6 +58,11 @@ export const defaultDebugConfig: DebugConfig = {
 
 // Función para obtener configuración personalizada desde localStorage
 export function getDebugConfig(): DebugConfig {
+  // Verificar si estamos en el cliente antes de acceder a localStorage
+  if (typeof window === 'undefined') {
+    return defaultDebugConfig;
+  }
+  
   try {
     const saved = localStorage.getItem('debugConfig');
     if (saved) {

@@ -3,11 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, IconButton, Tabs, Tab } from '@mui/material';
+import { Container, Box, Typography, IconButton, Tabs, Tab, CircularProgress } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EventManagement from '@/components/admin/EventManagement';
-import UserManagement from '@/components/admin/UserManagement';
-import LogViewer from '@/components/admin/LogViewer';
+import dynamic from 'next/dynamic';
+
+// Lazy loading para componentes de admin
+const EventManagement = dynamic(() => import('@/components/admin/EventManagement'), {
+  ssr: false,
+  loading: () => <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+});
+
+const UserManagement = dynamic(() => import('@/components/admin/UserManagement'), {
+  ssr: false,
+  loading: () => <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+});
+
+const LogViewer = dynamic(() => import('@/components/admin/LogViewer'), {
+  ssr: false,
+  loading: () => <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+});
 
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuth();
@@ -42,14 +56,13 @@ export default function AdminPage() {
           <Tabs value={tab} onChange={handleChange} centered>
             <Tab label="Gestionar Eventos" />
             <Tab label="Gestionar Usuarios" />
-            <Tab label="Registro de Actividad" />
+            <Tab label="Registro de Actividad" /> {/* 2. Añadir la nueva pestaña */}
           </Tabs>
         </Box>
 
-        {/* Contenido condicional basado en la pestaña seleccionada */}
         {tab === 0 && <EventManagement />}
         {tab === 1 && <UserManagement />}
-        {tab === 2 && <LogViewer />}
+        {tab === 2 && <LogViewer />} {/* 3. Mostrar el nuevo componente */}
       </Box>
     </Container>
   );

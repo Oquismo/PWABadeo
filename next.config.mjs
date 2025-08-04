@@ -11,6 +11,7 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  swcMinify: true, // Usar SWC para minificación más rápida
   images: {
     remotePatterns: [
       {
@@ -23,10 +24,13 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'raw.githubusercontent.com', // ¡NUEVO: Para los iconos de colores!
+        hostname: 'raw.githubusercontent.com',
       },
-      // Puedes añadir más dominios si los usas para otras imágenes
     ],
+    formats: ['image/webp', 'image/avif'], // Formatos modernos para mejores imágenes
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production', // Remover console.log en producción
   },
 };
 

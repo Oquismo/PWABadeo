@@ -8,7 +8,12 @@ import { carouselConfig } from '@/data/tasks';
 import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
-import DebugMetrics from '@/components/admin/DebugMetrics';
+import dynamic from 'next/dynamic';
+
+// Lazy loading para el componente de debug pesado
+const DebugMetrics = dynamic(() => import('@/components/admin/DebugMetrics'), {
+  ssr: false
+});
 
 export default function ProjectsDashboard() {
   const { tasks } = useTasks();

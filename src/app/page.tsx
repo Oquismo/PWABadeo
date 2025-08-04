@@ -3,12 +3,21 @@
 import { useState, useEffect } from 'react';
 import { Container, Fab, Fade, Box } from "@mui/material";
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import dynamic from 'next/dynamic';
 
-// Importamos los componentes de sección actualizados
+// Importamos los componentes críticos de forma normal
 import HeroSection from "@/components/home/HeroSection";
-// import FilterChips from "@/components/home/FilterChips"; // 1. Ya no necesitamos los filtros
-import ProjectsDashboard from "@/components/home/ProjectsDashboard";
-import CalendarSection from '@/components/home/CalendarSection/CalendarSection';
+
+// Lazy loading para componentes menos críticos
+const ProjectsDashboard = dynamic(() => import("@/components/home/ProjectsDashboard"), {
+  ssr: false,
+  loading: () => <Box sx={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Cargando proyectos...</Box>
+});
+
+const CalendarSection = dynamic(() => import('@/components/home/CalendarSection/CalendarSection'), {
+  ssr: false,
+  loading: () => <Box sx={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Cargando calendario...</Box>
+});
 
 export default function Home() {
   const [fadeIn, setFadeIn] = useState(false);
