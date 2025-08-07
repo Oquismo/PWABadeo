@@ -18,9 +18,11 @@ const nextConfig = {
   },
   // Configuración para App Router
   output: 'standalone',
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Configuración específica para Prisma en builds
-    config.externals = [...config.externals, '@prisma/client', '_http_common'];
+    if (isServer) {
+      config.externals.push('@prisma/client');
+    }
     return config;
   },
   images: {
