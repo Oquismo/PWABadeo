@@ -20,4 +20,9 @@ model User {
   password  String
   role      String   @default("user")
   createdAt DateTime @default(now())
+  school    String?  // Escuela del usuario
+  age       Int?     // Edad del usuario
+  arrivalDate String? // Fecha de llegada
+  departureDate String? // Fecha de salida
+  avatarUrl String?  // URL del avatar
 }

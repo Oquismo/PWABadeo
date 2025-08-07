@@ -137,7 +137,25 @@ export default function PerfilPage() {
             </AccordionDetails>
           </Accordion>
 
-          {/* Se ha eliminado el panel de administrador de esta vista */}
+          {/* Panel de administración solo visible para admin */}
+          {user.role === 'admin' && (
+            <Accordion sx={{ width: '100%', mt: 3 }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <SettingsIcon />
+                  <Typography variant="h6" color="secondary">Panel de Administración</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Accede a las herramientas de gestión de usuarios y tareas administrativas.
+                </Typography>
+                {/* Aquí puedes agregar componentes de admin, por ejemplo: */}
+                {/* <UserManagement /> */}
+                <TaskManager />
+              </AccordionDetails>
+            </Accordion>
+          )}
 
           <Button
             onClick={handleLogout}
