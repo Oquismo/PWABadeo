@@ -14,10 +14,15 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client']
+    serverComponentsExternalPackages: ['@prisma/client', 'bcrypt']
   },
   // Configuración para App Router
   output: 'standalone',
+  webpack: (config) => {
+    // Configuración específica para Prisma en builds
+    config.externals = [...config.externals, '@prisma/client', '_http_common'];
+    return config;
+  },
   images: {
     remotePatterns: [
       {
