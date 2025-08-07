@@ -39,8 +39,6 @@ export default function RootLayout({
           <AuthProvider> 
             <CustomThemeProvider>
               <TasksProvider>
-                {/* Banner global de anuncios */}
-                <AnnouncementBanner />
                 <CssBaseline />
                 <DebugInitializer />
                 <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
