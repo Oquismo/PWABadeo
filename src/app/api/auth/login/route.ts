@@ -12,12 +12,19 @@ export async function POST(request: Request) {
     }
 
     // Importación dinámica para evitar ejecución durante build
-    const { PrismaClient } = await import('@prisma/client');
-    const bcrypt = await import('bcrypt');
+    const [{ PrismaClient }, bcrypt] = await Promise.all([
+      import('@prisma/client'),
+      import('bcrypt')
+    ]);
     
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient({
+      log: ['error'],
+    });
     
     try {
+      // Verificar conexión a base de datos
+      await prisma.$connect();
+      
       const user = await prisma.user.findUnique({
         where: { email },
         select: {
@@ -65,7 +72,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error en login:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { 
+        error: 'Error interno del servidor',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
