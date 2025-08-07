@@ -12,9 +12,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true, // Usar SWC para minificación más rápida
+  swcMinify: true,
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client']
+  },
+  // Configuración específica para evitar el error de build
+  async generateBuildId() {
+    return 'build-' + Date.now()
+  },
+  // Excluir rutas API del análisis estático
+  async exportPathMap(defaultPathMap) {
+    const pathMap = {}
+    for (const [path, page] of Object.entries(defaultPathMap)) {
+      if (!path.startsWith('/api/')) {
+        pathMap[path] = page
+      }
+    }
+    return pathMap
   },
   images: {
     remotePatterns: [
