@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack, Accordion, AccordionSummary, AccordionDetails, Modal, Slide, Backdrop } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationsPanel from '@/components/home/NotificationsPanel';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
@@ -91,9 +90,6 @@ export default function PerfilPage() {
       </Modal>
       <Box sx={{ position: 'relative', pt: 4 }}>
         <Stack direction="row" spacing={1} sx={{ position: 'absolute', top: 24, right: 24, zIndex: 10 }}>
-          <IconButton aria-label="notificaciones" onClick={() => setModalOpen(true)} title="Ver notificaciones" size="large" sx={{ bgcolor: modalOpen ? 'primary.light' : 'background.paper', boxShadow: 2 }}>
-            <NotificationsIcon color={modalOpen ? 'primary' : 'action'} fontSize="large" />
-          </IconButton>
           <Link href="/perfil/editar" passHref>
             <IconButton aria-label="editar perfil" size="large">
               <EditIcon />
