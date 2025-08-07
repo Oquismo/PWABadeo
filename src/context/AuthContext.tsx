@@ -3,17 +3,18 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface User {
+  id: number;
   name: string;
   email: string;
-  age: number;
-  school: string;
-  avatarUrl: string;
-  arrivalDate: string;
-  departureDate: string;
   role: 'admin' | 'user';
+  age?: number | null;
+  school?: string | null;
+  avatarUrl?: string | null;
+  arrivalDate?: string | null;
+  departureDate?: string | null;
 }
 
-type UserUpdateData = Partial<Omit<User, 'email' | 'avatarUrl' | 'role'>>;
+type UserUpdateData = Partial<Omit<User, 'id' | 'email' | 'role'>>;
 
 interface AuthContextType {
   user: User | null;

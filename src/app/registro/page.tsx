@@ -63,32 +63,47 @@ export default function RegistroPage() {
     return Object.keys(tempErrors).length === 0;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (validate()) {
+    if (!validate()) return;
+    
+    setErrors({}); // Limpiar errores previos
+    
+    try {
       const payload = {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
       };
-      fetch('/api/auth/register', {
+      
+      console.log('📝 Intentando registro con:', payload.email);
+      
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      })
-        .then(async (res) => {
-          const data = await res.json();
-          if (!res.ok) {
-            setErrors({ api: data.error || 'Error en el registro' });
-            return;
-          }
-          // Aquí podrías guardar el usuario en el contexto o redirigir
-          login(data);
-          router.push('/');
-        })
-        .catch(() => {
-          setErrors({ api: 'Error de red o servidor' });
-        });
+      });
+      
+      const data = await response.json();
+      console.log('📋 Respuesta del registro:', data);
+      
+      if (!response.ok) {
+        setErrors({ api: data.error || 'Error en el registro' });
+        return;
+      }
+      
+      // Si llegamos aquí, el registro fue exitoso
+      console.log('✅ Registro exitoso, usuario:', data.user);
+      
+      // Usar el contexto de auth para guardar el usuario
+      login(data.user);
+      
+      // Redirigir a la página principal
+      router.push('/');
+      
+    } catch (error) {
+      console.error('❌ Error en registro:', error);
+      setErrors({ api: 'Error de conexión. Intenta nuevamente.' });
     }
   };
 

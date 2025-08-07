@@ -11,33 +11,61 @@ export async function POST(request: Request) {
       );
     }
 
-    // Importación dinámica para evitar ejecución durante build
+    // Verificar variable de entorno
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: 'DATABASE_URL no configurada' },
+        { status: 500 }
+      );
+    }
+
+    console.log('📝 Registro attempt for:', email);
+    
+    // Importación dinámica
     const [{ PrismaClient }, bcrypt] = await Promise.all([
-      import('@prisma/client'),
-      import('bcrypt')
+      import('@prisma/client').catch(err => {
+        console.error('Failed to import PrismaClient:', err);
+        throw new Error('Prisma import failed: ' + err.message);
+      }),
+      import('bcrypt').catch(err => {
+        console.error('Failed to import bcrypt:', err);
+        throw new Error('bcrypt import failed: ' + err.message);
+      })
     ]);
+    
+    console.log('✅ Imports successful');
     
     const prisma = new PrismaClient({
       log: ['error'],
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL
+        }
+      }
     });
     
     try {
-      // Verificar conexión a base de datos
+      console.log('🔄 Connecting to database...');
       await prisma.$connect();
+      console.log('✅ Database connected');
       
+      console.log('🔍 Checking if user exists:', email);
       const userExists = await prisma.user.findUnique({ 
         where: { email } 
       });
       
       if (userExists) {
+        console.log('❌ User already exists');
         return NextResponse.json(
           { error: 'El usuario ya existe' }, 
           { status: 409 }
         );
       }
 
+      console.log('🔐 Hashing password...');
       const hashedPassword = await bcrypt.hash(password, 10);
       
+      console.log('👤 Creating user...');
       const user = await prisma.user.create({
         data: {
           email,
@@ -58,21 +86,26 @@ export async function POST(request: Request) {
         }
       });
 
+      console.log('🎉 User created successfully:', email);
       return NextResponse.json({
         user,
         message: 'Usuario registrado exitosamente'
       });
 
     } finally {
+      console.log('🔌 Disconnecting from database...');
       await prisma.$disconnect();
     }
 
   } catch (error) {
-    console.error('Error en registro:', error);
+    console.error('❌ Detailed registration error:', error);
+    
     return NextResponse.json(
       { 
         error: 'Error interno del servidor',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        name: error instanceof Error ? error.name : 'Unknown',
+        timestamp: new Date().toISOString()
       },
       { status: 500 }
     );

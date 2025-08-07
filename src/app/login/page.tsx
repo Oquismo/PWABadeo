@@ -29,47 +29,64 @@ export default function LoginPage() {
   
   // 1. Definimos dos usuarios de ejemplo: uno admin y uno normal
   const mockAdminUser = {
+    id: 999,
     name: 'Admin User',
     email: 'admin@badeo.app',
+    role: 'admin' as 'admin',
     age: 30,
     school: 'Badeo Staff',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
     arrivalDate: '2025-01-01',
     departureDate: '2026-12-31',
-    role: 'admin' as 'admin',
   };
 
   const mockRegularUser = {
+    id: 998,
     name: 'Usuario Ejemplo',
     email: 'usuario@ejemplo.com',
+    role: 'user' as 'user',
     age: 24,
     school: 'Centro Educativo Sol',
     avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
     arrivalDate: '2025-09-01',
     departureDate: '2026-06-30',
-    role: 'user' as 'user',
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (validate()) {
-      fetch('/api/auth/login', {
+    if (!validate()) return;
+    
+    setErrors({}); // Limpiar errores previos
+    
+    try {
+      console.log('🔐 Intentando login con:', email);
+      
+      const response = await fetch('/api/auth/login-retry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      })
-        .then(async (res) => {
-          const data = await res.json();
-          if (!res.ok) {
-            setErrors({ api: data.error || 'Error al iniciar sesión' });
-            return;
-          }
-          login(data);
-          router.push('/');
-        })
-        .catch(() => {
-          setErrors({ api: 'Error de red o servidor' });
-        });
+      });
+      
+      const data = await response.json();
+      console.log('📋 Respuesta del servidor:', data);
+      
+      if (!response.ok) {
+        setErrors({ api: data.error || 'Error al iniciar sesión' });
+        return;
+      }
+      
+      // Si llegamos aquí, el login fue exitoso
+      console.log('✅ Login exitoso, usuario:', data.user);
+      
+      // Usar el contexto de auth para guardar el usuario
+      login(data.user);
+      
+      // Redirigir a la página principal
+      router.push('/');
+      
+    } catch (error) {
+      console.error('❌ Error en login:', error);
+      setErrors({ api: 'Error de conexión. Intenta nuevamente.' });
     }
   };
 
