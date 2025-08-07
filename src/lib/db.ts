@@ -13,12 +13,6 @@ export const prisma = globalForPrisma.prisma ??
         url: process.env.DATABASE_URL,
       },
     },
-    // Configuración específica para Vercel
-    __internal: {
-      engine: {
-        endpoint: process.env.PRISMA_ENGINE_ENDPOINT,
-      },
-    },
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
