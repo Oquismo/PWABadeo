@@ -6,23 +6,32 @@
 
 generator client {
   provider = "prisma-client-js"
- 
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  role      String   @default("user")
-  createdAt DateTime @default(now())
-  school    String?  // Escuela del usuario
-  age       Int?     // Edad del usuario
-  arrivalDate String? // Fecha de llegada
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  name          String?
+  password      String
+  role          String         @default("user")
+  createdAt     DateTime       @default(now())
+  school        String? // Escuela del usuario
+  age           Int? // Edad del usuario
+  arrivalDate   String? // Fecha de llegada
   departureDate String? // Fecha de salida
-  avatarUrl String?  // URL del avatar
+  avatarUrl     String? // URL del avatar
+  announcements Announcement[]
+}
+
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+  createdBy Int?
+  user      User?    @relation(fields: [createdBy], references: [id])
 }
