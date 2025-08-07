@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 
 // Importamos los componentes críticos de forma normal
 import HeroSection from "@/components/home/HeroSection";
+import NotificationsPanel from "@/components/home/NotificationsPanel";
 
 // Lazy loading para componentes menos críticos
 const ProjectsDashboard = dynamic(() => import("@/components/home/ProjectsDashboard"), {
@@ -37,7 +38,8 @@ export default function Home() {
         <Fade in={fadeIn} timeout={1000}>
           <Box sx={{ pt: 2, pb: 2 }}>
             <HeroSection />
-            {/* 2. Eliminamos los filtros y mostramos todo el contenido directamente */}
+            {/* Panel de notificaciones globales */}
+            <NotificationsPanel />
             <ProjectsDashboard />
             <CalendarSection />
           </Box>

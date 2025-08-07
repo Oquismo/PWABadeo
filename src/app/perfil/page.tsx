@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack, Accordion, AccordionSummary, AccordionDetails, Modal, Fade, Backdrop } from '@mui/material';
+import NotificationsPanel from '@/components/home/NotificationsPanel';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
 import EmailIcon from '@mui/icons-material/Email';
@@ -18,6 +19,8 @@ export default function PerfilPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string>('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const tapTimeout = useRef<NodeJS.Timeout | null>(null);
   
   // Emoji de huevo por defecto (como el antiguo Twitter)
   const defaultEggAvatar = '🥚';
@@ -62,8 +65,29 @@ export default function PerfilPage() {
     return null; 
   }
 
+  // Handler para tap largo en el avatar
+  const handleAvatarTouchStart = () => {
+    tapTimeout.current = setTimeout(() => setModalOpen(true), 500); // 500ms tap largo
+  };
+  const handleAvatarTouchEnd = () => {
+    if (tapTimeout.current) clearTimeout(tapTimeout.current);
+  };
+
   return (
     <Container component="main" maxWidth="sm">
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{ backdrop: { timeout: 300 } }}
+      >
+        <Fade in={modalOpen}>
+          <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, borderRadius: 3, p: 3, minWidth: 340, maxWidth: 500 }}>
+            <NotificationsPanel />
+          </Box>
+        </Fade>
+      </Modal>
       <Box sx={{ position: 'relative', pt: 4 }}>
         <Stack direction="row" spacing={1} sx={{ position: 'absolute', top: 0, right: 0 }}>
           <Link href="/perfil/editar" passHref>
@@ -86,8 +110,16 @@ export default function PerfilPage() {
               height: 100, 
               mb: 2,
               fontSize: profileImage && !profileImage.startsWith('data:') ? '3rem' : 'inherit',
-              bgcolor: 'primary.light'
+              bgcolor: 'primary.light',
+              cursor: 'pointer',
+              boxShadow: modalOpen ? 6 : 1,
+              transition: 'box-shadow 0.2s',
             }}
+            onTouchStart={handleAvatarTouchStart}
+            onTouchEnd={handleAvatarTouchEnd}
+            onMouseDown={handleAvatarTouchStart}
+            onMouseUp={handleAvatarTouchEnd}
+            title="Mantén presionado para ver notificaciones"
           >
             {!profileImage ? defaultEggAvatar : profileImage.startsWith('data:') ? null : profileImage}
           </Avatar>
