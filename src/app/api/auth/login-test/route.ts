@@ -28,20 +28,8 @@ export async function POST(request: Request) {
       });
     }
 
-    if (email === 'user@badeo.com' && password === 'user123') {
-      return NextResponse.json({
-        user: {
-          id: 2,
-          email: 'user@badeo.com',
-          name: 'Usuario',
-          role: 'user'
-        },
-        message: 'Login exitoso (modo test)'
-      });
-    }
-
     return NextResponse.json(
-      { error: 'Credenciales inválidas. Usa admin@badeo.com/admin123 o user@badeo.com/user123' }, 
+      { error: 'Credenciales inválidas. Solo admin puede acceder.' }, 
       { status: 401 }
     );
 

@@ -91,10 +91,10 @@ export default function LoginPage() {
   };
 
   // 2. Dos funciones de bypass separadas
-  const handleBypassUserLogin = () => {
-    login(mockRegularUser);
-    router.push('/');
-  };
+  // const handleBypassUserLogin = () => {
+  //   login(mockRegularUser);
+  //   router.push('/');
+  // };
 
   const handleBypassAdminLogin = () => {
     login(mockAdminUser);
@@ -149,15 +149,15 @@ export default function LoginPage() {
         
         {/* 3. Dos botones de bypass en un Stack */}
         <Stack spacing={2} sx={{ mt: 4, alignItems: 'center' }}>
-          <Tooltip title="Entrada rápida como Usuario Normal">
-            <Button
+          {/* <Tooltip title="Entrada rápida como Usuario Normal"> */}
+            {/* <Button
               onClick={handleBypassUserLogin}
               variant="text"
               startIcon={<EngineeringIcon />}
             >
               Bypass Usuario
-            </Button>
-          </Tooltip>
+            </Button> */}
+          {/* </Tooltip> */}
           <Tooltip title="Entrada rápida como Administrador">
             <Button
               onClick={handleBypassAdminLogin}

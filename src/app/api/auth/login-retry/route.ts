@@ -72,6 +72,14 @@ export async function POST(request: Request) {
             );
           }
 
+          // Solo permitir login si el usuario es admin
+          if (user.role !== 'admin') {
+            return NextResponse.json(
+              { error: 'Solo administradores pueden iniciar sesión.' },
+              { status: 403 }
+            );
+          }
+
           const { password: _, ...userWithoutPassword } = user;
 
           return NextResponse.json({

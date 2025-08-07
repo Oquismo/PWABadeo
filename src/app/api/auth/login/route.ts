@@ -75,6 +75,14 @@ export async function POST(request: Request) {
         );
       }
 
+      // Solo permitir login si el usuario es admin
+      if (user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Solo administradores pueden iniciar sesión.' },
+          { status: 403 }
+        );
+      }
+
       console.log('🔐 Comparing passwords...');
       const isValid = await bcrypt.compare(password, user.password);
       console.log('✅ Password valid:', isValid);

@@ -48,6 +48,14 @@ export async function POST(request: Request) {
         );
       }
 
+      // Solo permitir login si el usuario es admin
+      if (user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Solo administradores pueden iniciar sesión.' },
+          { status: 403 }
+        );
+      }
+
       console.log('User found, checking password');
       
       // Importar bcrypt solo cuando lo necesitemos
