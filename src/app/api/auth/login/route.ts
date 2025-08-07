@@ -22,11 +22,11 @@ export async function POST(request: Request) {
     email: user.email,
     name: user.name,
     role: user.role,
-    school: user.school,
-    age: user.age,
-    arrivalDate: user.arrivalDate,
-    departureDate: user.departureDate,
-    avatarUrl: user.avatarUrl ?? '',
+    school: user.school || '',
+    age: user.age || 0,
+    arrivalDate: user.arrivalDate || '',
+    departureDate: user.departureDate || '',
+    avatarUrl: user.avatarUrl || '',
     // Puedes agregar más campos si los tienes en el modelo
   });
 }
