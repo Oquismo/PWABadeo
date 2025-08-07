@@ -27,3 +27,5 @@ export async function GET() {
     }, { status: 200 });
   }
 }
+
+export const dynamic = 'force-dynamic';

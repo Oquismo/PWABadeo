@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+export const dynamic = 'force-dynamic';
+
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     const id = Number(params.id);

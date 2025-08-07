@@ -4,6 +4,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // Usar variable local por conexión para evitar que todos los usuarios compartan el mismo estado
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
