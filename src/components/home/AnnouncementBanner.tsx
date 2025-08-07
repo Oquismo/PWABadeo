@@ -1,36 +1,35 @@
 'use client';
 
+
 import { useState, useEffect } from 'react';
-import { Alert, Container } from '@mui/material';
+import { Alert, Container, CircularProgress } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
 export default function AnnouncementBanner() {
+
   const [announcement, setAnnouncement] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
+    const fetchAnnouncement = async () => {
+      try {
+        const res = await fetch('/api/announcement');
+        const data = await res.json();
+        setAnnouncement(data.message);
+      } catch {
+        setAnnouncement(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnnouncement();
+    // Opcional: refrescar cada 30s
+    const interval = setInterval(fetchAnnouncement, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (isClient) {
-      const savedAnnouncement = localStorage.getItem('globalAnnouncement');
-      setAnnouncement(savedAnnouncement);
-
-      const handleStorageChange = () => {
-        setAnnouncement(localStorage.getItem('globalAnnouncement'));
-      };
-
-      window.addEventListener('storage', handleStorageChange);
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-      };
-    }
-  }, [isClient]);
-
-  if (!isClient || !announcement) {
-    return null;
-  }
+  if (loading) return <Container sx={{ mt: 2 }}><CircularProgress size={24} /></Container>;
+  if (!announcement) return null;
 
   return (
     <Container sx={{ mt: 2 }}>
