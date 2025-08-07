@@ -12,6 +12,9 @@ const withPWA = withPWAInit({
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true, // Usar SWC para minificación más rápida
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client']
+  },
   images: {
     remotePatterns: [
       {
