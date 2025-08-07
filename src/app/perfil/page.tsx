@@ -92,7 +92,7 @@ export default function PerfilPage() {
             {!profileImage ? defaultEggAvatar : profileImage.startsWith('data:') ? null : profileImage}
           </Avatar>
           <Typography component="h1" variant="h4" fontWeight="bold">
-            {user.name}
+            {user.name || 'Sin nombre'}
           </Typography>
           <Typography variant="subtitle1" color={user.role === 'admin' ? 'secondary' : 'text.primary'} sx={{ mt: 1 }}>
             Rol: {user.role === 'admin' ? 'Administrador' : 'Usuario'}
@@ -109,13 +109,13 @@ export default function PerfilPage() {
                 <ListItemIcon>
                   <SchoolIcon />
                 </ListItemIcon>
-                <ListItemText primary="Escuela" secondary={user.school} />
+                <ListItemText primary="Escuela" secondary={user.school || 'No especificada'} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <CakeIcon />
                 </ListItemIcon>
-                <ListItemText primary="Edad" secondary={`${user.age} años`} />
+                <ListItemText primary="Edad" secondary={user.age ? `${user.age} años` : 'No especificada'} />
               </ListItem>
             </List>
           </Paper>

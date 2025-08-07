@@ -38,11 +38,11 @@ export default function UserManagement() {
               }
             >
               <ListItemAvatar>
-                <Avatar src={user.avatarUrl} />
+                <Avatar src={user.avatarUrl || undefined} />
               </ListItemAvatar>
               <ListItemText
-                primary={user.name}
-                secondary={`${user.email} - ${user.school}`}
+                primary={user.name || 'Sin nombre'}
+                secondary={`${user.email} - ${user.school || 'Sin escuela'}`}
               />
             </ListItem>
             {index < users.length - 1 && <Divider />}

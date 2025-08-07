@@ -73,7 +73,7 @@ export default function HeroSection() {
               variant="h4"
               fontWeight="bold"
             >
-              {isAuthenticated && user ? `Hola, ${user.name.split(' ')[0]}` : 'Hola'}
+              {isAuthenticated && user ? `Hola, ${user.name?.split(' ')[0] || 'Usuario'}` : 'Hola'}
             </Typography>
           </Box>
         </Stack>
