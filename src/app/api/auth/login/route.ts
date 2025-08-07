@@ -17,16 +17,19 @@ export async function POST(request: Request) {
   if (!valid) {
     return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 });
   }
-  return NextResponse.json({
+  
+  // Construir respuesta de forma segura para evitar errores de campos faltantes
+  const userResponse = {
     id: user.id,
     email: user.email,
     name: user.name,
     role: user.role,
-    school: user.school || '',
-    age: user.age || 0,
-    arrivalDate: user.arrivalDate || '',
-    departureDate: user.departureDate || '',
-    avatarUrl: user.avatarUrl || '',
-    // Puedes agregar más campos si los tienes en el modelo
-  });
+    school: (user as any).school || '',
+    age: (user as any).age || 0,
+    arrivalDate: (user as any).arrivalDate || '',
+    departureDate: (user as any).departureDate || '',
+    avatarUrl: (user as any).avatarUrl || '',
+  };
+  
+  return NextResponse.json(userResponse);
 }
