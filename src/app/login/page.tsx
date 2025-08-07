@@ -53,13 +53,23 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (validate()) {
-      // Si el email es el del admin, logueamos como admin, si no, como usuario normal
-      if (email === mockAdminUser.email) {
-        login(mockAdminUser);
-      } else {
-        login({ ...mockRegularUser, email: email });
-      }
-      router.push('/');
+      fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) {
+            setErrors({ api: data.error || 'Error al iniciar sesión' });
+            return;
+          }
+          login(data);
+          router.push('/');
+        })
+        .catch(() => {
+          setErrors({ api: 'Error de red o servidor' });
+        });
     }
   };
 
@@ -108,6 +118,11 @@ export default function LoginPage() {
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.5 }}>
             Entrar
           </Button>
+            {errors.api && (
+              <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                {errors.api}
+              </Typography>
+            )}
           <Box sx={{ textAlign: 'center' }}>
             <MuiLink component={Link} href="/registro" variant="body2">
               {"¿No tienes cuenta? Regístrate"}

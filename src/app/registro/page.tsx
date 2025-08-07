@@ -66,24 +66,29 @@ export default function RegistroPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (validate()) {
-      const newUser: User = {
+      const payload = {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
-        age: Number(formData.age),
-        school: formData.school,
-        avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${formData.firstName} ${formData.lastName}`,
-        arrivalDate: formData.arrivalDate,
-        departureDate: formData.departureDate,
-        role: 'user',
+        password: formData.password,
       };
-      
-      const usersRaw = localStorage.getItem('allUsers');
-      const users = usersRaw ? JSON.parse(usersRaw) : [];
-      const updatedUsers = [...users, newUser];
-      localStorage.setItem('allUsers', JSON.stringify(updatedUsers));
-      
-      login(newUser);
-      router.push('/');
+      fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) {
+            setErrors({ api: data.error || 'Error en el registro' });
+            return;
+          }
+          // Aquí podrías guardar el usuario en el contexto o redirigir
+          login(data);
+          router.push('/');
+        })
+        .catch(() => {
+          setErrors({ api: 'Error de red o servidor' });
+        });
     }
   };
 
@@ -150,6 +155,11 @@ export default function RegistroPage() {
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.5 }}>
             Registrarse
           </Button>
+          {errors.api && (
+            <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
+              {errors.api}
+            </Typography>
+          )}
           <Box sx={{ textAlign: 'center' }}>
             <MuiLink component={Link} href="/login" variant="body2">
               ¿Ya tienes una cuenta? Inicia sesión

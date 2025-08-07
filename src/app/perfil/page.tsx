@@ -50,6 +50,10 @@ export default function PerfilPage() {
   }, []);
 
   const handleLogout = () => {
+    // Limpiar completamente el localStorage para evitar datos viejos
+    localStorage.removeItem('user');
+    localStorage.removeItem('userProfileImage');
+    localStorage.removeItem('appLogs');
     logout();
     router.push('/');
   };
@@ -89,6 +93,9 @@ export default function PerfilPage() {
           </Avatar>
           <Typography component="h1" variant="h4" fontWeight="bold">
             {user.name}
+          </Typography>
+          <Typography variant="subtitle1" color={user.role === 'admin' ? 'secondary' : 'text.primary'} sx={{ mt: 1 }}>
+            Rol: {user.role === 'admin' ? 'Administrador' : 'Usuario'}
           </Typography>
           <Paper elevation={0} sx={{ width: '100%', mt: 4, p: 2 }}>
             <List>
