@@ -16,20 +16,8 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client']
   },
-  // Configuración específica para evitar el error de build
-  async generateBuildId() {
-    return 'build-' + Date.now()
-  },
-  // Excluir rutas API del análisis estático
-  async exportPathMap(defaultPathMap) {
-    const pathMap = {}
-    for (const [path, page] of Object.entries(defaultPathMap)) {
-      if (!path.startsWith('/api/')) {
-        pathMap[path] = page
-      }
-    }
-    return pathMap
-  },
+  // Configuración para App Router
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
