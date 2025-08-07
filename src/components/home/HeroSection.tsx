@@ -97,9 +97,24 @@ export default function HeroSection() {
               closeAfterTransition
               slots={{ backdrop: Backdrop }}
               slotProps={{ backdrop: { timeout: 300 } }}
+              sx={{ zIndex: 1500 }}
             >
               <Slide direction="down" in={modalOpen} mountOnEnter unmountOnExit>
-                <Box sx={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', bgcolor: 'background.paper', boxShadow: 24, borderRadius: 3, p: 3, minWidth: 340, maxWidth: 500, mt: 2 }}>
+                <Box sx={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100vw',
+                  height: '100vh',
+                  bgcolor: 'background.paper',
+                  boxShadow: 24,
+                  borderRadius: 0,
+                  p: { xs: 1, md: 3 },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  overflowY: 'auto',
+                }}>
                   <NotificationsPanel />
                 </Box>
               </Slide>

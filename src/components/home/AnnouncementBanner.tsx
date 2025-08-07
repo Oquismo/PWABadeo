@@ -12,24 +12,23 @@ export default function AnnouncementBanner() {
 
   // Actualización en tiempo real usando EventSource (Server-Sent Events) o polling rápido
   useEffect(() => {
-    let lastMessage = '';
-    const fetchAnnouncement = async () => {
-      try {
-        const res = await fetch('/api/announcement');
-        const data = await res.json();
-        if (data.message !== lastMessage) {
+    let eventSource: EventSource | null = null;
+    if (typeof window !== 'undefined') {
+      eventSource = new EventSource('/api/announcement/sse');
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
           setAnnouncement(data.message);
           setOpen(!!data.message);
-          lastMessage = data.message;
-        }
-      } catch {
-        setAnnouncement(null);
-        setOpen(false);
-      }
+        } catch {}
+      };
+      eventSource.onerror = () => {
+        eventSource?.close();
+      };
+    }
+    return () => {
+      eventSource?.close();
     };
-    fetchAnnouncement();
-    const interval = setInterval(fetchAnnouncement, 3000); // Actualiza cada 3s
-    return () => clearInterval(interval);
   }, []);
 
   // Auto-cierre a los 3 segundos
