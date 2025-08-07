@@ -2,10 +2,23 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+let prisma: PrismaClient;
+
+// Solo inicializar Prisma si no estamos en tiempo de build
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === 'production') {
+  prisma = new PrismaClient();
+} else {
+  // Durante el build, usar un cliente mock
+  prisma = {} as PrismaClient;
+}
 
 export async function POST(request: Request) {
   try {
+    // Si estamos en build time, devolver error sin intentar conectar DB
+    if (!prisma.user) {
+      return NextResponse.json({ error: 'Servicio no disponible durante build' }, { status: 503 });
+    }
+    
     const { email, password } = await request.json();
     if (!email || !password) {
       return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 });
