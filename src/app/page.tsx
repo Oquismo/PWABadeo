@@ -38,8 +38,6 @@ export default function Home() {
         <Fade in={fadeIn} timeout={1000}>
           <Box sx={{ pt: 2, pb: 2 }}>
             <HeroSection />
-            {/* Panel de notificaciones globales */}
-            <NotificationsPanel />
             <ProjectsDashboard />
             <CalendarSection />
           </Box>

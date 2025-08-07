@@ -1,6 +1,8 @@
 'use client';
 
-import { Box, Typography, Avatar, Stack, IconButton } from '@mui/material';
+import { Box, Typography, Avatar, Stack, IconButton, Modal, Slide, Backdrop } from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsPanel from '@/components/home/NotificationsPanel';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -10,6 +12,7 @@ import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar el icono
 export default function HeroSection() {
   const { isAuthenticated, user } = useAuth();
   const [profileImage, setProfileImage] = useState<string>('');
+  const [modalOpen, setModalOpen] = useState(false);
   
   // Emoji de huevo por defecto (como el antiguo Twitter)
   const defaultEggAvatar = '🥚';
@@ -48,25 +51,60 @@ export default function HeroSection() {
       }}
     >
       <Stack direction="row" spacing={2} alignItems="center">
-        {/* Parte Izquierda: Avatar y Saludo */}
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1 }}>
-          <Link href={isAuthenticated ? "/perfil" : "/login"} passHref>
-            <Avatar 
-              src={isAuthenticated ? profileImage : undefined}
-              sx={{ 
-                width: 48, 
-                height: 48, 
-                cursor: 'pointer',
-                fontSize: profileImage && !profileImage.startsWith('data:') ? '1.5rem' : 'inherit',
-                bgcolor: !isAuthenticated ? 'primary.main' : 'primary.light'
-              }}
+        {/* Parte Izquierda: Avatar, Campana y Saludo */}
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1, position: 'relative' }}>
+          <Box sx={{ position: 'relative', display: 'inline-block' }}>
+            <Link href={isAuthenticated ? "/perfil" : "/login"} passHref>
+              <Avatar 
+                src={isAuthenticated ? profileImage : undefined}
+                sx={{ 
+                  width: 48, 
+                  height: 48, 
+                  cursor: 'pointer',
+                  fontSize: profileImage && !profileImage.startsWith('data:') ? '1.5rem' : 'inherit',
+                  bgcolor: !isAuthenticated ? 'primary.main' : 'primary.light'
+                }}
+              >
+                {isAuthenticated && !profileImage ? defaultEggAvatar : 
+                 isAuthenticated && profileImage && !profileImage.startsWith('data:') ? profileImage : 
+                 !isAuthenticated ? undefined : null}
+              </Avatar>
+            </Link>
+            {/* Icono de campana sobre el avatar */}
+            {isAuthenticated && (
+              <IconButton
+                aria-label="notificaciones"
+                onClick={() => setModalOpen(true)}
+                sx={{
+                  position: 'absolute',
+                  top: -8,
+                  right: -8,
+                  bgcolor: 'background.paper',
+                  boxShadow: 2,
+                  zIndex: 2,
+                  p: 0.5,
+                }}
+                size="small"
+                title="Ver notificaciones"
+              >
+                <NotificationsIcon color={modalOpen ? 'primary' : 'action'} fontSize="small" />
+              </IconButton>
+            )}
+            {/* Modal de notificaciones deslizante */}
+            <Modal
+              open={modalOpen}
+              onClose={() => setModalOpen(false)}
+              closeAfterTransition
+              slots={{ backdrop: Backdrop }}
+              slotProps={{ backdrop: { timeout: 300 } }}
             >
-              {isAuthenticated && !profileImage ? defaultEggAvatar : 
-               isAuthenticated && profileImage && !profileImage.startsWith('data:') ? profileImage : 
-               !isAuthenticated ? undefined : null}
-            </Avatar>
-          </Link>
-
+              <Slide direction="down" in={modalOpen} mountOnEnter unmountOnExit>
+                <Box sx={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', bgcolor: 'background.paper', boxShadow: 24, borderRadius: 3, p: 3, minWidth: 340, maxWidth: 500, mt: 2 }}>
+                  <NotificationsPanel />
+                </Box>
+              </Slide>
+            </Modal>
+          </Box>
           <Box>
             <Typography 
               component="h1" 

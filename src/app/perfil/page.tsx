@@ -90,17 +90,17 @@ export default function PerfilPage() {
         </Slide>
       </Modal>
       <Box sx={{ position: 'relative', pt: 4 }}>
-        <Stack direction="row" spacing={1} sx={{ position: 'absolute', top: 0, right: 0 }}>
-          <IconButton aria-label="notificaciones" onClick={() => setModalOpen(true)} title="Ver notificaciones">
-            <NotificationsIcon color={modalOpen ? 'primary' : 'inherit'} />
+        <Stack direction="row" spacing={1} sx={{ position: 'absolute', top: 24, right: 24, zIndex: 10 }}>
+          <IconButton aria-label="notificaciones" onClick={() => setModalOpen(true)} title="Ver notificaciones" size="large" sx={{ bgcolor: modalOpen ? 'primary.light' : 'background.paper', boxShadow: 2 }}>
+            <NotificationsIcon color={modalOpen ? 'primary' : 'action'} fontSize="large" />
           </IconButton>
           <Link href="/perfil/editar" passHref>
-            <IconButton aria-label="editar perfil">
+            <IconButton aria-label="editar perfil" size="large">
               <EditIcon />
             </IconButton>
           </Link>
           <Link href="/ajustes" passHref>
-            <IconButton aria-label="ajustes">
+            <IconButton aria-label="ajustes" size="large">
               <SettingsIcon />
             </IconButton>
           </Link>
