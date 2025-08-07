@@ -12,20 +12,19 @@ export default function AnnouncementBanner() {
 
   // Actualización en tiempo real usando EventSource (Server-Sent Events) o polling rápido
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     let eventSource: EventSource | null = null;
-    if (typeof window !== 'undefined') {
-      eventSource = new EventSource('/api/announcement/sse');
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          setAnnouncement(data.message);
-          setOpen(!!data.message);
-        } catch {}
-      };
-      eventSource.onerror = () => {
-        eventSource?.close();
-      };
-    }
+    eventSource = new EventSource('/api/announcement/sse');
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setAnnouncement(data.message);
+        setOpen(!!data.message);
+      } catch {}
+    };
+    eventSource.onerror = () => {
+      eventSource?.close();
+    };
     return () => {
       eventSource?.close();
     };
