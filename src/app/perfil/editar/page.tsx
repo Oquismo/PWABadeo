@@ -35,11 +35,11 @@ export default function EditarPerfilPage() {
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
-        school: user.school,
-        age: String(user.age),
-        arrivalDate: user.arrivalDate,
-        departureDate: user.departureDate,
+        name: user.name || '',
+        school: user.school || '',
+        age: user.age ? String(user.age) : '',
+        arrivalDate: user.arrivalDate || '',
+        departureDate: user.departureDate || '',
       });
     }
   }, [user]);
