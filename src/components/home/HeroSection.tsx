@@ -100,21 +100,27 @@ export default function HeroSection() {
               sx={{ zIndex: 1500 }}
             >
               <Slide direction="down" in={modalOpen} mountOnEnter unmountOnExit>
-                <Box sx={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  bgcolor: 'background.paper',
-                  boxShadow: 24,
-                  borderRadius: 0,
-                  p: { xs: 1, md: 3 },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  overflowY: 'auto',
-                }}>
+                <Box
+                  sx={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    borderRadius: 0,
+                    p: { xs: 1, md: 3 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    overflowY: 'auto',
+                  }}
+                  onClick={(e) => {
+                    // Solo cerrar si se hace click fuera del panel (no sobre el contenido)
+                    if (e.target === e.currentTarget) setModalOpen(false);
+                  }}
+                >
                   <NotificationsPanel />
                 </Box>
               </Slide>
