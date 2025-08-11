@@ -30,30 +30,6 @@ export default function LoginPage() {
     return Object.keys(tempErrors).length === 0;
   };
   
-  // 1. Definimos dos usuarios de ejemplo: uno admin y uno normal
-  const mockAdminUser = {
-    id: 999,
-    name: 'Admin User',
-    email: 'admin@badeo.app',
-    role: 'admin' as 'admin',
-    age: 30,
-    school: 'Badeo Staff',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-    arrivalDate: '2025-01-01',
-    departureDate: '2026-12-31',
-  };
-
-  const mockRegularUser = {
-    id: 998,
-    name: 'Usuario Ejemplo',
-    email: 'usuario@ejemplo.com',
-    role: 'user' as 'user',
-    age: 24,
-    school: 'Centro Educativo Sol',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
-    arrivalDate: '2025-09-01',
-    departureDate: '2026-06-30',
-  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -99,10 +75,7 @@ export default function LoginPage() {
   //   router.push('/');
   // };
 
-  const handleBypassAdminLogin = () => {
-    login(mockAdminUser);
-    router.push('/');
-  };
+  // Bypass eliminado: ahora solo login real
 
   return (
     <Container component="main" maxWidth="xs">
@@ -167,28 +140,7 @@ export default function LoginPage() {
           </Box>
         </Box>
         
-        {/* 3. Dos botones de bypass en un Stack */}
-        <Stack spacing={2} sx={{ mt: 4, alignItems: 'center' }}>
-          {/* <Tooltip title="Entrada rápida como Usuario Normal"> */}
-            {/* <Button
-              onClick={handleBypassUserLogin}
-              variant="text"
-              startIcon={<EngineeringIcon />}
-            >
-              Bypass Usuario
-            </Button> */}
-          {/* </Tooltip> */}
-          <Tooltip title="Entrada rápida como Administrador">
-            <Button
-              onClick={handleBypassAdminLogin}
-              variant="text"
-              startIcon={<AdminPanelSettingsIcon />}
-              color="secondary"
-            >
-              Bypass Admin
-            </Button>
-          </Tooltip>
-        </Stack>
+  {/* Bypass eliminado para exigir autenticación real */}
       </Box>
     </Container>
   );
