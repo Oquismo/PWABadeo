@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { logActionServer } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,12 @@ export async function POST(request: Request) {
           }
 
           const { password: _, ...userWithoutPassword } = user;
+
+          try {
+            await logActionServer({ userId: user.id, action: 'login', meta: { email: user.email, retry: true }, updateLastSeen: true });
+          } catch (e) {
+            console.warn('No se pudo registrar log de login (retry)', e);
+          }
 
           return NextResponse.json({
             user: userWithoutPassword,

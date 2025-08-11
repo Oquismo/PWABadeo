@@ -23,6 +23,11 @@ const LogViewer = dynamic(() => import('@/components/admin/LogViewer'), {
   loading: () => <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
 });
 
+const AdminActivityPanel = dynamic(() => import('@/components/admin/activity/AdminActivityPanel'), {
+  ssr: false,
+  loading: () => <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+});
+
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -54,15 +59,17 @@ export default function AdminPage() {
 
         <Box sx={{ borderBottom: 1, borderColor: 'divider', my: 3 }}>
           <Tabs value={tab} onChange={handleChange} centered>
-            <Tab label="Gestionar Eventos" />
-            <Tab label="Gestionar Usuarios" />
-            <Tab label="Registro de Actividad" /> {/* 2. Añadir la nueva pestaña */}
+            <Tab label="Eventos" />
+            <Tab label="Usuarios" />
+            <Tab label="Logs Local" />
+            <Tab label="Actividad DB (Beta)" />
           </Tabs>
         </Box>
 
-        {tab === 0 && <EventManagement />}
-        {tab === 1 && <UserManagement />}
-        {tab === 2 && <LogViewer />} {/* 3. Mostrar el nuevo componente */}
+  {tab === 0 && <EventManagement />}
+  {tab === 1 && <UserManagement />}
+  {tab === 2 && <LogViewer />}
+  {tab === 3 && <AdminActivityPanel />}
       </Box>
     </Container>
   );

@@ -160,12 +160,11 @@ export default function LoginPage() {
                 {errors.api}
               </Typography>
             )}
-          {/* Registro oculto porque solo admins pueden entrar. Si se requiere, reactivar. */}
-          {/* <Box sx={{ textAlign: 'center' }}>
+          <Box sx={{ textAlign: 'center' }}>
             <MuiLink component={Link} href="/registro" variant="body2">
               {"¿No tienes cuenta? Regístrate"}
             </MuiLink>
-          </Box> */}
+          </Box>
         </Box>
         
         {/* 3. Dos botones de bypass en un Stack */}

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { logActionServer } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,6 +100,12 @@ export async function POST(request: Request) {
       const { password: _, ...userWithoutPassword } = user;
 
       console.log('🎉 Login successful for:', email);
+      // Registrar log en DB (si migración aplicada)
+      try {
+        await logActionServer({ userId: user.id, action: 'login', meta: { email: user.email }, updateLastSeen: true });
+      } catch (e) {
+        console.warn('No se pudo registrar log de login', e);
+      }
       return NextResponse.json({
         user: userWithoutPassword,
         message: 'Login exitoso'
@@ -106,7 +113,7 @@ export async function POST(request: Request) {
 
     } finally {
       console.log('🔌 Disconnecting from database...');
-      await prisma.$disconnect();
+  await prisma.$disconnect();
     }
 
   } catch (error) {

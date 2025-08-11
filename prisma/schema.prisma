@@ -20,12 +20,14 @@ model User {
   password      String
   role          String         @default("user")
   createdAt     DateTime       @default(now())
+  lastSeen      DateTime?      @db.Timestamptz(3)
   school        String? // Escuela del usuario
   age           Int? // Edad del usuario
   arrivalDate   String? // Fecha de llegada
   departureDate String? // Fecha de salida
   avatarUrl     String? // URL del avatar
   announcements Announcement[]
+  logs          Log[]
 }
 
 model Announcement {
@@ -34,4 +36,16 @@ model Announcement {
   createdAt DateTime @default(now())
   createdBy Int?
   user      User?    @relation(fields: [createdBy], references: [id])
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  action    String
+  meta      Json?
+  createdAt DateTime @default(now())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId])
 }

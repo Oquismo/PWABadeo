@@ -81,6 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const currentUser = user;
     if (currentUser) {
       logAction('logout', currentUser.email); // Registramos el cierre de sesión
+      // Llamada best-effort al backend para registrar logout en DB
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.id })
+      }).catch(() => {});
     }
     localStorage.removeItem('user');
     setUser(null);

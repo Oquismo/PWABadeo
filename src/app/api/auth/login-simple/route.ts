@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { logActionServer } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +73,11 @@ export async function POST(request: Request) {
       }
 
       console.log('Login successful');
+      try {
+        await logActionServer({ userId: user.id, action: 'login', meta: { email: user.email, simple: true }, updateLastSeen: true });
+      } catch (e) {
+        console.warn('No se pudo registrar log de login (simple)', e);
+      }
       
       // Retornar sin la contraseña
       const { password: _, ...safeUser } = user;

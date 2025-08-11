@@ -64,16 +64,20 @@ export async function POST(request: Request) {
         );
       }
 
-      console.log('🔐 Hashing password...');
+    console.log('🔐 Hashing password...');
       const hashedPassword = await bcrypt.hash(password, 10);
       
-      console.log('👤 Creating user...');
+    console.log('👤 Determinando rol inicial...');
+    // Si no existe ningún admin aún, el primer usuario será admin
+    const existingAdmin = await prisma.user.findFirst({ where: { role: 'admin' } });
+    const assignedRole = existingAdmin ? 'user' : 'admin';
+    console.log('👤 Creating user with role:', assignedRole);
       const user = await prisma.user.create({
         data: {
           email,
           name: name || email.split('@')[0], // Usar parte del email si no hay name
           password: hashedPassword,
-          role: 'user', // Los usuarios siempre se registran como 'user'
+      role: assignedRole,
         },
         select: {
           id: true,
@@ -89,10 +93,7 @@ export async function POST(request: Request) {
       });
 
       console.log('🎉 User created successfully:', email);
-      return NextResponse.json({
-        user,
-        message: 'Usuario registrado exitosamente'
-      });
+  return NextResponse.json({ user, message: 'Usuario registrado exitosamente', firstAdmin: assignedRole === 'admin' });
 
     } finally {
       console.log('🔌 Disconnecting from database...');
