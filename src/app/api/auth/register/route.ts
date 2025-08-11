@@ -72,25 +72,38 @@ export async function POST(request: Request) {
     const existingAdmin = await prisma.user.findFirst({ where: { role: 'admin' } });
     const assignedRole = existingAdmin ? 'user' : 'admin';
     console.log('👤 Creating user with role:', assignedRole);
-      const user = await prisma.user.create({
-        data: {
-          email,
-          name: name || email.split('@')[0], // Usar parte del email si no hay name
-          password: hashedPassword,
-      role: assignedRole,
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          school: true,
-          age: true,
-          arrivalDate: true,
-          departureDate: true,
-          avatarUrl: true
-        }
-      });
+      let user;
+      try {
+        user = await prisma.user.create({
+          data: {
+            email,
+            name: name || email.split('@')[0], // Usar parte del email si no hay name
+            password: hashedPassword,
+            role: assignedRole,
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            school: true,
+            age: true,
+            arrivalDate: true,
+            departureDate: true,
+            avatarUrl: true
+          }
+        });
+      } catch (dbErr: any) {
+        console.error('❌ Error creando usuario en DB:', dbErr);
+        return NextResponse.json({
+          error: 'No se pudo crear el usuario',
+          code: dbErr?.code,
+            meta: dbErr?.meta,
+            message: dbErr?.message,
+            target: dbErr?.meta?.target,
+          hint: 'Verifica migraciones y que la tabla User existe. Ejecuta prisma migrate dev.'
+        }, { status: 500 });
+      }
 
       console.log('🎉 User created successfully:', email);
   return NextResponse.json({ user, message: 'Usuario registrado exitosamente', firstAdmin: assignedRole === 'admin' });
@@ -101,16 +114,14 @@ export async function POST(request: Request) {
     }
 
   } catch (error) {
-    console.error('❌ Detailed registration error:', error);
-    
-    return NextResponse.json(
-      { 
-        error: 'Error interno del servidor',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        name: error instanceof Error ? error.name : 'Unknown',
-        timestamp: new Date().toISOString()
-      },
-      { status: 500 }
-    );
+    console.error('❌ Detailed registration error (outer catch):', error);
+    const isPrismaInit = error instanceof Error && /PrismaClientInitializationError|Schema/.test(error.message);
+    return NextResponse.json({
+      error: 'Error interno del servidor',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      prismaInit: isPrismaInit,
+      suggestion: isPrismaInit ? 'Ejecuta: npx prisma migrate dev && npx prisma generate' : undefined,
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
   }
 }
