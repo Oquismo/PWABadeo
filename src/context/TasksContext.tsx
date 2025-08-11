@@ -46,7 +46,11 @@ export function TasksProvider({ children }: TasksProviderProps) {
         const res = await fetch('/api/tasks');
         const data = await res.json();
         if (res.ok) {
-          setAllTasks(data.tasks || []);
+          const norm = (data.tasks || []).map((t: any) => ({
+            ...t,
+            avatars: Array.isArray(t.avatars) ? t.avatars : (t.avatars ? t.avatars : [])
+          }));
+          setAllTasks(norm);
           setError(null);
         } else {
           setError(data.error || 'Error cargando tareas');
@@ -88,7 +92,13 @@ export function TasksProvider({ children }: TasksProviderProps) {
         return;
       }
       const d = await r.json();
-      setAllTasks(prev => [d.task, ...prev]);
+      setAllTasks(prev => [
+        {
+          ...d.task,
+          avatars: Array.isArray(d.task.avatars) ? d.task.avatars : (d.task.avatars ? d.task.avatars : [])
+        },
+        ...prev
+      ]);
     });
   };
 
@@ -103,7 +113,11 @@ export function TasksProvider({ children }: TasksProviderProps) {
         console.error('Error actualizando tarea', d);
         return;
       }
-      setAllTasks(prev => prev.map(t => (t.id === d.task.id ? d.task : t)));
+      setAllTasks(prev => prev.map(t => (
+        t.id === d.task.id
+          ? { ...d.task, avatars: Array.isArray(d.task.avatars) ? d.task.avatars : (d.task.avatars ? d.task.avatars : []) }
+          : t
+      )));
     });
   };
 

@@ -210,7 +210,7 @@ export default function TaskManager() {
                 </Typography>
                 
                 <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
-                  {task.avatars.map((avatar, index) => (
+                  {(Array.isArray(task.avatars) ? task.avatars : []).map((avatar, index) => (
                     <Chip 
                       key={index}
                       label={avatar} 
