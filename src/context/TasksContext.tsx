@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { TaskData, carouselTasks as defaultTasks } from '@/data/tasks';
 import { barrioDeTasks } from '@/data/barrioTasks';
 import { useAuth } from './AuthContext';
@@ -33,30 +33,37 @@ interface TasksProviderProps {
 
 export function TasksProvider({ children }: TasksProviderProps) {
   const { user } = useAuth();
-  const [allTasks, setAllTasks] = useState<TaskData[]>(defaultTasksWithId);
+  const [allTasks, setAllTasks] = useState<TaskData[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Cargar tareas del localStorage al inicializar
+  // Carga inicial desde API
   useEffect(() => {
-  const savedTasks = localStorage.getItem('userTasks');
-    if (savedTasks) {
+    const fetchTasks = async () => {
+      setLoading(true);
       try {
-        const parsedTasks = JSON.parse(savedTasks);
-    setAllTasks(parsedTasks);
-      } catch (error) {
-        console.error('Error al cargar tareas guardadas:', error);
+        const res = await fetch('/api/tasks');
+        const data = await res.json();
+        if (res.ok) {
+          setAllTasks(data.tasks || []);
+          setError(null);
+        } else {
+          setError(data.error || 'Error cargando tareas');
+        }
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+    fetchTasks();
   }, []);
-
-  // Guardar tareas en localStorage cuando cambien
-  useEffect(() => {
-    localStorage.setItem('userTasks', JSON.stringify(allTasks));
-  }, [allTasks]);
 
   const canManageAdminTasks = user?.role === 'admin';
 
   // Ahora todas las tareas son visibles; el rol solo controla quién puede CREAR/EDITAR/ELIMINAR tareas de rol 'admin'
-  const tasks = allTasks;
+  const tasks = allTasks as TaskData[];
 
   const addTask = (taskData: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role'] }) => {
     const role: TaskData['role'] = taskData.role || 'user';
@@ -69,64 +76,86 @@ export function TasksProvider({ children }: TasksProviderProps) {
       role,
       id: taskData.id || generateId()
     };
-    setAllTasks(prev => [...prev, newTask]);
+    // Persistir
+    fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...newTask, userId: user?.id })
+    }).then(async r => {
+      if (!r.ok) {
+        const d = await r.json();
+        console.error('Error creando tarea', d);
+        return;
+      }
+      const d = await r.json();
+      setAllTasks(prev => [d.task, ...prev]);
+    });
   };
 
   const updateTask = (id: string, updates: Partial<TaskData>) => {
-    setAllTasks(prev => prev.map(task => {
-      if (task.id !== id) return task;
-      // Bloquear cambios a tareas admin por usuarios normales
-      if ((task.role || 'user') === 'admin' && !canManageAdminTasks) {
-        console.warn('Intento no autorizado de editar tarea admin');
-        return task;
+    fetch('/api/tasks', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: typeof id === 'string' ? parseInt(id, 10) : id, updates, userId: user?.id })
+    }).then(async r => {
+      const d = await r.json();
+      if (!r.ok) {
+        console.error('Error actualizando tarea', d);
+        return;
       }
-      // Evitar que un usuario escale role al editar
-      if (updates.role && updates.role === 'admin' && !canManageAdminTasks) {
-        console.warn('Intento no autorizado de cambiar role de tarea a admin');
-        const { role, ...rest } = updates as any;
-        return { ...task, ...rest };
-      }
-      return { ...task, ...updates };
-    }));
+      setAllTasks(prev => prev.map(t => (t.id === d.task.id ? d.task : t)));
+    });
   };
 
   const deleteTask = (id: string) => {
-    setAllTasks(prev => prev.filter(task => {
-      if (task.id !== id) return true;
-      if ((task.role || 'user') === 'admin' && !canManageAdminTasks) {
-        console.warn('Intento no autorizado de eliminar tarea admin');
-        return true; // no eliminar
-      }
-      return false;
-    }));
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    fetch(`/api/tasks?id=${numericId}&userId=${user?.id}`, { method: 'DELETE' })
+      .then(async r => {
+        const d = await r.json();
+        if (!r.ok) {
+          console.error('Error eliminando tarea', d);
+          return;
+        }
+        setAllTasks(prev => prev.filter(t => {
+          const tid = typeof t.id === 'string' ? parseInt(t.id, 10) : t.id;
+            return tid !== numericId;
+        }));
+      });
   };
 
   const resetToDefault = () => {
-    const resetTasks = defaultTasks.map(task => ({
-      ...task,
-      id: generateId()
-    }));
-    setAllTasks(resetTasks);
+    // No tiene sentido en persistente: podría recargar desde API
+    // Dejamos stub que vuelve a cargar
+    (async () => {
+      try {
+        const res = await fetch('/api/tasks');
+        const data = await res.json();
+        if (res.ok) setAllTasks(data.tasks || []);
+      } catch {}
+    })();
   };
 
   const loadBarrioTasks = () => {
-    const tasksWithId = barrioDeTasks.map(task => ({
-      ...task,
-      id: generateId()
-    }));
-    setAllTasks(tasksWithId);
+    // Carga selectiva: filtrar role user (placeholder)
+    (async () => {
+      try {
+        const res = await fetch('/api/tasks?role=user');
+        const data = await res.json();
+        if (res.ok) setAllTasks(data.tasks || []);
+      } catch {}
+    })();
   };
 
   const loadMixedTasks = () => {
     // Combinar algunas tareas originales con las del barrio
-    const mixed = [
-      ...defaultTasks.slice(0, 3),
-      ...barrioDeTasks.slice(0, 5)
-    ].map(task => ({
-      ...task,
-      id: generateId()
-    }));
-    setAllTasks(mixed);
+    // Mezcla simulada (por ahora recarga todo)
+    (async () => {
+      try {
+        const res = await fetch('/api/tasks');
+        const data = await res.json();
+        if (res.ok) setAllTasks(data.tasks || []);
+      } catch {}
+    })();
   };
 
   return (

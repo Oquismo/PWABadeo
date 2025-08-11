@@ -28,6 +28,7 @@ model User {
   avatarUrl     String? // URL del avatar
   announcements Announcement[]
   logs          Log[]
+  tasks         Task[]
 }
 
 model Announcement {
@@ -48,4 +49,22 @@ model Log {
   @@index([action])
   @@index([createdAt])
   @@index([userId])
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  color       String
+  date        String?
+  role        String   @default("user") // 'admin' o 'user'
+  avatars     Json?    // array de strings
+  progress    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   Int?
+  user        User?    @relation(fields: [createdBy], references: [id])
+  @@index([role])
+  @@index([createdAt])
+  @@index([createdBy])
 }
