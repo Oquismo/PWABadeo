@@ -492,7 +492,18 @@ export default function InteractiveMap() {
 
 
         {userPosition && (
-            <Marker position={userPosition}>
+            <Marker 
+              position={userPosition}
+              icon={L.icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32],
+                shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+                shadowSize: [41, 41],
+                shadowAnchor: [13, 41]
+              })}
+            >
                 <Popup>Estás aquí</Popup>
             </Marker>
         )}

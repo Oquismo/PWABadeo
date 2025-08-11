@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Box, Container, Typography, CircularProgress, Fab, Drawer, IconButton } from '@mui/material';
+import GeolocalizacionDemo from '@/components/GeolocalizacionDemo';
 import dynamic from 'next/dynamic';
 import RoutePlanner from '@/components/mapa/RoutePlanner'; 
 import ListIcon from '@mui/icons-material/List';
@@ -33,7 +34,10 @@ export default function MapaPage() {
           Tus lugares importantes en la ciudad.
         </Typography>
       </Box>
-      <InteractiveMap />
+
+  {/* Permiso y explicación de geolocalización */}
+  <GeolocalizacionDemo />
+  <InteractiveMap />
 
       {/* Sección del planificador de rutas */}
       <Box sx={{ mt: 4 }}>
