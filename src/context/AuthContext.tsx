@@ -47,18 +47,34 @@ const logAction = (action: string, userEmail: string) => {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const onlyAdmins = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsed: User = JSON.parse(storedUser);
+        if (!onlyAdmins || parsed.role === 'admin') {
+          setUser(parsed);
+        } else {
+          console.warn('Sesión de usuario no admin eliminada (modo solo admins activo)');
+          localStorage.removeItem('user');
+        }
+      } catch (e) {
+        console.error('Error parseando usuario almacenado, limpiando.', e);
+        localStorage.removeItem('user');
+      }
     }
   }, []);
 
   const login = (userData: User) => {
+    if (onlyAdmins && userData.role !== 'admin') {
+      console.warn('Intento de login bloqueado por modo solo admins.');
+      return;
+    }
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
-    logAction('login', userData.email); // Registramos el inicio de sesión
+    logAction('login', userData.email);
   };
 
   const logout = () => {

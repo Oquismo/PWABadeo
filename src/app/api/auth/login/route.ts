@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
+  const onlyAdmins = process.env.ONLY_ADMIN_LOGIN === 'true';
 
     // Verificación básica
     if (!email || !password) {
@@ -75,8 +76,8 @@ export async function POST(request: Request) {
         );
       }
 
-      // Solo permitir login si el usuario es admin
-      if (user.role !== 'admin') {
+      // Restringir a administradores sólo si el flag está activo
+      if (onlyAdmins && user.role !== 'admin') {
         return NextResponse.json(
           { error: 'Solo administradores pueden iniciar sesión.' },
           { status: 403 }

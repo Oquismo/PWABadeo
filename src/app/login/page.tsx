@@ -3,15 +3,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack, IconButton, InputAdornment } from '@mui/material';
 import Link from 'next/link';
 // import EngineeringIcon from '@mui/icons-material/Engineering';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<any>({});
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -107,6 +110,9 @@ export default function LoginPage() {
         <Typography component="h1" variant="h4" fontWeight="bold">
           Iniciar Sesión
         </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+          {process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true' ? 'Modo restringido: solo administradores.' : 'Ingresa con tu cuenta.'}
+        </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
           <TextField
             margin="normal"
@@ -126,11 +132,25 @@ export default function LoginPage() {
             fullWidth
             name="password"
             label="Contraseña"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             error={!!errors.password}
             helperText={errors.password}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    onClick={() => setShowPassword(p => !p)}
+                    edge="end"
+                    size="small"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
           />
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.5 }}>
             Entrar
@@ -140,11 +160,12 @@ export default function LoginPage() {
                 {errors.api}
               </Typography>
             )}
-          <Box sx={{ textAlign: 'center' }}>
+          {/* Registro oculto porque solo admins pueden entrar. Si se requiere, reactivar. */}
+          {/* <Box sx={{ textAlign: 'center' }}>
             <MuiLink component={Link} href="/registro" variant="body2">
               {"¿No tienes cuenta? Regístrate"}
             </MuiLink>
-          </Box>
+          </Box> */}
         </Box>
         
         {/* 3. Dos botones de bypass en un Stack */}
