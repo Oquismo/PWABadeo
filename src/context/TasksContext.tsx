@@ -1,17 +1,19 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { TaskData, carouselTasks as defaultTasks } from '@/data/tasks';
 import { barrioDeTasks } from '@/data/barrioTasks';
+import { useAuth } from './AuthContext';
 
 interface TasksContextType {
-  tasks: TaskData[];
-  addTask: (task: Omit<TaskData, 'id'> & { id?: string }) => void;
+  tasks: TaskData[];               // Tareas visibles para el usuario actual
+  addTask: (task: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role'] }) => void;
   updateTask: (id: string, task: Partial<TaskData>) => void;
   deleteTask: (id: string) => void;
   resetToDefault: () => void;
   loadBarrioTasks: () => void;
   loadMixedTasks: () => void;
+  canManageAdminTasks: boolean;    // Permiso para editar tareas role=admin
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -30,15 +32,16 @@ interface TasksProviderProps {
 }
 
 export function TasksProvider({ children }: TasksProviderProps) {
-  const [tasks, setTasks] = useState<TaskData[]>(defaultTasksWithId);
+  const { user } = useAuth();
+  const [allTasks, setAllTasks] = useState<TaskData[]>(defaultTasksWithId);
 
   // Cargar tareas del localStorage al inicializar
   useEffect(() => {
-    const savedTasks = localStorage.getItem('userTasks');
+  const savedTasks = localStorage.getItem('userTasks');
     if (savedTasks) {
       try {
         const parsedTasks = JSON.parse(savedTasks);
-        setTasks(parsedTasks);
+    setAllTasks(parsedTasks);
       } catch (error) {
         console.error('Error al cargar tareas guardadas:', error);
       }
@@ -47,27 +50,55 @@ export function TasksProvider({ children }: TasksProviderProps) {
 
   // Guardar tareas en localStorage cuando cambien
   useEffect(() => {
-    localStorage.setItem('userTasks', JSON.stringify(tasks));
-  }, [tasks]);
+    localStorage.setItem('userTasks', JSON.stringify(allTasks));
+  }, [allTasks]);
 
-  const addTask = (taskData: Omit<TaskData, 'id'> & { id?: string }) => {
-    const newTask = {
+  const canManageAdminTasks = user?.role === 'admin';
+
+  // Ahora todas las tareas son visibles; el rol solo controla quién puede CREAR/EDITAR/ELIMINAR tareas de rol 'admin'
+  const tasks = allTasks;
+
+  const addTask = (taskData: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role'] }) => {
+    const role: TaskData['role'] = taskData.role || 'user';
+    if (role === 'admin' && !canManageAdminTasks) {
+      console.warn('Intento no autorizado de crear tarea admin');
+      return;
+    }
+    const newTask: TaskData = {
       ...taskData,
+      role,
       id: taskData.id || generateId()
     };
-    setTasks(prev => [...prev, newTask]);
+    setAllTasks(prev => [...prev, newTask]);
   };
 
   const updateTask = (id: string, updates: Partial<TaskData>) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task.id === id ? { ...task, ...updates } : task
-      )
-    );
+    setAllTasks(prev => prev.map(task => {
+      if (task.id !== id) return task;
+      // Bloquear cambios a tareas admin por usuarios normales
+      if ((task.role || 'user') === 'admin' && !canManageAdminTasks) {
+        console.warn('Intento no autorizado de editar tarea admin');
+        return task;
+      }
+      // Evitar que un usuario escale role al editar
+      if (updates.role && updates.role === 'admin' && !canManageAdminTasks) {
+        console.warn('Intento no autorizado de cambiar role de tarea a admin');
+        const { role, ...rest } = updates as any;
+        return { ...task, ...rest };
+      }
+      return { ...task, ...updates };
+    }));
   };
 
   const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
+    setAllTasks(prev => prev.filter(task => {
+      if (task.id !== id) return true;
+      if ((task.role || 'user') === 'admin' && !canManageAdminTasks) {
+        console.warn('Intento no autorizado de eliminar tarea admin');
+        return true; // no eliminar
+      }
+      return false;
+    }));
   };
 
   const resetToDefault = () => {
@@ -75,7 +106,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       ...task,
       id: generateId()
     }));
-    setTasks(resetTasks);
+    setAllTasks(resetTasks);
   };
 
   const loadBarrioTasks = () => {
@@ -83,7 +114,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       ...task,
       id: generateId()
     }));
-    setTasks(tasksWithId);
+    setAllTasks(tasksWithId);
   };
 
   const loadMixedTasks = () => {
@@ -95,19 +126,20 @@ export function TasksProvider({ children }: TasksProviderProps) {
       ...task,
       id: generateId()
     }));
-    setTasks(mixed);
+    setAllTasks(mixed);
   };
 
   return (
     <TasksContext.Provider
       value={{
-        tasks,
+  tasks,
         addTask,
         updateTask,
         deleteTask,
         resetToDefault,
         loadBarrioTasks,
-        loadMixedTasks
+  loadMixedTasks,
+  canManageAdminTasks
       }}
     >
       {children}

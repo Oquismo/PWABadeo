@@ -29,6 +29,7 @@ import {
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useTasks } from '@/context/TasksContext';
+import { useAuth } from '@/context/AuthContext';
 import { TaskData } from '@/data/tasks';
 
 // Gradientes predefinidos para elegir
@@ -53,7 +54,8 @@ interface TaskFormData {
 }
 
 export default function TaskManager() {
-  const { tasks, addTask, updateTask, deleteTask, resetToDefault } = useTasks();
+  const { tasks, addTask, updateTask, deleteTask, resetToDefault, canManageAdminTasks } = useTasks();
+  const { user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskData | null>(null);
   const [showAlert, setShowAlert] = useState(false);
@@ -66,6 +68,7 @@ export default function TaskManager() {
     avatars: '',
     date: ''
   });
+  const [taskRole, setTaskRole] = useState<'admin' | 'user'>('user');
 
   const openDialog = (task?: TaskData) => {
     if (task) {
@@ -78,6 +81,7 @@ export default function TaskManager() {
         avatars: task.avatars.join(', '),
         date: task.date || ''
       });
+      setTaskRole(task.role || 'user');
     } else {
       setEditingTask(null);
       setFormData({
@@ -88,6 +92,7 @@ export default function TaskManager() {
         avatars: '',
         date: ''
       });
+      setTaskRole('user');
     }
     setDialogOpen(true);
   };
@@ -106,7 +111,8 @@ export default function TaskManager() {
       progress: formData.progress,
       color: formData.color,
       avatars: formData.avatars.split(',').map(a => a.trim()).filter(a => a),
-      date: formData.date || undefined
+      date: formData.date || undefined,
+      role: taskRole
     };
 
     if (editingTask) {
@@ -133,14 +139,16 @@ export default function TaskManager() {
           Gestionar Tareas
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={resetToDefault}
-            size="small"
-          >
-            Restablecer
-          </Button>
+          {canManageAdminTasks && (
+            <Button
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={resetToDefault}
+              size="small"
+            >
+              Restablecer
+            </Button>
+          )}
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -172,20 +180,24 @@ export default function TaskManager() {
                     {task.title}
                   </Typography>
                   <Box>
-                    <IconButton 
-                      size="small" 
-                      sx={{ color: 'white', p: 0.5 }}
-                      onClick={() => openDialog(task)}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton 
-                      size="small" 
-                      sx={{ color: 'white', p: 0.5, ml: 0.5 }}
-                      onClick={() => handleDelete(task.id!)}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {((task.role || 'user') === 'user' || canManageAdminTasks) && (
+                      <>
+                        <IconButton 
+                          size="small" 
+                          sx={{ color: 'white', p: 0.5 }}
+                          onClick={() => openDialog(task)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton 
+                          size="small" 
+                          sx={{ color: 'white', p: 0.5, ml: 0.5 }}
+                          onClick={() => handleDelete(task.id!)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
                   </Box>
                 </Box>
                 
@@ -221,10 +233,23 @@ export default function TaskManager() {
       {/* Dialog para crear/editar tareas */}
       <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {editingTask ? 'Editar Tarea' : 'Nueva Tarea'}
+          {editingTask ? 'Editar Tarea' : 'Nueva Tarea'} {taskRole === 'admin' && '(Admin)'}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            {canManageAdminTasks && (
+              <FormControl fullWidth>
+                <InputLabel>Rol de la tarea</InputLabel>
+                <Select
+                  value={taskRole}
+                  label="Rol de la tarea"
+                  onChange={(e) => setTaskRole(e.target.value as 'admin' | 'user')}
+                >
+                  <MenuItem value="user">Usuario</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                </Select>
+              </FormControl>
+            )}
             <TextField
               label="Título de la tarea"
               value={formData.title}

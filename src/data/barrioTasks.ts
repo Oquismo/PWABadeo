@@ -8,7 +8,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 75,
     color: 'linear-gradient(135deg, #654ea3 0%, #eaafc8 100%)',
     avatars: ['EU', 'AC', '+3'],
-    date: 'Oct 15'
+  date: 'Oct 15',
+  role: 'admin'
   },
   {
     title: 'Pre-partida',
@@ -16,7 +17,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 92,
     color: 'linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)',
     avatars: ['C', 'P', 'S', '+18'],
-    date: 'Sep 20'
+  date: 'Sep 20',
+  role: 'admin'
   },
   {
     title: 'Monitoreo',
@@ -24,7 +26,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 68,
     color: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
     avatars: ['M', 'T', 'E', '+15'],
-    date: 'Continuo'
+  date: 'Continuo',
+  role: 'admin'
   },
   {
     title: 'Red Empresas',
@@ -32,7 +35,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 52,
     color: 'linear-gradient(135deg, #fd79a8 0%, #e84393 100%)',
     avatars: ['B', 'P', '+12'],
-    date: 'Oct 30'
+  date: 'Oct 30',
+  role: 'admin'
   },
   {
     title: 'Networking',
@@ -40,7 +44,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 80,
     color: 'linear-gradient(135deg, #00b894 0%, #00cec9 100%)',
     avatars: ['N', 'E', 'P', '+40'],
-    date: 'Mensual'
+  date: 'Mensual',
+  role: 'admin'
   },
   {
     title: 'Traslados',
@@ -48,7 +53,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 95,
     color: 'linear-gradient(135deg, #fdcb6e 0%, #e17055 100%)',
     avatars: ['L', 'T', '+8'],
-    date: 'Diario'
+  date: 'Diario',
+  role: 'admin'
   },
   {
     title: 'Documentos',
@@ -56,7 +62,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 85,
     color: 'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)',
     avatars: ['D', 'V', '+5'],
-    date: 'Semanal'
+  date: 'Semanal',
+  role: 'admin'
   },
   {
     title: 'Inmersión',
@@ -64,7 +71,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 70,
     color: 'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)',
     avatars: ['I', 'L', '+22'],
-    date: 'L-V'
+  date: 'L-V',
+  role: 'admin'
   },
   {
     title: 'Tutorías',
@@ -72,7 +80,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 88,
     color: 'linear-gradient(135deg, #81ecec 0%, #74b9ff 100%)',
     avatars: ['T', 'P', '+25'],
-    date: 'Semanal'
+  date: 'Semanal',
+  role: 'admin'
   },
   {
     title: 'Certificación',
@@ -80,7 +89,8 @@ export const barrioDeTasks: TaskData[] = [
     progress: 60,
     color: 'linear-gradient(135deg, #55a3ff 0%, #003d82 100%)',
     avatars: ['E', 'C', '+8'],
-    date: 'Mensual'
+  date: 'Mensual',
+  role: 'admin'
   }
 ];
 

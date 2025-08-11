@@ -1,8 +1,9 @@
 'use client';
 
-import { Typography, Card, CardContent, Box, LinearProgress, Avatar, AvatarGroup, IconButton, Fab, Tooltip } from '@mui/material';
+import { Typography, Card, CardContent, Box, IconButton, Tooltip, Chip } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import LaunchIcon from '@mui/icons-material/Launch';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import { carouselConfig } from '@/data/tasks';
 import { useTasks } from '@/context/TasksContext';
@@ -85,35 +86,43 @@ export default function ProjectsDashboard() {
           'scrollbar-width': 'none'
         }}>
           {tasks.map((task, index) => (
-            <Card 
+            <Card
               key={task.id || index}
-              sx={{ 
+              sx={{
                 background: task.color,
-                color: 'white', 
+                color: 'white',
                 minWidth: carouselConfig.cardWidth,
                 width: carouselConfig.cardWidth,
                 height: carouselConfig.cardHeight,
                 borderRadius: carouselConfig.borderRadius,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
                 position: 'relative',
                 overflow: 'hidden',
                 flexShrink: 0,
                 cursor: 'pointer',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                border: user?.role === 'admin' && debugInfo ? '2px solid #ff5722' : 'none',
+                p: 0.5,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.5,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+                transition: 'transform .25s ease, box-shadow .25s ease',
+                border: user?.role === 'admin' && debugInfo ? '1.5px solid #ff9800' : '1px solid rgba(255,255,255,0.15)',
                 '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 12px 48px rgba(0,0,0,0.25)'
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 10px 36px rgba(0,0,0,0.4)'
                 },
                 '&::before': {
                   content: '""',
                   position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: 'inherit'
+                  inset: 0,
+                  background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 60%)',
+                  opacity: 0.4
+                },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  inset: 0,
+                  backdropFilter: 'blur(2px)',
+                  background: 'linear-gradient(140deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))'
                 }
               }}
               onClick={() => {
@@ -122,89 +131,72 @@ export default function ProjectsDashboard() {
                 }
               }}
             >
-              <CardContent sx={{ height: '100%', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column' }}>
-                {/* Indicador de debug para admin */}
-                {user?.role === 'admin' && debugInfo && (
-                  <Box sx={{ 
-                    position: 'absolute', 
-                    top: 0, 
-                    right: 0, 
-                    backgroundColor: 'error.main', 
-                    color: 'white', 
-                    px: 1, 
-                    py: 0.5, 
-                    fontSize: '0.6rem',
-                    borderRadius: '0 0 0 8px'
-                  }}>
-                    ID: {task.id?.slice(-4) || 'N/A'}
-                  </Box>
-                )}
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                  <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.1rem' }}>
+              {/* Etiquetas superiores */}
+              <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: 1, pt: 0.5 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, maxWidth: '75%' }}>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.15, fontSize: '1.05rem', textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}>
                     {task.title}
                   </Typography>
-                  <IconButton size="small" sx={{ color: 'white', mt: -1, mr: -1, opacity: 0.8 }}>
-                    <MoreVertIcon />
-                  </IconButton>
+                  <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.72rem', lineHeight: 1.2 }}>
+                    {task.description}
+                  </Typography>
                 </Box>
-                
-                <Typography variant="body2" sx={{ opacity: 0.85, mb: 3, fontSize: '0.85rem' }}>
-                  {task.description}
-                </Typography>
-                
-                <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.75rem', display: 'block', mb: 0.5 }}>
-                  Progreso
-                </Typography>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-                  {task.progress}%
-                </Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={task.progress}
-                  sx={{ 
-                    height: 8, 
-                    borderRadius: '4px', 
-                    mb: 2,
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    '& .MuiLinearProgress-bar': { 
-                      backgroundColor: 'white',
-                      borderRadius: '4px'
-                    }
-                  }}
-                />
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
-                  <AvatarGroup max={4} sx={{ 
-                    '& .MuiAvatar-root': { 
-                      width: 32, 
-                      height: 32, 
-                      fontSize: '0.8rem', 
-                      border: '2px solid white',
-                      ml: -1
-                    } 
-                  }}>
-                    {task.avatars.map((avatar, avatarIndex) => (
-                      <Avatar key={avatarIndex} sx={{ 
-                        bgcolor: avatarIndex === 0 ? '#ff6b6b' : 
-                                avatarIndex === 1 ? '#4ecdc4' : 
-                                avatarIndex === 2 ? '#45b7d1' : '#96ceb4',
-                        fontSize: avatar.includes('+') ? '0.7rem' : '0.8rem' 
-                      }}>
-                        {avatar}
-                      </Avatar>
-                    ))}
-                  </AvatarGroup>
+                <IconButton size="small" sx={{ color: 'white', opacity: 0.8, mt: -0.5 }}>
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+              </Box>
+
+              {/* Badge ADMIN y fecha */}
+              <Box sx={{ position: 'relative', zIndex: 2, mt: 'auto', px: 1, pb: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                  {task.role === 'admin' && (
+                    <Chip label="ADMIN" size="small" sx={{
+                      height: 20,
+                      fontSize: '0.55rem',
+                      fontWeight: 600,
+                      letterSpacing: '.5px',
+                      color: '#fff',
+                      bgcolor: 'rgba(0,0,0,0.35)',
+                      backdropFilter: 'blur(3px)',
+                      border: '1px solid rgba(255,255,255,0.25)'
+                    }} />
+                  )}
                   {task.date && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, opacity: 0.8 }}>
-                      <CalendarTodayIcon sx={{ fontSize: '1rem' }} />
-                      <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
-                        {task.date}
-                      </Typography>
-                    </Box>
+                    <Chip icon={<CalendarTodayIcon sx={{ fontSize: '0.9rem !important' }} />} label={task.date} size="small" sx={{
+                      height: 20,
+                      fontSize: '0.55rem',
+                      pl: 0.5,
+                      pr: 0.8,
+                      color: '#fff',
+                      bgcolor: 'rgba(255,255,255,0.15)',
+                      border: '1px solid rgba(255,255,255,0.25)',
+                      '.MuiChip-icon': { ml: 0, color: 'inherit' }
+                    }} />
                   )}
                 </Box>
-              </CardContent>
+                <IconButton size="small" sx={{ color: 'white', opacity: 0.85 }}>
+                  <LaunchIcon fontSize="inherit" />
+                </IconButton>
+              </Box>
+
+              {/* Debug overlay id */}
+              {user?.role === 'admin' && debugInfo && (
+                <Box sx={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  zIndex: 3,
+                  background: 'rgba(0,0,0,0.45)',
+                  color: 'white',
+                  px: 0.5,
+                  py: 0.25,
+                  fontSize: '0.55rem',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255,255,255,0.2)'
+                }}>
+                  ID {task.id?.slice(-4) || 'N/A'}
+                </Box>
+              )}
             </Card>
           ))}
         </Box>

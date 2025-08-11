@@ -27,6 +27,11 @@ export default function BottomNavBar() {
     return null; // Evita errores de hidratación
   }
 
+  // Ocultar barra en páginas de login/registro para evitar navegación antes de autenticarse
+  if (pathname === '/login' || pathname === '/login-simple' || pathname === '/registro') {
+    return null;
+  }
+
   const navActions = [
     { value: "/", icon: <HomeIcon /> },
     { value: "/mapa", icon: <MapIcon /> },
