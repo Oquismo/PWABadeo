@@ -336,23 +336,34 @@ export default function InteractiveMap() {
         {locations.map((loc) => {
             const [lat, lng] = Array.isArray(loc.position) ? loc.position : [loc.position.lat, loc.position.lng];
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`;
-            
+            const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${lat},${lng}`;
             return (
-              <Marker key={loc.name} position={loc.position} icon={getCategoryIcon('Tu Alojamiento')}> 
+              <Marker key={loc.name} position={loc.position} icon={getCategoryIcon('Tu Alojamiento')}>
                   <Popup>
                       <Box>
                           <Typography variant="subtitle2" component="div" fontWeight="bold">{loc.name}</Typography>
                           <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>{loc.description}</Typography>
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<DirectionsIcon />}
-                            href={directionsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Cómo llegar
-                          </Button>
+                          <Stack direction="row" spacing={1}>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<DirectionsIcon />}
+                              href={directionsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Cómo llegar
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              href={streetViewUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Street View
+                            </Button>
+                          </Stack>
                       </Box>
                   </Popup>
               </Marker>
@@ -362,7 +373,7 @@ export default function InteractiveMap() {
         {/* Marcadores de Lugares de Interés predefinidos (FILTRADOS Y CON ICONO PERSONALIZADO) */}
         {placesData.filter(place => selectedCategory === 'Todos' || place.category === selectedCategory).map((place) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
-            
+            const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
             return (
               <Marker key={place.id} position={place.coordinates} icon={getCategoryIcon(place.category)}>
                   <Popup>
@@ -389,7 +400,6 @@ export default function InteractiveMap() {
                           <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
                             {place.description}
                           </Typography>
-                          
                           {place.link && (
                             <Button
                                 variant="text"
@@ -402,18 +412,29 @@ export default function InteractiveMap() {
                                 Más info
                             </Button>
                           )}
-                          
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<DirectionsIcon />}
-                            href={directionsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            fullWidth
-                          >
-                            Cómo llegar
-                          </Button>
+                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<DirectionsIcon />}
+                              href={directionsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              fullWidth
+                            >
+                              Cómo llegar
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              href={streetViewUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              fullWidth
+                            >
+                              Street View
+                            </Button>
+                          </Stack>
                       </Box>
                   </Popup>
               </Marker>
@@ -423,10 +444,9 @@ export default function InteractiveMap() {
         {/* Marcadores de Puntos de Interés Personalizados por el Usuario (FILTRADOS Y CON ICONO PERSONALIZADO) */}
         {customPlaces.filter(place => selectedCategory === 'Todos' || (selectedCategory === 'Personalizado' && !placesData.some(p => p.id === place.id)) || (selectedCategory !== 'Personalizado' && place.category === selectedCategory) ).map((place) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
-            
+            const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
             // La lógica de filtrado ya está en el `.filter` de arriba.
             // Aquí solo nos aseguramos de que se muestre con el icono correcto.
-
             return (
               <Marker key={place.id} position={place.coordinates} icon={getCategoryIcon('Personalizado')}>
                   <Popup>
@@ -453,7 +473,6 @@ export default function InteractiveMap() {
                           <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
                             {place.description}
                           </Typography>
-                          
                           {place.link && (
                             <Button
                                 variant="text"
@@ -466,18 +485,29 @@ export default function InteractiveMap() {
                                 Más info
                             </Button>
                           )}
-                          
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<DirectionsIcon />}
-                            href={directionsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            fullWidth
-                          >
-                            Cómo llegar
-                          </Button>
+                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<DirectionsIcon />}
+                              href={directionsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              fullWidth
+                            >
+                              Cómo llegar
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              href={streetViewUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              fullWidth
+                            >
+                              Street View
+                            </Button>
+                          </Stack>
                       </Box>
                   </Popup>
               </Marker>
