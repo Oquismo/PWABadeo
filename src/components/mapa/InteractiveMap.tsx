@@ -19,45 +19,39 @@ import L from 'leaflet';
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 const getCategoryIcon = (category: string) => {
-  let iconUrl: string;
-  let shadowUrl: string = 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png';
-
-  switch (category) {
-    case 'Cultural':
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png';
-      break;
-    case 'Comida':
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png';
-      break;
-    case 'Ocio':
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png';
-      break;
-    case 'Servicios':
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png';
-      break;
-    case 'Estudio':
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-darkblue.png';
-      break;
-    case 'Transporte':
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png';
-      break;
-    case 'Salud': // Esta es la categoría específica
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-darkred.png'; // Este es el icono
-      break;
-    case 'Personalizado':
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
-      break;
-    default: // Para cualquier otra categoría no especificada o las de 'locations'
-      iconUrl = 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png';
+  // Mapeo de categorías a iconos personalizados locales
+  const iconMap: Record<string, string> = {
+    'Residencia': '/icons/hotel-svgrepo-com.svg',
+    'Comida': '/icons/food-svgrepo-com.svg',
+    'Salud': '/icons/health-svgrepo-com.svg',
+    'Transporte': '/icons/bus-svgrepo-com.svg',
+    'Ocio': '/icons/school-bell-svgrepo-com.svg',
+    'Cultural': '/icons/location-pin-svgrepo-com.svg',
+    'Servicios': '/icons/location-pin-svgrepo-com.svg',
+    'Estudio': '/icons/school-bell-svgrepo-com.svg',
+  };
+  const iconFile = iconMap[category] || '/icons/location-pin-svgrepo-com.svg';
+  const shadowUrl = 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png';
+  // Ajuste especial para el icono de residencia/hotel
+  if (category === 'Residencia') {
+    return new L.Icon({
+      iconUrl: iconFile,
+      iconRetinaUrl: iconFile,
+      shadowUrl: shadowUrl,
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+      popupAnchor: [0, -40],
+      shadowSize: [41, 41]
+    });
   }
-
+  // Otros iconos
   return new L.Icon({
-    iconUrl: iconUrl,
-    iconRetinaUrl: iconUrl,
+    iconUrl: iconFile,
+    iconRetinaUrl: iconFile,
     shadowUrl: shadowUrl,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
     shadowSize: [41, 41]
   });
 };
