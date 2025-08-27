@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   Container, 
@@ -24,7 +24,8 @@ import {
 import { IconButton, InputAdornment } from '@mui/material';
 import Link from 'next/link';
 
-export default function ResetPasswordPage() {
+// Componente que maneja los search params
+function ResetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -321,5 +322,23 @@ export default function ResetPasswordPage() {
         </Box>
       </Paper>
     </Container>
+  );
+}
+
+// Componente principal que envuelve en Suspense
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <Container maxWidth="sm" sx={{ py: 8 }}>
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6">
+            Cargando...
+          </Typography>
+        </Paper>
+      </Container>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
