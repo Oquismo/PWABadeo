@@ -3,8 +3,24 @@ import { testEmailConnection } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Verificación básica de seguridad
+    const url = new URL(request.url);
+    const authHeader = request.headers.get('authorization');
+    const referer = request.headers.get('referer');
+    
+    // Solo permitir acceso desde la página de email-config o con header de auth
+    if (!referer?.includes('/email-config') && !authHeader) {
+      return NextResponse.json({
+        success: false,
+        error: 'Acceso no autorizado',
+        message: 'Esta API solo es accesible desde el panel de diagnóstico'
+      }, { status: 403 });
+    }
+
+    console.log('🔍 Acceso autorizado a diagnóstico de email desde:', referer);
+
     // Verificar variables de entorno
     const envVars = {
       EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || 'not set',

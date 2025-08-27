@@ -2,9 +2,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // EXCEPCIÓN: Permitir acceso a la página de diagnóstico de email
+  // EXCEPCIÓN: Permitir acceso a la página de diagnóstico de email (con auth interna)
   if (request.nextUrl.pathname === '/email-config') {
-    console.log('✅ Permitiendo acceso a página de diagnóstico de email');
+    console.log('✅ Permitiendo acceso a página de diagnóstico de email (requiere auth interna)');
+    return NextResponse.next();
+  }
+
+  // EXCEPCIÓN: Permitir acceso a documentación de admin (solo lectura)
+  if (request.nextUrl.pathname === '/admin-docs') {
+    console.log('✅ Permitiendo acceso a documentación de admin');
     return NextResponse.next();
   }
 
@@ -56,7 +62,8 @@ export function middleware(request: NextRequest) {
     // EXCEPCIÓN: Permitir rutas de diagnóstico de email sin restricciones
     const emailDiagnosticRoutes = [
       '/api/debug/email-config',
-      '/api/debug/test-email'
+      '/api/debug/test-email',
+      '/api/debug/tokens'
     ];
     
     if (emailDiagnosticRoutes.includes(request.nextUrl.pathname)) {
@@ -100,6 +107,7 @@ export const config = {
   matcher: [
     '/debug/:path*',
     '/api/debug/:path*',
-    '/email-config'
+    '/email-config',
+    '/admin-docs'
   ]
 };

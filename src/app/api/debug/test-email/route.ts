@@ -5,6 +5,21 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
+    // Verificación básica de seguridad
+    const referer = req.headers.get('referer');
+    const authHeader = req.headers.get('authorization');
+    
+    // Solo permitir acceso desde la página de email-config o con header de auth
+    if (!referer?.includes('/email-config') && !authHeader) {
+      return NextResponse.json({
+        success: false,
+        error: 'Acceso no autorizado',
+        message: 'Esta API solo es accesible desde el panel de diagnóstico'
+      }, { status: 403 });
+    }
+
+    console.log('🔍 Acceso autorizado a test de email desde:', referer);
+
     const { email } = await req.json();
 
     if (!email) {

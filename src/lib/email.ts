@@ -50,6 +50,9 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
     
     const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3002'}/reset-password?token=${resetToken}`;
     
+    console.log('🔗 URL de reset generada:', resetUrl);
+    console.log('🌍 NEXTAUTH_URL desde env:', process.env.NEXTAUTH_URL);
+    
     const mailOptions = {
       from: {
         name: 'Badeo - Barrio de Oportunidades',

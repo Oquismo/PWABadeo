@@ -40,6 +40,14 @@ export async function POST(req: Request) {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 1);
 
+      console.log('🔑 Generando token de reset:', {
+        email,
+        tokenLength: resetToken.length,
+        tokenStart: resetToken.substring(0, 8) + '...',
+        expiresAt: expiresAt.toISOString(),
+        minutesValid: 60
+      });
+
       // Limpiar tokens anteriores expirados para este email
       await prisma.$executeRaw`
         DELETE FROM "PasswordResetToken" 
@@ -51,6 +59,8 @@ export async function POST(req: Request) {
         INSERT INTO "PasswordResetToken" (email, token, "expiresAt", used, "createdAt")
         VALUES (${email}, ${resetToken}, ${expiresAt}, false, NOW())
       `;
+
+      console.log('✅ Token guardado en base de datos para:', email);
 
       // En desarrollo, mostramos el token en consola
       if (process.env.NODE_ENV === 'development') {
