@@ -4,7 +4,17 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const { email, password, name } = await request.json();
+    const { 
+      email, 
+      password, 
+      firstName,
+      lastName,
+      name,
+      age,
+      schoolId,
+      arrivalDate,
+      departureDate
+    } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -74,24 +84,29 @@ export async function POST(request: Request) {
     console.log('👤 Creating user with role:', assignedRole);
       let user;
       try {
+        const userData: any = {
+          email,
+          password: hashedPassword,
+          role: assignedRole,
+        };
+
+        // Agregar campos opcionales si están presentes
+        if (firstName) userData.firstName = firstName;
+        if (lastName) userData.lastName = lastName;
+        if (name) userData.name = name;
+        if (!name && (firstName || lastName)) {
+          userData.name = `${firstName || ''} ${lastName || ''}`.trim();
+        }
+        if (!name && !firstName && !lastName) {
+          userData.name = email.split('@')[0];
+        }
+        if (age) userData.age = parseInt(age, 10);
+        if (schoolId) userData.schoolId = parseInt(schoolId, 10);
+        if (arrivalDate) userData.arrivalDate = arrivalDate;
+        if (departureDate) userData.departureDate = departureDate;
+
         user = await prisma.user.create({
-          data: {
-            email,
-            name: name || email.split('@')[0], // Usar parte del email si no hay name
-            password: hashedPassword,
-            role: assignedRole,
-          },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            school: true,
-            age: true,
-            arrivalDate: true,
-            departureDate: true,
-            avatarUrl: true
-          }
+          data: userData
         });
       } catch (dbErr: any) {
         console.error('❌ Error creando usuario en DB:', dbErr);

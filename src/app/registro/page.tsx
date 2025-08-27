@@ -6,7 +6,20 @@ import { useAuth } from '@/context/AuthContext';
 import { Container, Box, Typography, TextField, Button, Link as MuiLink, Grid, Tooltip } from '@mui/material';
 import Link from 'next/link';
 import EngineeringIcon from '@mui/icons-material/Engineering';
+import SchoolSelector from '@/components/registro/SchoolSelector';
 import type { User } from '@/context/AuthContext';
+
+// Tipo para la escuela seleccionada
+interface School {
+  id: number;
+  name: string;
+  address?: string;
+  city?: string;
+  province?: string;
+  type: string;
+  level: string;
+  description?: string;
+}
 
 export default function RegistroPage() {
   const [formData, setFormData] = useState({
@@ -15,10 +28,10 @@ export default function RegistroPage() {
     email: '',
     password: '',
     age: '',
-    school: '',
     arrivalDate: '',
     departureDate: '',
   });
+  const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [errors, setErrors] = useState<any>({});
   const router = useRouter();
   const { login } = useAuth();
@@ -55,7 +68,7 @@ export default function RegistroPage() {
     } else if (isNaN(Number(formData.age)) || Number(formData.age) <= 0) {
       tempErrors.age = 'Introduce una edad válida.';
     }
-    if (!formData.school) tempErrors.school = 'El nombre de la escuela es obligatorio.';
+    if (!selectedSchool) tempErrors.school = 'La escuela es obligatoria.';
     if (!formData.arrivalDate) tempErrors.arrivalDate = 'La fecha de llegada es obligatoria.';
     if (!formData.departureDate) tempErrors.departureDate = 'La fecha de salida es obligatoria.';
     
@@ -71,9 +84,14 @@ export default function RegistroPage() {
     
     try {
       const payload = {
-        name: `${formData.firstName} ${formData.lastName}`,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
+        age: parseInt(formData.age, 10),
+        schoolId: selectedSchool?.id,
+        arrivalDate: formData.arrivalDate,
+        departureDate: formData.departureDate,
       };
       
       console.log('📝 Intentando registro con:', payload.email);
@@ -95,8 +113,28 @@ export default function RegistroPage() {
       // Si llegamos aquí, el registro fue exitoso
       console.log('✅ Registro exitoso, usuario:', data.user);
       
+      // Preparar datos del usuario para el contexto con información de la escuela
+      const userData: User = {
+        id: data.user.id,
+        firstName: data.user.firstName,
+        lastName: data.user.lastName,
+        email: data.user.email,
+        age: data.user.age,
+        role: data.user.role || 'USER',
+        arrivalDate: data.user.arrivalDate,
+        departureDate: data.user.departureDate,
+        schoolId: data.user.schoolId,
+        school: selectedSchool ? {
+          id: selectedSchool.id,
+          name: selectedSchool.name,
+          city: selectedSchool.city,
+          type: selectedSchool.type,
+          level: selectedSchool.level,
+        } : undefined,
+      };
+      
       // Usar el contexto de auth para guardar el usuario
-      login(data.user);
+      login(userData);
       
       // Redirigir a la página principal
       router.push('/');
@@ -132,8 +170,14 @@ export default function RegistroPage() {
             <Grid item xs={12} sm={6}>
               <TextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField name="school" required fullWidth label="Escuela" value={formData.school} onChange={handleChange} error={!!errors.school} helperText={errors.school} />
+            <Grid item xs={12}>
+              <SchoolSelector
+                value={selectedSchool}
+                onChange={setSelectedSchool}
+                error={!!errors.school}
+                helperText={errors.school}
+                required
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField

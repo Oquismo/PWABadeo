@@ -16,12 +16,15 @@ datasource db {
 model User {
   id               Int               @id @default(autoincrement())
   email            String            @unique
+  firstName        String?
+  lastName         String?
   name             String?
   password         String
   role             String            @default("user")
   createdAt        DateTime          @default(now())
   lastSeen         DateTime?         @db.Timestamptz(3)
-  school           String? // Escuela del usuario
+  schoolId         Int? // ID de la escuela (relación)
+  school           School?           @relation(fields: [schoolId], references: [id]) // Relación con escuela
   age              Int? // Edad del usuario
   arrivalDate      String? // Fecha de llegada
   departureDate    String? // Fecha de salida
@@ -30,6 +33,35 @@ model User {
   logs             Log[]
   tasks            Task[]
   pushSubscription PushSubscription?
+  
+  @@index([schoolId])
+}
+
+model School {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // Nombre de la escuela
+  address     String? // Dirección de la escuela
+  city        String? // Ciudad
+  province    String? // Provincia/Estado
+  country     String   @default("España") // País
+  phoneNumber String? // Teléfono de contacto
+  email       String? // Email de contacto
+  website     String? // Sitio web
+  type        String   @default("pública") // "pública", "privada", "concertada"
+  level       String   @default("primaria") // "infantil", "primaria", "secundaria", "bachillerato", "fp"
+  description String? // Descripción adicional
+  isActive    Boolean  @default(true) // Si está activa para registro
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relación con usuarios
+  users       User[]
+  
+  @@index([name])
+  @@index([city])
+  @@index([type])
+  @@index([level])
+  @@index([isActive])
 }
 
 model Announcement {

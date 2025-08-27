@@ -4,11 +4,20 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 export interface User {
   id: number;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
   email: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'USER' | 'ADMIN';
   age?: number | null;
-  school?: string | null;
+  school?: {
+    id: number;
+    name: string;
+    city?: string;
+    type: string;
+    level: string;
+  } | string | null;
+  schoolId?: number | null;
   avatarUrl?: string | null;
   arrivalDate?: string | null;
   departureDate?: string | null;

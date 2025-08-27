@@ -9,6 +9,7 @@ import EventManagement from '@/components/admin/EventManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import LogViewer from '@/components/admin/LogViewer';
 import AnnouncementManager from '@/components/admin/AnnouncementManager'; // 1. Asegurarse de que está importado
+import SchoolManagement from '@/components/admin/SchoolManagement';
 import AdminDevTools from '@/components/admin/AdminDevTools';
 import AuthDebugPanel from '@/components/admin/AuthDebugPanel';
 
@@ -48,6 +49,7 @@ export default function AdminPage() {
             <Tab label="Usuarios" />
             <Tab label="Logs" />
             <Tab label="Anuncios" />
+            <Tab label="Escuelas" />
             <Tab label="Dev Tools" />
             <Tab label="Auth Debug" />
           </Tabs>
@@ -58,8 +60,9 @@ export default function AdminPage() {
         {tab === 1 && <UserManagement />}
         {tab === 2 && <LogViewer />}
         {tab === 3 && <AnnouncementManager />}
-        {tab === 4 && <AdminDevTools />}
-        {tab === 5 && <AuthDebugPanel />}
+        {tab === 4 && <SchoolManagement />}
+        {tab === 5 && <AdminDevTools />}
+        {tab === 6 && <AuthDebugPanel />}
       </Box>
     </Container>
   );
