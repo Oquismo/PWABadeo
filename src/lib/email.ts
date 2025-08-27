@@ -2,8 +2,17 @@ import nodemailer from 'nodemailer';
 
 // Configuración del transportador de email
 const createTransporter = () => {
+  console.log('🔧 Configurando transportador de email:', {
+    EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || 'not set',
+    EMAIL_USER: process.env.EMAIL_USER ? 'SET' : 'NOT SET',
+    EMAIL_PASSWORD: process.env.EMAIL_PASSWORD ? 'SET' : 'NOT SET',
+    EMAIL_HOST: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    EMAIL_PORT: process.env.EMAIL_PORT || '587'
+  });
+
   // Configuración para Gmail (puedes cambiar por otro proveedor)
   if (process.env.EMAIL_PROVIDER === 'gmail') {
+    console.log('📧 Usando configuración Gmail');
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -14,6 +23,7 @@ const createTransporter = () => {
   }
 
   // Configuración para otros proveedores SMTP
+  console.log('📧 Usando configuración SMTP genérica');
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -27,6 +37,15 @@ const createTransporter = () => {
 
 export async function sendPasswordResetEmail(email: string, resetToken: string) {
   try {
+    console.log('📧 Iniciando envío de email de recuperación:', {
+      to: email,
+      hasToken: !!resetToken,
+      NODE_ENV: process.env.NODE_ENV,
+      EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
+      EMAIL_USER: process.env.EMAIL_USER ? '***@gmail.com' : 'NOT SET',
+      EMAIL_PASSWORD: process.env.EMAIL_PASSWORD ? 'SET' : 'NOT SET'
+    });
+
     const transporter = createTransporter();
     
     const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3002'}/reset-password?token=${resetToken}`;
