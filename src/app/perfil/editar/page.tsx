@@ -34,9 +34,19 @@ export default function EditarPerfilPage() {
 
   useEffect(() => {
     if (user) {
+      // Manejar el campo school que puede ser string o objeto
+      let schoolValue = '';
+      if (user.school) {
+        if (typeof user.school === 'string') {
+          schoolValue = user.school;
+        } else if (typeof user.school === 'object' && 'name' in user.school) {
+          schoolValue = user.school.name;
+        }
+      }
+
       setFormData({
         name: user.name || '',
-        school: user.school || '',
+        school: schoolValue,
         age: user.age ? String(user.age) : '',
         arrivalDate: user.arrivalDate || '',
         departureDate: user.departureDate || '',

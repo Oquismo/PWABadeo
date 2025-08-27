@@ -23,7 +23,9 @@ export interface User {
   departureDate?: string | null;
 }
 
-type UserUpdateData = Partial<Omit<User, 'id' | 'email' | 'role'>>;
+type UserUpdateData = Partial<Omit<User, 'id' | 'email' | 'role' | 'school'>> & {
+  school?: string | null; // Para edición de perfil solo permitimos string
+};
 
 interface AuthContextType {
   user: User | null;
@@ -104,7 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUser = (data: UserUpdateData) => {
     setUser(prevUser => {
       if (!prevUser) return null;
-      const updatedUser = { ...prevUser, ...data };
+      
+      // Si se está actualizando la escuela con un string, mantenerlo como string
+      // En el futuro podríamos convertirlo a objeto si es necesario
+      const updatedData: any = { ...data };
+      
+      const updatedUser = { ...prevUser, ...updatedData };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     });
