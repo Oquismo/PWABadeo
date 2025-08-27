@@ -2,15 +2,37 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma-client';
 import webpush from 'web-push';
 
-// Configurar VAPID
-webpush.setVapidDetails(
-  'mailto:tu-email@example.com', // Cambia esto por tu email
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
+    // Configurar VAPID dentro de la función
+    const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    const privateKey = process.env.VAPID_PRIVATE_KEY;
+    
+    if (!publicKey || !privateKey) {
+      console.error('VAPID keys not configured');
+      return NextResponse.json(
+        { error: 'Claves VAPID no configuradas' },
+        { status: 500 }
+      );
+    }
+
+    // Validar que las claves no estén vacías y tengan el formato correcto
+    if (publicKey.length < 10 || privateKey.length < 10) {
+      console.error('VAPID keys appear to be invalid');
+      return NextResponse.json(
+        { error: 'Claves VAPID inválidas' },
+        { status: 500 }
+      );
+    }
+
+    webpush.setVapidDetails(
+      'mailto:contact@badeo.com',
+      publicKey,
+      privateKey
+    );
+
     const { title, body, icon, userId } = await req.json();
 
     if (!title || !body) {
