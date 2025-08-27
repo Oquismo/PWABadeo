@@ -2,7 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // PROTECCIÓN ESTRICTA: Bloquear TODAS las rutas de debug
+  // EXCEPCIÓN: Permitir acceso a la página de diagnóstico de email
+  if (request.nextUrl.pathname === '/email-config') {
+    console.log('✅ Permitiendo acceso a página de diagnóstico de email');
+    return NextResponse.next();
+  }
+
+  // PROTECCIÓN ESTRICTA: Bloquear OTRAS rutas de debug
   if (request.nextUrl.pathname.startsWith('/debug')) {
     
     // BLOQUEO TOTAL: Solo permitir acceso desde el panel de admin
@@ -47,7 +53,18 @@ export function middleware(request: NextRequest) {
   // PROTECCIÓN ESTRICTA: APIs de debug
   if (request.nextUrl.pathname.startsWith('/api/debug')) {
     
-    // Verificar que viene del panel de admin
+    // EXCEPCIÓN: Permitir rutas de diagnóstico de email sin restricciones
+    const emailDiagnosticRoutes = [
+      '/api/debug/email-config',
+      '/api/debug/test-email'
+    ];
+    
+    if (emailDiagnosticRoutes.includes(request.nextUrl.pathname)) {
+      console.log('✅ Permitiendo acceso a diagnóstico de email:', request.nextUrl.pathname);
+      return NextResponse.next();
+    }
+    
+    // Verificar que viene del panel de admin (para otras rutas debug)
     const referer = request.headers.get('referer');
     const origin = request.headers.get('origin');
     
@@ -82,6 +99,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/debug/:path*',
-    '/api/debug/:path*'
+    '/api/debug/:path*',
+    '/email-config'
   ]
 };
