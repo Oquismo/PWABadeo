@@ -11,6 +11,7 @@ import BottomNavBar from '@/components/layout/BottomNavBar';
 import PageTransition from '@/components/layout/PageTransition';
 import DebugInitializer from '@/components/debug/DebugInitializer';
 import AnnouncementBanner from '@/components/home/AnnouncementBanner';
+import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -41,17 +42,19 @@ export default function RootLayout({
               <TasksProvider>
                 <CssBaseline />
                 <DebugInitializer />
-                <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-                  
-                  <Box component="main" sx={{ pb: '90px' }}>
-                    <PageTransition>
-                      {children}
-                    </PageTransition>
+                <ServiceWorkerProvider>
+                  <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+                    
+                    <Box component="main" sx={{ pb: '90px' }}>
+                      <PageTransition>
+                        {children}
+                      </PageTransition>
+                    </Box>
+
+                    <BottomNavBar />
+
                   </Box>
-
-                  <BottomNavBar />
-
-                </Box>
+                </ServiceWorkerProvider>
               </TasksProvider>
             </CustomThemeProvider>
           </AuthProvider>

@@ -20,5 +20,23 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "categories": ["education", "lifestyle", "social"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Ver Proyectos",
+      "short_name": "Proyectos",
+      "description": "Ver proyectos activos",
+      "url": "/proyectos",
+      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mapa",
+      "short_name": "Mapa",
+      "description": "Ver mapa del barrio",
+      "url": "/mapa",
+      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+    }
   ]
 }

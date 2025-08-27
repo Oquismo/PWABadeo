@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
 import { Box, Typography, Fab, TextField, IconButton, InputAdornment, Button, Stack, Chip } from '@mui/material';
@@ -15,6 +15,49 @@ import { placesData, Place } from '@/data/places';
 import AddPlaceModal from './AddPlaceModal'; 
 
 import L from 'leaflet';
+import 'leaflet.heat';
+// Genera los puntos del heatmap a partir de los datos reales de placesData y clicks almacenados en localStorage
+function getHeatmapPointsFromClicks(places: Place[]): [number, number, number?][] {
+  // Recupera el objeto de clicks por id de localStorage
+  let clickMap: Record<string, number> = {};
+  try {
+    const raw = localStorage.getItem('placeClicks');
+    if (raw) clickMap = JSON.parse(raw);
+  } catch {}
+  // Calcula el máximo para normalizar
+  const maxClicks = Math.max(1, ...Object.values(clickMap));
+  return places.map(place => [
+    place.coordinates.lat,
+    place.coordinates.lng,
+    (clickMap[place.id] || 0) / maxClicks || 0.1 // mínimo 0.1 para que se vea
+  ]);
+}
+// Componente para añadir la capa de heatmap a Leaflet
+function HeatmapLayer({ points, visible }: { points: [number, number, number?][]; visible: boolean }) {
+  const map = useMap();
+  const layerRef = useRef<L.Layer | null>(null);
+
+  useEffect(() => {
+    if (!visible) {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+      return;
+    }
+    // @ts-ignore
+    const heat = (L as any).heatLayer(points, { radius: 30, blur: 18, maxZoom: 17, gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'} });
+    heat.addTo(map);
+    layerRef.current = heat;
+    return () => {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
+  }, [map, points, visible]);
+  return null;
+}
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -139,6 +182,22 @@ function MapResizer() {
 }
 
 export default function InteractiveMap() {
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  // Botón flotante para alternar el heatmap
+  const HeatmapToggleButton = () => (
+    <Fab
+      color={showHeatmap ? 'secondary' : 'default'}
+      size="small"
+      onClick={() => setShowHeatmap((v) => !v)}
+      sx={{ position: 'absolute', top: 145, right: 10, zIndex: 1000 }}
+      aria-label="toggle heatmap"
+    >
+      <span role="img" aria-label="heatmap">🔥</span>
+    </Fab>
+  );
+
+  // Estado para forzar actualización del heatmap al hacer clic
+  const [heatmapVersion, setHeatmapVersion] = useState(0);
   const defaultPosition: LatLngExpression = [37.3891, -5.9845];
   const [userPosition, setUserPosition] = useState<LatLng | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -315,6 +374,8 @@ export default function InteractiveMap() {
         ))}
       </Stack>
 
+      <Box sx={{ position: 'relative' }}>
+        <HeatmapToggleButton />
       <MapContainer 
         center={defaultPosition} 
         zoom={14} 
@@ -374,8 +435,19 @@ export default function InteractiveMap() {
         {placesData.filter(place => selectedCategory === 'Todos' || place.category === selectedCategory).map((place) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
             const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
+            // Handler para contar clicks en el marcador
+            const handleMarkerClick = () => {
+              let clickMap: Record<string, number> = {};
+              try {
+                const raw = localStorage.getItem('placeClicks');
+                if (raw) clickMap = JSON.parse(raw);
+              } catch {}
+              clickMap[place.id] = (clickMap[place.id] || 0) + 1;
+              localStorage.setItem('placeClicks', JSON.stringify(clickMap));
+              setHeatmapVersion(v => v + 1); // Forzar actualización
+            };
             return (
-              <Marker key={place.id} position={place.coordinates} icon={getCategoryIcon(place.category)}>
+              <Marker key={place.id} position={place.coordinates} icon={getCategoryIcon(place.category)} eventHandlers={{ click: handleMarkerClick }}>
                   <Popup>
                       <Box sx={{ maxWidth: 200 }}>
                           {place.imageUrl && (
@@ -532,10 +604,13 @@ export default function InteractiveMap() {
             </Marker>
         )}
 
-        <MapController setMap={setMap} />
-        <LocationButton setUserPosition={setUserPosition} />
-        <MapResizer />
-      </MapContainer>
+  <MapController setMap={setMap} />
+  <LocationButton setUserPosition={setUserPosition} />
+  <MapResizer />
+  {/* Capa de heatmap */}
+  <HeatmapLayer points={getHeatmapPointsFromClicks(placesData)} visible={showHeatmap} key={heatmapVersion} />
+  </MapContainer>
+  </Box>
 
       <AddPlaceModal
         open={showAddPlaceModal}

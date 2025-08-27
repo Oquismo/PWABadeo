@@ -11,4 +11,7 @@ if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
 
+// Forzar regeneración del tipo
+prisma.$connect().catch(console.error);
+
 export default prisma;

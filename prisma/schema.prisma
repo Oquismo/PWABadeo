@@ -14,21 +14,22 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique
-  name          String?
-  password      String
-  role          String         @default("user")
-  createdAt     DateTime       @default(now())
-  lastSeen      DateTime?      @db.Timestamptz(3)
-  school        String? // Escuela del usuario
-  age           Int? // Edad del usuario
-  arrivalDate   String? // Fecha de llegada
-  departureDate String? // Fecha de salida
-  avatarUrl     String? // URL del avatar
-  announcements Announcement[]
-  logs          Log[]
-  tasks         Task[]
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  name             String?
+  password         String
+  role             String            @default("user")
+  createdAt        DateTime          @default(now())
+  lastSeen         DateTime?         @db.Timestamptz(3)
+  school           String? // Escuela del usuario
+  age              Int? // Edad del usuario
+  arrivalDate      String? // Fecha de llegada
+  departureDate    String? // Fecha de salida
+  avatarUrl        String? // URL del avatar
+  announcements    Announcement[]
+  logs             Log[]
+  tasks            Task[]
+  pushSubscription PushSubscription?
 }
 
 model Announcement {
@@ -67,4 +68,15 @@ model Task {
   @@index([role])
   @@index([createdAt])
   @@index([createdBy])
+}
+
+model PushSubscription {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  subscription Json     // Suscripción push del navegador
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
