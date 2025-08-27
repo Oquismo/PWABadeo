@@ -133,11 +133,20 @@ export default function LoginPage() {
                 {errors.api}
               </Typography>
             )}
-          <Box sx={{ textAlign: 'center' }}>
-            <MuiLink component={Link} href="/registro" variant="body2">
-              {"¿No tienes cuenta? Regístrate"}
-            </MuiLink>
-          </Box>
+          
+          {/* Enlaces de utilidad */}
+          <Stack spacing={1} sx={{ mt: 2 }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <MuiLink component={Link} href="/forgot-password" variant="body2" color="primary">
+                {"¿Has olvidado tu contraseña?"}
+              </MuiLink>
+            </Box>
+            <Box sx={{ textAlign: 'center' }}>
+              <MuiLink component={Link} href="/registro" variant="body2">
+                {"¿No tienes cuenta? Regístrate"}
+              </MuiLink>
+            </Box>
+          </Stack>
         </Box>
         
   {/* Bypass eliminado para exigir autenticación real */}
