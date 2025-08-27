@@ -141,7 +141,16 @@ export default function PerfilPage() {
                 <ListItemIcon>
                   <SchoolIcon />
                 </ListItemIcon>
-                <ListItemText primary="Escuela" secondary={user.school || 'No especificada'} />
+                <ListItemText 
+                  primary="Escuela" 
+                  secondary={
+                    user.school 
+                      ? (typeof user.school === 'string' 
+                          ? user.school 
+                          : user.school.name)
+                      : 'No especificada'
+                  } 
+                />
               </ListItem>
               <ListItem>
                 <ListItemIcon>

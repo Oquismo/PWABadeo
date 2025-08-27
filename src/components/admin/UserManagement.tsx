@@ -42,7 +42,13 @@ export default function UserManagement() {
               </ListItemAvatar>
               <ListItemText
                 primary={user.name || 'Sin nombre'}
-                secondary={`${user.email} - ${user.school || 'Sin escuela'}`}
+                secondary={`${user.email} - ${
+                  user.school 
+                    ? (typeof user.school === 'string' 
+                        ? user.school 
+                        : user.school.name)
+                    : 'Sin escuela'
+                }`}
               />
             </ListItem>
             {index < users.length - 1 && <Divider />}
