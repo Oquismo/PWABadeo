@@ -1,6 +1,9 @@
 {
-  "typescript.preferences.includePackageJsonAutoImports": "on",
-  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
   "typescript.suggest.autoImports": true,
-  "typescript.preferences.typescript.inlayHints.functionLikeReturnTypes.enabled": true
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.includeCompletionsForModuleExports": true,
+  "eslint.workingDirectories": ["src"],
+  "typescript.preferences.includeCompletionsWithSnippetText": true,
+  "typescript.suggest.completeFunctionCalls": true
 }
