@@ -16,7 +16,7 @@ import Link from 'next/link';
 import TaskManager from '@/components/admin/TaskManager';
 
 export default function PerfilPage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -26,10 +26,10 @@ export default function PerfilPage() {
   const defaultEggAvatar = '🥚';
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, isLoading]);
 
   // Cargar imagen de perfil al inicializar
   useEffect(() => {
@@ -61,8 +61,14 @@ export default function PerfilPage() {
     router.push('/');
   };
 
-  if (!user) {
-    return null; 
+  if (isLoading || !user) {
+    return (
+      <Container component="main" maxWidth="sm">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <Typography>Cargando...</Typography>
+        </Box>
+      </Container>
+    );
   }
 
   // Handler para tap largo en el avatar

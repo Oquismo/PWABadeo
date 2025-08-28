@@ -214,10 +214,72 @@ export default function EditarPerfilPage() {
               <TextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField name="arrivalDate" required fullWidth label="Fecha de Llegada" type="date" InputLabelProps={{ shrink: true }} value={formData.arrivalDate} onChange={handleChange} />
+              <TextField
+                name="arrivalDate"
+                required
+                fullWidth
+                label="Fecha de Llegada"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={formData.arrivalDate}
+                onChange={handleChange}
+                sx={{
+                  '& input': {
+                    backgroundColor: '#222 !important',
+                    color: '#e0e0e0 !important',
+                    borderRadius: '6px',
+                  },
+                  '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                    filter: 'invert(0.7)',
+                  },
+                  '& input[type="date"]::-webkit-input-placeholder': {
+                    color: '#aaa',
+                  },
+                  '& input[type="date"]::-moz-placeholder': {
+                    color: '#aaa',
+                  },
+                  '& input[type="date"]:-ms-input-placeholder': {
+                    color: '#aaa',
+                  },
+                  '& input[type="date"]::placeholder': {
+                    color: '#aaa',
+                  },
+                }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField name="departureDate" required fullWidth label="Fecha de Salida" type="date" InputLabelProps={{ shrink: true }} value={formData.departureDate} onChange={handleChange} />
+              <TextField
+                name="departureDate"
+                required
+                fullWidth
+                label="Fecha de Salida"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={formData.departureDate}
+                onChange={handleChange}
+                sx={{
+                  '& input': {
+                    backgroundColor: '#222 !important',
+                    color: '#e0e0e0 !important',
+                    borderRadius: '6px',
+                  },
+                  '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                    filter: 'invert(0.7)',
+                  },
+                  '& input[type="date"]::-webkit-input-placeholder': {
+                    color: '#aaa',
+                  },
+                  '& input[type="date"]::-moz-placeholder': {
+                    color: '#aaa',
+                  },
+                  '& input[type="date"]:-ms-input-placeholder': {
+                    color: '#aaa',
+                  },
+                  '& input[type="date"]::placeholder': {
+                    color: '#aaa',
+                  },
+                }}
+              />
             </Grid>
           </Grid>
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2 }}>

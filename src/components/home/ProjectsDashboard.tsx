@@ -4,11 +4,15 @@ import { Typography, Card, CardContent, Box, IconButton, Tooltip, Chip } from '@
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LaunchIcon from '@mui/icons-material/Launch';
+import CloseIcon from '@mui/icons-material/Close';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import { carouselConfig } from '@/data/tasks';
+import { TaskData } from '@/data/tasks';
 import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createSwapy } from 'swapy';
 import dynamic from 'next/dynamic';
 
 // Lazy loading para el componente de debug pesado
@@ -17,9 +21,89 @@ const DebugMetrics = dynamic(() => import('@/components/admin/DebugMetrics'), {
 });
 
 export default function ProjectsDashboard() {
-  const { tasks } = useTasks();
+  const { tasks, deleteTask } = useTasks();
   const { user } = useAuth();
   const [debugInfo, setDebugInfo] = useState(false);
+  const [orderedTasks, setOrderedTasks] = useState<TaskData[]>([]);
+  const swapyRef = useRef<HTMLDivElement>(null);
+  const swapyInstance = useRef<any>(null);
+  
+  // Efecto para cerrar debug al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Si debugInfo está activo y el clic no es dentro del panel de debug
+      if (debugInfo && user?.role === 'admin') {
+        const debugPanel = document.querySelector('[data-debug-panel]');
+        if (debugPanel && !debugPanel.contains(event.target as Node)) {
+          setDebugInfo(false);
+        }
+      }
+    };
+
+    if (debugInfo) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [debugInfo, user?.role]);
+  
+  // Inicializar tareas ordenadas
+  useEffect(() => {
+    let initialTasks = [...tasks];
+    
+    // Cargar orden guardado desde localStorage
+    const savedOrder = localStorage.getItem('tasksOrder');
+    if (savedOrder) {
+      try {
+        const orderIds = JSON.parse(savedOrder);
+        const ordered = orderIds.map((id: string) => 
+          initialTasks.find(task => String(task.id) === id)
+        ).filter(Boolean);
+        
+        // Agregar tareas nuevas que no estén en el orden guardado
+        const newTasks = initialTasks.filter(task => 
+          !orderIds.includes(String(task.id))
+        );
+        
+        initialTasks = [...ordered, ...newTasks];
+      } catch (error) {
+        console.warn('Error loading saved task order:', error);
+      }
+    }
+    
+    setOrderedTasks(initialTasks);
+  }, [tasks]);
+  
+  // Inicializar Swapy para drag and drop
+  useEffect(() => {
+    if (swapyRef.current && orderedTasks.length > 0) {
+      swapyInstance.current = createSwapy(swapyRef.current, {
+        animation: 'spring',
+        swapMode: 'hover'
+      });
+      
+      swapyInstance.current.onSwap((event: any) => {
+        const { data } = event.detail;
+        const newOrder = data.map((item: any) => {
+          const taskId = item.element.id.replace('task-', '');
+          return orderedTasks.find(task => String(task.id) === taskId);
+        }).filter(Boolean);
+        
+        setOrderedTasks(newOrder);
+        
+        // Guardar el orden en localStorage
+        localStorage.setItem('tasksOrder', JSON.stringify(newOrder.map((task: TaskData) => task.id)));
+      });
+    }
+    
+    return () => {
+      if (swapyInstance.current) {
+        swapyInstance.current.destroy();
+      }
+    };
+  }, [orderedTasks.length]);
   
   // Función de debug para administradores
   const showDebugInfo = () => {
@@ -37,6 +121,25 @@ export default function ProjectsDashboard() {
   
   return (
     <Box sx={{ py: 4, position: 'relative' }}>
+      <style>{`
+        .swapy-item {
+          transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .swapy-item.is-dragging {
+          opacity: 0.5;
+          transform: rotate(5deg) scale(1.05);
+          z-index: 1000;
+        }
+        .swapy-item.is-ghost {
+          opacity: 0.3;
+        }
+        .swapy-slot {
+          transition: all 0.3s ease;
+        }
+        .swapy-slot.is-highlighted {
+          transform: scale(1.02);
+        }
+      `}</style>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, px: 2 }}>
         <Typography variant="h5" fontWeight="bold" sx={{ color: 'text.primary' }}>
           {carouselConfig.title}
@@ -49,7 +152,7 @@ export default function ProjectsDashboard() {
               color: debugInfo ? 'error.main' : 'text.secondary',
               fontSize: '0.7rem'
             }}>
-              {tasks.length} tareas • Admin Mode
+              {orderedTasks.length} tareas • Admin Mode
             </Typography>
             <Tooltip title="Debug Info (Solo Admin)">
               <IconButton 
@@ -84,10 +187,13 @@ export default function ProjectsDashboard() {
           },
           '-ms-overflow-style': 'none',
           'scrollbar-width': 'none'
-        }}>
-          {tasks.map((task, index) => (
+        }} ref={swapyRef}>
+          {orderedTasks.map((task, index) => (
             <Card
               key={task.id || index}
+              id={`task-${task.id || index}`}
+              data-swapy-item={`item-${index}`}
+              className="swapy-item"
               sx={{
                 background: task.color,
                 color: 'white',
@@ -174,9 +280,30 @@ export default function ProjectsDashboard() {
                     }} />
                   )}
                 </Box>
-                <IconButton size="small" sx={{ color: 'white', opacity: 0.85 }}>
-                  <LaunchIcon fontSize="inherit" />
-                </IconButton>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <Tooltip title="Eliminar tarea">
+                    <IconButton 
+                      size="small" 
+                      sx={{ 
+                        color: 'white', 
+                        opacity: 0.85,
+                        '&:hover': { 
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          opacity: 1
+                        }
+                      }}
+                      onClick={() => {
+                        console.log('Eliminando tarea:', task.id);
+                        deleteTask(String(task.id));
+                      }}
+                    >
+                      <InfoOutlinedIcon fontSize="inherit" />
+                    </IconButton>
+                  </Tooltip>
+                  <IconButton size="small" sx={{ color: 'white', opacity: 0.85 }}>
+                    <LaunchIcon fontSize="inherit" />
+                  </IconButton>
+                </Box>
               </Box>
 
               {/* Debug overlay id */}
@@ -194,7 +321,7 @@ export default function ProjectsDashboard() {
                   borderRadius: '4px',
                   border: '1px solid rgba(255,255,255,0.2)'
                 }}>
-                  ID {task.id?.slice(-4) || 'N/A'}
+                  ID {String(task.id).slice(-4) || 'N/A'}
                 </Box>
               )}
             </Card>
@@ -202,8 +329,17 @@ export default function ProjectsDashboard() {
         </Box>
       </Box>
       
-      {/* Métricas de debug para admin */}
-      <DebugMetrics show={debugInfo && user?.role === 'admin'} />
+      {/* Métricas de debug para admin - oculto por defecto para no interferir */}
+      <Box sx={{ 
+        position: 'fixed', 
+        bottom: 20, 
+        right: 20, 
+        zIndex: 1000,
+        maxWidth: '300px',
+        display: debugInfo && user?.role === 'admin' ? 'block' : 'none'
+      }} data-debug-panel>
+        <DebugMetrics show={debugInfo && user?.role === 'admin'} />
+      </Box>
     </Box>
   );
 }

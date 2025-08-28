@@ -14,19 +14,30 @@ import AdminDevTools from '@/components/admin/AdminDevTools';
 import AuthDebugPanel from '@/components/admin/AuthDebugPanel';
 
 export default function AdminPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState(0);
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'admin') {
+    // Solo redirigir después de que termine la carga inicial
+    if (!isLoading && (!isAuthenticated || user?.role !== 'admin')) {
       router.push('/');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isLoading]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
+
+  if (isLoading) {
+    return (
+      <Container>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <Typography>Cargando...</Typography>
+        </Box>
+      </Container>
+    );
+  }
 
   if (!user || user.role !== 'admin') {
     return null;

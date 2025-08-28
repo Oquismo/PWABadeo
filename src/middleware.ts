@@ -1,7 +1,52 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Rutas públicas que no requieren autenticación
+const publicRoutes = [
+  '/login',
+  '/login-simple',
+  '/registro',
+  '/forgot-password',
+  '/reset-password',
+  '/test-auth',
+  '/test-login',
+  '/test-email',
+  '/unauthorized'
+];
+
+// Rutas públicas adicionales que pueden ser accedidas sin login
+const publicPaths = [
+  '/api/auth/login',
+  '/api/auth/login-retry',
+  '/api/auth/login-simple',
+  '/api/auth/login-test',
+  '/api/auth/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/validate-reset-token',
+  '/api/auth/logout',
+  '/api/schools', // API pública para obtener escuelas
+  '/api/announcement/sse', // Server-sent events para anuncios
+  '/api/tasks' // API pública para tareas (si es necesario)
+];
+
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // EXCEPCIÓN: Permitir acceso a rutas públicas
+  if (publicRoutes.includes(pathname) || publicPaths.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // EXCEPCIÓN: Permitir acceso a archivos estáticos y API públicas
+  if (
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/api/public/') ||
+    pathname.includes('.') // archivos con extensión
+  ) {
+    return NextResponse.next();
+  }
+
   // EXCEPCIÓN: Permitir acceso a la página de diagnóstico de email (con auth interna)
   if (request.nextUrl.pathname === '/email-config') {
     console.log('✅ Permitiendo acceso a página de diagnóstico de email (requiere auth interna)');
@@ -14,100 +59,72 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // PROTECCIÓN ESTRICTA: Bloquear OTRAS rutas de debug
-  if (request.nextUrl.pathname.startsWith('/debug')) {
-    
-    // BLOQUEO TOTAL: Solo permitir acceso desde el panel de admin
-    const referer = request.headers.get('referer');
-    const userAgent = request.headers.get('user-agent');
-    
-    // Verificar que NO se accede directamente por URL
-    if (!referer || !referer.includes('/admin')) {
-      console.warn('🚨 ACCESO BLOQUEADO - Intento de acceso directo a debug:', request.nextUrl.pathname);
-      console.warn('🚨 Referer:', referer);
-      console.warn('🚨 User Agent:', userAgent);
-      
-      // Redirigir a página de acceso no autorizado
-      const unauthorizedUrl = new URL('/unauthorized', request.url);
-      return NextResponse.redirect(unauthorizedUrl);
+  // ESTRATEGIA SIMPLIFICADA: Sistema actual usa localStorage
+  // El middleware permitirá acceso a páginas y dejará verificación al frontend
+  // Solo protegerá APIs críticas que necesiten verificación del lado servidor
+
+  const authToken = request.cookies.get('auth-token')?.value;
+  const userData = request.cookies.get('user')?.value;
+
+  // PROTEGER SOLO APIs CRÍTICAS
+  if (pathname.startsWith('/api/admin/')) {
+    if (!authToken || !userData) {
+      console.log('🚨 API ADMIN BLOQUEADA - Sin autenticación:', pathname);
+      return NextResponse.json(
+        { error: 'Acceso denegado - Autenticación requerida' },
+        { status: 401 }
+      );
     }
-    
-    // Verificar autenticación básica (esto se debería mejorar con JWT real)
-    const authCookie = request.cookies.get('auth-token');
-    const userRole = request.cookies.get('user-role');
-    
-    // Si no hay autenticación, bloquear
-    if (!authCookie && process.env.NODE_ENV === 'production') {
-      console.warn('🚨 ACCESO BLOQUEADO - Sin autenticación');
-      const homeUrl = new URL('/', request.url);
-      return NextResponse.redirect(homeUrl);
-    }
-    
-    // DESARROLLO: Permitir solo desde localhost y con referer admin
-    if (process.env.NODE_ENV === 'development') {
-      const origin = request.headers.get('origin');
-      const host = request.headers.get('host');
-      
-      if (!origin?.includes('localhost') && !host?.includes('localhost')) {
-        console.warn('🚨 ACCESO BLOQUEADO - No es localhost en desarrollo');
-        const unauthorizedUrl = new URL('/unauthorized', request.url);
-        return NextResponse.redirect(unauthorizedUrl);
+
+    try {
+      const user = JSON.parse(userData);
+      if (user.role !== 'admin') {
+        console.log('🚨 API ADMIN BLOQUEADA - Usuario no admin');
+        return NextResponse.json(
+          { error: 'Acceso denegado - Se requieren permisos de administrador' },
+          { status: 403 }
+        );
       }
+    } catch (error) {
+      console.log('🚨 API ADMIN BLOQUEADA - Datos inválidos');
+      return NextResponse.json(
+        { error: 'Acceso denegado - Sesión inválida' },
+        { status: 401 }
+      );
     }
   }
 
-  // PROTECCIÓN ESTRICTA: APIs de debug
-  if (request.nextUrl.pathname.startsWith('/api/debug')) {
-    
-    // EXCEPCIÓN: Permitir rutas de diagnóstico de email sin restricciones
-    const emailDiagnosticRoutes = [
-      '/api/debug/email-config',
-      '/api/debug/test-email',
-      '/api/debug/tokens'
-    ];
-    
-    if (emailDiagnosticRoutes.includes(request.nextUrl.pathname)) {
-      console.log('✅ Permitiendo acceso a diagnóstico de email:', request.nextUrl.pathname);
-      return NextResponse.next();
-    }
-    
-    // Verificar que viene del panel de admin (para otras rutas debug)
-    const referer = request.headers.get('referer');
-    const origin = request.headers.get('origin');
-    
-    if (!referer || (!referer.includes('/admin') && !referer.includes('/debug'))) {
-      console.warn('🚨 API BLOQUEADA - Sin referer admin:', request.nextUrl.pathname);
-      return NextResponse.json(
-        { 
-          error: 'Acceso denegado - Solo desde panel de administración',
-          code: 'ADMIN_PANEL_REQUIRED',
-          timestamp: new Date().toISOString()
-        },
-        { status: 403 }
-      );
-    }
-    
-    // En desarrollo, verificar localhost
-    if (process.env.NODE_ENV === 'development') {
-      if (!origin?.includes('localhost') && !referer?.includes('localhost')) {
-        console.warn('🚨 API BLOQUEADA - No es localhost');
+  // PROTEGER APIs DE DEBUG (solo en producción)
+  if (pathname.startsWith('/api/debug/')) {
+    if (process.env.NODE_ENV === 'production') {
+      if (!authToken || !userData) {
+        console.log('🚨 API DEBUG BLOQUEADA - Producción sin auth');
         return NextResponse.json(
-          { error: 'Acceso denegado - Solo localhost en desarrollo' },
+          { error: 'Acceso denegado - Ambiente de desarrollo requerido' },
           { status: 403 }
         );
       }
     }
   }
 
+  // PERMITIR ACCESO A TODAS LAS DEMÁS RUTAS
+  // El frontend (localStorage) manejará la autenticación de páginas
   return NextResponse.next();
 }
 
 // Configurar qué rutas debe interceptar el middleware
 export const config = {
   matcher: [
-    '/debug/:path*',
-    '/api/debug/:path*',
-    '/email-config',
-    '/admin-docs'
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - API routes (except specific ones we want to protect)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|public/|api/).*)',
+    '/api/admin/:path*',
+    '/api/debug/:path*'
   ]
 };

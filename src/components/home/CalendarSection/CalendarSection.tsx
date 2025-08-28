@@ -116,7 +116,7 @@ export default function CalendarSection() {
           background: rgba(39, 39, 42, 0.7);
           backdrop-filter: blur(10px);
           border-radius: 16px;
-          color: #fff;
+          
         }
         .react-calendar__tile--now {
           background: rgba(190, 242, 100, 0.15) !important;
@@ -130,8 +130,16 @@ export default function CalendarSection() {
           font-weight: bold;
         }
         .react-calendar__navigation button { color: #BEF264; }
+        .react-calendar__navigation button:enabled:hover,
+        .react-calendar__navigation button:enabled:focus {
+          background-color: rgba(60,60,60,0.25) !important;
+        }
         .react-calendar__month-view__weekdays__weekday { color: #A1A1AA; }
         .react-calendar__tile { color: #fff; border-radius: 8px; }
+        .react-calendar__tile:enabled:hover,
+        .react-calendar__tile:enabled:focus {
+          background-color: rgba(60,60,60,0.25) !important;
+        }
         .react-calendar__tile:disabled { color: #555; }
         .event-day {
           background-color: rgba(56, 164, 220, 0.3);
