@@ -50,6 +50,13 @@ export default function SpotifyDebugPage() {
     return () => clearInterval(interval);
   }, [isAuthenticated, isLoading, user]);
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === 'object' && 'message' in error) {
+      return String((error as { message: unknown }).message);
+    }
+    return String(error || 'Unknown error');
+  };
+
   const testEndpoint = async (endpoint: string, description: string) => {
     setTestResults(prev => ({ ...prev, [endpoint]: { status: 'loading' } }));
 
@@ -68,12 +75,11 @@ export default function SpotifyDebugPage() {
         }
       }));
     } catch (error: unknown) {
-      const errorMessage = (error as Error)?.message || String(error || 'Unknown error');
       setTestResults(prev => ({
         ...prev,
         [endpoint]: {
           status: 'error',
-          error: errorMessage
+          error: getErrorMessage(error)
         }
       }));
     }
