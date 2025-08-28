@@ -450,21 +450,10 @@ export default function ProjectsDashboard() {
             scrollBehavior: 'smooth',
             paddingBottom: '20px',
             '&::-webkit-scrollbar': {
-              height: '8px'
+              display: 'none'
             },
-            '&::-webkit-scrollbar-track': {
-              background: 'rgba(0,0,0,0.1)',
-              borderRadius: '4px'
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: 'rgba(0,0,0,0.3)',
-              borderRadius: '4px',
-              '&:hover': {
-                background: 'rgba(0,0,0,0.5)'
-              }
-            },
-            '-ms-overflow-style': 'auto',
-            'scrollbar-width': 'thin'
+            '-ms-overflow-style': 'none',
+            'scrollbar-width': 'none'
           }} 
           ref={swapyRef}
         >
