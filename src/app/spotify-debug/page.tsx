@@ -19,6 +19,13 @@ export default function SpotifyDebugPage() {
     error?: string;
   }>>({});
 
+  // Determinar si estamos en desarrollo o producción
+  const isDevelopment = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  
+  const baseUrl = isDevelopment ? 'http://localhost:3001' : 'https://pwa-badeo.vercel.app';
+  const redirectUri = `${baseUrl}/api/spotify/callback`;
+
   const updateDebugInfo = () => {
     const info = {
       timestamp: new Date().toISOString(),
@@ -285,8 +292,8 @@ export default function SpotifyDebugPage() {
           <ListItem>
             <ListItemIcon><CheckCircle color="success" /></ListItemIcon>
             <ListItemText
-              primary="Verifica que el puerto sea 3001"
-              secondary="La app debe estar corriendo en http://localhost:3001"
+              primary={`Verifica que la app esté corriendo en ${isDevelopment ? 'puerto 3001' : 'producción'}`}
+              secondary={`La app debe estar corriendo en ${baseUrl}`}
             />
           </ListItem>
 
@@ -294,7 +301,7 @@ export default function SpotifyDebugPage() {
             <ListItemIcon><CheckCircle color="success" /></ListItemIcon>
             <ListItemText
               primary="Configura el Redirect URI en Spotify Dashboard"
-              secondary="Debe ser exactamente: http://localhost:3001/api/spotify/callback"
+              secondary={`Debe ser exactamente: ${redirectUri}`}
             />
           </ListItem>
 

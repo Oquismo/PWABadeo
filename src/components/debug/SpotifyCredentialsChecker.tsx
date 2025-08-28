@@ -17,6 +17,14 @@ export default function SpotifyCredentialsChecker() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Determinar si estamos en desarrollo o producción
+  const isDevelopment = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  
+  const baseUrl = isDevelopment ? 'http://localhost:3001' : 'https://pwa-badeo.vercel.app';
+  const redirectUri = `${baseUrl}/api/spotify/callback`;
+  const envFile = isDevelopment ? '.env.local' : '.env.production';
+
   useEffect(() => {
     checkCredentials();
   }, []);
@@ -132,12 +140,12 @@ export default function SpotifyCredentialsChecker() {
           <Box component="ul" sx={{ pl: 3, mt: 1 }}>
             <li><strong>App name:</strong> Badeo PWA</li>
             <li><strong>App description:</strong> Recomendaciones musicales basadas en clima</li>
-            <li><strong>Redirect URI:</strong> <code>http://localhost:3000/api/spotify/callback</code></li>
+            <li><strong>Redirect URI:</strong> <code>{redirectUri}</code></li>
           </Box>
         </Typography>
 
         <Typography variant="body2" component="div" sx={{ mb: 2 }}>
-          3. Copia el <strong>Client ID</strong> y <strong>Client Secret</strong> al archivo <code>.env.local</code>
+          3. Copia el <strong>Client ID</strong> y <strong>Client Secret</strong> al archivo <code>{envFile}</code>
         </Typography>
 
         <Typography variant="body2" component="div" sx={{ mb: 3 }}>

@@ -1,4 +1,17 @@
-# ## � Problema Común: "Loop de Autenticación"
+# ## � Problema Común: "Loop ### ✅ Diagnóstico Rápido
+
+1. **Página de diagnóstico**: `https://pwa-badeo.vercel.app/spotify-production-debug`
+2. **Script de verificación**: `./scripts/check-spotify-production.sh`
+3. **Páginas inteligentes**: Las páginas de debug ahora detectan automáticamente si estás en desarrollo o producción y muestran la información correcta.
+
+### 🔍 ¿Sigues viendo URLs de desarrollo?
+
+Si aún ves URLs como `localhost:3001` en producción, es porque:
+- **Cache del navegador**: Limpia la cache (Ctrl+F5)
+- **Service Worker**: Actualiza la PWA
+- **Variables de entorno**: Verifica que estén configuradas en tu proveedor de hosting
+
+## 📋 Requisitos Previosenticación"
 
 Si al hacer clic en "Conectar" con Spotify, aceptas los permisos pero vuelves a la página de conexión sin completar el login, sigue esta guía.
 
