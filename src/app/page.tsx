@@ -11,6 +11,7 @@ import AnnouncementBanner from "@/components/home/AnnouncementBanner";
 import ProjectsDashboard from "@/components/home/ProjectsDashboard";
 import CalendarSection from "@/components/home/CalendarSection/CalendarSection";
 import ExternalInfoPanel from "@/components/home/ExternalInfoPanel";
+import SpotifyPlayer from "@/components/SpotifyPlayer";
 
 export default function Home() {
   const [fadeIn, setFadeIn] = useState(false);
@@ -31,6 +32,7 @@ export default function Home() {
         <Fade in={fadeIn} timeout={1000}>
           <Box sx={{ pt: 2, pb: 2 }}>
             <HeroSection />
+            <SpotifyPlayer compact />
             <ExternalInfoPanel />
             <ProjectsDashboard />
             <CalendarSection />

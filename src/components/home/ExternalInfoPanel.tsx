@@ -8,6 +8,7 @@ import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import AirIcon from '@mui/icons-material/Air';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
+import SpotifyWeatherIntegration from './SpotifyWeatherIntegration';
 
 // Coordenadas configurables vía variables de entorno (NEXT_PUBLIC_*)
 // Fallback a Sevilla si no están definidas.
@@ -99,13 +100,17 @@ export default function ExternalInfoPanel() {
             background: `linear-gradient(135deg, ${theme.palette.mode === 'dark' ? 'rgba(190,242,100,0.12)' : 'rgba(59,130,246,0.12)'} 0%, rgba(255,255,255,0) 70%)`,
             border: `1px solid ${theme.palette.divider}`,
             backdropFilter: 'blur(12px)',
+            borderRadius: 3,
+            boxShadow: theme.palette.mode === 'dark' 
+              ? '0 8px 32px rgba(0,0,0,0.3)' 
+              : '0 8px 32px rgba(0,0,0,0.1)'
         })}
       >
         <CardContent sx={{ pb: 2 }}>          
           <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
             <Box>
-              <Typography variant="overline" sx={{ letterSpacing: 1.2, opacity: 0.8 }}>
-                Clima actual · {LOCATION_LABEL}
+              <Typography variant="overline" sx={{ letterSpacing: 1.2, opacity: 0.8, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                🌤️ Clima actual · {LOCATION_LABEL} {weather && '🎵'}
               </Typography>
               {loading ? (
                 <Stack spacing={1} sx={{ mt: 1, width: 180 }}>
@@ -165,8 +170,52 @@ export default function ExternalInfoPanel() {
             </Box>
           </Stack>
         </CardContent>
+
+        {/* Separador visual elegante */}
+        {weather && (
+          <Box sx={{ 
+            position: 'relative',
+            mx: 2, 
+            my: 2,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: '50%',
+              left: 0,
+              right: 0,
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+            },
+            '&::after': {
+              content: '"🎵"',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: 'rgba(255,255,255,0.9)',
+              borderRadius: '50%',
+              width: 24,
+              height: 24,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }
+          }} />
+        )}
+
+        {/* Integración de Spotify basada en el clima */}
+        {weather && (
+          <CardContent sx={{ pb: 2, pt: 0, px: 2 }}>
+            <SpotifyWeatherIntegration
+              weatherCode={weather.weathercode}
+              temperature={weather.temperature}
+            />
+          </CardContent>
+        )}
+
       </Card>
-      {/* Animación simple para el icono refresh */}
       <style jsx global>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>

@@ -7,7 +7,6 @@ import LaunchIcon from '@mui/icons-material/Launch';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { carouselConfig } from '@/data/tasks';
 import { TaskData } from '@/data/tasks';
 import { useTasks } from '@/context/TasksContext';
@@ -30,8 +29,42 @@ export default function ProjectsDashboard() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [swipedCardIndex, setSwipedCardIndex] = useState<number | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const swapyRef = useRef<HTMLDivElement>(null);
   const swapyInstance = useRef<any>(null);
+  
+  // Marcar cuando la hidratación está completa
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+  
+  // Función helper para acceder a localStorage de forma segura
+  const safeLocalStorage = {
+    getItem: (key: string) => {
+      if (typeof window === 'undefined') return null;
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    setItem: (key: string, value: string) => {
+      if (typeof window === 'undefined') return;
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        // Silently fail if localStorage is not available
+      }
+    },
+    removeItem: (key: string) => {
+      if (typeof window === 'undefined') return;
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // Silently fail if localStorage is not available
+      }
+    }
+  };
   
   // Efecto para cerrar debug al hacer clic fuera
   useEffect(() => {
@@ -56,10 +89,12 @@ export default function ProjectsDashboard() {
   
   // Inicializar tareas ordenadas
   useEffect(() => {
+    if (!isHydrated) return; // Solo ejecutar después de la hidratación
+    
     let initialTasks = [...tasks];
     
     // Cargar orden guardado desde localStorage
-    const savedOrder = localStorage.getItem('tasksOrder');
+    const savedOrder = safeLocalStorage.getItem('tasksOrder');
     if (savedOrder) {
       try {
         const orderIds = JSON.parse(savedOrder);
@@ -79,7 +114,7 @@ export default function ProjectsDashboard() {
     }
     
     setOrderedTasks(initialTasks);
-  }, [tasks]);
+  }, [tasks, isHydrated]);
   
   // Inicializar Swapy para drag and drop
   useEffect(() => {
@@ -165,7 +200,7 @@ export default function ProjectsDashboard() {
 
               // Guardar el orden en localStorage
               const orderIds = newOrder.map(task => task.id);
-              localStorage.setItem('tasksOrder', JSON.stringify(orderIds));
+              safeLocalStorage.setItem('tasksOrder', JSON.stringify(orderIds));
             } else {
               console.warn('❌ Orden inválido generado:', newOrder.length, 'vs', orderedTasks.length);
             }
@@ -313,7 +348,7 @@ export default function ProjectsDashboard() {
       setOrderedTasks(originalOrder);
       
       // Limpiar el orden guardado en localStorage
-      localStorage.removeItem('tasksOrder');
+      safeLocalStorage.removeItem('tasksOrder');
       
       console.log('🔄 Orden de tareas reseteado al original');
       
@@ -394,7 +429,7 @@ export default function ProjectsDashboard() {
 
       // Guardar el nuevo orden en localStorage
       const orderIds = newTasks.map(task => task.id);
-      localStorage.setItem('tasksOrder', JSON.stringify(orderIds));
+      safeLocalStorage.setItem('tasksOrder', JSON.stringify(orderIds));
     } else {
       console.log('❌ Swipe no válido - distancia insuficiente');
     }
@@ -428,292 +463,285 @@ export default function ProjectsDashboard() {
   
   return (
     <Box sx={{ py: 4, position: 'relative' }}>
-      <style>{`
-        /* Estilos específicos para Swapy */
-        [data-swapy-slot] {
-          min-height: 300px;
-          display: flex;
-          flex-direction: column;
-          touch-action: auto;
-        }
-        
-        [data-swapy-item] {
-          transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
-          cursor: grab;
-          user-select: none;
-          position: relative;
-          touch-action: pan-x pan-y pinch-zoom;
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          width: 100% !important;
-          box-shadow: none;
-        }
-        
-        [data-swapy-item]:active {
-          cursor: grabbing;
-        }
-        
+      {/* Mostrar loading state durante hidratación para evitar diferencias */}
+      {!isHydrated ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+          <Typography>Cargando...</Typography>
+        </Box>
+      ) : (
+        <>
+          <style>{`
+            /* Estilos específicos para Swapy */
+            [data-swapy-slot] {
+              min-height: 300px;
+              display: flex;
+              flex-direction: column;
+              touch-action: auto;
+            }
+            
+            [data-swapy-item] {
+              transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+              cursor: grab;
+              user-select: none;
+              position: relative;
+              touch-action: pan-x pan-y pinch-zoom;
+              -webkit-touch-callout: none;
+              -webkit-user-select: none;
+              -moz-user-select: none;
+              -ms-user-select: none;
+              width: 100% !important;
+              box-shadow: none;
+            }
+            
+            [data-swapy-item]:active {
+              cursor: grabbing;
+            }
+            
         [data-swapy-highlighted] {
-          background: rgba(33, 150, 243, 0.1) !important;
-          border: 2px dashed rgba(33, 150, 243, 0.5) !important;
-        }
-        
-        .swapy-item {
-          transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
-          cursor: grab;
-          user-select: none;
-          position: relative;
-          touch-action: pan-x pan-y pinch-zoom;
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          box-shadow: none;
-        }
-        .swapy-item[data-swapy-dragging],
-        [data-swapy-item][data-swapy-dragging] {
-          transform: scale(1.04) !important;
-          z-index: 10;
-          box-shadow: 0 6px 24px rgba(0,0,0,0.10);
-        }
+          /* Estilos de resaltado removidos */
+        }            .swapy-item {
+              transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+              cursor: grab;
+              user-select: none;
+              position: relative;
+              touch-action: pan-x pan-y pinch-zoom;
+              -webkit-touch-callout: none;
+              -webkit-user-select: none;
+              -moz-user-select: none;
+              -ms-user-select: none;
+              box-shadow: none;
+            }
+            .swapy-item[data-swapy-dragging],
+            [data-swapy-item][data-swapy-dragging] {
+              transform: scale(1.04) !important;
+              z-index: 10;
+              box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+            }
 
-        .swapy-item:active {
-          cursor: grabbing;
-          z-index: 1000;
-        }
+            .swapy-item:active {
+              cursor: grabbing;
+              z-index: 1000;
+            }
 
-        .drag-indicator {
-          position: absolute;
-          top: 5px;
-          left: 5px;
-          background: rgba(0,0,0,0.7);
-          color: white;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 10px;
-          z-index: 10;
-          pointer-events: none;
-        }
+            .drag-indicator {
+              position: absolute;
+              top: 5px;
+              left: 5px;
+              background: rgba(0,0,0,0.7);
+              color: white;
+              padding: 2px 6px;
+              border-radius: 4px;
+              font-size: 10px;
+              z-index: 10;
+              pointer-events: none;
+            }
 
-        /* Estilos para el contenedor de scroll */
-        .scroll-container {
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
-        }
+            /* Estilos para el contenedor de scroll */
+            .scroll-container {
+              scroll-snap-type: x mandatory;
+              -webkit-overflow-scrolling: touch;
+            }
 
-        .scroll-container > div[data-swapy-slot] {
-          scroll-snap-align: start;
-        }
+            .scroll-container > div[data-swapy-slot] {
+              scroll-snap-align: start;
+            }
 
-        /* Estilos para swipe feedback */
-        .swipe-feedback-left {
-          animation: swipeLeft 0.3s ease-out;
-        }
+            /* Estilos para swipe feedback */
+            .swipe-feedback-left {
+              animation: swipeLeft 0.3s ease-out;
+            }
 
-        .swipe-feedback-right {
-          animation: swipeRight 0.3s ease-out;
-        }
+            .swipe-feedback-right {
+              animation: swipeRight 0.3s ease-out;
+            }
 
-        @keyframes swipeLeft {
-          0% { transform: translateX(0); }
-          50% { transform: translateX(-20px) scale(0.95); }
-          100% { transform: translateX(0); }
-        }
+            @keyframes swipeLeft {
+              0% { transform: translateX(0); }
+              50% { transform: translateX(-20px) scale(0.95); }
+              100% { transform: translateX(0); }
+            }
 
-        @keyframes swipeRight {
-          0% { transform: translateX(0); }
-          50% { transform: translateX(20px) scale(0.95); }
-          100% { transform: translateX(0); }
-        }
-      `}</style>
+            @keyframes swipeRight {
+              0% { transform: translateX(0); }
+              50% { transform: translateX(20px) scale(0.95); }
+              100% { transform: translateX(0); }
+            }
+          `}</style>
 
-      {/* Header con título y botones de control */}
-      <Box sx={{ mb: 3, px: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h4" fontWeight={700} sx={{ mb: 0 }}>
-            Proyectos Activos
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Probar funcionalidad de swipe">
-              <IconButton 
-                size="small" 
-                onClick={testSwipe}
-                sx={{ color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
-              >
-                <BugReportIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+          {/* Header con título y botones de control */}
+          <Box sx={{ mb: 3, px: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="h4" fontWeight={700} sx={{ mb: 0 }}>
+                Proyectos Activos
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Tooltip title="Probar funcionalidad de swipe">
+                  <IconButton 
+                    size="small" 
+                    onClick={testSwipe}
+                    sx={{ color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
+                  >
+                    <BugReportIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              {orderedTasks.length} proyectos • 💡 Desliza las tarjetas horizontalmente para reorganizar
+            </Typography>
           </Box>
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          {orderedTasks.length} proyectos • 💡 Desliza las tarjetas horizontalmente para reorganizar
-        </Typography>
-      </Box>
-      
-      {/* Carrusel horizontal con swipe support */}
-      <Box sx={{ 
-        position: 'relative',
-        overflow: 'visible'
-      }}>
-        {/* 
-          Funcionalidad de Swipe:
-          - Swipe izquierda: mueve la tarjeta al final del carrusel
-          - Swipe derecha: mueve la tarjeta al inicio del carrusel
-          - Funciona junto con el drag & drop existente
-        */}
-        <Box 
-          className="scroll-container"
-          sx={{ 
-            display: 'flex',
-            gap: carouselConfig.gap,
-            px: 2,
-            overflowX: 'auto',
-            overflowY: 'visible',
-            scrollBehavior: 'smooth',
-            paddingBottom: '20px',
-            '&::-webkit-scrollbar': {
-              display: 'none'
-            },
-            '-ms-overflow-style': 'none',
-            'scrollbar-width': 'none'
-          }} 
-          ref={swapyRef}
-        >
-          {orderedTasks.map((task, index) => (
-            <div
-              key={task.id || index}
-              data-swapy-slot={dragMode === 'swapy' ? `slot-${index}` : undefined}
-              style={{ 
-                minWidth: carouselConfig.cardWidth,
-                width: carouselConfig.cardWidth,
-                flexShrink: 0
-              }}
+          
+          {/* Carrusel horizontal con swipe support */}
+          <Box sx={{ 
+            position: 'relative',
+            overflow: 'visible'
+          }}>
+            {/* 
+              Funcionalidad de Swipe:
+              - Swipe izquierda: mueve la tarjeta al final del carrusel
+              - Swipe derecha: mueve la tarjeta al inicio del carrusel
+              - Funciona junto con el drag & drop existente
+            */}
+            <Box 
+              className="scroll-container"
+              sx={{ 
+                display: 'flex',
+                gap: carouselConfig.gap,
+                px: 2,
+                overflowX: 'auto',
+                overflowY: 'visible',
+                scrollBehavior: 'smooth',
+                paddingBottom: '20px',
+                '&::-webkit-scrollbar': {
+                  display: 'none'
+                },
+                '-ms-overflow-style': 'none',
+                'scrollbar-width': 'none'
+              }} 
+              ref={swapyRef}
             >
-              <Card
-                id={`task-${task.id || index}`}
-                data-swapy-item={dragMode === 'swapy' ? `item-${index}` : undefined}
-                className={dragMode === 'swapy' ? "swapy-item" : ""}
-                draggable={dragMode === 'html5'}
-                onDragStart={dragMode === 'html5' ? (e) => handleDragStart(e, index) : undefined}
-                onDragOver={dragMode === 'html5' ? handleDragOver : undefined}
-                onDrop={dragMode === 'html5' ? (e) => handleDrop(e, index) : undefined}
-                onTouchStart={(e) => handleTouchStart(e, index)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                sx={{
-                  background: task.color,
-                  color: 'white',
-                  width: '100%',
-                  height: carouselConfig.cardHeight,
-                  borderRadius: carouselConfig.borderRadius,
-                  position: 'relative',
-                  overflow: 'hidden',
-                  cursor: dragMode === 'swapy' ? 'grab' : dragMode === 'html5' ? 'grab' : 'pointer',
-                  p: 0.5,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 0.5,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-                  transition: 'transform .25s ease, box-shadow .25s ease',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 10px 36px rgba(0,0,0,0.4)'
-                  },
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 60%)',
-                    opacity: 0.4
-                  },
-                  '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    inset: 0,
-                    backdropFilter: 'blur(2px)',
-                    background: 'linear-gradient(140deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))'
-                  }
-                }}
-                onClick={() => {
-                  if (user?.role === 'admin' && debugInfo) {
-                    console.log('🎯 Card clickeada:', task);
-                  }
-                }}
-              >
+              {orderedTasks.map((task, index) => (
+                <div
+                  key={task.id || index}
+                  data-swapy-slot={dragMode === 'swapy' ? `slot-${index}` : undefined}
+                  style={{ 
+                    minWidth: carouselConfig.cardWidth,
+                    width: carouselConfig.cardWidth,
+                    flexShrink: 0
+                  }}
+                >
+                  <Card
+                    id={`task-${task.id || index}`}
+                    data-swapy-item={dragMode === 'swapy' ? `item-${index}` : undefined}
+                    className={dragMode === 'swapy' ? "swapy-item" : ""}
+                    draggable={dragMode === 'html5'}
+                    onDragStart={dragMode === 'html5' ? (e) => handleDragStart(e, index) : undefined}
+                    onDragOver={dragMode === 'html5' ? handleDragOver : undefined}
+                    onDrop={dragMode === 'html5' ? (e) => handleDrop(e, index) : undefined}
+                    onTouchStart={(e) => handleTouchStart(e, index)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    sx={{
+                      background: task.color,
+                      color: 'white',
+                      width: '100%',
+                      height: carouselConfig.cardHeight,
+                      borderRadius: carouselConfig.borderRadius,
+                      position: 'relative',
+                      overflow: 'hidden',
+                      cursor: dragMode === 'swapy' ? 'grab' : dragMode === 'html5' ? 'grab' : 'pointer',
+                      p: 0.5,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 0.5,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+                      transition: 'transform .25s ease, box-shadow .25s ease',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 10px 36px rgba(0,0,0,0.4)'
+                      },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 60%)',
+                        opacity: 0.4
+                      },
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        inset: 0,
+                        backdropFilter: 'blur(2px)',
+                        background: 'linear-gradient(140deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))'
+                      }
+                    }}
+                    onClick={() => {
+                      if (user?.role === 'admin' && debugInfo) {
+                        console.log('🎯 Card clickeada:', task);
+                      }
+                    }}
+                  >
 
-                
-                {/* Etiquetas superiores */}
-                <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: 1, pt: 0.5 }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, maxWidth: '75%' }}>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.15, fontSize: '1.05rem', textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}>
-                      {task.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.72rem', lineHeight: 1.2 }}>
-                      {task.description}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Tooltip title="💡 TIP: Mantén presionada la tarjeta y desliza horizontalmente para moverla al inicio o final">
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        color: 'white', 
-                        opacity: 0.6,
-                        '&:hover': { opacity: 1 }
-                      }}>
-                        <DragIndicatorIcon fontSize="small" />
+                    
+                    {/* Etiquetas superiores */}
+                    <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: 1, pt: 0.5 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, maxWidth: '75%' }}>
+                        <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.15, fontSize: '1.05rem', textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}>
+                          {task.title}
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.72rem', lineHeight: 1.2 }}>
+                          {task.description}
+                        </Typography>
                       </Box>
-                    </Tooltip>
-                    <IconButton size="small" sx={{ color: 'white', opacity: 0.8, mt: -0.5 }}>
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <IconButton size="small" sx={{ color: 'white', opacity: 0.8, mt: -0.5 }}>
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Box>
 
-                {/* Badge ADMIN y fecha */}
-                <Box sx={{ position: 'relative', zIndex: 2, mt: 'auto', px: 1, pb: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                  <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                    {task.role === 'admin' && (
-                      <Chip label="ADMIN" size="small" sx={{
-                        height: 20,
-                        fontSize: '0.55rem',
-                        fontWeight: 600,
-                        letterSpacing: '.5px',
-                        color: '#fff',
-                        bgcolor: 'rgba(0,0,0,0.35)',
-                        backdropFilter: 'blur(3px)',
-                        border: '1px solid rgba(255,255,255,0.25)'
-                      }} />
-                    )}
-                    {task.date && (
-                      <Chip icon={<CalendarTodayIcon sx={{ fontSize: '0.9rem !important' }} />} label={task.date} size="small" sx={{
-                        height: 20,
-                        fontSize: '0.55rem',
-                        pl: 0.5,
-                        pr: 0.8,
-                        color: '#fff',
-                        bgcolor: 'rgba(255,255,255,0.15)',
-                        border: '1px solid rgba(255,255,255,0.25)',
-                        '& .MuiChip-icon': {
-                          color: 'inherit'
-                        }
-                      }} />
-                    )}
-                  </Box>
-                </Box>
+                    {/* Badge ADMIN y fecha */}
+                    <Box sx={{ position: 'relative', zIndex: 2, mt: 'auto', px: 1, pb: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                      <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                        {task.role === 'admin' && (
+                          <Chip label="ADMIN" size="small" sx={{
+                            height: 20,
+                            fontSize: '0.55rem',
+                            fontWeight: 600,
+                            letterSpacing: '.5px',
+                            color: '#fff',
+                            bgcolor: 'rgba(0,0,0,0.35)',
+                            backdropFilter: 'blur(3px)',
+                            border: '1px solid rgba(255,255,255,0.25)'
+                          }} />
+                        )}
+                        {task.date && (
+                          <Chip icon={<CalendarTodayIcon sx={{ fontSize: '0.9rem !important' }} />} label={task.date} size="small" sx={{
+                            height: 20,
+                            fontSize: '0.55rem',
+                            pl: 0.5,
+                            pr: 0.8,
+                            color: '#fff',
+                            bgcolor: 'rgba(255,255,255,0.15)',
+                            border: '1px solid rgba(255,255,255,0.25)',
+                            '& .MuiChip-icon': {
+                              color: 'inherit'
+                            }
+                          }} />
+                        )}
+                      </Box>
+                    </Box>
 
-                {/* Badge de ID para debug */}
+                    {/* Badge de ID para debug */}
 
-              </Card>
-            </div>
-          ))}
-        </Box>
-      </Box>
-      
-
+                  </Card>
+                </div>
+              ))}
+            </Box>
+          </Box>
+        </>
+      )}
     </Box>
   );
 }

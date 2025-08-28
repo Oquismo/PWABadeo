@@ -10,6 +10,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, LayoutGroup } from 'framer-motion'; // 1. Importar de Framer Motion
@@ -35,6 +36,7 @@ export default function BottomNavBar() {
   const navActions = [
     { value: "/", icon: <HomeIcon /> },
     { value: "/mapa", icon: <MapIcon /> },
+    { value: "/spotify", icon: <MusicNoteIcon /> },
     ...(user?.role === 'admin'
       ? [{ value: "/admin", icon: <AdminPanelSettingsIcon /> }]
       : [

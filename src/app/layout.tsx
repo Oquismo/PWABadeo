@@ -4,6 +4,7 @@ import './globals.css'; // 1. Importar el archivo de estilos globales
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { AuthProvider } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
+import { SpotifyAuthProvider } from '@/context/SpotifyAuthContext';
 import { TasksProvider } from '@/context/TasksContext';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
@@ -40,21 +41,23 @@ export default function RootLayout({
           <AuthProvider> 
             <CustomThemeProvider>
               <TasksProvider>
-                <CssBaseline />
-                <DebugInitializer />
-                <ServiceWorkerProvider>
-                  <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-                    
-                    <Box component="main" sx={{ pb: '90px' }}>
-                      <PageTransition>
-                        {children}
-                      </PageTransition>
+                <SpotifyAuthProvider>
+                  <CssBaseline />
+                  <DebugInitializer />
+                  <ServiceWorkerProvider>
+                    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+                      
+                      <Box component="main" sx={{ pb: '90px' }}>
+                        <PageTransition>
+                          {children}
+                        </PageTransition>
+                      </Box>
+
+                      <BottomNavBar />
+
                     </Box>
-
-                    <BottomNavBar />
-
-                  </Box>
-                </ServiceWorkerProvider>
+                  </ServiceWorkerProvider>
+                </SpotifyAuthProvider>
               </TasksProvider>
             </CustomThemeProvider>
           </AuthProvider>
