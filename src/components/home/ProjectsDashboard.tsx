@@ -27,6 +27,9 @@ export default function ProjectsDashboard() {
   const [debugInfo, setDebugInfo] = useState(false);
   const [dragMode, setDragMode] = useState<'swapy' | 'html5'>('swapy'); // Usar Swapy por defecto para animaciones
   const [orderedTasks, setOrderedTasks] = useState<TaskData[]>([]);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipedCardIndex, setSwipedCardIndex] = useState<number | null>(null);
   const swapyRef = useRef<HTMLDivElement>(null);
   const swapyInstance = useRef<any>(null);
   
@@ -127,9 +130,9 @@ export default function ProjectsDashboard() {
 
         // Configuración optimizada de Swapy para scroll lateral
         swapyInstance.current = createSwapy(swapyRef.current, {
-          animation: 'dynamic',
+          animation: 'spring', // Animación de resorte para máxima fluidez
           swapMode: 'hover',
-          dragOnHold: false // Drag inmediato, más fluido
+          dragOnHold: false
         });
 
         // Event listener mejorado usando la nueva API
@@ -332,6 +335,64 @@ export default function ProjectsDashboard() {
     }
   };
 
+  // Funciones para manejar swipe gestures
+  const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setSwipedCardIndex(index);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd || swipedCardIndex === null) {
+      setTouchStart(null);
+      setTouchEnd(null);
+      setSwipedCardIndex(null);
+      return;
+    }
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe || isRightSwipe) {
+      // Agregar feedback visual
+      const cardElement = document.getElementById(`task-${orderedTasks[swipedCardIndex]?.id || swipedCardIndex}`);
+      if (cardElement) {
+        cardElement.classList.add(isLeftSwipe ? 'swipe-feedback-left' : 'swipe-feedback-right');
+        setTimeout(() => {
+          cardElement.classList.remove('swipe-feedback-left', 'swipe-feedback-right');
+        }, 300);
+      }
+
+      const newTasks = [...orderedTasks];
+      const [swipedTask] = newTasks.splice(swipedCardIndex, 1);
+
+      if (isLeftSwipe) {
+        // Mover al final
+        newTasks.push(swipedTask);
+        console.log('👈 Swipe izquierda - moviendo al final:', swipedTask.title);
+      } else {
+        // Mover al inicio
+        newTasks.unshift(swipedTask);
+        console.log('👉 Swipe derecha - moviendo al inicio:', swipedTask.title);
+      }
+
+      setOrderedTasks(newTasks);
+
+      // Guardar el nuevo orden en localStorage
+      const orderIds = newTasks.map(task => task.id);
+      localStorage.setItem('tasksOrder', JSON.stringify(orderIds));
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+    setSwipedCardIndex(null);
+  };
+
   // Función de debug para administradores
   const showDebugInfo = () => {
     console.group('🔧 DEBUG INFO - ProjectsDashboard');
@@ -360,7 +421,7 @@ export default function ProjectsDashboard() {
         }
         
         [data-swapy-item] {
-          transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s linear;
+          transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
           cursor: grab;
           user-select: none;
           position: relative;
@@ -370,7 +431,7 @@ export default function ProjectsDashboard() {
           -moz-user-select: none;
           -ms-user-select: none;
           width: 100% !important;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+          box-shadow: none;
         }
         
         [data-swapy-item]:active {
@@ -383,7 +444,7 @@ export default function ProjectsDashboard() {
         }
         
         .swapy-item {
-          transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s linear;
+          transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
           cursor: grab;
           user-select: none;
           position: relative;
@@ -392,7 +453,13 @@ export default function ProjectsDashboard() {
           -webkit-user-select: none;
           -moz-user-select: none;
           -ms-user-select: none;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+          box-shadow: none;
+        }
+        .swapy-item[data-swapy-dragging],
+        [data-swapy-item][data-swapy-dragging] {
+          transform: scale(1.04) !important;
+          z-index: 10;
+          box-shadow: 0 6px 24px rgba(0,0,0,0.10);
         }
 
         .swapy-item:active {
@@ -422,6 +489,27 @@ export default function ProjectsDashboard() {
         .scroll-container > div[data-swapy-slot] {
           scroll-snap-align: start;
         }
+
+        /* Estilos para swipe feedback */
+        .swipe-feedback-left {
+          animation: swipeLeft 0.3s ease-out;
+        }
+
+        .swipe-feedback-right {
+          animation: swipeRight 0.3s ease-out;
+        }
+
+        @keyframes swipeLeft {
+          0% { transform: translateX(0); }
+          50% { transform: translateX(-20px) scale(0.95); }
+          100% { transform: translateX(0); }
+        }
+
+        @keyframes swipeRight {
+          0% { transform: translateX(0); }
+          50% { transform: translateX(20px) scale(0.95); }
+          100% { transform: translateX(0); }
+        }
       `}</style>
 
       {/* Header con título y botones de control */}
@@ -434,11 +522,17 @@ export default function ProjectsDashboard() {
         </Typography>
       </Box>
       
-      {/* Carrusel horizontal */}
+      {/* Carrusel horizontal con swipe support */}
       <Box sx={{ 
         position: 'relative',
         overflow: 'visible'
       }}>
+        {/* 
+          Funcionalidad de Swipe:
+          - Swipe izquierda: mueve la tarjeta al final del carrusel
+          - Swipe derecha: mueve la tarjeta al inicio del carrusel
+          - Funciona junto con el drag & drop existente
+        */}
         <Box 
           className="scroll-container"
           sx={{ 
@@ -475,6 +569,9 @@ export default function ProjectsDashboard() {
                 onDragStart={dragMode === 'html5' ? (e) => handleDragStart(e, index) : undefined}
                 onDragOver={dragMode === 'html5' ? handleDragOver : undefined}
                 onDrop={dragMode === 'html5' ? (e) => handleDrop(e, index) : undefined}
+                onTouchStart={(e) => handleTouchStart(e, index)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 sx={{
                   background: task.color,
                   color: 'white',
@@ -529,7 +626,7 @@ export default function ProjectsDashboard() {
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Tooltip title="Arrastrar para reordenar">
+                    <Tooltip title="Arrastrar para reordenar • Swipe izquierda/derecha para mover al final/inicio">
                       <Box sx={{ 
                         display: 'flex', 
                         alignItems: 'center', 
