@@ -13,7 +13,13 @@ import {
 interface DiagnosisResult {
   timestamp: string;
   status: string;
+  environment: {
+    isDevelopment: boolean;
+    detectedBaseUrl: string;
+    usingDynamicDetection: boolean;
+  };
   currentConfig: any;
+  calculatedUrls: any;
   expectedUrls: any;
   diagnosis: any;
   issues: any[];
@@ -71,12 +77,22 @@ export default function SpotifyProductionDebugPage() {
         </Typography>
         <Typography variant="body2">
           <strong>Entorno detectado:</strong> {
-            typeof window !== 'undefined' && 
+            typeof window !== 'undefined' &&
             (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-              ? 'Desarrollo (localhost)' 
+              ? 'Desarrollo (localhost)'
               : 'Producción'
           }
         </Typography>
+        {diagnosis && (
+          <>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <strong>URL detectada dinámicamente:</strong> {diagnosis.environment.detectedBaseUrl}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Detección dinámica:</strong> {diagnosis.environment.usingDynamicDetection ? 'ACTIVADA' : 'DESACTIVADA'}
+            </Typography>
+          </>
+        )}
         <Typography variant="body2" sx={{ mt: 1 }}>
           💡 Esta página se adapta automáticamente a tu entorno y muestra la configuración correcta.
         </Typography>
@@ -148,6 +164,15 @@ export default function SpotifyProductionDebugPage() {
                     </ListItem>
                     <ListItem>
                       <ListItemIcon>
+                        {diagnosis.currentConfig.SPOTIFY_CLIENT_SECRET === 'CONFIGURADO' ? <CheckCircle color="success" /> : <Error color="error" />}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="SPOTIFY_CLIENT_SECRET"
+                        secondary={diagnosis.currentConfig.SPOTIFY_CLIENT_SECRET}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon>
                         {diagnosis.currentConfig.SPOTIFY_REDIRECT_URI ? <CheckCircle color="success" /> : <Error color="error" />}
                       </ListItemIcon>
                       <ListItemText
@@ -164,12 +189,48 @@ export default function SpotifyProductionDebugPage() {
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    🎯 URLs Esperadas
+                    🎯 URLs Calculadas Dinámicamente
                   </Typography>
                   <List dense>
                     <ListItem>
                       <ListItemText
                         primary="Redirect URI"
+                        secondary={diagnosis.calculatedUrls.redirectUri}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText
+                        primary="Callback URL"
+                        secondary={diagnosis.calculatedUrls.callbackUrl}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText
+                        primary="Auth URL"
+                        secondary={diagnosis.calculatedUrls.authUrl}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText
+                        primary="Diagnose URL"
+                        secondary={diagnosis.calculatedUrls.diagnoseUrl}
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    📋 URLs de Variables de Entorno
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText
+                        primary="Redirect URI (NEXTAUTH_URL)"
                         secondary={diagnosis.expectedUrls.redirectUri}
                       />
                     </ListItem>
@@ -219,8 +280,8 @@ export default function SpotifyProductionDebugPage() {
               🎵 Configuración del Dashboard de Spotify
             </Typography>
 
-            <Alert 
-              severity={diagnosis.spotifyDashboard.environment === 'producción' ? 'success' : 'info'} 
+            <Alert
+              severity={diagnosis.spotifyDashboard.environment === 'producción' ? 'success' : 'info'}
               sx={{ mb: 2 }}
             >
               <strong>Entorno:</strong> {diagnosis.spotifyDashboard.environment.toUpperCase()}
@@ -241,6 +302,102 @@ export default function SpotifyProductionDebugPage() {
                 <strong>Nota:</strong> {diagnosis.spotifyDashboard.note}
               </Alert>
             )}
+
+            {diagnosis.spotifyDashboard.troubleshooting && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  🔧 Pasos de Verificación
+                </Typography>
+                <List dense>
+                  {diagnosis.spotifyDashboard.troubleshooting.verificationSteps.map((step: string, index: number) => (
+                    <ListItem key={index}>
+                      <ListItemText primary={step} />
+                    </ListItem>
+                  ))}
+                </List>
+
+                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                  ⚠️ Problemas Comunes
+                </Typography>
+                <List dense>
+                  {diagnosis.spotifyDashboard.troubleshooting.commonIssues.map((issue: string, index: number) => (
+                    <ListItem key={index}>
+                      <ListItemIcon>
+                        <Warning color="warning" fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary={issue} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            )}
+          </Paper>
+
+          {/* Conectividad */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              🧪 Prueba del Flujo de Autenticación
+            </Typography>
+
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Esta sección te permite probar cada paso del flujo de autenticación de Spotify para identificar exactamente dónde está fallando.
+            </Typography>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<LinkIcon />}
+                onClick={() => {
+                  const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${diagnosis.currentConfig.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}&scope=user-read-private%20user-read-email%20playlist-read-private%20playlist-modify-public%20playlist-modify-private&code_challenge_method=S256&code_challenge=test&redirect_uri=${encodeURIComponent(diagnosis.calculatedUrls.redirectUri)}`;
+                  window.open(authUrl, '_blank');
+                }}
+                disabled={!diagnosis || diagnosis.currentConfig.SPOTIFY_CLIENT_ID !== 'CONFIGURADO'}
+              >
+                1. Probar URL de Autorización (se abrirá en nueva pestaña)
+              </Button>
+
+              <Button
+                variant="outlined"
+                startIcon={<BugReport />}
+                onClick={async () => {
+                  try {
+                    const response = await fetch(diagnosis.calculatedUrls.callbackUrl);
+                    alert(`Callback endpoint responde: ${response.status} ${response.statusText}`);
+                  } catch (error) {
+                    alert(`Error al acceder al callback endpoint: ${error}`);
+                  }
+                }}
+              >
+                2. Verificar que el Callback Endpoint responde
+              </Button>
+
+              <Button
+                variant="outlined"
+                startIcon={<BugReport />}
+                onClick={async () => {
+                  try {
+                    const response = await fetch(diagnosis.calculatedUrls.authUrl);
+                    alert(`Auth endpoint responde: ${response.status} ${response.statusText}`);
+                  } catch (error) {
+                    alert(`Error al acceder al auth endpoint: ${error}`);
+                  }
+                }}
+              >
+                3. Verificar que el Auth Endpoint responde
+              </Button>
+
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <strong>Instrucciones de prueba:</strong>
+                <br />
+                1. Haz clic en "Probar URL de Autorización" - debería abrir Spotify
+                <br />
+                2. Si Spotify te pide credenciales, la configuración básica está bien
+                <br />
+                3. Si te redirige de vuelta con un código, el callback funciona
+                <br />
+                4. Si el código se intercambia por tokens, todo el flujo está funcionando
+              </Alert>
+            </Box>
           </Paper>
 
           {/* Conectividad */}

@@ -1,7 +1,12 @@
 #!/bin/bash
 
-echo "🔧 Verificación de configuración de Spotify para producción"
-echo "============================================================"
+echo "🔧 Verificación de configuración de Spotify para produecho ""
+echo "🔧 Cambios recientes implementados:"
+echo "✓ Detección dinámica de URLs en callback endpoint"
+echo "✓ Diagnóstico mejorado con verificación de conectividad"
+echo "✓ Página de debug con pruebas paso a paso"
+echo "✓ Logging detallado para troubleshooting"
+echo "✓ Compatibilidad automática con cualquier entorno"========================================================="
 
 # Detectar entorno automáticamente
 if [ -n "$VERCEL_URL" ]; then

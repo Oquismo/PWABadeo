@@ -231,6 +231,8 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
   useEffect(() => {
     const initAuth = async () => {
       console.log('🔄 Inicializando autenticación de Spotify...');
+      console.log('🌐 URL actual:', window.location.href);
+      console.log('🔍 Parámetros de búsqueda:', window.location.search);
       setIsLoading(true);
 
       // Verificar si hay código en la URL (callback de Spotify)
@@ -239,23 +241,29 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
       const error = urlParams.get('error');
       const spotifyCode = urlParams.get('spotify_code');
 
-      console.log('📋 Parámetros de URL:', {
+      console.log('📋 Parámetros de URL detectados:', {
         code: code ? 'PRESENTE' : 'NO PRESENTE',
         spotify_code: spotifyCode ? 'PRESENTE' : 'NO PRESENTE',
-        error
+        error,
+        allParams: Object.fromEntries(urlParams.entries())
       });
 
       if (code || spotifyCode) {
         const authCode = code || spotifyCode;
         console.log('✅ Código de autorización encontrado:', authCode?.substring(0, 20) + '...');
-        // Limpiar la URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        console.log('🔄 Iniciando intercambio de código por token...');
+
+        // Limpiar la URL antes de procesar
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+        console.log('🧹 URL limpiada, procesando código...');
+
         await exchangeCodeForToken(authCode!);
       } else if (error) {
         console.log('❌ Error en la autenticación:', error);
         setLoginError('Error en la autenticación con Spotify');
       } else {
-        console.log('🔍 Verificando tokens guardados...');
+        console.log('🔍 No se encontró código de auth, verificando tokens guardados...');
         // Verificar si hay tokens guardados
         const savedToken = localStorage.getItem('spotify_access_token');
         const savedUser = localStorage.getItem('spotify_user');

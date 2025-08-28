@@ -5,11 +5,15 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
 
-  // URL base de la aplicación (ajusta según tu configuración)
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3001';
+  // Detectar dinámicamente la URL base
+  const host = request.headers.get('host') || 'localhost:3001';
+  const protocol = host.includes('localhost') ? 'http' : 'https';
+  const baseUrl = `${protocol}://${host}`;
+
   console.log('🔄 Callback de Spotify recibido');
   console.log('📋 Parámetros:', { code: code ? 'PRESENTE' : 'NO PRESENTE', error });
-  console.log('🏠 Base URL:', baseUrl);
+  console.log('🏠 URL base detectada:', baseUrl);
+  console.log('🌐 Host:', host, 'Protocol:', protocol);
 
   if (error) {
     console.error('❌ Spotify auth error:', error);
