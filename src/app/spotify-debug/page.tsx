@@ -68,11 +68,12 @@ export default function SpotifyDebugPage() {
         }
       }));
     } catch (error: unknown) {
+      const errorMessage = (error as Error)?.message || String(error || 'Unknown error');
       setTestResults(prev => ({
         ...prev,
         [endpoint]: {
           status: 'error',
-          error: error instanceof Error ? error.message : String(error)
+          error: errorMessage
         }
       }));
     }
