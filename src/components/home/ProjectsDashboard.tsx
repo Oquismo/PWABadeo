@@ -337,17 +337,22 @@ export default function ProjectsDashboard() {
 
   // Funciones para manejar swipe gestures
   const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    console.log('👆 TouchStart en tarjeta:', index, 'Posición X:', e.targetTouches[0].clientX);
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
     setSwipedCardIndex(index);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    console.log('👆 TouchMove - Posición X:', e.targetTouches[0].clientX);
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const handleTouchEnd = () => {
+    console.log('👆 TouchEnd - Start:', touchStart, 'End:', touchEnd, 'Index:', swipedCardIndex);
+
     if (!touchStart || !touchEnd || swipedCardIndex === null) {
+      console.log('❌ TouchEnd - faltan datos');
       setTouchStart(null);
       setTouchEnd(null);
       setSwipedCardIndex(null);
@@ -358,7 +363,11 @@ export default function ProjectsDashboard() {
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
+    console.log('📏 Distancia:', distance, 'LeftSwipe:', isLeftSwipe, 'RightSwipe:', isRightSwipe);
+
     if (isLeftSwipe || isRightSwipe) {
+      console.log('✅ Swipe detectado!');
+
       // Agregar feedback visual
       const cardElement = document.getElementById(`task-${orderedTasks[swipedCardIndex]?.id || swipedCardIndex}`);
       if (cardElement) {
@@ -386,6 +395,8 @@ export default function ProjectsDashboard() {
       // Guardar el nuevo orden en localStorage
       const orderIds = newTasks.map(task => task.id);
       localStorage.setItem('tasksOrder', JSON.stringify(orderIds));
+    } else {
+      console.log('❌ Swipe no válido - distancia insuficiente');
     }
 
     setTouchStart(null);
@@ -393,20 +404,26 @@ export default function ProjectsDashboard() {
     setSwipedCardIndex(null);
   };
 
-  // Función de debug para administradores
-  const showDebugInfo = () => {
-    console.group('🔧 DEBUG INFO - ProjectsDashboard');
-    console.log('📊 Total de tareas:', tasks.length);
-    console.log('👤 Usuario actual:', user?.name, `(${user?.role})`);
-    console.log('🎨 Configuración del carrusel:', carouselConfig);
-    console.log('📋 Datos de tareas:', tasks);
-    console.log('🔄 Tareas ordenadas:', orderedTasks);
-    console.log('🎯 Swapy inicializado:', !!swapyInstance.current);
-    console.log('🏪 LocalStorage keys:', Object.keys(localStorage));
-    console.log('⏰ Timestamp:', new Date().toISOString());
+  // Función de debug para probar swipe
+  const testSwipe = () => {
+    console.group('🧪 Debug Swipe Functionality');
+    console.log('📱 Touch events disponibles:', 'ontouchstart' in window ? '✅' : '❌');
+    console.log('� TouchStart handler:', typeof handleTouchStart);
+    console.log('� TouchMove handler:', typeof handleTouchMove);
+    console.log('👆 TouchEnd handler:', typeof handleTouchEnd);
+    console.log('🎯 Estado actual:', { touchStart, touchEnd, swipedCardIndex });
+    console.log('� Tarjetas ordenadas:', orderedTasks.length);
+    
+    // Verificar si las tarjetas tienen los eventos
+    const cards = document.querySelectorAll('[id^="task-"]');
+    console.log('� Número de tarjetas encontradas:', cards.length);
+    
+    cards.forEach((card, index) => {
+      const hasTouchStart = card.hasAttribute('data-touch-start');
+      console.log(`  Tarjeta ${index}: Eventos touch:`, hasTouchStart ? '✅' : '❌');
+    });
+    
     console.groupEnd();
-
-    setDebugInfo(!debugInfo);
   };
   
   return (
@@ -425,7 +442,7 @@ export default function ProjectsDashboard() {
           cursor: grab;
           user-select: none;
           position: relative;
-          touch-action: pan-y pinch-zoom;
+          touch-action: pan-x pan-y pinch-zoom;
           -webkit-touch-callout: none;
           -webkit-user-select: none;
           -moz-user-select: none;
@@ -448,7 +465,7 @@ export default function ProjectsDashboard() {
           cursor: grab;
           user-select: none;
           position: relative;
-          touch-action: pan-y pinch-zoom;
+          touch-action: pan-x pan-y pinch-zoom;
           -webkit-touch-callout: none;
           -webkit-user-select: none;
           -moz-user-select: none;
@@ -514,11 +531,24 @@ export default function ProjectsDashboard() {
 
       {/* Header con título y botones de control */}
       <Box sx={{ mb: 3, px: 2 }}>
-        <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
-          Proyectos Activos
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h4" fontWeight={700} sx={{ mb: 0 }}>
+            Proyectos Activos
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Probar funcionalidad de swipe">
+              <IconButton 
+                size="small" 
+                onClick={testSwipe}
+                sx={{ color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
+              >
+                <BugReportIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
         <Typography variant="body2" color="text.secondary">
-          {orderedTasks.length} proyectos
+          {orderedTasks.length} proyectos • 💡 Desliza las tarjetas horizontalmente para reorganizar
         </Typography>
       </Box>
       
@@ -626,7 +656,7 @@ export default function ProjectsDashboard() {
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Tooltip title="Arrastrar para reordenar • Swipe izquierda/derecha para mover al final/inicio">
+                    <Tooltip title="💡 TIP: Mantén presionada la tarjeta y desliza horizontalmente para moverla al inicio o final">
                       <Box sx={{ 
                         display: 'flex', 
                         alignItems: 'center', 
