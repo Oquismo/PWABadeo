@@ -28,6 +28,19 @@ export async function GET(request: NextRequest) {
     portConsistent: currentConfig.NEXTAUTH_URL?.includes('3001') || false
   };
 
+  // Probar conectividad con Spotify
+  let spotifyConnectivity = 'NO PROBADO';
+  try {
+    const testResponse = await fetch('https://api.spotify.com/v1/me', {
+      headers: {
+        'Authorization': 'Bearer test'
+      }
+    });
+    spotifyConnectivity = testResponse.status === 401 ? 'CONECTIVIDAD OK' : 'ERROR DE CONECTIVIDAD';
+  } catch (error) {
+    spotifyConnectivity = 'ERROR DE RED';
+  }
+
   const issues = [];
   if (!diagnosis.redirectUriCorrect) {
     issues.push({
@@ -63,7 +76,10 @@ export async function GET(request: NextRequest) {
     status: issues.length === 0 ? 'success' : 'issues_found',
     currentConfig,
     expectedUrls,
-    diagnosis,
+    diagnosis: {
+      ...diagnosis,
+      spotifyConnectivity
+    },
     issues,
     spotifyDashboard: {
       requiredRedirectUri: expectedUrls.redirectUri,
