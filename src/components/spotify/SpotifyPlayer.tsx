@@ -1,3 +1,5 @@
+// @ts-ignore
+/// <reference types="spotify-web-playback-sdk" />
 import { useEffect, useState, useRef } from 'react';
 import { useSpotifyAuth } from '@/context/SpotifyAuthContext';
 import { Box, Typography, Slider, IconButton, CircularProgress, Button } from '@mui/material';
@@ -117,7 +119,7 @@ const SpotifyPlayer = () => {
       {playerState ? (
         <Box>
           <Typography>
-            {playerState.track_window.current_track.name} - {playerState.track_window.current_track.artists.map((a: Spotify.Artist) => a.name).join(', ')}
+            {playerState.track_window.current_track.name} - {playerState.track_window.current_track.artists.map((a) => a.name).join(', ')}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <IconButton onClick={() => player?.previousTrack()}><SkipPrevious /></IconButton>
