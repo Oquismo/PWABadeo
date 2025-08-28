@@ -125,9 +125,11 @@ export default function ProjectsDashboard() {
 
         console.log('🎯 Inicializando Swapy con', items.length, 'items y', slots.length, 'slots');
 
-        // Configuración simplificada de Swapy
+        // Configuración optimizada de Swapy para scroll lateral
         swapyInstance.current = createSwapy(swapyRef.current, {
-          animation: 'spring'
+          animation: 'dynamic',
+          swapMode: 'hover',
+          dragOnHold: false // Drag inmediato, más fluido
         });
 
         // Event listener mejorado usando la nueva API
@@ -354,19 +356,21 @@ export default function ProjectsDashboard() {
           min-height: 300px;
           display: flex;
           flex-direction: column;
+          touch-action: auto;
         }
         
         [data-swapy-item] {
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+          transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s linear;
           cursor: grab;
           user-select: none;
           position: relative;
-          touch-action: none;
+          touch-action: pan-y pinch-zoom;
           -webkit-touch-callout: none;
           -webkit-user-select: none;
           -moz-user-select: none;
           -ms-user-select: none;
           width: 100% !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
         }
         
         [data-swapy-item]:active {
@@ -379,15 +383,16 @@ export default function ProjectsDashboard() {
         }
         
         .swapy-item {
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+          transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s linear;
           cursor: grab;
           user-select: none;
           position: relative;
-          touch-action: none;
+          touch-action: pan-y pinch-zoom;
           -webkit-touch-callout: none;
           -webkit-user-select: none;
           -moz-user-select: none;
           -ms-user-select: none;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
         }
 
         .swapy-item:active {
@@ -407,98 +412,62 @@ export default function ProjectsDashboard() {
           z-index: 10;
           pointer-events: none;
         }
+
+        /* Estilos para el contenedor de scroll */
+        .scroll-container {
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .scroll-container > div[data-swapy-slot] {
+          scroll-snap-align: start;
+        }
       `}</style>
 
       {/* Header con título y botones de control */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 3, 
-        px: 2 
-      }}>
-        <Box>
-          <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
-            Proyectos Activos
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {orderedTasks.length} proyectos • Modo: {dragMode === 'swapy' ? '🎯 Swapy' : '🌐 HTML5'}
-          </Typography>
-        </Box>
-        
-        {/* Botones de control para admin */}
-        {user?.role === 'admin' && (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Probar Drag & Drop">
-              <IconButton 
-                size="small" 
-                onClick={testDragDrop}
-                sx={{ 
-                  color: 'info.main',
-                  backgroundColor: 'info.100'
-                }}
-              >
-                <InfoOutlinedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Resetear orden">
-              <IconButton 
-                size="small" 
-                onClick={resetTaskOrder}
-                sx={{ 
-                  color: 'warning.main',
-                  backgroundColor: 'warning.50'
-                }}
-              >
-                <LaunchIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={`Cambiar a ${dragMode === 'html5' ? 'Swapy' : 'HTML5'}`}>
-              <IconButton 
-                size="small" 
-                onClick={toggleDragMode}
-                sx={{ 
-                  color: dragMode === 'html5' ? 'success.main' : 'info.main',
-                  backgroundColor: dragMode === 'html5' ? 'success.100' : 'info.100'
-                }}
-              >
-                {dragMode === 'html5' ? '🌐' : '🎯'}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Debug Info (Solo Admin)">
-              <IconButton 
-                size="small" 
-                onClick={showDebugInfo}
-                sx={{ 
-                  color: debugInfo ? 'error.main' : 'text.secondary',
-                  backgroundColor: debugInfo ? 'error.50' : 'transparent'
-                }}
-              >
-                <BugReportIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
+      <Box sx={{ mb: 3, px: 2 }}>
+        <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
+          Proyectos Activos
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {orderedTasks.length} proyectos
+        </Typography>
       </Box>
       
       {/* Carrusel horizontal */}
       <Box sx={{ 
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'visible'
       }}>
-        <Box sx={{ 
-          display: 'flex',
-          gap: carouselConfig.gap,
-          px: 2,
-          overflowX: 'auto',
-          scrollBehavior: 'smooth',
-          paddingBottom: '20px',
-          '&::-webkit-scrollbar': {
-            display: 'none'
-          },
-          '-ms-overflow-style': 'none',
-          'scrollbar-width': 'none'
-        }} ref={swapyRef}>
+        <Box 
+          className="scroll-container"
+          sx={{ 
+            display: 'flex',
+            gap: carouselConfig.gap,
+            px: 2,
+            overflowX: 'auto',
+            overflowY: 'visible',
+            scrollBehavior: 'smooth',
+            paddingBottom: '20px',
+            '&::-webkit-scrollbar': {
+              height: '8px'
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'rgba(0,0,0,0.1)',
+              borderRadius: '4px'
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: 'rgba(0,0,0,0.3)',
+              borderRadius: '4px',
+              '&:hover': {
+                background: 'rgba(0,0,0,0.5)'
+              }
+            },
+            '-ms-overflow-style': 'auto',
+            'scrollbar-width': 'thin'
+          }} 
+          ref={swapyRef}
+        >
           {orderedTasks.map((task, index) => (
             <div
               key={task.id || index}
@@ -532,7 +501,7 @@ export default function ProjectsDashboard() {
                   gap: 0.5,
                   boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
                   transition: 'transform .25s ease, box-shadow .25s ease',
-                  border: user?.role === 'admin' && debugInfo ? '1.5px solid #ff9800' : '1px solid rgba(255,255,255,0.15)',
+                  border: '1px solid rgba(255,255,255,0.15)',
                   '&:hover': {
                     transform: 'translateY(-4px)',
                     boxShadow: '0 10px 36px rgba(0,0,0,0.4)'
@@ -558,10 +527,7 @@ export default function ProjectsDashboard() {
                   }
                 }}
               >
-                {/* Indicador de drag */}
-                <Box className="drag-indicator">
-                  {dragMode === 'swapy' ? '🎯 Swapy' : '🌐 HTML5'}
-                </Box>
+
                 
                 {/* Etiquetas superiores */}
                 <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: 1, pt: 0.5 }}>
@@ -624,40 +590,14 @@ export default function ProjectsDashboard() {
                 </Box>
 
                 {/* Badge de ID para debug */}
-                {user?.role === 'admin' && debugInfo && (
-                  <Box sx={{
-                    position: 'absolute',
-                    bottom: 5,
-                    right: 5,
-                    backgroundColor: 'rgba(255,255,255,0.9)',
-                    color: 'black',
-                    padding: '2px 4px',
-                    borderRadius: '3px',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    zIndex: 10,
-                    border: '1px solid rgba(255,255,255,0.2)'
-                  }}>
-                    ID {String(task.id).slice(-4) || 'N/A'}
-                  </Box>
-                )}
+
               </Card>
             </div>
           ))}
         </Box>
       </Box>
       
-      {/* Métricas de debug para admin - oculto por defecto para no interferir */}
-      <Box sx={{ 
-        position: 'fixed', 
-        bottom: 20, 
-        right: 20, 
-        zIndex: 1000,
-        maxWidth: '300px',
-        display: debugInfo && user?.role === 'admin' ? 'block' : 'none'
-      }} data-debug-panel>
-        <DebugMetrics show={debugInfo && user?.role === 'admin'} />
-      </Box>
+
     </Box>
   );
 }
