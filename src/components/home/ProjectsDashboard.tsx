@@ -25,7 +25,7 @@ export default function ProjectsDashboard() {
   const { tasks, deleteTask } = useTasks();
   const { user } = useAuth();
   const [debugInfo, setDebugInfo] = useState(false);
-  const [dragMode, setDragMode] = useState<'swapy' | 'html5'>('html5'); // Usar HTML5 por defecto
+  const [dragMode, setDragMode] = useState<'swapy' | 'html5'>('swapy'); // Usar Swapy por defecto para animaciones
   const [orderedTasks, setOrderedTasks] = useState<TaskData[]>([]);
   const swapyRef = useRef<HTMLDivElement>(null);
   const swapyInstance = useRef<any>(null);
@@ -116,10 +116,12 @@ export default function ProjectsDashboard() {
 
         console.log('🎯 Inicializando Swapy con', items.length, 'elementos');
 
-        // Configuración básica y segura de Swapy
+        // Configuración avanzada de Swapy con animaciones
         swapyInstance.current = createSwapy(swapyRef.current, {
-          animation: 'dynamic',
-          swapMode: 'drop'
+          animation: 'spring',
+          swapMode: 'hover',
+          dragOnHold: false,
+          autoScrollOnDrag: false
         });
 
         swapyInstance.current.onSwap((event: any) => {
@@ -130,8 +132,8 @@ export default function ProjectsDashboard() {
             }
 
             const { data } = event.detail;
-            if (!Array.isArray(data)) {
-              console.warn('Data del swap no es array:', data);
+            if (!Array.isArray(data) || data.length === 0) {
+              console.warn('Data del swap no es array válido:', data);
               return;
             }
 
@@ -141,31 +143,57 @@ export default function ProjectsDashboard() {
                 const taskId = item.element.id.replace('task-', '');
                 return orderedTasks.find(task => String(task.id) === taskId);
               })
-              .filter((task): task is TaskData => task !== undefined);
+              .filter((task): task is TaskData => task !== undefined && task !== null);
 
             if (newOrder.length === orderedTasks.length && newOrder.length > 0) {
-              console.log('🔄 Nuevo orden:', newOrder.map(t => t.title));
+              console.log('🔄 Nuevo orden (Swapy):', newOrder.map(t => t.title));
               setOrderedTasks(newOrder);
 
               // Guardar el orden en localStorage
               const orderIds = newOrder.map(task => task.id);
               localStorage.setItem('tasksOrder', JSON.stringify(orderIds));
+            } else {
+              console.warn('Orden inválido generado:', newOrder.length, 'vs', orderedTasks.length);
             }
           } catch (error) {
-            console.error('❌ Error procesando swap:', error);
+            console.error('❌ Error procesando swap de Swapy:', error instanceof Error ? error.message : String(error));
           }
         });
 
         console.log('✅ Swapy inicializado correctamente');
 
+        // Verificar que los elementos sean arrastrables
+        const draggableElements = swapyRef.current.querySelectorAll('.swapy-item');
+        console.log('🎯 Elementos arrastrables encontrados:', draggableElements.length);
+
+        // Agregar listener adicional para verificar funcionamiento
+        swapyInstance.current.onBeforeSwap((event: any) => {
+          console.log('🎯 onBeforeSwap:', event?.detail);
+        });
+
+        swapyInstance.current.onAfterSwap((event: any) => {
+          console.log('🎉 onAfterSwap completado');
+        });
+
+        // Mostrar mensaje de éxito
+        console.log('🚀 ¡Swapy está listo! Puedes arrastrar las tarjetas ahora.');
+
       } catch (error) {
-        console.error('❌ Error inicializando Swapy:', error);
+        console.error('❌ Error inicializando Swapy:', error instanceof Error ? error.message : String(error));
+        console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
+
+        // Mostrar información de debug adicional
+        console.log('🔍 Información de debug:');
+        console.log('- Modo:', dragMode);
+        console.log('- Tareas:', orderedTasks.length);
+        console.log('- Contenedor:', !!swapyRef.current);
+
         // Limpiar instancia en caso de error
         if (swapyInstance.current) {
           try {
             swapyInstance.current.destroy();
           } catch (destroyError) {
-            console.error('Error destruyendo Swapy después del error:', destroyError);
+            console.error('Error destruyendo Swapy después del error:', destroyError instanceof Error ? destroyError.message : String(destroyError));
           }
           swapyInstance.current = null;
         }
@@ -211,11 +239,22 @@ export default function ProjectsDashboard() {
     }
   };
   
-  // Función para resetear el orden de las tareas
-  const resetTaskOrder = () => {
-    localStorage.removeItem('tasksOrder');
-    setOrderedTasks([...tasks]);
-    console.log('🔄 Orden de tareas reseteado');
+  // Función para cambiar el modo de drag
+  const toggleDragMode = () => {
+    const newMode = dragMode === 'html5' ? 'swapy' : 'html5';
+    setDragMode(newMode);
+    console.log(`🔄 Modo cambiado a: ${newMode}`);
+
+    // Limpiar instancia de Swapy cuando cambiamos de modo
+    if (swapyInstance.current) {
+      try {
+        swapyInstance.current.destroy();
+        swapyInstance.current = null;
+        console.log('🧹 Instancia Swapy limpiada');
+      } catch (error) {
+        console.error('Error limpiando Swapy:', error);
+      }
+    }
   };
   
   // Función para probar drag and drop
@@ -235,17 +274,64 @@ export default function ProjectsDashboard() {
       items.forEach((item, index) => {
         console.log(`  ${index}:`, item.id, item.className);
       });
+
+      // Verificar si los elementos están visibles
+      const rect = swapyRef.current.getBoundingClientRect();
+      console.log('📏 Dimensiones del contenedor:', rect.width, 'x', rect.height);
     }
 
     if (swapyInstance.current) {
       console.log('✅ Swapy está activo');
+      // Intentar acceder a métodos de Swapy para verificar estado
+      try {
+        console.log('🔧 Estado interno de Swapy: OK');
+      } catch (error) {
+        console.log('🔧 Error accediendo a Swapy:', error instanceof Error ? error.message : String(error));
+      }
     } else {
       console.log('❌ Swapy no está inicializado');
+      if (dragMode === 'swapy' && orderedTasks.length >= 2) {
+        console.log('💡 Debería estar inicializado. Revisa la consola por errores.');
+      }
     }
 
     console.groupEnd();
   };
   
+  // Función para resetear el orden de las tareas al orden original
+  const resetTaskOrder = () => {
+    try {
+      // Resetear al orden original (por título alfabéticamente, ya que id es string opcional)
+      const originalOrder = [...tasks].sort((a, b) => {
+        const aId = a.id || a.title;
+        const bId = b.id || b.title;
+        return aId.localeCompare(bId);
+      });
+      setOrderedTasks(originalOrder);
+      
+      // Limpiar el orden guardado en localStorage
+      localStorage.removeItem('tasksOrder');
+      
+      console.log('🔄 Orden de tareas reseteado al original');
+      
+      // Reinicializar Swapy con el nuevo orden
+      if (swapyInstance.current) {
+        setTimeout(() => {
+          // Limpiar instancia de Swapy
+          try {
+            swapyInstance.current.destroy();
+            swapyInstance.current = null;
+            console.log('🧹 Instancia Swapy limpiada para reinicialización');
+          } catch (error) {
+            console.error('Error limpiando Swapy:', error instanceof Error ? error.message : String(error));
+          }
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error reseteando orden de tareas:', error instanceof Error ? error.message : String(error));
+    }
+  };
+
   // Función de debug para administradores
   const showDebugInfo = () => {
     console.group('🔧 DEBUG INFO - ProjectsDashboard');
@@ -266,53 +352,60 @@ export default function ProjectsDashboard() {
     <Box sx={{ py: 4, position: 'relative' }}>
       <style>{`
         .swapy-item {
-          transition: transform 0.3s ease, opacity 0.3s ease;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
           cursor: grab;
           user-select: none;
           position: relative;
-        }
-        .swapy-item:active {
-          cursor: grabbing;
-        }
-        .swapy-item.is-dragging {
-          opacity: 0.8;
-          transform: rotate(3deg) scale(1.02);
-          z-index: 1000;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .swapy-item.is-ghost {
-          opacity: 0.4;
-          transform: scale(0.95);
-        }
-        .swapy-slot {
-          transition: all 0.3s ease;
-        }
-        .swapy-slot.is-highlighted {
-          transform: scale(1.01);
-        }
-        /* Asegurar que las tarjetas sean arrastrables */
-        .swapy-item {
           touch-action: none;
           -webkit-touch-callout: none;
           -webkit-user-select: none;
           -moz-user-select: none;
           -ms-user-select: none;
+          will-change: transform, opacity;
+        }
+        .swapy-item:active {
+          cursor: grabbing;
+        }
+        .swapy-item.is-dragging {
+          opacity: 0.95;
+          transform: rotate(2deg) scale(1.03) translateZ(0);
+          z-index: 1000;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+          transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+        }
+        .swapy-item.is-ghost {
+          opacity: 0.6;
+          transform: scale(0.98) translateZ(0);
+          transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+        }
+        .swapy-slot {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .swapy-slot.is-highlighted {
+          transform: scale(1.02) translateZ(0);
+          transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .swapy-container {
+          position: relative;
+          overflow: visible;
         }
         /* Indicador de drag */
         .drag-indicator {
           position: absolute;
           top: 8px;
           right: 8px;
-          background: rgba(255, 255, 255, 0.9);
-          color: rgba(0, 0, 0, 0.7);
-          padding: 2px 6px;
-          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.95);
+          color: rgba(0, 0, 0, 0.8);
+          padding: 3px 8px;
+          border-radius: 6px;
           font-size: 10px;
-          font-weight: 500;
+          font-weight: 600;
           opacity: 0;
           transition: opacity 0.2s ease;
           pointer-events: none;
           z-index: 10;
+          backdrop-filter: blur(4px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .swapy-item:hover .drag-indicator {
           opacity: 1;
@@ -330,7 +423,7 @@ export default function ProjectsDashboard() {
               color: debugInfo ? 'error.main' : 'text.secondary',
               fontSize: '0.7rem'
             }}>
-              {orderedTasks.length} tareas • Admin Mode
+              {orderedTasks.length} tareas • {dragMode === 'swapy' ? '🎯 Swapy' : '🌐 HTML5'} {swapyInstance.current ? '✅' : '❌'}
             </Typography>
             <Tooltip title="Resetear orden">
               <IconButton 
@@ -347,10 +440,15 @@ export default function ProjectsDashboard() {
             <Tooltip title={`Modo ${dragMode === 'html5' ? 'HTML5' : 'Swapy'} - Click para cambiar`}>
               <IconButton 
                 size="small" 
-                onClick={() => setDragMode(dragMode === 'html5' ? 'swapy' : 'html5')}
+                onClick={toggleDragMode}
                 sx={{ 
                   color: dragMode === 'html5' ? 'success.main' : 'info.main',
-                  backgroundColor: dragMode === 'html5' ? 'success.50' : 'info.50'
+                  backgroundColor: dragMode === 'html5' ? 'success.50' : 'info.50',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.1)',
+                    backgroundColor: dragMode === 'html5' ? 'success.100' : 'info.100'
+                  }
                 }}
               >
                 {dragMode === 'html5' ? '🌐' : '🎯'}
@@ -445,7 +543,7 @@ export default function ProjectsDashboard() {
             >
               {/* Indicador de drag */}
               <Box className="drag-indicator">
-                Arrastrar
+                {dragMode === 'swapy' ? '🎯 Swapy' : '🌐 HTML5'}
               </Box>
               
               {/* Etiquetas superiores */}
