@@ -13,7 +13,11 @@ import { useSpotifyAuth } from '@/context/SpotifyAuthContext';
 export default function SpotifyDebugPage() {
   const { user, login, logout, isAuthenticated, isLoading, getAccessToken } = useSpotifyAuth();
   const [debugInfo, setDebugInfo] = useState<any>({});
-  const [testResults, setTestResults] = useState<any>({});
+  const [testResults, setTestResults] = useState<Record<string, {
+    status: 'loading' | 'success' | 'error';
+    response?: { status: number; data: any };
+    error?: string;
+  }>>({});
 
   const updateDebugInfo = () => {
     const info = {
@@ -63,12 +67,12 @@ export default function SpotifyDebugPage() {
           }
         }
       }));
-    } catch (error) {
+    } catch (error: unknown) {
       setTestResults(prev => ({
         ...prev,
         [endpoint]: {
           status: 'error',
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : String(error)
         }
       }));
     }
