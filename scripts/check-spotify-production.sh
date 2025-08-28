@@ -3,22 +3,28 @@
 echo "🔧 Verificación de configuración de Spotify para producción"
 echo "============================================================"
 
-# Detectar entorno
+# Detectar entorno automáticamente
 if [ -n "$VERCEL_URL" ]; then
-    echo "🌐 Entorno detectado: Vercel"
+    DETECTED_ENV="Vercel"
     BASE_URL="https://$VERCEL_URL"
 elif [ -n "$RAILWAY_STATIC_URL" ]; then
-    echo "🌐 Entorno detectado: Railway"
+    DETECTED_ENV="Railway"
     BASE_URL="$RAILWAY_STATIC_URL"
+elif [ -n "$NEXTAUTH_URL" ]; then
+    if [[ $NEXTAUTH_URL == https://* ]]; then
+        DETECTED_ENV="Producción (desde NEXTAUTH_URL)"
+        BASE_URL="$NEXTAUTH_URL"
+    else
+        DETECTED_ENV="Desarrollo (desde NEXTAUTH_URL)"
+        BASE_URL="$NEXTAUTH_URL"
+    fi
 else
-    echo "🌐 Entorno detectado: Local/Desarrollo"
+    DETECTED_ENV="Desarrollo (localhost)"
     BASE_URL="http://localhost:3001"
 fi
 
-echo ""
-echo "📋 Configuración actual:"
-echo "Base URL: $BASE_URL"
-echo "Redirect URI esperado: $BASE_URL/api/spotify/callback"
+echo "🌐 Entorno detectado: $DETECTED_ENV"
+echo "🏠 URL base: $BASE_URL"
 
 # Verificar variables de entorno
 echo ""
@@ -66,7 +72,18 @@ echo "Ve a: https://developer.spotify.com/dashboard"
 echo "Configura el Redirect URI como: $EXPECTED_REDIRECT"
 
 echo ""
-echo "🔍 Páginas de diagnóstico:"
-echo "Diagnóstico general: $BASE_URL/spotify-production-debug"
-echo "Debug de desarrollo: $BASE_URL/spotify-debug"
-echo "Página de solución: $BASE_URL/spotify-fix"
+echo "� Para aplicar cambios:"
+if [[ $DETECTED_ENV == *"Vercel"* ]]; then
+    echo "1. Ve al dashboard de Vercel"
+    echo "2. Proyecto > Settings > Environment Variables"
+    echo "3. Actualiza las variables"
+    echo "4. Redeploya la aplicación"
+elif [[ $DETECTED_ENV == *"Railway"* ]]; then
+    echo "1. Ve al dashboard de Railway"
+    echo "2. Proyecto > Variables"
+    echo "3. Actualiza las variables"
+    echo "4. Redeploya la aplicación"
+else
+    echo "1. Edita tu archivo .env.local"
+    echo "2. Reinicia el servidor (Ctrl+C, luego npm run dev)"
+fi

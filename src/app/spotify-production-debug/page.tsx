@@ -61,6 +61,27 @@ export default function SpotifyProductionDebugPage() {
         Esta página verifica la configuración de Spotify para producción y ayuda a identificar problemas comunes.
       </Typography>
 
+      {/* Información del entorno */}
+      <Paper sx={{ p: 3, mb: 3, bgcolor: 'info.main', color: 'info.contrastText' }}>
+        <Typography variant="h6" gutterBottom>
+          🌐 Información del Entorno
+        </Typography>
+        <Typography variant="body2">
+          <strong>Dominio actual:</strong> {typeof window !== 'undefined' ? window.location.origin : 'Cargando...'}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Entorno detectado:</strong> {
+            typeof window !== 'undefined' && 
+            (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+              ? 'Desarrollo (localhost)' 
+              : 'Producción'
+          }
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          💡 Esta página se adapta automáticamente a tu entorno y muestra la configuración correcta.
+        </Typography>
+      </Paper>
+
       <Box sx={{ mb: 3 }}>
         <Button
           variant="contained"
@@ -198,7 +219,12 @@ export default function SpotifyProductionDebugPage() {
               🎵 Configuración del Dashboard de Spotify
             </Typography>
 
-            <Alert severity="info" sx={{ mb: 2 }}>
+            <Alert 
+              severity={diagnosis.spotifyDashboard.environment === 'producción' ? 'success' : 'info'} 
+              sx={{ mb: 2 }}
+            >
+              <strong>Entorno:</strong> {diagnosis.spotifyDashboard.environment.toUpperCase()}
+              <br />
               Ve a tu aplicación en el <a href={diagnosis.spotifyDashboard.dashboardUrl} target="_blank" rel="noopener noreferrer">Dashboard de Spotify</a> y configura:
             </Alert>
 
@@ -209,6 +235,12 @@ export default function SpotifyProductionDebugPage() {
             <Typography variant="body2" sx={{ mt: 2 }}>
               {diagnosis.spotifyDashboard.instructions}
             </Typography>
+
+            {diagnosis.spotifyDashboard.note && (
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                <strong>Nota:</strong> {diagnosis.spotifyDashboard.note}
+              </Alert>
+            )}
           </Paper>
 
           {/* Conectividad */}

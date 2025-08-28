@@ -20,12 +20,18 @@ export async function GET(request: NextRequest) {
     statusUrl: `${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/spotify/status`
   };
 
+  // Determinar si estamos en desarrollo o producción
+  const isDevelopment = currentConfig.NEXTAUTH_URL?.includes('localhost') || 
+                       currentConfig.NEXTAUTH_URL?.includes('127.0.0.1') || false;
+  
   // Diagnóstico
   const diagnosis = {
     redirectUriCorrect: currentConfig.SPOTIFY_REDIRECT_URI === expectedUrls.redirectUri,
     clientIdConfigured: currentConfig.SPOTIFY_CLIENT_ID === 'CONFIGURADO',
     nextAuthConfigured: !!currentConfig.NEXTAUTH_URL,
-    portConsistent: currentConfig.NEXTAUTH_URL?.includes('3001') || false
+    portConsistent: isDevelopment ? 
+      (currentConfig.NEXTAUTH_URL?.includes('3001') || false) : 
+      !currentConfig.NEXTAUTH_URL?.includes('3001') || false
   };
 
   // Probar conectividad con Spotify
@@ -41,33 +47,42 @@ export async function GET(request: NextRequest) {
     spotifyConnectivity = 'ERROR DE RED';
   }
 
+  const envFile = isDevelopment ? '.env.local' : '.env.production';
+  
   const issues = [];
   if (!diagnosis.redirectUriCorrect) {
     issues.push({
       type: 'redirect_uri_mismatch',
       message: `El redirect URI configurado (${currentConfig.SPOTIFY_REDIRECT_URI}) no coincide con el esperado (${expectedUrls.redirectUri})`,
-      solution: `Actualiza NEXT_PUBLIC_SPOTIFY_REDIRECT_URI en .env.local a: ${expectedUrls.redirectUri}`
+      solution: `Actualiza NEXT_PUBLIC_SPOTIFY_REDIRECT_URI en ${envFile} a: ${expectedUrls.redirectUri}`
     });
   }
   if (!diagnosis.clientIdConfigured) {
     issues.push({
       type: 'client_id_missing',
       message: 'El Client ID de Spotify no está configurado',
-      solution: 'Configura NEXT_PUBLIC_SPOTIFY_CLIENT_ID en .env.local'
+      solution: `Configura NEXT_PUBLIC_SPOTIFY_CLIENT_ID en ${envFile}`
     });
   }
   if (!diagnosis.nextAuthConfigured) {
     issues.push({
       type: 'nextauth_missing',
       message: 'NEXTAUTH_URL no está configurado',
-      solution: 'Configura NEXTAUTH_URL en .env.local'
+      solution: `Configura NEXTAUTH_URL en ${envFile}`
     });
   }
   if (!diagnosis.portConsistent) {
+    const portMessage = isDevelopment 
+      ? 'El puerto en NEXTAUTH_URL no es 3001'
+      : 'NEXTAUTH_URL tiene un puerto específico (no necesario en producción)';
+    const portSolution = isDevelopment
+      ? 'Asegúrate de que NEXTAUTH_URL sea http://localhost:3001'
+      : 'Quita el puerto específico de NEXTAUTH_URL (ej: https://tu-dominio.com)';
+    
     issues.push({
       type: 'port_inconsistent',
-      message: 'El puerto en NEXTAUTH_URL no coincide con el puerto del servidor',
-      solution: 'Asegúrate de que NEXTAUTH_URL use el puerto 3001'
+      message: portMessage,
+      solution: portSolution
     });
   }
 
@@ -84,7 +99,11 @@ export async function GET(request: NextRequest) {
     spotifyDashboard: {
       requiredRedirectUri: expectedUrls.redirectUri,
       dashboardUrl: 'https://developer.spotify.com/dashboard',
-      instructions: 'Ve a tu app en Spotify Dashboard > Edit Settings > Redirect URIs y configura exactamente: ' + expectedUrls.redirectUri
+      environment: isDevelopment ? 'desarrollo' : 'producción',
+      instructions: `Ve a tu app en Spotify Dashboard > Edit Settings > Redirect URIs y configura exactamente: ${expectedUrls.redirectUri}`,
+      note: isDevelopment 
+        ? 'Esta configuración es solo para desarrollo local. En producción necesitarás una URI diferente.'
+        : 'Esta es la configuración correcta para producción.'
     }
   });
 }
