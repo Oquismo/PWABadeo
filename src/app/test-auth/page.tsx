@@ -9,6 +9,13 @@ export default function TestAuth() {
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === 'object' && 'message' in error) {
+      return String((error as { message: unknown }).message);
+    }
+    return String(error || 'Unknown error');
+  };
+
   const testEndpoint = async (endpoint: string) => {
     setLoading(true);
     setResult(null);
@@ -26,10 +33,10 @@ export default function TestAuth() {
         status: response.status,
         data
       });
-    } catch (error) {
+    } catch (error: unknown) {
       setResult({
         endpoint,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: getErrorMessage(error)
       });
     } finally {
       setLoading(false);
@@ -48,10 +55,10 @@ export default function TestAuth() {
         status: response.status,
         data
       });
-    } catch (error) {
+    } catch (error: unknown) {
       setResult({
         endpoint: '/api/test-db',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: getErrorMessage(error)
       });
     } finally {
       setLoading(false);

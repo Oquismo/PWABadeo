@@ -12,6 +12,13 @@ export default function PushNotificationTest() {
 
   const { isSupported, isSubscribed, requestPermission, subscribeToPush } = usePushNotifications();
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === 'object' && 'message' in error) {
+      return String((error as { message: unknown }).message);
+    }
+    return String(error || 'Error desconocido');
+  };
+
   const handleSendNotification = async () => {
     setIsLoading(true);
     setResult(null);
@@ -31,8 +38,8 @@ export default function PushNotificationTest() {
 
       const data = await response.json();
       setResult(data);
-    } catch (error) {
-      setResult({ error: error instanceof Error ? error.message : 'Error desconocido' });
+    } catch (error: unknown) {
+      setResult({ error: getErrorMessage(error) });
     } finally {
       setIsLoading(false);
     }

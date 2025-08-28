@@ -20,6 +20,13 @@ const DebugMetrics = dynamic(() => import('@/components/admin/DebugMetrics'), {
   ssr: false
 });
 
+const getErrorMessage = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message: unknown }).message);
+  }
+  return String(error || 'Unknown error');
+};
+
 export default function ProjectsDashboard() {
   const { tasks, deleteTask } = useTasks();
   const { user } = useAuth();
@@ -125,8 +132,8 @@ export default function ProjectsDashboard() {
           try {
             swapyInstance.current.destroy();
             swapyInstance.current = null;
-          } catch (error) {
-            console.error('Error limpiando Swapy:', error instanceof Error ? error.message : String(error));
+          } catch (error: unknown) {
+            console.error('Error limpiando Swapy:', getErrorMessage(error));
           }
         }
         return;
@@ -204,8 +211,8 @@ export default function ProjectsDashboard() {
             } else {
               console.warn('❌ Orden inválido generado:', newOrder.length, 'vs', orderedTasks.length);
             }
-          } catch (error) {
-            console.error('❌ Error procesando swap de Swapy:', error instanceof Error ? error.message : String(error));
+          } catch (error: unknown) {
+            console.error('❌ Error procesando swap de Swapy:', getErrorMessage(error));
           }
         });
 
@@ -217,9 +224,9 @@ export default function ProjectsDashboard() {
 
         console.log('🚀 ¡Swapy está listo! Puedes arrastrar las tarjetas ahora.');
 
-      } catch (error) {
-        console.error('❌ Error inicializando Swapy:', error instanceof Error ? error.message : String(error));
-        console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
+      } catch (error: unknown) {
+        console.error('❌ Error inicializando Swapy:', getErrorMessage(error));
+        console.error('Stack trace:', error instanceof Error ? (error as Error).stack : 'No stack trace available');
 
         // Mostrar información de debug adicional
         console.log('🔍 Información de debug:');
@@ -245,8 +252,8 @@ export default function ProjectsDashboard() {
         try {
           swapyInstance.current.destroy();
           swapyInstance.current = null;
-        } catch (error) {
-          console.error('Error limpiando Swapy:', error instanceof Error ? error.message : String(error));
+        } catch (error: unknown) {
+          console.error('Error limpiando Swapy:', getErrorMessage(error));
         }
       }
     };
@@ -289,8 +296,8 @@ export default function ProjectsDashboard() {
         swapyInstance.current.destroy();
         swapyInstance.current = null;
         console.log('🧹 Instancia Swapy limpiada');
-      } catch (error) {
-        console.error('Error limpiando Swapy:', error instanceof Error ? error.message : String(error));
+      } catch (error: unknown) {
+        console.error('Error limpiando Swapy:', getErrorMessage(error));
       }
     }
   };
@@ -323,8 +330,8 @@ export default function ProjectsDashboard() {
       // Intentar acceder a métodos de Swapy para verificar estado
       try {
         console.log('🔧 Estado interno de Swapy: OK');
-      } catch (error) {
-        console.log('🔧 Error accediendo a Swapy:', error instanceof Error ? error.message : String(error));
+      } catch (error: unknown) {
+        console.log('🔧 Error accediendo a Swapy:', getErrorMessage(error));
       }
     } else {
       console.log('❌ Swapy no está inicializado');
@@ -360,13 +367,13 @@ export default function ProjectsDashboard() {
             swapyInstance.current.destroy();
             swapyInstance.current = null;
             console.log('🧹 Instancia Swapy limpiada para reinicialización');
-          } catch (error) {
-            console.error('Error limpiando Swapy:', error instanceof Error ? error.message : String(error));
+          } catch (error: unknown) {
+            console.error('Error limpiando Swapy:', getErrorMessage(error));
           }
         }, 100);
       }
-    } catch (error) {
-      console.error('Error reseteando orden de tareas:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Error reseteando orden de tareas:', getErrorMessage(error));
     }
   };
 
