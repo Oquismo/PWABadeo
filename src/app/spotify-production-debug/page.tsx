@@ -25,6 +25,13 @@ export default function SpotifyProductionDebugPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === 'object' && 'message' in error) {
+      return String((error as { message: unknown }).message);
+    }
+    return String(error || 'Error desconocido');
+  };
+
   const runDiagnosis = async () => {
     setLoading(true);
     setError(null);
@@ -33,8 +40,8 @@ export default function SpotifyProductionDebugPage() {
       const response = await fetch('/api/spotify/diagnose');
       const data = await response.json();
       setDiagnosis(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
