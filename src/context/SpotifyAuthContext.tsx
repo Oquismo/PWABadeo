@@ -84,7 +84,18 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
       sessionStorage.setItem('spotify_code_verifier', codeVerifier);
       console.log('💾 Code verifier guardado en sessionStorage');
 
-      const scope = 'user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private';
+      const scope = [
+        'user-read-private',
+        'user-read-email',
+        'playlist-read-private',
+        'playlist-modify-public',
+        'playlist-modify-private',
+        'streaming', // Requerido para el Web Playback SDK
+        'user-modify-playback-state' // Requerido para controlar la reproducción
+      ].join(' ');
+
+      console.log('🔒 Scopes solicitados:', scope);
+
       const authUrl = new URL("https://accounts.spotify.com/authorize");
 
       const params = {
