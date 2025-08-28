@@ -284,10 +284,10 @@ export function useSpotifyPlayer() {
   };
 }
 
-// Declaración de tipos para el SDK de Spotify
-declare global {
-  interface Window {
-    Spotify: any;
-    onSpotifyWebPlaybackSDKReady: () => void;
-  }
-}
+// Declaración de tipos para el SDK de Spotify (comentado para evitar conflicto de tipos)
+// declare global {
+//   interface Window {
+//     Spotify: any; // ⚠️ Si reactivas la integración, usa: Spotify: typeof Spotify;
+//     onSpotifyWebPlaybackSDKReady: () => void;
+//   }
+// }
