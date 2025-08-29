@@ -37,10 +37,10 @@ export default function BottomNavBar() {
   const navActions = [
     { value: "/", icon: <HomeIcon /> },
     { value: "/mapa", icon: <MapIcon /> },
-    { value: "/spotify", icon: <MusicNoteIcon /> },
+    // { value: "/spotify", icon: <MusicNoteIcon /> }, // Oculto temporalmente
     ...(user?.role === 'admin'
       ? [
-          { value: "/spotify-production-debug", icon: <BugReportIcon /> },
+          // { value: "/spotify-production-debug", icon: <BugReportIcon /> }, // Oculto temporalmente
           { value: "/admin", icon: <AdminPanelSettingsIcon /> }
         ]
       : [
