@@ -6,7 +6,6 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import BugReportIcon from '@mui/icons-material/BugReport';
 import { carouselConfig } from '@/data/tasks';
 import { TaskData } from '@/data/tasks';
 import { useTasks } from '@/context/TasksContext';
@@ -20,6 +19,98 @@ const DebugMetrics = dynamic(() => import('@/components/admin/DebugMetrics'), {
   ssr: false
 });
 
+// 🎨 Sistema de Colores Material You/Google
+const useMaterialYouTheme = () => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Actualizar cada minuto
+    return () => clearInterval(timer);
+  }, []);
+
+  const hour = currentTime.getHours();
+
+  // 🎨 Paletas dinámicas basadas en la hora del día
+  const getDynamicPalette = () => {
+    if (hour >= 6 && hour < 12) {
+      // 🌅 Mañana - tonos cálidos y energéticos
+      return {
+        primary: '#FF6B35',      // Coral vibrante
+        secondary: '#F7931E',    // Naranja soleado
+        tertiary: '#FFD23F',     // Amarillo dorado
+        surface: '#FFF8F0',      // Blanco cálido
+        surfaceVariant: '#F5E6D3', // Beige claro
+        onSurface: '#2D1810',    // Marrón oscuro
+        onSurfaceVariant: '#5D4037', // Marrón medio
+        outline: '#D7C4B7',      // Beige oscuro
+        shadow: 'rgba(255, 107, 53, 0.25)' // Sombra coral
+      };
+    } else if (hour >= 12 && hour < 17) {
+      // ☀️ Tarde - tonos frescos y productivos
+      return {
+        primary: '#1976D2',      // Azul profesional
+        secondary: '#42A5F5',    // Azul cielo
+        tertiary: '#81C784',     // Verde menta
+        surface: '#FAFAFA',      // Gris muy claro
+        surfaceVariant: '#F5F5F5', // Gris claro
+        onSurface: '#0D47A1',    // Azul oscuro
+        onSurfaceVariant: '#1565C0', // Azul medio
+        outline: '#BDBDBD',      // Gris medio
+        shadow: 'rgba(25, 118, 210, 0.25)' // Sombra azul
+      };
+    } else if (hour >= 17 && hour < 21) {
+      // 🌆 Atardecer - tonos cálidos y relajantes
+      return {
+        primary: '#9C27B0',      // Púrpura elegante
+        secondary: '#BA68C8',    // Lavanda
+        tertiary: '#FF7043',     // Coral oscuro
+        surface: '#FEF7FF',      // Blanco lavanda
+        surfaceVariant: '#F3E5F5', // Lavanda claro
+        onSurface: '#4A148C',    // Púrpura oscuro
+        onSurfaceVariant: '#7B1FA2', // Púrpura medio
+        outline: '#CE93D8',      // Lavanda medio
+        shadow: 'rgba(156, 39, 176, 0.25)' // Sombra púrpura
+      };
+    } else {
+      // 🌙 Noche - tonos oscuros y sofisticados
+      return {
+        primary: '#212121',      // Gris muy oscuro
+        secondary: '#424242',    // Gris oscuro
+        tertiary: '#FF5722',     // Naranja intenso
+        surface: '#303030',      // Gris oscuro
+        surfaceVariant: '#424242', // Gris medio
+        onSurface: '#FFFFFF',    // Blanco
+        onSurfaceVariant: '#BDBDBD', // Gris claro
+        outline: '#616161',      // Gris
+        shadow: 'rgba(33, 33, 33, 0.4)' // Sombra oscura
+      };
+    }
+  };
+
+  const palette = getDynamicPalette();
+
+  // 🎯 Generar colores para cada tipo de proyecto
+  const getProjectColors = (taskType?: string, index?: number) => {
+    const baseColors = [
+      { primary: '#FF6B35', secondary: '#FF8F65', accent: '#FFD23F' }, // Coral
+      { primary: '#1976D2', secondary: '#42A5F5', accent: '#81C784' }, // Azul
+      { primary: '#9C27B0', secondary: '#BA68C8', accent: '#FF7043' }, // Púrpura
+      { primary: '#388E3C', secondary: '#4CAF50', accent: '#8BC34A' }, // Verde
+      { primary: '#F57C00', secondary: '#FF9800', accent: '#FFC107' }, // Naranja
+      { primary: '#7B1FA2', secondary: '#9C27B0', accent: '#E91E63' }, // Morado
+    ];
+
+    const colorIndex = index !== undefined ? index % baseColors.length : Math.floor(Math.random() * baseColors.length);
+    return baseColors[colorIndex];
+  };
+
+  return {
+    palette,
+    getProjectColors,
+    currentTime: hour
+  };
+};
+
 const getErrorMessage = (error: unknown): string => {
   if (error && typeof error === 'object' && 'message' in error) {
     return String((error as { message: unknown }).message);
@@ -30,6 +121,7 @@ const getErrorMessage = (error: unknown): string => {
 export default function ProjectsDashboard() {
   const { tasks, deleteTask } = useTasks();
   const { user } = useAuth();
+  const { palette, getProjectColors, currentTime } = useMaterialYouTheme();
   const [debugInfo, setDebugInfo] = useState(false);
   const [dragMode, setDragMode] = useState<'swapy' | 'html5'>('swapy'); // Usar Swapy por defecto para animaciones
   const [orderedTasks, setOrderedTasks] = useState<TaskData[]>([]);
@@ -458,30 +550,8 @@ export default function ProjectsDashboard() {
     setSwipedCardIndex(null);
   };
 
-  // Función de debug para probar swipe
-  const testSwipe = () => {
-    console.group('🧪 Debug Swipe Functionality');
-    console.log('📱 Touch events disponibles:', 'ontouchstart' in window ? '✅' : '❌');
-    console.log('� TouchStart handler:', typeof handleTouchStart);
-    console.log('� TouchMove handler:', typeof handleTouchMove);
-    console.log('👆 TouchEnd handler:', typeof handleTouchEnd);
-    console.log('🎯 Estado actual:', { touchStart, touchEnd, swipedCardIndex });
-    console.log('� Tarjetas ordenadas:', orderedTasks.length);
-    
-    // Verificar si las tarjetas tienen los eventos
-    const cards = document.querySelectorAll('[id^="task-"]');
-    console.log('� Número de tarjetas encontradas:', cards.length);
-    
-    cards.forEach((card, index) => {
-      const hasTouchStart = card.hasAttribute('data-touch-start');
-      console.log(`  Tarjeta ${index}: Eventos touch:`, hasTouchStart ? '✅' : '❌');
-    });
-    
-    console.groupEnd();
-  };
-  
   return (
-    <Box sx={{ py: 4, position: 'relative' }}>
+    <Box sx={{ py: 2, position: 'relative' }}>
       {/* Mostrar loading state durante hidratación para evitar diferencias */}
       {!isHydrated ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
@@ -492,7 +562,6 @@ export default function ProjectsDashboard() {
           <style>{`
             /* Estilos específicos para Swapy */
             [data-swapy-slot] {
-              min-height: 300px;
               display: flex;
               flex-direction: column;
               touch-action: auto;
@@ -585,24 +654,150 @@ export default function ProjectsDashboard() {
               50% { transform: translateX(20px) scale(0.95); }
               100% { transform: translateX(0); }
             }
+
+            /* 🎨 Material You - Animaciones y efectos mejorados */
+            @keyframes materialYouGlow {
+              0%, 100% {
+                box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+              }
+              50% {
+                box-shadow: 0 2px 8px rgba(0,0,0,0.16), 0 4px 16px rgba(0,0,0,0.24);
+              }
+            }
+
+            @keyframes materialYouHover {
+              0% {
+                transform: translateY(0) scale(1);
+              }
+              100% {
+                transform: translateY(-8px) scale(1.02);
+              }
+            }
+
+            @keyframes materialYouPress {
+              0% {
+                transform: translateY(-8px) scale(1.02);
+              }
+              100% {
+                transform: translateY(-4px) scale(0.98);
+              }
+            }
+
+            /* Efectos de profundidad Material You */
+            .material-you-card {
+              position: relative;
+              transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .material-you-card::before {
+              content: '';
+              position: absolute;
+              inset: 0;
+              border-radius: inherit;
+              padding: 1px;
+              background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+              mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+              mask-composite: xor;
+              -webkit-mask-composite: xor;
+              opacity: 0;
+              transition: opacity 0.3s ease;
+            }
+
+            .material-you-card:hover::before {
+              opacity: 1;
+            }
+
+            /* Efectos de ripple Material You */
+            .material-you-ripple {
+              position: relative;
+              overflow: hidden;
+            }
+
+            .material-you-ripple::after {
+              content: '';
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              width: 0;
+              height: 0;
+              border-radius: 50%;
+              background: rgba(255,255,255,0.3);
+              transform: translate(-50%, -50%);
+              transition: width 0.6s, height 0.6s;
+            }
+
+            .material-you-ripple:active::after {
+              width: 300px;
+              height: 300px;
+            }
+
+            /* Gradientes dinámicos Material You */
+            .material-you-gradient {
+              background: linear-gradient(135deg,
+                var(--material-primary) 0%,
+                var(--material-secondary) 50%,
+                var(--material-primary) 100%);
+              background-size: 200% 200%;
+              animation: materialYouGradient 8s ease infinite;
+            }
+
+            @keyframes materialYouGradient {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+
+            /* Efectos de elevación Material You */
+            .material-you-elevation-1 {
+              box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            }
+
+            .material-you-elevation-2 {
+              box-shadow: 0 2px 8px rgba(0,0,0,0.16), 0 4px 16px rgba(0,0,0,0.12);
+            }
+
+            .material-you-elevation-3 {
+              box-shadow: 0 4px 16px rgba(0,0,0,0.20), 0 8px 32px rgba(0,0,0,0.16);
+            }
+
+            .material-you-elevation-4 {
+              box-shadow: 0 8px 32px rgba(0,0,0,0.24), 0 16px 48px rgba(0,0,0,0.20);
+            }
+
+            /* Transiciones fluidas Material You */
+            .material-you-transition {
+              transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .material-you-transition-fast {
+              transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .material-you-transition-slow {
+              transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            }
           `}</style>
 
           {/* Header con título y botones de control */}
           <Box sx={{ mb: 3, px: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-              <Typography variant="h4" fontWeight={700} sx={{ mb: 0 }}>
+              <Typography
+                variant="h4"
+                fontWeight={700}
+                sx={{
+                  mb: 0,
+                  background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.secondary} 100%)`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: `0 2px 4px ${palette.shadow}`,
+                  letterSpacing: '-0.02em',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              >
                 Proyectos Activos
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <Tooltip title="Probar funcionalidad de swipe">
-                  <IconButton 
-                    size="small" 
-                    onClick={testSwipe}
-                    sx={{ color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
-                  >
-                    <BugReportIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -703,38 +898,91 @@ export default function ProjectsDashboard() {
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     sx={{
-                      background: task.color,
+                      // 🎨 Material You - Colores dinámicos
+                      background: `linear-gradient(135deg,
+                        ${getProjectColors(task.title, index).primary}E6 0%,
+                        ${getProjectColors(task.title, index).secondary}CC 50%,
+                        ${getProjectColors(task.title, index).primary}B3 100%)`,
                       color: 'white',
                       width: '100%',
                       height: carouselConfig.cardHeight,
-                      borderRadius: carouselConfig.borderRadius,
+                      borderRadius: 4, // Bordes más redondeados Material You
                       position: 'relative',
                       overflow: 'hidden',
                       cursor: dragMode === 'swapy' ? 'grab' : dragMode === 'html5' ? 'grab' : 'pointer',
-                      p: 0.5,
+                      p: 0,
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 0.5,
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-                      transition: 'transform .25s ease, box-shadow .25s ease',
-                      border: '1px solid rgba(255,255,255,0.15)',
+                      gap: 0,
+
+                      // 🌟 Sombras realistas Material You
+                      boxShadow: `
+                        0 1px 3px rgba(0,0,0,0.12),
+                        0 1px 2px rgba(0,0,0,0.24),
+                        0 4px 8px rgba(0,0,0,0.16),
+                        0 8px 16px rgba(0,0,0,0.12)
+                      `,
+
+                      // ✨ Transiciones fluidas Material You
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+
+                      // 🎯 Bordes Material You
+                      border: `1px solid ${getProjectColors(task.title, index).primary}40`,
+
+                      // 🎭 Estados hover/active Material You
                       '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 10px 36px rgba(0,0,0,0.4)'
+                        transform: 'translateY(-8px) scale(1.02)',
+                        boxShadow: `
+                          0 2px 8px rgba(0,0,0,0.16),
+                          0 4px 16px rgba(0,0,0,0.24),
+                          0 8px 32px rgba(0,0,0,0.20),
+                          0 16px 48px rgba(0,0,0,0.16),
+                          0 0 0 1px ${getProjectColors(task.title, index).accent}30
+                        `,
+                        borderColor: `${getProjectColors(task.title, index).accent}60`
                       },
+
+                      '&:active': {
+                        transform: 'scale(0.98)',
+                        transition: 'all 0.1s cubic-bezier(0.4, 0, 0.2, 1)'
+                      },
+
+                      // 🌈 Efectos de profundidad Material You
                       '&::before': {
                         content: '""',
                         position: 'absolute',
                         inset: 0,
-                        background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 60%)',
-                        opacity: 0.4
+                        background: `radial-gradient(circle at 20% 30%,
+                          ${getProjectColors(task.title, index).accent}20 0%,
+                          transparent 50%)`,
+                        opacity: 0.6,
+                        transition: 'opacity 0.3s ease'
                       },
+
                       '&::after': {
                         content: '""',
                         position: 'absolute',
                         inset: 0,
-                        backdropFilter: 'blur(2px)',
-                        background: 'linear-gradient(140deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))'
+                        background: `linear-gradient(145deg,
+                          rgba(255,255,255,0.1) 0%,
+                          rgba(255,255,255,0.05) 25%,
+                          transparent 50%,
+                          rgba(0,0,0,0.05) 100%)`,
+                        borderRadius: 'inherit',
+                        pointerEvents: 'none'
+                      },
+
+                      // 🎨 Efectos hover adicionales
+                      '&:hover::before': {
+                        opacity: 0.8
+                      },
+
+                      '&:hover::after': {
+                        background: `linear-gradient(145deg,
+                          rgba(255,255,255,0.15) 0%,
+                          rgba(255,255,255,0.08) 25%,
+                          transparent 50%,
+                          rgba(0,0,0,0.08) 100%)`
                       }
                     }}
                     onClick={() => {
@@ -746,12 +994,12 @@ export default function ProjectsDashboard() {
 
                     
                     {/* Etiquetas superiores */}
-                    <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: 1, pt: 0.5 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, maxWidth: '75%' }}>
-                        <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.15, fontSize: '1.05rem', textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}>
+                    <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: 1.5, pt: 1 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, maxWidth: '75%' }}>
+                        <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.1, fontSize: '0.95rem', textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}>
                           {task.title}
                         </Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.72rem', lineHeight: 1.2 }}>
+                        <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.65rem', lineHeight: 1.15 }}>
                           {task.description}
                         </Typography>
                       </Box>
@@ -763,33 +1011,59 @@ export default function ProjectsDashboard() {
                     </Box>
 
                     {/* Badge ADMIN y fecha */}
-                    <Box sx={{ position: 'relative', zIndex: 2, mt: 'auto', px: 1, pb: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <Box sx={{ position: 'relative', zIndex: 2, mt: 'auto', px: 1.5, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                       <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                         {task.role === 'admin' && (
-                          <Chip label="ADMIN" size="small" sx={{
-                            height: 20,
-                            fontSize: '0.55rem',
-                            fontWeight: 600,
-                            letterSpacing: '.5px',
-                            color: '#fff',
-                            bgcolor: 'rgba(0,0,0,0.35)',
-                            backdropFilter: 'blur(3px)',
-                            border: '1px solid rgba(255,255,255,0.25)'
-                          }} />
+                          <Chip
+                            label="ADMIN"
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: '0.5rem',
+                              fontWeight: 700,
+                              letterSpacing: '0.5px',
+                              color: getProjectColors(task.title, index).accent,
+                              bgcolor: 'rgba(255,255,255,0.95)',
+                              backdropFilter: 'blur(8px)',
+                              border: `1px solid ${getProjectColors(task.title, index).accent}40`,
+                              boxShadow: `0 2px 8px ${getProjectColors(task.title, index).primary}20`,
+                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              '&:hover': {
+                                bgcolor: 'rgba(255,255,255,0.98)',
+                                boxShadow: `0 4px 12px ${getProjectColors(task.title, index).primary}30`,
+                                transform: 'translateY(-1px)'
+                              }
+                            }}
+                          />
                         )}
                         {task.date && (
-                          <Chip icon={<CalendarTodayIcon sx={{ fontSize: '0.9rem !important' }} />} label={task.date} size="small" sx={{
-                            height: 20,
-                            fontSize: '0.55rem',
-                            pl: 0.5,
-                            pr: 0.8,
-                            color: '#fff',
-                            bgcolor: 'rgba(255,255,255,0.15)',
-                            border: '1px solid rgba(255,255,255,0.25)',
-                            '& .MuiChip-icon': {
-                              color: 'inherit'
-                            }
-                          }} />
+                          <Chip
+                            icon={<CalendarTodayIcon sx={{ fontSize: '0.7rem !important' }} />}
+                            label={task.date}
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: '0.5rem',
+                              fontWeight: 600,
+                              pl: 0.5,
+                              pr: 0.8,
+                              color: 'rgba(255,255,255,0.9)',
+                              bgcolor: 'rgba(0,0,0,0.2)',
+                              backdropFilter: 'blur(4px)',
+                              border: '1px solid rgba(255,255,255,0.15)',
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              '& .MuiChip-icon': {
+                                color: 'inherit',
+                                opacity: 0.8
+                              },
+                              '&:hover': {
+                                bgcolor: 'rgba(0,0,0,0.3)',
+                                borderColor: 'rgba(255,255,255,0.25)',
+                                transform: 'translateY(-1px)'
+                              }
+                            }}
+                          />
                         )}
                       </Box>
                     </Box>

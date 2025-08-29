@@ -182,22 +182,52 @@ export default function AnnouncementBanner() {
       sx={{ zIndex: 1400 }}
     >
       <Alert
-        icon={<InfoIcon fontSize="inherit" />} 
+        icon={<InfoIcon sx={{ fontSize: 36, color: 'primary.main', mr: 1 }} />}
         severity="info"
         variant="filled"
         onClose={handleClose}
         sx={{
-          bgcolor: 'background.paper',
-          color: 'text.primary',
-          boxShadow: 3,
-          borderRadius: 3,
+          bgcolor: (theme) => theme.palette.background.paper,
+          color: (theme) => theme.palette.text.primary,
+          boxShadow: 6,
+          borderRadius: 6,
           fontWeight: 'bold',
-          fontSize: '1.1rem',
+          fontSize: '1.15rem',
           alignItems: 'center',
-          minWidth: 320,
-          maxWidth: 480,
+          minWidth: 340,
+          maxWidth: 500,
           margin: 'auto',
+          px: 3,
+          py: 2.5,
+          display: 'flex',
+          gap: 2,
+          border: (theme) => `2px solid ${theme.palette.primary.main}22`,
+          backgroundImage: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light}11 0%, ${theme.palette.secondary.light}11 100%)`,
         }}
+        action={
+          <>
+            <button
+              onClick={handleClose}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'inherit',
+                fontWeight: 600,
+                fontSize: '1rem',
+                padding: '6px 16px',
+                borderRadius: 24,
+                cursor: 'pointer',
+                backgroundColor: 'rgba(0,0,0,0.04)',
+                marginLeft: 12,
+                transition: 'background 0.2s',
+              }}
+              onMouseOver={e => (e.currentTarget.style.backgroundColor = '#e0e0e0')}
+              onMouseOut={e => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)')}
+            >
+              Cerrar
+            </button>
+          </>
+        }
       >
         {announcement}
       </Alert>

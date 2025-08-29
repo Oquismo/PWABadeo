@@ -1,5 +1,20 @@
+'use client';
+
 import React, { useEffect, useState, useCallback } from 'react';
-import { Box, Typography, Card, CardContent, IconButton, Stack, Skeleton, Tooltip, Fade, Chip, Divider } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  IconButton,
+  Stack,
+  Skeleton,
+  Tooltip,
+  Fade,
+  useTheme,
+  alpha,
+  keyframes
+} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import CloudIcon from '@mui/icons-material/Cloud';
@@ -8,9 +23,87 @@ import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import AirIcon from '@mui/icons-material/Air';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SpotifyWeatherIntegration from './SpotifyWeatherIntegration';
+
+// Material Design 3 Motion Tokens
+const motionTokens = {
+  easing: {
+    standard: 'cubic-bezier(0.2, 0.0, 0, 1.0)',
+    emphasized: 'cubic-bezier(0.05, 0.7, 0.1, 1.0)',
+    decelerated: 'cubic-bezier(0.0, 0.0, 0.2, 1.0)',
+    accelerated: 'cubic-bezier(0.3, 0.0, 1.0, 1.0)',
+  },
+  duration: {
+    short1: 50,
+    short2: 100,
+    short3: 150,
+    short4: 200,
+    medium1: 250,
+    medium2: 300,
+    medium3: 350,
+    medium4: 400,
+    long1: 450,
+    long2: 500,
+    long3: 550,
+    long4: 600,
+    extraLong1: 700,
+    extraLong2: 800,
+    extraLong3: 900,
+    extraLong4: 1000,
+  }
+};
+
+// Material Design 3 Elevation System
+const elevationTokens = {
+  level0: {
+    boxShadow: 'none',
+    surfaceTint: 0,
+  },
+  level1: {
+    boxShadow: '0px 1px 2px 0px rgba(0, 0, 0, 0.30), 0px 1px 3px 1px rgba(0, 0, 0, 0.15)',
+    surfaceTint: 0.05,
+  },
+  level2: {
+    boxShadow: '0px 1px 2px 0px rgba(0, 0, 0, 0.30), 0px 2px 6px 2px rgba(0, 0, 0, 0.15)',
+    surfaceTint: 0.08,
+  },
+  level3: {
+    boxShadow: '0px 1px 3px 0px rgba(0, 0, 0, 0.30), 0px 4px 8px 3px rgba(0, 0, 0, 0.15)',
+    surfaceTint: 0.11,
+  },
+  level4: {
+    boxShadow: '0px 2px 3px 0px rgba(0, 0, 0, 0.30), 0px 6px 10px 4px rgba(0, 0, 0, 0.15)',
+    surfaceTint: 0.12,
+  },
+  level5: {
+    boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.30), 0px 8px 12px 6px rgba(0, 0, 0, 0.15)',
+    surfaceTint: 0.14,
+  },
+};
+
+// Material Design 3 State Layers
+const stateLayers = {
+  hover: 0.08,
+  focus: 0.12,
+  pressed: 0.12,
+  dragged: 0.16,
+};
+
+// Keyframes para animaciones Material Design 3
+const breatheAnimation = keyframes`
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+`;
+
+const shimmerAnimation = keyframes`
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+`;
+
+const rippleAnimation = keyframes`
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(4); opacity: 0; }
+`;
 
 // Coordenadas configurables vía variables de entorno (NEXT_PUBLIC_*)
 // Fallback a Sevilla si no están definidas.
@@ -42,175 +135,179 @@ interface WeatherData {
 }
 
 // Mapeo básico de códigos (Open-Meteo) a icono y descripción
-const weatherCodeMap: Record<number, { label: string; icon: React.ReactNode }> = {
+const weatherCodeMap: Record<number, { label: string; icon: React.ReactElement }> = {
   0: { label: 'Despejado', icon: <WbSunnyIcon fontSize="inherit" /> },
-  1: { label: 'Parcial', icon: <WbSunnyIcon fontSize="inherit" /> },
-  2: { label: 'Nubes dispersas', icon: <CloudIcon fontSize="inherit" /> },
+  1: { label: 'Mayormente despejado', icon: <WbSunnyIcon fontSize="inherit" /> },
+  2: { label: 'Parcialmente nublado', icon: <CloudIcon fontSize="inherit" /> },
   3: { label: 'Nublado', icon: <CloudIcon fontSize="inherit" /> },
-  45: { label: 'Niebla', icon: <GrainIcon fontSize="inherit" /> },
-  48: { label: 'Niebla', icon: <GrainIcon fontSize="inherit" /> },
-  51: { label: 'Llovizna', icon: <GrainIcon fontSize="inherit" /> },
+  45: { label: 'Niebla', icon: <CloudIcon fontSize="inherit" /> },
+  48: { label: 'Niebla con escarcha', icon: <CloudIcon fontSize="inherit" /> },
+  51: { label: 'Llovizna ligera', icon: <GrainIcon fontSize="inherit" /> },
   53: { label: 'Llovizna', icon: <GrainIcon fontSize="inherit" /> },
-  55: { label: 'Llovizna', icon: <GrainIcon fontSize="inherit" /> },
+  55: { label: 'Llovizna intensa', icon: <GrainIcon fontSize="inherit" /> },
+  56: { label: 'Llovizna helada ligera', icon: <GrainIcon fontSize="inherit" /> },
+  57: { label: 'Llovizna helada intensa', icon: <GrainIcon fontSize="inherit" /> },
   61: { label: 'Lluvia ligera', icon: <GrainIcon fontSize="inherit" /> },
   63: { label: 'Lluvia', icon: <GrainIcon fontSize="inherit" /> },
   65: { label: 'Lluvia fuerte', icon: <GrainIcon fontSize="inherit" /> },
-  66: { label: 'Aguanieve', icon: <AcUnitIcon fontSize="inherit" /> },
-  67: { label: 'Aguanieve', icon: <AcUnitIcon fontSize="inherit" /> },
+  66: { label: 'Lluvia helada ligera', icon: <AcUnitIcon fontSize="inherit" /> },
+  67: { label: 'Lluvia helada', icon: <AcUnitIcon fontSize="inherit" /> },
   71: { label: 'Nieve ligera', icon: <AcUnitIcon fontSize="inherit" /> },
   73: { label: 'Nieve', icon: <AcUnitIcon fontSize="inherit" /> },
   75: { label: 'Nieve intensa', icon: <AcUnitIcon fontSize="inherit" /> },
+  77: { label: 'Granos de nieve', icon: <AcUnitIcon fontSize="inherit" /> },
+  80: { label: 'Chubascos ligeros', icon: <GrainIcon fontSize="inherit" /> },
+  81: { label: 'Chubascos', icon: <GrainIcon fontSize="inherit" /> },
+  82: { label: 'Chubascos fuertes', icon: <GrainIcon fontSize="inherit" /> },
+  85: { label: 'Chubascos de nieve ligeros', icon: <AcUnitIcon fontSize="inherit" /> },
+  86: { label: 'Chubascos de nieve', icon: <AcUnitIcon fontSize="inherit" /> },
   95: { label: 'Tormenta', icon: <ThunderstormIcon fontSize="inherit" /> },
   96: { label: 'Tormenta', icon: <ThunderstormIcon fontSize="inherit" /> },
   99: { label: 'Tormenta', icon: <ThunderstormIcon fontSize="inherit" /> },
 };
 
-// Sistema de temas dinámicos basados en el clima
-const getWeatherTheme = (weatherCode: number, temperature: number, isDark: boolean) => {
+// Material Design 3 Weather Theme System
+interface WeatherTheme {
+  surface: string;
+  surfaceVariant: string;
+  surfaceTint: string;
+  onSurface: string;
+  onSurfaceVariant: string;
+  primary: string;
+  onPrimary: string;
+  stateLayer: {
+    hover: string;
+    focus: string;
+    pressed: string;
+  };
+  elevation: {
+    boxShadow: string;
+    surfaceTint: number;
+  };
+  glowEffect: boolean;
+  shimmerEffect: boolean;
+  rippleEffect: boolean;
+}
+
+const createWeatherTheme = (weatherCode: number, temperature: number, isDark: boolean, theme: any): WeatherTheme => {
+  // Base Material Design 3 tokens
   const baseTheme = {
-    cardBackground: '',
-    textPrimary: '',
-    textSecondary: '',
-    iconColor: '',
-    shadowColor: '',
-    borderColor: '',
-    gradientStart: '',
-    gradientEnd: '',
-    accentColor: '',
-    glowEffect: false,
-    particles: false
+    // Surface & Container tokens
+    surface: isDark ? '#1e1e1e' : '#ffffff',
+    surfaceVariant: isDark ? '#49454f' : '#f7f2fa',
+    surfaceTint: '',
+
+    // Text tokens
+    onSurface: isDark ? '#e6e1e5' : '#1c1b1f',
+    onSurfaceVariant: isDark ? '#cac4d0' : '#49454f',
+    primary: theme.palette.primary?.main || (isDark ? '#d0bcff' : '#6750a4'),
+    onPrimary: isDark ? '#381e72' : '#ffffff',
+
+    // State layers
+    stateLayer: {
+      hover: alpha(theme.palette.primary?.main || '#6750a4', stateLayers.hover),
+      focus: alpha(theme.palette.primary?.main || '#6750a4', stateLayers.focus),
+      pressed: alpha(theme.palette.primary?.main || '#6750a4', stateLayers.pressed),
+    },
   };
 
-  // Temas según condiciones meteorológicas
-  if (weatherCode === 0 || weatherCode === 1) {
-    // Día soleado
-    if (temperature >= 30) {
-      // Calor extremo - tema naranja/rojo
-      return {
-        ...baseTheme,
-        cardBackground: isDark 
-          ? 'linear-gradient(135deg, rgba(255,140,0,0.15) 0%, rgba(255,69,0,0.08) 50%, rgba(0,0,0,0.02) 100%)'
-          : 'linear-gradient(135deg, rgba(255,200,87,0.2) 0%, rgba(255,154,0,0.12) 50%, rgba(255,255,255,0.3) 100%)',
-        textPrimary: isDark ? '#FFB74D' : '#FF8F00',
-        textSecondary: isDark ? '#FFCC02' : '#F57C00',
-        iconColor: '#FF9800',
-        shadowColor: isDark ? 'rgba(255,152,0,0.3)' : 'rgba(255,152,0,0.2)',
-        borderColor: isDark ? 'rgba(255,193,7,0.3)' : 'rgba(255,193,7,0.4)',
-        gradientStart: '#FFB74D',
-        gradientEnd: '#FF8F00',
-        accentColor: '#FF9800',
-        glowEffect: true
-      };
-    } else {
-      // Día normal soleado - tema azul/dorado
-      return {
-        ...baseTheme,
-        cardBackground: isDark 
-          ? 'linear-gradient(135deg, rgba(100,181,246,0.12) 0%, rgba(255,193,7,0.08) 50%, rgba(0,0,0,0.02) 100%)'
-          : 'linear-gradient(135deg, rgba(144,202,249,0.25) 0%, rgba(255,241,118,0.15) 50%, rgba(255,255,255,0.4) 100%)',
-        textPrimary: isDark ? '#81C784' : '#2E7D32',
-        textSecondary: isDark ? '#A5D6A7' : '#388E3C',
-        iconColor: '#FFC107',
-        shadowColor: isDark ? 'rgba(129,199,132,0.25)' : 'rgba(46,125,50,0.15)',
-        borderColor: isDark ? 'rgba(165,214,167,0.3)' : 'rgba(129,199,132,0.4)',
-        gradientStart: '#81C784',
-        gradientEnd: '#4CAF50',
-        accentColor: '#66BB6A'
-      };
-    }
-  }
-
-  if (weatherCode >= 2 && weatherCode <= 3) {
-    // Nublado - tema gris/azul
+  // Weather-specific theming
+  if (weatherCode >= 0 && weatherCode <= 3) {
+    // Sunny/Clear weather
+    const sunnyPrimary = temperature >= 30 ? '#ff6b35' : temperature >= 25 ? '#ffb627' : '#4ade80';
     return {
       ...baseTheme,
-      cardBackground: isDark 
-        ? 'linear-gradient(135deg, rgba(96,125,139,0.15) 0%, rgba(69,90,100,0.08) 50%, rgba(0,0,0,0.02) 100%)'
-        : 'linear-gradient(135deg, rgba(176,190,197,0.3) 0%, rgba(144,164,174,0.2) 50%, rgba(255,255,255,0.4) 100%)',
-      textPrimary: isDark ? '#90A4AE' : '#455A64',
-      textSecondary: isDark ? '#B0BEC5' : '#546E7A',
-      iconColor: '#78909C',
-      shadowColor: isDark ? 'rgba(144,164,174,0.2)' : 'rgba(96,125,139,0.15)',
-      borderColor: isDark ? 'rgba(176,190,197,0.25)' : 'rgba(144,164,174,0.3)',
-      gradientStart: '#90A4AE',
-      gradientEnd: '#607D8B',
-      accentColor: '#78909C'
+      primary: sunnyPrimary,
+      surfaceTint: alpha(sunnyPrimary, 0.08),
+      elevation: elevationTokens.level1,
+      glowEffect: temperature >= 30,
+      shimmerEffect: true,
+      rippleEffect: false,
+      stateLayer: {
+        hover: alpha(sunnyPrimary, stateLayers.hover),
+        focus: alpha(sunnyPrimary, stateLayers.focus),
+        pressed: alpha(sunnyPrimary, stateLayers.pressed),
+      },
     };
-  }
-
-  if ((weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) {
-    // Lluvia - tema azul/gris oscuro
+  } else if (weatherCode >= 45 && weatherCode <= 48) {
+    // Fog/Mist
+    const fogPrimary = '#94a3b8';
     return {
       ...baseTheme,
-      cardBackground: isDark 
-        ? 'linear-gradient(135deg, rgba(33,150,243,0.18) 0%, rgba(21,101,192,0.12) 50%, rgba(0,0,0,0.05) 100%)'
-        : 'linear-gradient(135deg, rgba(100,181,246,0.25) 0%, rgba(66,165,245,0.18) 50%, rgba(255,255,255,0.3) 100%)',
-      textPrimary: isDark ? '#64B5F6' : '#1976D2',
-      textSecondary: isDark ? '#90CAF9' : '#1E88E5',
-      iconColor: '#2196F3',
-      shadowColor: isDark ? 'rgba(100,181,246,0.3)' : 'rgba(33,150,243,0.2)',
-      borderColor: isDark ? 'rgba(144,202,249,0.35)' : 'rgba(100,181,246,0.4)',
-      gradientStart: '#64B5F6',
-      gradientEnd: '#1976D2',
-      accentColor: '#2196F3',
-      particles: true // Efecto de gotas
+      primary: fogPrimary,
+      surfaceTint: alpha(fogPrimary, 0.08),
+      elevation: elevationTokens.level2,
+      glowEffect: false,
+      shimmerEffect: false,
+      rippleEffect: false,
+      stateLayer: {
+        hover: alpha(fogPrimary, stateLayers.hover),
+        focus: alpha(fogPrimary, stateLayers.focus),
+        pressed: alpha(fogPrimary, stateLayers.pressed),
+      },
     };
-  }
-
-  if (weatherCode >= 71 && weatherCode <= 77) {
-    // Nieve - tema blanco/azul claro
+  } else if (weatherCode >= 51 && weatherCode <= 67) {
+    // Rain/Drizzle
+    const rainPrimary = '#3b82f6';
     return {
       ...baseTheme,
-      cardBackground: isDark 
-        ? 'linear-gradient(135deg, rgba(224,247,250,0.12) 0%, rgba(178,235,242,0.08) 50%, rgba(0,0,0,0.02) 100%)'
-        : 'linear-gradient(135deg, rgba(240,248,255,0.8) 0%, rgba(227,242,253,0.6) 50%, rgba(255,255,255,0.9) 100%)',
-      textPrimary: isDark ? '#81D4FA' : '#0277BD',
-      textSecondary: isDark ? '#B3E5FC' : '#0288D1',
-      iconColor: '#00BCD4',
-      shadowColor: isDark ? 'rgba(129,212,250,0.25)' : 'rgba(2,119,189,0.15)',
-      borderColor: isDark ? 'rgba(179,229,252,0.3)' : 'rgba(129,212,250,0.4)',
-      gradientStart: '#81D4FA',
-      gradientEnd: '#0277BD',
-      accentColor: '#00ACC1',
-      particles: true, // Efecto de copos de nieve
-      glowEffect: true
+      primary: rainPrimary,
+      surfaceTint: alpha(rainPrimary, 0.08),
+      elevation: elevationTokens.level3,
+      glowEffect: false,
+      shimmerEffect: false,
+      rippleEffect: true,
+      stateLayer: {
+        hover: alpha(rainPrimary, stateLayers.hover),
+        focus: alpha(rainPrimary, stateLayers.focus),
+        pressed: alpha(rainPrimary, stateLayers.pressed),
+      },
     };
-  }
-
-  if (weatherCode >= 95 && weatherCode <= 99) {
-    // Tormenta - tema púrpura/amarillo
+  } else if (weatherCode >= 71 && weatherCode <= 86) {
+    // Snow
+    const snowPrimary = '#e0f2fe';
     return {
       ...baseTheme,
-      cardBackground: isDark 
-        ? 'linear-gradient(135deg, rgba(156,39,176,0.15) 0%, rgba(103,58,183,0.12) 50%, rgba(0,0,0,0.05) 100%)'
-        : 'linear-gradient(135deg, rgba(186,104,200,0.25) 0%, rgba(149,117,205,0.18) 50%, rgba(255,255,255,0.3) 100%)',
-      textPrimary: isDark ? '#BA68C8' : '#7B1FA2',
-      textSecondary: isDark ? '#CE93D8' : '#8E24AA',
-      iconColor: '#9C27B0',
-      shadowColor: isDark ? 'rgba(186,104,200,0.35)' : 'rgba(123,31,162,0.2)',
-      borderColor: isDark ? 'rgba(206,147,216,0.4)' : 'rgba(186,104,200,0.45)',
-      gradientStart: '#BA68C8',
-      gradientEnd: '#7B1FA2',
-      accentColor: '#9C27B0',
+      primary: snowPrimary,
+      surfaceTint: alpha(snowPrimary, 0.08),
+      elevation: elevationTokens.level4,
+      glowEffect: false,
+      shimmerEffect: true,
+      rippleEffect: false,
+      stateLayer: {
+        hover: alpha(snowPrimary, stateLayers.hover),
+        focus: alpha(snowPrimary, stateLayers.focus),
+        pressed: alpha(snowPrimary, stateLayers.pressed),
+      },
+    };
+  } else if (weatherCode >= 95 && weatherCode <= 99) {
+    // Thunderstorm
+    const stormPrimary = '#7c3aed';
+    return {
+      ...baseTheme,
+      primary: stormPrimary,
+      surfaceTint: alpha(stormPrimary, 0.08),
+      elevation: elevationTokens.level5,
       glowEffect: true,
-      particles: true // Efecto de rayos
+      shimmerEffect: false,
+      rippleEffect: true,
+      stateLayer: {
+        hover: alpha(stormPrimary, stateLayers.hover),
+        focus: alpha(stormPrimary, stateLayers.focus),
+        pressed: alpha(stormPrimary, stateLayers.pressed),
+      },
     };
   }
 
-  // Tema por defecto (niebla, etc.)
+  // Default theme
   return {
     ...baseTheme,
-    cardBackground: isDark 
-      ? 'linear-gradient(135deg, rgba(190,242,100,0.12) 0%, rgba(155,193,75,0.08) 50%, rgba(0,0,0,0.02) 100%)'
-      : 'linear-gradient(135deg, rgba(200,230,201,0.3) 0%, rgba(165,214,167,0.2) 50%, rgba(255,255,255,0.4) 100%)',
-    textPrimary: isDark ? '#AED581' : '#689F38',
-    textSecondary: isDark ? '#C5E1A5' : '#7CB342',
-    iconColor: '#8BC34A',
-    shadowColor: isDark ? 'rgba(174,213,129,0.25)' : 'rgba(104,159,56,0.15)',
-    borderColor: isDark ? 'rgba(197,225,165,0.3)' : 'rgba(174,213,129,0.35)',
-    gradientStart: '#AED581',
-    gradientEnd: '#689F38',
-    accentColor: '#8BC34A'
+    primary: theme.palette.primary?.main || '#6750a4',
+    surfaceTint: alpha(theme.palette.primary?.main || '#6750a4', 0.08),
+    elevation: elevationTokens.level1,
+    glowEffect: false,
+    shimmerEffect: false,
+    rippleEffect: false,
   };
 };
 
@@ -226,22 +323,23 @@ export default function ExternalInfoPanel() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const theme = useTheme();
   const url = buildWeatherUrl(LAT, LON);
 
   // Detectar tema del sistema
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkMode(mediaQuery.matches);
-    
+
     const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
     mediaQuery.addEventListener('change', handleChange);
-    
+
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   // Obtener tema dinámico basado en el clima actual
-  const currentWeatherTheme = weather 
-    ? getWeatherTheme(weather.weathercode, weather.temperature, isDarkMode)
+  const currentWeatherTheme = weather
+    ? createWeatherTheme(weather.weathercode, weather.temperature, isDarkMode, theme)
     : null;
 
   const loadWeather = useCallback(async () => {
@@ -260,32 +358,17 @@ export default function ExternalInfoPanel() {
     } catch (e) {
       setWeather(null);
       setDailyForecast(null);
-      setError('No disponible');
+      setError(e instanceof Error ? e.message : 'Error desconocido');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, [url]);
 
+  // Cargar datos iniciales
   useEffect(() => {
     loadWeather();
-    // Auto-refresh cada 10 minutos
-    const interval = setInterval(loadWeather, 10 * 60 * 1000);
-    return () => clearInterval(interval);
   }, [loadWeather]);
-
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (isTransitioning) return;
-    
-    setIsTransitioning(true);
-    if (direction === 'left' && currentView < 3) {
-      setCurrentView(prev => prev + 1);
-    } else if (direction === 'right' && currentView > 0) {
-      setCurrentView(prev => prev - 1);
-    }
-    
-    setTimeout(() => setIsTransitioning(false), 300);
-  };
 
   // Soporte para gestos táctiles
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -299,462 +382,306 @@ export default function ExternalInfoPanel() {
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
-    if (isLeftSwipe) {
-      handleSwipe('left');
-    } else if (isRightSwipe) {
-      handleSwipe('right');
+    if (isLeftSwipe && currentView < 3) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentView(prev => prev + 1);
+        setIsTransitioning(false);
+      }, 150);
+    }
+
+    if (isRightSwipe && currentView > 0) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentView(prev => prev - 1);
+        setIsTransitioning(false);
+      }, 150);
     }
   };
 
-  const getDayLabel = (index: number) => {
-    if (index === 0) return 'Hoy';
-    const date = new Date();
-    date.setDate(date.getDate() + index);
-    return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+  // Función para obtener el pronóstico del día específico
+  const getForecastForDay = (dayIndex: number) => {
+    if (!dailyForecast || !dailyForecast.time[dayIndex]) return null;
+
+    return {
+      date: new Date(dailyForecast.time[dayIndex]),
+      weathercode: dailyForecast.weathercode[dayIndex],
+      tempMax: dailyForecast.temperature_2m_max[dayIndex],
+      tempMin: dailyForecast.temperature_2m_min[dayIndex],
+      windSpeed: dailyForecast.windspeed_10m_max[dayIndex],
+    };
   };
 
-  const renderCurrentWeather = () => {
-    if (!weather) return null;
-    
-    const codeInfo = weatherCodeMap[weather.weathercode];
-    const theme = currentWeatherTheme;
-    const tempColor = theme ? theme.textPrimary : (weather.temperature >= 30 ? 'secondary.main' : 'primary.main');
+  // Usar tema basado en el pronóstico del día específico
+  const forecastDay = getForecastForDay(currentView);
+  const displayWeatherTheme = forecastDay && currentView > 0
+    ? createWeatherTheme(forecastDay.weathercode, forecastDay.tempMax, isDarkMode, theme)
+    : currentWeatherTheme;
 
+  if (loading && !weather) {
     return (
-      <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography 
-            variant="h4" 
-            fontWeight={700} 
-            sx={{ 
-              color: tempColor,
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              textShadow: theme?.glowEffect ? `0 0 10px ${theme.accentColor}40` : 'none',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <DeviceThermostatIcon 
-              fontSize="large" 
-              sx={{ 
-                opacity: 0.7,
-                color: theme?.iconColor || 'inherit',
-                filter: theme?.glowEffect ? `drop-shadow(0 0 8px ${theme.accentColor}60)` : 'none'
-              }} 
-            />
-            {Math.round(weather.temperature)}°C
-          </Typography>
+      <Card
+        sx={{
+          minHeight: 180,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: theme.palette.background.paper,
+        }}
+      >
+        <Stack spacing={2} alignItems="center">
+          <Skeleton variant="circular" width={48} height={48} />
+          <Skeleton variant="text" width={120} height={24} />
+          <Skeleton variant="text" width={80} height={20} />
         </Stack>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 0.5,
-            color: theme?.textSecondary || 'text.primary'
-          }}
-        >
-          <AirIcon 
-            fontSize="small" 
-            sx={{ color: theme?.iconColor || 'inherit' }}
-          /> 
-          {Math.round(weather.windspeed)} km/h
-        </Typography>
-        {codeInfo && (
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 0.5, 
-              opacity: 0.85,
-              color: theme?.textSecondary || 'text.primary'
-            }}
-          >
-            <Box 
-              component="span" 
-              sx={{ 
-                fontSize: 18, 
-                lineHeight: 0,
-                color: theme?.iconColor || 'inherit',
-                filter: theme?.glowEffect ? `drop-shadow(0 0 6px ${theme.accentColor}80)` : 'none'
-              }}
-            >
-              {codeInfo.icon}
-            </Box> 
-            {codeInfo.label}
-          </Typography>
-        )}
-        {lastUpdated && (
-          <Typography 
-            variant="caption" 
-            color="text.secondary" 
-            sx={{ 
-              mt: 0.5,
-              opacity: 0.7
-            }}
-          >
-            Actualizado: {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Typography>
-        )}
-      </Stack>
+      </Card>
     );
-  };
+  }
 
-  const renderForecastDay = (dayIndex: number) => {
-    if (!dailyForecast || dayIndex >= dailyForecast.time.length) return null;
-    
-    const codeInfo = weatherCodeMap[dailyForecast.weathercode[dayIndex]];
-    const maxTemp = Math.round(dailyForecast.temperature_2m_max[dayIndex]);
-    const minTemp = Math.round(dailyForecast.temperature_2m_min[dayIndex]);
-    const windSpeed = Math.round(dailyForecast.windspeed_10m_max[dayIndex]);
-    
-    // Usar tema basado en el pronóstico del día específico
-    const dayTheme = getWeatherTheme(dailyForecast.weathercode[dayIndex], maxTemp, isDarkMode);
-
+  if (error && !weather) {
     return (
-      <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography 
-            variant="h4" 
-            fontWeight={700} 
-            sx={{ 
-              color: dayTheme.textPrimary,
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              textShadow: dayTheme.glowEffect ? `0 0 10px ${dayTheme.accentColor}40` : 'none',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <DeviceThermostatIcon 
-              fontSize="large" 
-              sx={{ 
-                opacity: 0.7,
-                color: dayTheme.iconColor,
-                filter: dayTheme.glowEffect ? `drop-shadow(0 0 8px ${dayTheme.accentColor}60)` : 'none'
-              }} 
-            />
-            {maxTemp}°C
-          </Typography>
-        </Stack>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 0.5,
-            color: dayTheme.textSecondary
-          }}
-        >
-          <span style={{ fontSize: '0.875rem', opacity: 0.7 }}>Min: {minTemp}°C</span>
+      <Card
+        sx={{
+          minHeight: 180,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: theme.palette.error.main,
+          color: theme.palette.error.contrastText,
+        }}
+      >
+        <Typography variant="h6" gutterBottom>
+          Error al cargar el clima
         </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 0.5,
-            color: dayTheme.textSecondary
-          }}
-        >
-          <AirIcon 
-            fontSize="small" 
-            sx={{ color: dayTheme.iconColor }}
-          /> 
-          {windSpeed} km/h
+        <Typography variant="body2" sx={{ mb: 1.5 }}>
+          {error}
         </Typography>
-        {codeInfo && (
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 0.5, 
-              opacity: 0.85,
-              color: dayTheme.textSecondary
-            }}
-          >
-            <Box 
-              component="span" 
-              sx={{ 
-                fontSize: 18, 
-                lineHeight: 0,
-                color: dayTheme.iconColor,
-                filter: dayTheme.glowEffect ? `drop-shadow(0 0 6px ${dayTheme.accentColor}80)` : 'none'
-              }}
-            >
-              {codeInfo.icon}
-            </Box> 
-            {codeInfo.label}
-          </Typography>
-        )}
-      </Stack>
+        <IconButton
+          onClick={loadWeather}
+          sx={{ color: 'inherit' }}
+          disabled={refreshing}
+        >
+          <RefreshIcon />
+        </IconButton>
+      </Card>
     );
-  };
+  }
 
-  const codeInfo = weather ? weatherCodeMap[weather.weathercode] : undefined;
+  const currentWeather = weather;
+  const weatherInfo = currentWeather ? weatherCodeMap[currentWeather.weathercode] : null;
 
   return (
-    <Box sx={{ mt: 2, mb: 3 }}>
-      <Card
-        sx={theme => {
-          const weatherTheme = currentWeatherTheme;
-          const baseBackground = weatherTheme?.cardBackground || 
-            `linear-gradient(135deg, ${theme.palette.mode === 'dark' ? 'rgba(190,242,100,0.12)' : 'rgba(59,130,246,0.12)'} 0%, rgba(255,255,255,0) 70%)`;
-          
-          return {
-            maxWidth: 520,
-            margin: '0 auto',
-            position: 'relative',
-            overflow: 'hidden',
-            background: baseBackground,
-            border: `1px solid ${weatherTheme?.borderColor || theme.palette.divider}`,
-            backdropFilter: 'blur(12px)',
-            borderRadius: 3,
-            boxShadow: weatherTheme?.shadowColor 
-              ? `0 8px 32px ${weatherTheme.shadowColor}, 0 0 20px ${weatherTheme.shadowColor}` 
-              : theme.palette.mode === 'dark' 
-                ? '0 8px 32px rgba(0,0,0,0.3)' 
-                : '0 8px 32px rgba(0,0,0,0.1)',
-            userSelect: 'none',
-            transition: 'all 0.5s ease',
-            '&::before': weatherTheme?.particles ? {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: weather && weather.weathercode >= 71 && weather.weathercode <= 77 
-                ? `radial-gradient(circle at 20% 80%, ${weatherTheme.accentColor}15 1px, transparent 1px),
-                   radial-gradient(circle at 80% 20%, ${weatherTheme.accentColor}15 1px, transparent 1px),
-                   radial-gradient(circle at 40% 40%, ${weatherTheme.accentColor}10 1px, transparent 1px)`
-                : weatherTheme.particles
-                ? `linear-gradient(45deg, transparent 40%, ${weatherTheme.accentColor}05 50%, transparent 60%)`
-                : 'none',
-              backgroundSize: '30px 30px, 50px 50px, 20px 20px',
-              animation: weatherTheme.particles ? 'weather-particles 20s linear infinite' : 'none',
-              pointerEvents: 'none',
-              zIndex: 0
-            } : {},
-            '& > *': {
-              position: 'relative',
-              zIndex: 1
-            }
-          };
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        minHeight: 250,
+        background: displayWeatherTheme?.surface || theme.palette.background.paper,
+        borderRadius: 3,
+        overflow: 'hidden',
+        transition: `all ${motionTokens.duration.medium2}ms ${motionTokens.easing.standard}`,
+        boxShadow: displayWeatherTheme?.elevation?.boxShadow || elevationTokens.level1.boxShadow,
+        '&::before': displayWeatherTheme?.glowEffect ? {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `radial-gradient(circle at center, ${alpha(displayWeatherTheme.primary, 0.1)} 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        } : undefined,
+      }}
+    >
+      {/* Header con navegación */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          p: 2,
+          pb: 1,
+          background: alpha(displayWeatherTheme?.surface || theme.palette.background.paper, 0.8),
+          backdropFilter: 'blur(8px)',
         }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
-        <CardContent sx={{ pb: 2 }}>
-          {/* Header con navegación */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="overline" sx={{ letterSpacing: 1.2, opacity: 0.8 }}>
-                🌤️ {getDayLabel(currentView)} · {LOCATION_LABEL}
-              </Typography>
-              {/* Icono de música oculto temporalmente */}
-              {/* {weather && currentView === 0 && (
-                <Typography variant="overline" sx={{ opacity: 0.6 }}>🎵</Typography>
-              )} */}
-            </Box>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <IconButton
-                size="small"
-                onClick={() => handleSwipe('right')}
-                disabled={currentView === 0 || isTransitioning}
-                sx={{ opacity: currentView === 0 ? 0.3 : 1 }}
-              >
-                <ArrowBackIosIcon fontSize="small" />
-              </IconButton>
-              
-              <Chip 
-                label={`${currentView + 1}/4`} 
-                size="small" 
-                variant="outlined"
-                sx={{ mx: 0.5, fontSize: '0.7rem', height: 20 }}
-              />
-              
-              <IconButton
-                size="small"
-                onClick={() => handleSwipe('left')}
-                disabled={currentView === 3 || isTransitioning}
-                sx={{ opacity: currentView === 3 ? 0.3 : 1 }}
-              >
-                <ArrowForwardIosIcon fontSize="small" />
-              </IconButton>
-              
-              <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-              
-              <Tooltip title="Actualizar ahora">
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={loadWeather}
-                    disabled={refreshing || loading}
-                    sx={{
-                      bgcolor: theme => theme.palette.action.hover,
-                      '&:hover': { bgcolor: theme => theme.palette.action.selected }
-                    }}
-                  >
-                    <RefreshIcon fontSize="small" sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </Box>
-          </Stack>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {LOCATION_LABEL}
+          </Typography>
+          {lastUpdated && (
+            <Typography variant="caption" sx={{ opacity: 0.7 }}>
+              Actualizado: {lastUpdated.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </Typography>
+          )}
+        </Box>
 
-          {/* Contenido principal con transición */}
-          <Box
-            sx={{
-              position: 'relative',
-              minHeight: 120,
-              overflow: 'hidden'
-            }}
-          >
-            <Fade in={!isTransitioning} timeout={300}>
-              <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
-                <Box>
-                  {loading ? (
-                    <Stack spacing={1} sx={{ mt: 1, width: 180 }}>
-                      <Skeleton variant="text" width={120} height={32} />
-                      <Skeleton variant="text" width={140} height={20} />
-                      <Skeleton variant="text" width={100} height={18} />
-                    </Stack>
-                  ) : error ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{error}</Typography>
-                  ) : currentView === 0 ? (
-                    renderCurrentWeather()
-                  ) : (
-                    renderForecastDay(currentView)
-                  )}
-                </Box>
-                
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, pt: 0.5 }}>
-                  {!loading && !error && (
-                    <Box sx={{ fontSize: 46, lineHeight: 1, color: 'text.primary', opacity: 0.25 }}>
-                      {currentView === 0 && codeInfo ? codeInfo.icon : 
-                       dailyForecast && weatherCodeMap[dailyForecast.weathercode[currentView]]?.icon}
-                    </Box>
-                  )}
-                </Box>
-              </Stack>
-            </Fade>
-          </Box>
-
-          {/* Indicadores de deslizamiento para móvil */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            gap: 0.5, 
-            mt: 2,
-            opacity: 0.6
-          }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {/* Indicadores de navegación */}
+          <Stack direction="row" spacing={0.5}>
             {[0, 1, 2, 3].map((index) => (
               <Box
                 key={index}
                 sx={{
-                  width: 6,
-                  height: 6,
+                  width: 8,
+                  height: 8,
                   borderRadius: '50%',
-                  bgcolor: currentView === index 
-                    ? (currentWeatherTheme?.accentColor || 'primary.main')
-                    : 'action.disabled',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  boxShadow: currentView === index && currentWeatherTheme?.glowEffect 
-                    ? `0 0 8px ${currentWeatherTheme.accentColor}60` 
-                    : 'none'
-                }}
-                onClick={() => {
-                  if (!isTransitioning) {
-                    setIsTransitioning(true);
-                    setCurrentView(index);
-                    setTimeout(() => setIsTransitioning(false), 300);
-                  }
+                  backgroundColor: currentView === index
+                    ? displayWeatherTheme?.primary || theme.palette.primary.main
+                    : alpha(theme.palette.text.secondary, 0.3),
+                  transition: `all ${motionTokens.duration.short2}ms ${motionTokens.easing.standard}`,
                 }}
               />
             ))}
-            
-            {/* Indicación de deslizamiento */}
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                ml: 2, 
-                opacity: 0.4, 
-                fontSize: '0.65rem',
-                display: { xs: 'block', sm: 'none' }, // Solo visible en móvil
-                color: currentWeatherTheme?.textSecondary || 'text.secondary'
+          </Stack>
+
+          <Tooltip title="Actualizar">
+            <IconButton
+              onClick={loadWeather}
+              disabled={refreshing}
+              sx={{
+                color: displayWeatherTheme?.primary || theme.palette.text.secondary,
+                '&:hover': {
+                  backgroundColor: displayWeatherTheme?.stateLayer?.hover || alpha(theme.palette.action.hover, 0.08),
+                },
               }}
             >
-              ← Desliza →
-            </Typography>
-          </Box>
-        </CardContent>
+              <RefreshIcon
+                sx={{
+                  animation: refreshing ? 'spin 1s linear infinite' : 'none',
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Box>
 
-        {/* Separador visual elegante (OCULTO TEMPORALMENTE - relacionado con Spotify) */}
-        {/* 
-        {weather && (
-          <Box sx={{ 
-            position: 'relative',
-            mx: 2, 
-            my: 2,
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: '50%',
-              left: 0,
-              right: 0,
-              height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-            },
-            '&::after': {
-              content: '"🎵"',
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: 'rgba(255,255,255,0.9)',
-              borderRadius: '50%',
-              width: 24,
-              height: 24,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }
-          }} />
-        )}
-        */}
+      {/* Contenido principal con transición */}
+      <Fade in={!isTransitioning} timeout={300}>
+        <Box
+          sx={{
+            p: 2,
+            pt: 0,
+            minHeight: 180,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            cursor: { xs: 'grab', sm: 'default' },
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {currentView === 0 ? (
+            // Vista del clima actual
+            <Stack spacing={2} alignItems="center">
+              <Box sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    fontSize: { xs: 60, sm: 80 },
+                    mb: 1,
+                    animation: displayWeatherTheme?.shimmerEffect
+                      ? `${shimmerAnimation} 3s ease-in-out infinite`
+                      : `${breatheAnimation} 4s ease-in-out infinite`,
+                    background: displayWeatherTheme?.shimmerEffect
+                      ? `linear-gradient(90deg, ${displayWeatherTheme.primary} 0%, ${alpha(displayWeatherTheme.primary, 0.5)} 50%, ${displayWeatherTheme.primary} 100%)`
+                      : 'none',
+                    backgroundSize: '200px 100%',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: displayWeatherTheme?.shimmerEffect ? 'transparent' : 'inherit',
+                    color: displayWeatherTheme?.shimmerEffect ? undefined : displayWeatherTheme?.primary || theme.palette.text.primary,
+                  }}
+                >
+                  {weatherInfo?.icon}
+                </Box>
 
-        {/* Integración de Spotify basada en el clima (OCULTA TEMPORALMENTE) */}
-        {/* 
-        {false && weather && weather.weathercode && weather.temperature && (
-          <CardContent sx={{ pb: 2, pt: 0, px: 2 }}>
-            <SpotifyWeatherIntegration
-              weatherCode={weather.weathercode}
-              temperature={weather.temperature}
-            />
-          </CardContent>
-        )}
-        */}
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 300,
+                    mb: 1,
+                    color: displayWeatherTheme?.primary || theme.palette.text.primary,
+                  }}
+                >
+                  {currentWeather?.temperature}°C
+                </Typography>
 
-      </Card>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 1.5,
+                    color: displayWeatherTheme?.onSurface || theme.palette.text.secondary,
+                  }}
+                >
+                  {weatherInfo?.label}
+                </Typography>
+
+                <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+                  <Box sx={{ textAlign: 'center' }}>
+                    <AirIcon sx={{ mb: 0.5, opacity: 0.7 }} />
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      {currentWeather?.windspeed} km/h
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            </Stack>
+          ) : (
+            // Vista del pronóstico
+            <Stack spacing={2} alignItems="center">
+              <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                {forecastDay?.date.toLocaleDateString('es-ES', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long'
+                })}
+              </Typography>
+
+              <Box sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    fontSize: 56,
+                    mb: 2,
+                    color: displayWeatherTheme?.primary || theme.palette.text.primary,
+                  }}
+                >
+                  {forecastDay ? weatherCodeMap[forecastDay.weathercode]?.icon : null}
+                </Box>
+
+                <Typography variant="h4" sx={{ mb: 1, fontWeight: 300 }}>
+                  {forecastDay?.tempMax}° / {forecastDay?.tempMin}°
+                </Typography>
+
+                <Typography variant="body1" sx={{ mb: 1.5, opacity: 0.8 }}>
+                  {forecastDay ? weatherCodeMap[forecastDay.weathercode]?.label : ''}
+                </Typography>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                  <AirIcon sx={{ opacity: 0.7 }} />
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    {forecastDay?.windSpeed} km/h
+                  </Typography>
+                </Box>
+              </Box>
+            </Stack>
+          )}
+        </Box>
+      </Fade>
+
       <style jsx global>{`
-        @keyframes spin { 
-          from { transform: rotate(0deg); } 
-          to { transform: rotate(360deg); } 
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         @keyframes weather-particles {
           0% { transform: translateY(0) translateX(0); }

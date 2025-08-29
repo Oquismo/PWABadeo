@@ -32,6 +32,7 @@ model User {
   announcements    Announcement[]
   logs             Log[]
   tasks            Task[]
+  userEvents       UserEvent[]       // Relación con eventos personalizados
   pushSubscription PushSubscription?
   
   @@index([schoolId])
@@ -124,4 +125,19 @@ model PasswordResetToken {
   @@index([email])
   @@index([token])
   @@index([expiresAt])
+}
+
+model UserEvent {
+  id        Int      @id @default(autoincrement())
+  title     String
+  date      DateTime
+  type      String   @default("personal") // 'personal', 'program', 'holiday'
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([date])
+  @@index([type])
 }

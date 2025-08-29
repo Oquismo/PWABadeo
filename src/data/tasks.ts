@@ -89,8 +89,8 @@ export const carouselTasks: TaskData[] = [
 // Configuración adicional del carrusel
 export const carouselConfig = {
   title: 'Proyectos Activos',
-  cardWidth: '280px',
-  cardHeight: '200px',
-  gap: 2,
-  borderRadius: '20px'
+  cardWidth: '260px',
+  cardHeight: '160px',
+  gap: 1.5,
+  borderRadius: '16px'
 };
