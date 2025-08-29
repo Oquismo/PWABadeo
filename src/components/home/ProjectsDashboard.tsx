@@ -37,6 +37,7 @@ export default function ProjectsDashboard() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [swipedCardIndex, setSwipedCardIndex] = useState<number | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
   const swapyRef = useRef<HTMLDivElement>(null);
   const swapyInstance = useRef<any>(null);
   
@@ -93,6 +94,17 @@ export default function ProjectsDashboard() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [debugInfo, user?.role]);
+  
+  // Efecto para auto-cerrar el tooltip de información después de 3 segundos
+  useEffect(() => {
+    if (showInfoTooltip) {
+      const timer = setTimeout(() => {
+        setShowInfoTooltip(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showInfoTooltip]);
   
   // Inicializar tareas ordenadas
   useEffect(() => {
@@ -593,9 +605,51 @@ export default function ProjectsDashboard() {
                 </Tooltip>
               </Box>
             </Box>
-            <Typography variant="body2" color="text.secondary">
-              {orderedTasks.length} proyectos • 💡 Desliza las tarjetas horizontalmente para reorganizar
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                {orderedTasks.length} proyectos
+              </Typography>
+              <Tooltip 
+                title="💡 Desliza las tarjetas horizontalmente para reorganizar"
+                open={showInfoTooltip}
+                onClose={() => setShowInfoTooltip(false)}
+                placement="top"
+                arrow
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: 'rgba(0, 0, 0, 0.9)',
+                      fontSize: '0.75rem',
+                      maxWidth: 250,
+                      textAlign: 'center',
+                      borderRadius: 1
+                    }
+                  },
+                  arrow: {
+                    sx: {
+                      color: 'rgba(0, 0, 0, 0.9)'
+                    }
+                  }
+                }}
+              >
+                <IconButton 
+                  size="small"
+                  onClick={() => setShowInfoTooltip(!showInfoTooltip)}
+                  onTouchStart={() => setShowInfoTooltip(!showInfoTooltip)}
+                  sx={{ 
+                    p: 0.5,
+                    color: 'text.secondary',
+                    '&:hover': {
+                      color: 'primary.main',
+                      bgcolor: 'rgba(25, 118, 210, 0.04)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <InfoOutlinedIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
           
           {/* Carrusel horizontal con swipe support */}
