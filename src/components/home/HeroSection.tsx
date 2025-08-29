@@ -17,6 +17,18 @@ export default function HeroSection() {
   // Emoji de huevo por defecto (como el antiguo Twitter)
   const defaultEggAvatar = '🥚';
 
+  // Función para obtener el saludo según la hora del día
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) {
+      return 'Buenos días';
+    } else if (hour >= 12 && hour < 20) {
+      return 'Buenas tardes';
+    } else {
+      return 'Buenas noches';
+    }
+  };
+
   // Cargar imagen de perfil al inicializar
   useEffect(() => {
     const savedProfileImage = localStorage.getItem('userProfileImage');
@@ -132,7 +144,7 @@ export default function HeroSection() {
               variant="h4"
               fontWeight="bold"
             >
-              {isAuthenticated && user ? `Hola, ${user.name?.split(' ')[0] || 'Usuario'}` : 'Hola'}
+              {isAuthenticated && user ? `${getGreeting()}, ${user.name?.split(' ')[0] || 'Usuario'}` : getGreeting()}
             </Typography>
           </Box>
         </Stack>
