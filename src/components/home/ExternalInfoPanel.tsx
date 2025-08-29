@@ -23,7 +23,7 @@ import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import AirIcon from '@mui/icons-material/Air';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
-import SpotifyWeatherIntegration from './SpotifyWeatherIntegration';
+// import SpotifyWeatherIntegration from './SpotifyWeatherIntegration';
 
 // Material Design 3 Motion Tokens
 const motionTokens = {
