@@ -3,7 +3,32 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Avatar, Paper, List, ListItem, ListItemIcon, ListItemText, IconButton, Stack, Accordion, AccordionSummary, AccordionDetails, Modal, Slide, Backdrop } from '@mui/material';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Avatar,
+  Paper,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  Stack,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Modal,
+  Slide,
+  Backdrop,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Fade,
+  Grid
+} from '@mui/material';
 import NotificationsPanel from '@/components/home/NotificationsPanel';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
@@ -12,16 +37,18 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PersonIcon from '@mui/icons-material/Person';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import Link from 'next/link';
 import TaskManager from '@/components/admin/TaskManager';
 
 export default function PerfilPage() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout, refreshAvatar } = useAuth();
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
   const tapTimeout = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Emoji de huevo por defecto (como el antiguo Twitter)
   const defaultEggAvatar = '🥚';
 
@@ -31,26 +58,33 @@ export default function PerfilPage() {
     }
   }, [isAuthenticated, router, isLoading]);
 
-  // Cargar imagen de perfil al inicializar
+  // Cargar imagen de perfil desde el servidor
   useEffect(() => {
-    const savedProfileImage = localStorage.getItem('userProfileImage');
-    if (savedProfileImage) {
-      setProfileImage(savedProfileImage);
-    }
-  }, []);
+    const loadAvatar = async () => {
+      if (user?.id) {
+        try {
+          await refreshAvatar();
+        } catch (error) {
+          console.error('Error al cargar avatar:', error);
+        }
+      }
+    };
+    loadAvatar();
+  }, [user?.id, refreshAvatar]);
 
-  // Escuchar cambios en la imagen de perfil
+  // Escuchar cambios en la imagen de perfil (para sincronización entre pestañas)
   useEffect(() => {
     const handleProfileImageChange = () => {
-      const savedProfileImage = localStorage.getItem('userProfileImage');
-      setProfileImage(savedProfileImage || '');
+      if (user?.id) {
+        refreshAvatar();
+      }
     };
 
     window.addEventListener('profileImageChanged', handleProfileImageChange);
     return () => {
       window.removeEventListener('profileImageChanged', handleProfileImageChange);
     };
-  }, []);
+  }, [user?.id, refreshAvatar]);
 
   const handleLogout = () => {
     // Limpiar completamente el localStorage para evitar datos viejos
@@ -63,9 +97,9 @@ export default function PerfilPage() {
 
   if (isLoading || !user) {
     return (
-      <Container component="main" maxWidth="sm">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <Typography>Cargando...</Typography>
+      <Container component="main" maxWidth="md">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+          <Typography variant="h6" color="text.secondary">Cargando perfil...</Typography>
         </Box>
       </Container>
     );
@@ -79,8 +113,10 @@ export default function PerfilPage() {
     if (tapTimeout.current) clearTimeout(tapTimeout.current);
   };
 
+  const isAdmin = user.role === 'admin' || user.role === 'ADMIN';
+
   return (
-    <Container component="main" maxWidth="sm">
+    <Container component="main" maxWidth="md" sx={{ py: 2 }}>
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -89,132 +125,340 @@ export default function PerfilPage() {
         slotProps={{ backdrop: { timeout: 300 } }}
       >
         <Slide direction="down" in={modalOpen} mountOnEnter unmountOnExit>
-          <Box sx={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', bgcolor: 'background.paper', boxShadow: 24, borderRadius: 3, p: 3, minWidth: 340, maxWidth: 500, mt: 2 }}>
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            borderRadius: 3,
+            p: 3,
+            minWidth: 340,
+            maxWidth: 500,
+            mt: 2
+          }}>
             <NotificationsPanel />
           </Box>
         </Slide>
       </Modal>
-      <Box sx={{ position: 'relative', pt: 4 }}>
-        <Stack direction="row" spacing={1} sx={{ position: 'absolute', top: 24, right: 24, zIndex: 10 }}>
+
+      {/* Header con acciones */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Mi Perfil
+        </Typography>
+        <Stack direction="row" spacing={1}>
           <Link href="/perfil/editar" passHref>
-            <IconButton aria-label="editar perfil" size="large">
+            <IconButton
+              aria-label="editar perfil"
+              size="large"
+              sx={{
+                bgcolor: 'action.hover',
+                '&:hover': { bgcolor: 'action.selected' }
+              }}
+            >
               <EditIcon />
             </IconButton>
           </Link>
           <Link href="/ajustes" passHref>
-            <IconButton aria-label="ajustes" size="large">
+            <IconButton
+              aria-label="ajustes"
+              size="large"
+              sx={{
+                bgcolor: 'action.hover',
+                '&:hover': { bgcolor: 'action.selected' }
+              }}
+            >
               <SettingsIcon />
             </IconButton>
           </Link>
         </Stack>
-        
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Avatar 
-            src={profileImage}
-            sx={{ 
-              width: 100, 
-              height: 100, 
-              mb: 2,
-              fontSize: profileImage && !profileImage.startsWith('data:') ? '3rem' : 'inherit',
-              bgcolor: 'primary.light',
-              cursor: 'pointer',
-              boxShadow: modalOpen ? 6 : 1,
-              transition: 'box-shadow 0.2s',
-            }}
-            onTouchStart={handleAvatarTouchStart}
-            onTouchEnd={handleAvatarTouchEnd}
-            onMouseDown={handleAvatarTouchStart}
-            onMouseUp={handleAvatarTouchEnd}
-            title="Mantén presionado para ver notificaciones"
-          >
-            {!profileImage ? defaultEggAvatar : profileImage.startsWith('data:') ? null : profileImage}
-          </Avatar>
-          <Typography component="h1" variant="h4" fontWeight="bold">
-            {user.name || 'Sin nombre'}
-          </Typography>
-          <Typography variant="subtitle1" color={user.role === 'admin' ? 'secondary' : 'text.primary'} sx={{ mt: 1 }}>
-            Rol: {user.role === 'admin' ? 'Administrador' : 'Usuario'}
-          </Typography>
-          <Paper elevation={0} sx={{ width: '100%', mt: 4, p: 2 }}>
-            <List>
-              <ListItem>
-                <ListItemIcon>
-                  <EmailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Email" secondary={user.email} />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <SchoolIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Escuela" 
-                  secondary={
-                    user.school 
-                      ? (typeof user.school === 'string' 
-                          ? user.school 
-                          : user.school.name)
-                      : 'No especificada'
-                  } 
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <CakeIcon />
-                </ListItemIcon>
-                <ListItemText primary="Edad" secondary={user.age ? `${user.age} años` : 'No especificada'} />
-              </ListItem>
-            </List>
-          </Paper>
+      </Box>
 
-          {/* Gestión de tareas personales */}
-          <Accordion sx={{ width: '100%', mt: 3 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AssignmentIcon />
-                <Typography variant="h6">Mis Tareas Personalizadas</Typography>
+      {/* Card principal del perfil */}
+      <Fade in={true} timeout={600}>
+        <Card
+          elevation={0}
+          sx={{
+            mb: 3,
+            borderRadius: 4,
+            border: '1px solid',
+            borderColor: 'divider',
+            overflow: 'visible'
+          }}
+        >
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+              {/* Avatar con mejor diseño */}
+              <Box sx={{ position: 'relative', mb: 3 }}>
+                <Avatar
+                  src={user.avatarUrl || undefined}
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    fontSize: user.avatarUrl && !user.avatarUrl.startsWith('data:') ? '3rem' : 'inherit',
+                    bgcolor: 'primary.light',
+                    cursor: 'pointer',
+                    boxShadow: modalOpen ? 8 : 3,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: '4px solid',
+                    borderColor: 'background.paper',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      boxShadow: 6
+                    }
+                  }}
+                  onTouchStart={handleAvatarTouchStart}
+                  onTouchEnd={handleAvatarTouchEnd}
+                  onMouseDown={handleAvatarTouchStart}
+                  onMouseUp={handleAvatarTouchEnd}
+                  title="Mantén presionado para ver notificaciones"
+                >
+                  {!user.avatarUrl ? defaultEggAvatar : user.avatarUrl.startsWith('data:') ? null : user.avatarUrl}
+                </Avatar>
+
+                {/* Indicador de rol */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 8,
+                    right: 8,
+                    bgcolor: isAdmin ? 'secondary.main' : 'primary.main',
+                    borderRadius: '50%',
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 2,
+                    border: '2px solid',
+                    borderColor: 'background.paper'
+                  }}
+                >
+                  {isAdmin ? (
+                    <AdminPanelSettingsIcon sx={{ fontSize: 16, color: 'white' }} />
+                  ) : (
+                    <PersonIcon sx={{ fontSize: 16, color: 'white' }} />
+                  )}
+                </Box>
               </Box>
+
+              {/* Información principal */}
+              <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
+                {user.name || 'Usuario'}
+              </Typography>
+
+              <Chip
+                icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+                label={isAdmin ? 'Administrador' : 'Usuario'}
+                color={isAdmin ? 'secondary' : 'primary'}
+                variant="filled"
+                sx={{ mb: 2, fontWeight: 'medium' }}
+              />
+
+              {/* Información de contacto */}
+              <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid item xs={12} sm={4}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: 'action.hover',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}
+                  >
+                    <EmailIcon color="action" />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">
+                        Email
+                      </Typography>
+                      <Typography variant="body2" fontWeight="medium">
+                        {user.email}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: 'action.hover',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}
+                  >
+                    <SchoolIcon color="action" />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">
+                        Escuela
+                      </Typography>
+                      <Typography variant="body2" fontWeight="medium">
+                        {user.school
+                          ? (typeof user.school === 'string'
+                              ? user.school
+                              : user.school.name)
+                          : 'No especificada'}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: 'action.hover',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}
+                  >
+                    <CakeIcon color="action" />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">
+                        Edad
+                      </Typography>
+                      <Typography variant="body2" fontWeight="medium">
+                        {user.age ? `${user.age} años` : 'No especificada'}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Box>
+          </CardContent>
+        </Card>
+      </Fade>
+
+      {/* Sección de tareas personales */}
+      <Fade in={true} timeout={800}>
+        <Card
+          elevation={0}
+          sx={{
+            mb: 3,
+            borderRadius: 4,
+            border: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <Accordion
+            elevation={0}
+            sx={{
+              '&:before': { display: 'none' },
+              borderRadius: 4,
+              '& .MuiAccordionSummary-root': { borderRadius: 4 }
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{
+                '& .MuiAccordionSummary-content': {
+                  alignItems: 'center',
+                  gap: 1
+                }
+              }}
+            >
+              <AssignmentIcon color="primary" />
+              <Typography variant="h6" fontWeight="bold">
+                Mis Tareas Personalizadas
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Gestiona las tareas que aparecen en tu dashboard principal. 
+            <AccordionDetails sx={{ pt: 0 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Gestiona las tareas que aparecen en tu dashboard principal.
                 Puedes agregar, editar o eliminar tareas según tus necesidades.
               </Typography>
               <TaskManager />
             </AccordionDetails>
           </Accordion>
+        </Card>
+      </Fade>
 
-          {/* Panel de administración solo visible para admin */}
-          {user.role === 'admin' && (
-            <Accordion sx={{ width: '100%', mt: 3 }}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <SettingsIcon />
-                  <Typography variant="h6" color="secondary">Panel de Administración</Typography>
-                </Box>
+      {/* Panel de administración solo visible para admin */}
+      {isAdmin && (
+        <Fade in={true} timeout={1000}>
+          <Card
+            elevation={0}
+            sx={{
+              mb: 3,
+              borderRadius: 4,
+              border: '1px solid',
+              borderColor: 'secondary.main',
+              bgcolor: 'secondary.main',
+              color: 'secondary.contrastText'
+            }}
+          >
+            <Accordion
+              elevation={0}
+              sx={{
+                '&:before': { display: 'none' },
+                borderRadius: 4,
+                bgcolor: 'transparent',
+                color: 'inherit',
+                '& .MuiAccordionSummary-root': {
+                  borderRadius: 4,
+                  color: 'inherit'
+                }
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon sx={{ color: 'inherit' }} />}
+                sx={{
+                  '& .MuiAccordionSummary-content': {
+                    alignItems: 'center',
+                    gap: 1
+                  }
+                }}
+              >
+                <AdminPanelSettingsIcon />
+                <Typography variant="h6" fontWeight="bold">
+                  Panel de Administración
+                </Typography>
               </AccordionSummary>
-              <AccordionDetails>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Typography variant="body2" sx={{ mb: 3, opacity: 0.9 }}>
                   Accede a las herramientas de gestión de usuarios y tareas administrativas.
                 </Typography>
-                {/* Aquí puedes agregar componentes de admin, por ejemplo: */}
-                {/* <UserManagement /> */}
                 <TaskManager />
               </AccordionDetails>
             </Accordion>
-          )}
+          </Card>
+        </Fade>
+      )}
 
+      {/* Botón de cerrar sesión */}
+      <Fade in={true} timeout={1200}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Button
             onClick={handleLogout}
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 4 }}
+            variant="outlined"
+            color="error"
+            size="large"
+            sx={{
+              px: 4,
+              py: 1.5,
+              borderRadius: 3,
+              fontWeight: 'bold',
+              '&:hover': {
+                bgcolor: 'error.main',
+                color: 'error.contrastText'
+              }
+            }}
           >
             Cerrar Sesión
           </Button>
         </Box>
-      </Box>
+      </Fade>
     </Container>
   );
 }

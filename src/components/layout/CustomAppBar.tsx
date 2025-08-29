@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CustomAppBar() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <AnimatePresence>
@@ -24,7 +24,17 @@ export default function CustomAppBar() {
               {/* Icono de Perfil a la Izquierda */}
               <Link href="/perfil" passHref>
                 <IconButton>
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }} />
+                  <Avatar
+                    src={user?.avatarUrl || undefined}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      bgcolor: user?.avatarUrl ? 'transparent' : 'primary.main',
+                      fontSize: user?.avatarUrl && !user.avatarUrl.startsWith('data:') ? '1.2rem' : 'inherit'
+                    }}
+                  >
+                    {!user?.avatarUrl ? '👤' : null}
+                  </Avatar>
                 </IconButton>
               </Link>
 

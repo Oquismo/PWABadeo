@@ -10,8 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar el icono de Ajustes
 
 export default function HeroSection() {
-  const { isAuthenticated, user } = useAuth();
-  const [profileImage, setProfileImage] = useState<string>('');
+  const { isAuthenticated, user, refreshAvatar } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   
   // Emoji de huevo por defecto (como el antiguo Twitter)
@@ -29,32 +28,33 @@ export default function HeroSection() {
     }
   };
 
-  // Cargar imagen de perfil al inicializar
+  // Cargar avatar del servidor cuando el usuario cambie
   useEffect(() => {
-    const savedProfileImage = localStorage.getItem('userProfileImage');
-    if (savedProfileImage) {
-      setProfileImage(savedProfileImage);
-    }
-  }, []);
+    const loadAvatar = async () => {
+      if (isAuthenticated && user?.id) {
+        try {
+          await refreshAvatar();
+        } catch (error) {
+          console.error('Error al cargar avatar en hero:', error);
+        }
+      }
+    };
+    loadAvatar();
+  }, [isAuthenticated, user?.id, refreshAvatar]);
 
-  // Escuchar cambios en localStorage para actualizar la imagen en tiempo real
+  // Escuchar cambios de avatar para sincronización en tiempo real
   useEffect(() => {
-    const handleStorageChange = () => {
-      const savedProfileImage = localStorage.getItem('userProfileImage');
-      setProfileImage(savedProfileImage || '');
+    const handleAvatarChange = () => {
+      if (isAuthenticated && user?.id) {
+        refreshAvatar();
+      }
     };
 
-    // Escuchar cambios en localStorage desde otras pestañas/ventanas
-    window.addEventListener('storage', handleStorageChange);
-    
-    // También escuchar un evento personalizado para cambios en la misma pestaña
-    window.addEventListener('profileImageChanged', handleStorageChange);
-
+    window.addEventListener('profileImageChanged', handleAvatarChange);
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('profileImageChanged', handleStorageChange);
+      window.removeEventListener('profileImageChanged', handleAvatarChange);
     };
-  }, []);
+  }, [isAuthenticated, user?.id, refreshAvatar]);
 
   return (
     <Box 
@@ -67,18 +67,18 @@ export default function HeroSection() {
         <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1, position: 'relative' }}>
           <Box sx={{ position: 'relative', display: 'inline-block' }}>
             <Link href={isAuthenticated ? "/perfil" : "/login"} passHref>
-              <Avatar 
-                src={isAuthenticated ? profileImage : undefined}
-                sx={{ 
-                  width: 48, 
-                  height: 48, 
+              <Avatar
+                src={isAuthenticated ? user?.avatarUrl || undefined : undefined}
+                sx={{
+                  width: 48,
+                  height: 48,
                   cursor: 'pointer',
-                  fontSize: profileImage && !profileImage.startsWith('data:') ? '1.5rem' : 'inherit',
+                  fontSize: user?.avatarUrl && !user.avatarUrl.startsWith('data:') ? '1.5rem' : 'inherit',
                   bgcolor: !isAuthenticated ? 'primary.main' : 'primary.light'
                 }}
               >
-                {isAuthenticated && !profileImage ? defaultEggAvatar : 
-                 isAuthenticated && profileImage && !profileImage.startsWith('data:') ? profileImage : 
+                {isAuthenticated && !user?.avatarUrl ? defaultEggAvatar :
+                 isAuthenticated && user?.avatarUrl && !user.avatarUrl.startsWith('data:') ? user.avatarUrl :
                  !isAuthenticated ? undefined : null}
               </Avatar>
             </Link>
