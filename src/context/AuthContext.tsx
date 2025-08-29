@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
 export interface User {
   id: number;
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const updateAvatar = async (avatarUrl: string) => {
+  const updateAvatar = useCallback(async (avatarUrl: string) => {
     if (!user) return;
 
     try {
@@ -151,9 +151,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error updating avatar:', error);
       throw error;
     }
-  };
+  }, [user]);
 
-  const deleteAvatar = async () => {
+  const deleteAvatar = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -177,9 +177,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error deleting avatar:', error);
       throw error;
     }
-  };
+  }, [user]);
 
-  const refreshAvatar = async () => {
+  const refreshAvatar = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -203,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error refreshing avatar:', error);
       throw error;
     }
-  };
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{

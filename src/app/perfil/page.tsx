@@ -70,7 +70,7 @@ export default function PerfilPage() {
       }
     };
     loadAvatar();
-  }, [user?.id, refreshAvatar]);
+  }, [user?.id]); // Removido refreshAvatar de las dependencias
 
   // Escuchar cambios en la imagen de perfil (para sincronización entre pestañas)
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function PerfilPage() {
     return () => {
       window.removeEventListener('profileImageChanged', handleProfileImageChange);
     };
-  }, [user?.id, refreshAvatar]);
+  }, [user?.id]); // Removido refreshAvatar de las dependencias
 
   const handleLogout = () => {
     // Limpiar completamente el localStorage para evitar datos viejos

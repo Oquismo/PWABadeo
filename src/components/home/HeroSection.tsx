@@ -40,7 +40,7 @@ export default function HeroSection() {
       }
     };
     loadAvatar();
-  }, [isAuthenticated, user?.id, refreshAvatar]);
+  }, [isAuthenticated, user?.id]); // Removido refreshAvatar de las dependencias
 
   // Escuchar cambios de avatar para sincronización en tiempo real
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function HeroSection() {
     return () => {
       window.removeEventListener('profileImageChanged', handleAvatarChange);
     };
-  }, [isAuthenticated, user?.id, refreshAvatar]);
+  }, [isAuthenticated, user?.id]); // Removido refreshAvatar de las dependencias
 
   return (
     <Box 
