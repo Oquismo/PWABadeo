@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build:vercel",
   "env": {
     "NEXTAUTH_URL": "https://pwa-badeo.vercel.app",
     "NEXT_PUBLIC_APP_URL": "https://pwa-badeo.vercel.app"
