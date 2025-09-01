@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { logActionServer } from '@/lib/logger';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
-  const onlyAdmins = process.env.ONLY_ADMIN_LOGIN === 'true';
+    const onlyAdmins = process.env.ONLY_ADMIN_LOGIN === 'true';
 
     // Verificación básica
     if (!email || !password) {
@@ -27,29 +28,13 @@ export async function POST(request: Request) {
     console.log('Login attempt for:', email);
     console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
     
-    // Usar importación dinámica con configuración manual para Vercel
-    const [{ PrismaClient }, bcrypt] = await Promise.all([
-      import('@prisma/client').catch(err => {
-        console.error('Failed to import PrismaClient:', err);
-        throw new Error('Prisma import failed: ' + err.message);
-      }),
-      import('bcrypt').catch(err => {
-        console.error('Failed to import bcrypt:', err);
-        throw new Error('bcrypt import failed: ' + err.message);
-      })
-    ]);
+    // Importación dinámica de bcrypt solamente
+    const bcrypt = await import('bcrypt').catch(err => {
+      console.error('Failed to import bcrypt:', err);
+      throw new Error('bcrypt import failed: ' + err.message);
+    });
     
     console.log('✅ Imports successful');
-    
-    // Crear instancia con configuración manual
-    const prisma = new PrismaClient({
-      log: ['error'],
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL
-        }
-      }
-    });
     
     try {
       console.log('🔄 Connecting to database...');
@@ -63,8 +48,15 @@ export async function POST(request: Request) {
           id: true,
           email: true,
           name: true,
+          firstName: true,
+          lastName: true,
           password: true,
           role: true,
+          age: true,
+          schoolId: true,
+          arrivalDate: true,
+          departureDate: true,
+          avatarUrl: true,
         }
       });
       

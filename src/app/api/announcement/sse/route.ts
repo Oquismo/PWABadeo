@@ -1,7 +1,6 @@
-import { NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse, NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
 
-const prisma = new PrismaClient();
 // Usar variable local por conexión para evitar que todos los usuarios compartan el mismo estado
 
 export const dynamic = 'force-dynamic';

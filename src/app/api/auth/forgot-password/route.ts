@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,9 +16,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Importar dinámicamente Prisma
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    // Importar dinámicamente bcrypt si es necesario
+    // const bcrypt = await import('bcrypt');
 
     try {
       // Verificar si el usuario existe
@@ -92,8 +92,15 @@ export async function POST(req: Request) {
         message: 'Si el email existe en nuestro sistema, recibirás un enlace de recuperación'
       });
 
-    } finally {
-      await prisma.$disconnect();
+    } catch (error) {
+      console.error('❌ Error en forgot-password:', error);
+      return NextResponse.json(
+        { 
+          error: 'Error interno del servidor',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        },
+        { status: 500 }
+      );
     }
 
   } catch (error) {

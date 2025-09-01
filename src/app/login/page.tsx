@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, User } from '@/context/AuthContext';
 import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack, IconButton, InputAdornment } from '@mui/material';
 import Link from 'next/link';
 // import EngineeringIcon from '@mui/icons-material/Engineering';
@@ -69,13 +69,18 @@ export default function LoginPage() {
     }
   };
 
-  // 2. Dos funciones de bypass separadas
-  // const handleBypassUserLogin = () => {
-  //   login(mockRegularUser);
-  //   router.push('/');
-  // };
 
-  // Bypass eliminado: ahora solo login real
+  // Bypass admin: usuario simulado
+  const handleBypassAdmin = () => {
+    const fakeAdmin: User = {
+      id: 0, // Cambiado a number para cumplir con el tipo User
+      email: 'admin@badeo.com',
+      name: 'Admin Bypass',
+      role: 'admin' as const,
+    };
+    login(fakeAdmin);
+    router.push('/');
+  };
 
   return (
     <Container component="main" maxWidth="xs">
@@ -128,12 +133,14 @@ export default function LoginPage() {
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.5 }}>
             Entrar
           </Button>
+          <Button onClick={handleBypassAdmin} fullWidth variant="outlined" color="secondary" sx={{ mb: 2, py: 1.5 }} startIcon={<AdminPanelSettingsIcon />}>
+            Bypass admin
+          </Button>
             {errors.api && (
               <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
                 {errors.api}
               </Typography>
             )}
-          
           {/* Enlaces de utilidad */}
           <Stack spacing={1} sx={{ mt: 2 }}>
             <Box sx={{ textAlign: 'center' }}>
@@ -148,8 +155,6 @@ export default function LoginPage() {
             </Box>
           </Stack>
         </Box>
-        
-  {/* Bypass eliminado para exigir autenticación real */}
       </Box>
     </Container>
   );

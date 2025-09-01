@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,30 +13,18 @@ export async function GET() {
       }, { status: 500 });
     }
 
-    // Importación dinámica de Prisma
-    const { PrismaClient } = await import('@prisma/client');
+    // Test básico de conexión usando la instancia global
+    await prisma.$connect();
     
-    const prisma = new PrismaClient({
-      log: ['error', 'warn'],
+    // Test de query simple
+    const userCount = await prisma.user.count();
+    
+    return NextResponse.json({
+      status: 'connected',
+      userCount,
+      databaseUrl: process.env.DATABASE_URL?.substring(0, 50) + '...',
+      message: 'Conexión a base de datos exitosa'
     });
-    
-    try {
-      // Test básico de conexión
-      await prisma.$connect();
-      
-      // Test de query simple
-      const userCount = await prisma.user.count();
-      
-      return NextResponse.json({
-        status: 'connected',
-        userCount,
-        databaseUrl: process.env.DATABASE_URL?.substring(0, 50) + '...',
-        message: 'Conexión a base de datos exitosa'
-      });
-      
-    } finally {
-      await prisma.$disconnect();
-    }
     
   } catch (error) {
     console.error('Database connection error:', error);

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 
 // Tipo personalizado temporal para el token de reset
 interface PasswordResetToken {
@@ -30,9 +31,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Importar dinámicamente Prisma
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    // Usar instancia global de Prisma
 
     try {
       // Buscar el token usando SQL directo
@@ -102,8 +101,15 @@ export async function POST(req: Request) {
         email: resetToken.email
       });
 
-    } finally {
-      await prisma.$disconnect();
+    } catch (error) {
+      console.error('❌ Error validating reset token:', error);
+      return NextResponse.json(
+        { 
+          valid: false,
+          error: 'Error interno del servidor'
+        },
+        { status: 500 }
+      );
     }
 
   } catch (error) {

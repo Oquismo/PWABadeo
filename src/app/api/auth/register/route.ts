@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,9 @@ export async function POST(request: Request) {
       age,
       schoolId,
       arrivalDate,
-      departureDate
+      departureDate,
+      isAdmin,
+      adminCode
     } = await request.json();
 
     if (!email || !password) {
@@ -33,28 +36,13 @@ export async function POST(request: Request) {
 
     console.log('📝 Registro attempt for:', email);
     
-    // Importación dinámica
-    const [{ PrismaClient }, bcrypt] = await Promise.all([
-      import('@prisma/client').catch(err => {
-        console.error('Failed to import PrismaClient:', err);
-        throw new Error('Prisma import failed: ' + err.message);
-      }),
-      import('bcrypt').catch(err => {
-        console.error('Failed to import bcrypt:', err);
-        throw new Error('bcrypt import failed: ' + err.message);
-      })
-    ]);
+    // Importación dinámica de bcrypt solamente
+    const bcrypt = await import('bcrypt').catch(err => {
+      console.error('Failed to import bcrypt:', err);
+      throw new Error('bcrypt import failed: ' + err.message);
+    });
     
     console.log('✅ Imports successful');
-    
-    const prisma = new PrismaClient({
-      log: ['error'],
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL
-        }
-      }
-    });
     
     try {
       console.log('🔄 Connecting to database...');
@@ -78,9 +66,18 @@ export async function POST(request: Request) {
       const hashedPassword = await bcrypt.hash(password, 10);
       
     console.log('👤 Determinando rol inicial...');
-    // Si no existe ningún admin aún, el primer usuario será admin
-    const existingAdmin = await prisma.user.findFirst({ where: { role: 'admin' } });
-    const assignedRole = existingAdmin ? 'user' : 'admin';
+    
+    // Verificar si es registro de admin con código
+    let assignedRole = 'user';
+    if (isAdmin && adminCode === 'ADMIN2025') {
+      assignedRole = 'admin';
+      console.log('🔑 Código de admin válido, asignando rol admin');
+    } else {
+      // Si no existe ningún admin aún, el primer usuario será admin
+      const existingAdmin = await prisma.user.findFirst({ where: { role: 'admin' } });
+      assignedRole = existingAdmin ? 'user' : 'admin';
+    }
+    
     console.log('👤 Creating user with role:', assignedRole);
       let user;
       try {
@@ -101,7 +98,8 @@ export async function POST(request: Request) {
           userData.name = email.split('@')[0];
         }
         if (age) userData.age = parseInt(age, 10);
-        if (schoolId) userData.schoolId = parseInt(schoolId, 10);
+        // Solo asignar schoolId si no es admin o si se proporciona
+        if (schoolId && assignedRole !== 'admin') userData.schoolId = parseInt(schoolId, 10);
         if (arrivalDate) userData.arrivalDate = arrivalDate;
         if (departureDate) userData.departureDate = departureDate;
 

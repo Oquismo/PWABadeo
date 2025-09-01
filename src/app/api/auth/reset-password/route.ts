@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
+import { prisma } from '@/lib/db';
 
 // Tipo personalizado temporal para el token de reset
 interface PasswordResetToken {
@@ -31,9 +32,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Importar dinámicamente Prisma
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    // Importar dinámicamente si es necesario
+    // const bcrypt = await import('bcrypt');
 
     try {
       // Buscar y validar el token usando SQL directo
@@ -101,8 +101,15 @@ export async function POST(req: Request) {
         message: 'Contraseña restablecida exitosamente'
       });
 
-    } finally {
-      await prisma.$disconnect();
+    } catch (error) {
+      console.error('❌ Error resetting password:', error);
+      return NextResponse.json(
+        { 
+          error: 'Error interno del servidor',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        },
+        { status: 500 }
+      );
     }
 
   } catch (error) {

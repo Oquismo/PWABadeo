@@ -11,7 +11,8 @@ const publicRoutes = [
   '/test-auth',
   '/test-login',
   '/test-email',
-  '/unauthorized'
+  '/unauthorized',
+  '/create-school'
 ];
 
 // Rutas públicas adicionales que pueden ser accedidas sin login
@@ -26,6 +27,7 @@ const publicPaths = [
   '/api/auth/validate-reset-token',
   '/api/auth/logout',
   '/api/schools', // API pública para obtener escuelas
+  '/api/admin/schools', // Temporalmente público para crear escuelas
   '/api/announcement/sse', // Server-sent events para anuncios
   '/api/tasks' // API pública para tareas (si es necesario)
 ];

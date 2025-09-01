@@ -30,8 +30,10 @@ export default function RegistroPage() {
     age: '',
     arrivalDate: '',
     departureDate: '',
+    adminCode: '',
   });
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const [isAdminRegistration, setIsAdminRegistration] = useState(false);
   const [errors, setErrors] = useState<any>({});
   const router = useRouter();
   const { login } = useAuth();
@@ -43,10 +45,21 @@ export default function RegistroPage() {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    
+    // Verificar si es código de admin
+    if (name === 'adminCode') {
+      const isAdmin = value === 'ADMIN2025'; // Código secreto para admin
+      setIsAdminRegistration(isAdmin);
+      if (isAdmin) {
+        // Limpiar error de escuela si se activa modo admin
+        setErrors((prev: any) => ({ ...prev, school: '' }));
+      }
+    }
   };
 
   const validate = () => {
@@ -68,7 +81,12 @@ export default function RegistroPage() {
     } else if (isNaN(Number(formData.age)) || Number(formData.age) <= 0) {
       tempErrors.age = 'Introduce una edad válida.';
     }
-    if (!selectedSchool) tempErrors.school = 'La escuela es obligatoria.';
+    
+    // Solo validar escuela si NO es registro de admin
+    if (!isAdminRegistration && !selectedSchool) {
+      tempErrors.school = 'La escuela es obligatoria.';
+    }
+    
     if (!formData.arrivalDate) tempErrors.arrivalDate = 'La fecha de llegada es obligatoria.';
     if (!formData.departureDate) tempErrors.departureDate = 'La fecha de salida es obligatoria.';
     
@@ -86,12 +104,15 @@ export default function RegistroPage() {
       const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
         password: formData.password,
         age: parseInt(formData.age, 10),
-        schoolId: selectedSchool?.id,
+        schoolId: isAdminRegistration ? null : selectedSchool?.id,
         arrivalDate: formData.arrivalDate,
         departureDate: formData.departureDate,
+        isAdmin: isAdminRegistration,
+        adminCode: isAdminRegistration ? formData.adminCode : undefined,
       };
       
       console.log('📝 Intentando registro con:', payload.email);
@@ -118,6 +139,7 @@ export default function RegistroPage() {
         id: data.user.id,
         firstName: data.user.firstName,
         lastName: data.user.lastName,
+        name: data.user.name,
         email: data.user.email,
         age: data.user.age,
         role: data.user.role || 'USER',
@@ -170,15 +192,40 @@ export default function RegistroPage() {
             <Grid item xs={12} sm={6}>
               <TextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
             </Grid>
-            <Grid item xs={12}>
-              <SchoolSelector
-                value={selectedSchool}
-                onChange={setSelectedSchool}
-                error={!!errors.school}
-                helperText={errors.school}
-                required
+            <Grid item xs={12} sm={6}>
+              <TextField 
+                name="adminCode" 
+                fullWidth 
+                label="Código Admin (opcional)" 
+                value={formData.adminCode} 
+                onChange={handleChange} 
+                placeholder="ADMIN2025"
+                helperText={isAdminRegistration ? "✅ Registro como Admin activado" : "Deja vacío para registro normal"}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: isAdminRegistration ? '#e8f5e8' : 'inherit',
+                  }
+                }}
               />
             </Grid>
+            {!isAdminRegistration && (
+              <Grid item xs={12}>
+                <SchoolSelector
+                  value={selectedSchool}
+                  onChange={setSelectedSchool}
+                  error={!!errors.school}
+                  helperText={errors.school}
+                  required
+                />
+              </Grid>
+            )}
+            {isAdminRegistration && (
+              <Grid item xs={12}>
+                <Typography variant="body2" color="success.main" sx={{ textAlign: 'center', p: 1, bgcolor: '#e8f5e8', borderRadius: 1 }}>
+                  🔐 Modo Administrador: La selección de escuela no es requerida
+                </Typography>
+              </Grid>
+            )}
             <Grid item xs={12} sm={6}>
               <TextField
                 name="arrivalDate"

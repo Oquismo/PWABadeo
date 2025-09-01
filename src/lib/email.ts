@@ -48,10 +48,19 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
 
     const transporter = createTransporter();
     
-    const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3002'}/reset-password?token=${resetToken}`;
+    // Determinar la URL base correcta
+    let baseUrl;
+    if (process.env.NODE_ENV === 'production') {
+      baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://pwa-badeo.vercel.app';
+    } else {
+      baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    }
+    
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
     
     console.log('🔗 URL de reset generada:', resetUrl);
-    console.log('🌍 NEXTAUTH_URL desde env:', process.env.NEXTAUTH_URL);
+    console.log('🌍 Entorno:', process.env.NODE_ENV);
+    console.log('🌍 Base URL:', baseUrl);
     
     const mailOptions = {
       from: {
@@ -133,7 +142,7 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
             <p>Este email fue enviado desde <strong>Badeo - Barrio de Oportunidades</strong></p>
             <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
             <p style="margin-top: 15px;">
-              🌐 <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3002'}" style="color: #667eea;">Visitar Badeo</a> | 
+              🌐 <a href="${baseUrl}" style="color: #667eea;">Visitar Badeo</a> | 
               📧 <a href="mailto:soporte@badeo.com" style="color: #667eea;">Contactar soporte</a>
             </p>
           </div>

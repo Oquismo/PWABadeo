@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { logActionServer } from '@/lib/logger';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
-  const onlyAdmins = process.env.ONLY_ADMIN_LOGIN === 'true';
+    const onlyAdmins = process.env.ONLY_ADMIN_LOGIN === 'true';
 
     if (!email || !password) {
       return NextResponse.json(
@@ -15,84 +16,64 @@ export async function POST(request: Request) {
       );
     }
 
-    // Usar una conexión más simple sin Prisma client global
-    const { PrismaClient } = await import('@prisma/client');
+    console.log('Attempting to find user:', email);
     
-    // Crear una instancia específica con configuración mínima
-    const prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL
-        }
+    // Query más simple usando la instancia global
+    const user = await prisma.user.findFirst({
+      where: { email: email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: true,
+        role: true
       }
     });
 
-    try {
-      console.log('Attempting to find user:', email);
-      
-      // Query más simple
-      const user = await prisma.user.findFirst({
-        where: { email: email },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          password: true,
-          role: true
-        }
-      });
-
-      if (!user) {
-        console.log('User not found');
-        return NextResponse.json(
-          { error: 'Credenciales inválidas' }, 
-          { status: 401 }
-        );
-      }
-
-      // Restringir sólo si el flag está activo
-      if (onlyAdmins && user.role !== 'admin') {
-        return NextResponse.json(
-          { error: 'Solo administradores pueden iniciar sesión.' },
-          { status: 403 }
-        );
-      }
-
-      console.log('User found, checking password');
-      
-      // Importar bcrypt solo cuando lo necesitemos
-      const bcrypt = await import('bcrypt');
-      const isValid = await bcrypt.compare(password, user.password);
-      
-      if (!isValid) {
-        console.log('Password invalid');
-        return NextResponse.json(
-          { error: 'Credenciales inválidas' }, 
-          { status: 401 }
-        );
-      }
-
-      console.log('Login successful');
-      try {
-        await logActionServer({ userId: user.id, action: 'login', meta: { email: user.email, simple: true }, updateLastSeen: true });
-      } catch (e) {
-        console.warn('No se pudo registrar log de login (simple)', e);
-      }
-      
-      // Retornar sin la contraseña
-      const { password: _, ...safeUser } = user;
-
-      return NextResponse.json({
-        user: safeUser,
-        message: 'Login exitoso'
-      });
-
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      throw dbError;
-    } finally {
-      await prisma.$disconnect();
+    if (!user) {
+      console.log('User not found');
+      return NextResponse.json(
+        { error: 'Credenciales inválidas' }, 
+        { status: 401 }
+      );
     }
+
+    // Restringir sólo si el flag está activo
+    if (onlyAdmins && user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Solo administradores pueden iniciar sesión.' },
+        { status: 403 }
+      );
+    }
+
+    console.log('User found, checking password');
+    
+    // Importar bcrypt solo cuando lo necesitemos
+    const bcrypt = await import('bcrypt');
+    const isValid = await bcrypt.compare(password, user.password);
+    
+    if (!isValid) {
+      console.log('Password invalid');
+      return NextResponse.json(
+        { error: 'Credenciales inválidas' }, 
+        { status: 401 }
+      );
+    }
+
+    console.log('Login successful');
+    try {
+      await logActionServer({ userId: user.id, action: 'login', meta: { email: user.email, simple: true }, updateLastSeen: true });
+    } catch (e) {
+      console.warn('No se pudo registrar log de login (simple)', e);
+    }
+    
+    // Retornar sin la contraseña
+    const { password: _, ...safeUser } = user;
+
+    return NextResponse.json({
+      user: safeUser,
+      message: 'Login exitoso'
+    });
 
   } catch (error) {
     console.error('Login error:', error);

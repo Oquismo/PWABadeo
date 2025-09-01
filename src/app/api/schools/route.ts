@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,10 +11,6 @@ export async function GET(request: Request) {
     const type = url.searchParams.get('type') || '';
     const level = url.searchParams.get('level') || '';
     
-    // Importar dinámicamente Prisma
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-
     try {
       // Construir filtros
       const where: any = {
@@ -77,8 +74,9 @@ export async function GET(request: Request) {
         }
       });
 
-    } finally {
-      await prisma.$disconnect();
+    } catch (dbError) {
+      console.error('❌ Error de base de datos:', dbError);
+      throw dbError;
     }
 
   } catch (error) {

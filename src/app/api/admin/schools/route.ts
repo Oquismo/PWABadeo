@@ -1,33 +1,15 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const [{ PrismaClient }] = await Promise.all([
-      import('@prisma/client').catch(err => {
-        console.error('Failed to import PrismaClient:', err);
-        throw new Error('Prisma import failed: ' + err.message);
-      })
-    ]);
-
-    const prisma = new PrismaClient({
-      log: ['error'],
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL
-        }
-      }
-    });
-
-    try {
-      await prisma.$connect();
-
-      // Obtener todas las escuelas con el conteo de usuarios
-      const schools = await (prisma as any).school.findMany({
-        include: {
-          users: {
-            select: {
+    // Obtener todas las escuelas con el conteo de usuarios
+    const schools = await (prisma as any).school.findMany({
+      include: {
+        users: {
+          select: {
               id: true,
               firstName: true,
               lastName: true,
@@ -45,10 +27,6 @@ export async function GET() {
         schools,
         total: schools.length
       });
-
-    } finally {
-      await prisma.$disconnect();
-    }
 
   } catch (error) {
     console.error('Error al obtener escuelas:', error);
@@ -83,33 +61,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const [{ PrismaClient }] = await Promise.all([
-      import('@prisma/client').catch(err => {
-        console.error('Failed to import PrismaClient:', err);
-        throw new Error('Prisma import failed: ' + err.message);
-      })
-    ]);
-
-    const prisma = new PrismaClient({
-      log: ['error'],
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL
-        }
-      }
+    // Verificar si ya existe una escuela con el mismo nombre
+    const existingSchool = await (prisma as any).school.findUnique({
+      where: { name: name.trim() }
     });
 
-    try {
-      await prisma.$connect();
-
-      // Verificar si ya existe una escuela con el mismo nombre
-      const existingSchool = await (prisma as any).school.findUnique({
-        where: { name: name.trim() }
-      });
-
-      if (existingSchool) {
-        return NextResponse.json(
-          { error: 'Ya existe una escuela con ese nombre' },
+    if (existingSchool) {
+      return NextResponse.json(
+        { error: 'Ya existe una escuela con ese nombre' },
           { status: 409 }
         );
       }
@@ -150,10 +109,6 @@ export async function POST(request: Request) {
         message: 'Escuela creada exitosamente',
         school: newSchool
       });
-
-    } finally {
-      await prisma.$disconnect();
-    }
 
   } catch (error) {
     console.error('Error al crear escuela:', error);
