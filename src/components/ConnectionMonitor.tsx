@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from 'react';
 import { Box, Chip, Typography, CircularProgress } from '@mui/material';
 import { useApiWithRetry } from '@/hooks/useRetry';
