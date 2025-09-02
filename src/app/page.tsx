@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Fab, Fade, Box } from "@mui/material";
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import { useTranslation } from '@/hooks/useTranslation';
 
 // Importamos los componentes críticos de forma normal
 import HeroSection from "@/components/home/HeroSection";
@@ -15,6 +16,7 @@ import ExternalInfoPanel from "@/components/home/ExternalInfoPanel";
 
 export default function Home() {
   const [fadeIn, setFadeIn] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setFadeIn(true);
@@ -22,7 +24,7 @@ export default function Home() {
 
   // Información para el enlace de WhatsApp
   const phoneNumber = "34000000000"; // Reemplaza con el número de teléfono real
-  const message = "Hola, me gustaría recibir más información sobre Barrio de Oportunidades.";
+  const message = t('pages.home.welcomeMessage'); // Usar traducción
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
   return (

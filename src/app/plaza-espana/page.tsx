@@ -6,24 +6,28 @@ import DirectionsIcon from '@mui/icons-material/Directions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-// Datos para Plaza de España
-const spot = {
-  name: "Plaza de España",
-  trainer: "Guía: Carlos Ruiz",
-  nextSpots: "2 of 6",
-  coordinates: "37.3769,-5.9875", // Coordenadas de Plaza de España
-  currentSpot: {
-    name: "Alcázar de Sevilla",
-    time: "25 min",
-    distance: "800 m",
-    difficulty: "Histórico"
-  }
-};
+import { useTranslation } from '@/hooks/useTranslation';
+import LanguageSwitch from '@/components/LanguageSwitch';
 
 export default function PlazaEspanaPage() {
   const router = useRouter();
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
+  const { t } = useTranslation();
+
+  // Datos dinámicos del sitio
+  const spot = {
+    name: t('sites.plazaEspana.name'),
+    trainer: t('sites.plazaEspana.guide'),
+    nextSpots: "2 " + t('nav.of') + " 6",
+    coordinates: "37.3769,-5.9875", // Coordenadas de Plaza de España
+    currentSpot: {
+      name: t('sites.alcazar.name'),
+      time: "25 min",
+      distance: "800 m",
+      difficulty: t('difficulty.historic')
+    },
+    description: t('sites.plazaEspana.description')
+  };
 
   const openMaps = () => {
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates}`;
@@ -55,6 +59,8 @@ export default function PlazaEspanaPage() {
         <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: '#fff', zIndex: 10 }}>
           <ShareIcon />
         </IconButton>
+        {/* Botón de idioma */}
+        <LanguageSwitch />
         {/* Botón de Maps */}
         <IconButton 
           onClick={openMaps}
@@ -134,7 +140,7 @@ export default function PlazaEspanaPage() {
           letterSpacing: '0.3px',
           textAlign: 'justify'
         }}>
-          La Plaza de España es una de las plazas más espectaculares de España, construida para la Exposición Iberoamericana de 1929. Su arquitectura semicircular de estilo regionalista, con sus canales, puentes y azulejos que representan todas las provincias españolas, la convierten en un lugar único.
+          {spot.description}
         </Typography>
 
         {/* Next exercises */}
@@ -147,7 +153,7 @@ export default function PlazaEspanaPage() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Próximos sitios
+            {t('nav.nextSites')}
           </Typography>
           <Typography variant="body2" sx={{ 
             color: '#90caf9',

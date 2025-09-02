@@ -6,24 +6,28 @@ import DirectionsIcon from '@mui/icons-material/Directions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-// Datos de ejemplo para Sevilla
-const spot = {
-  name: "La Giralda",
-  trainer: "Guía: María García",
-  nextSpots: "1 of 6",
-  coordinates: "37.3862,-5.9925", // Coordenadas de La Giralda
-  currentSpot: {
-    name: "Plaza de España",
-    time: "15 min",
-    distance: "1.2 km",
-    difficulty: "Turístico"
-  }
-};
+import { useTranslation } from '@/hooks/useTranslation';
+import LanguageSwitch from '@/components/LanguageSwitch';
 
 export default function SevillaSpotPage() {
   const router = useRouter();
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
+  const { t } = useTranslation();
+
+  // Datos dinámicos del sitio
+  const spot = {
+    name: t('sites.giralda.name'),
+    trainer: t('sites.giralda.guide'),
+    nextSpots: "1 " + t('nav.of') + " 6",
+    coordinates: "37.3862,-5.9925", // Coordenadas de La Giralda
+    currentSpot: {
+      name: t('sites.plazaEspana.name'),
+      time: "15 min",
+      distance: "1.2 km",
+      difficulty: t('difficulty.tourist')
+    },
+    description: t('sites.giralda.description')
+  };
 
   const openMaps = () => {
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates}`;
@@ -55,6 +59,8 @@ export default function SevillaSpotPage() {
         <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: '#fff', zIndex: 10 }}>
           <ShareIcon />
         </IconButton>
+        {/* Botón de idioma */}
+        <LanguageSwitch />
         {/* Botón de Maps */}
         <IconButton 
           onClick={openMaps}
@@ -134,7 +140,7 @@ export default function SevillaSpotPage() {
           letterSpacing: '0.3px',
           textAlign: 'justify'
         }}>
-          La Giralda es el campanario de la Catedral de Sevilla y uno de los monumentos más emblemáticos de la ciudad. Con sus 104 metros de altura, ofrece unas vistas espectaculares de toda Sevilla. Su construcción combina el arte almohade con elementos renacentistas, creando una arquitectura única que la convierte en Patrimonio de la Humanidad.
+          {spot.description}
         </Typography>
 
         {/* Next exercises */}
@@ -147,7 +153,7 @@ export default function SevillaSpotPage() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Próximos sitios
+            {t('nav.nextSites')}
           </Typography>
           <Typography variant="body2" sx={{ 
             color: '#90caf9',

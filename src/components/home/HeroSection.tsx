@@ -8,10 +8,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar el icono de Ajustes
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function HeroSection() {
   const { isAuthenticated, user, refreshAvatar } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
+  const { t } = useTranslation();
   
   // Emoji de huevo por defecto (como el antiguo Twitter)
   const defaultEggAvatar = '🥚';
@@ -20,11 +22,11 @@ export default function HeroSection() {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 6 && hour < 12) {
-      return 'Buenos días';
+      return t('common.greetings.morning') || 'Buenos días';
     } else if (hour >= 12 && hour < 20) {
-      return 'Buenas tardes';
+      return t('common.greetings.afternoon') || 'Buenas tardes';
     } else {
-      return 'Buenas noches';
+      return t('common.greetings.evening') || 'Buenas noches';
     }
   };
 

@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
 import { SpotifyAuthProvider } from '@/context/SpotifyAuthContext';
 import { TasksProvider } from '@/context/TasksContext';
+import { LanguageProvider } from '@/hooks/useLanguage';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import BottomNavBar from '@/components/layout/BottomNavBar';
@@ -15,6 +16,8 @@ import AnnouncementBanner from '@/components/home/AnnouncementBanner';
 import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 import { ConnectionMonitor } from '@/components/ConnectionMonitor';
 import WarmupInitializer from '../components/WarmupInitializer';
+import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
+import LanguageTest from '@/components/LanguageTest';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -40,15 +43,18 @@ export default function RootLayout({
       </head>
       <body>
         <AppRouterCacheProvider>
-          <AuthProvider> 
-            <CustomThemeProvider>
-              <TasksProvider>
-                <SpotifyAuthProvider>
-                  <CssBaseline />
-                  <DebugInitializer />
-                  <WarmupInitializer />
+          <LanguageProvider>
+            <AuthProvider> 
+              <CustomThemeProvider>
+                <TasksProvider>
+                  <SpotifyAuthProvider>
+                    <CssBaseline />
+                    <DebugInitializer />
+                    <WarmupInitializer />
                   <ServiceWorkerProvider>
                     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+                      <GlobalLanguageSwitch />
+                      <LanguageTest />
                       
                       <Box component="main" sx={{ pb: '90px' }}>
                         <PageTransition>
@@ -65,6 +71,7 @@ export default function RootLayout({
               </TasksProvider>
             </CustomThemeProvider>
           </AuthProvider>
+        </LanguageProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

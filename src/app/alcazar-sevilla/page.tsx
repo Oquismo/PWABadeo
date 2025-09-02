@@ -6,24 +6,28 @@ import DirectionsIcon from '@mui/icons-material/Directions';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-// Datos para Alcázar de Sevilla
-const spot = {
-  name: "Alcázar de Sevilla",
-  trainer: "Guía: Ana Martínez",
-  nextSpots: "3 of 6",
-  coordinates: "37.3829,-5.9901", // Coordenadas del Alcázar
-  currentSpot: {
-    name: "Barrio Santa Cruz",
-    time: "20 min",
-    distance: "400 m",
-    difficulty: "Pintoresco"
-  }
-};
+import { useTranslation } from '@/hooks/useTranslation';
+import LanguageSwitch from '@/components/LanguageSwitch';
 
 export default function AlcazarSevillaPage() {
   const router = useRouter();
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
+  const { t } = useTranslation();
+
+  // Datos dinámicos del sitio
+  const spot = {
+    name: t('sites.alcazar.name'),
+    trainer: t('sites.alcazar.guide'),
+    nextSpots: "3 " + t('nav.of') + " 6",
+    coordinates: "37.3829,-5.9901", // Coordenadas del Alcázar
+    currentSpot: {
+      name: t('sites.barrioSantaCruz.name'),
+      time: "20 min",
+      distance: "400 m",
+      difficulty: t('difficulty.picturesque')
+    },
+    description: t('sites.alcazar.description')
+  };
 
   const openMaps = () => {
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates}`;
@@ -55,6 +59,8 @@ export default function AlcazarSevillaPage() {
         <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: '#fff', zIndex: 10 }}>
           <ShareIcon />
         </IconButton>
+        {/* Botón de idioma */}
+        <LanguageSwitch />
         {/* Botón de Maps */}
         <IconButton 
           onClick={openMaps}
@@ -134,7 +140,7 @@ export default function AlcazarSevillaPage() {
           letterSpacing: '0.3px',
           textAlign: 'justify'
         }}>
-          El Real Alcázar de Sevilla es un complejo palaciego amurallado construido en diferentes etapas históricas. Destacan los palacios mudéjares del siglo XIV y los jardines del Alcázar, considerados entre los más bellos de España.
+          {spot.description}
         </Typography>
 
         {/* Next exercises */}
@@ -147,7 +153,7 @@ export default function AlcazarSevillaPage() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Próximos sitios
+            {t('nav.nextSites')}
           </Typography>
           <Typography variant="body2" sx={{ 
             color: '#90caf9',

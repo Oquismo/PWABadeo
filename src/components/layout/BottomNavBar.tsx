@@ -16,11 +16,13 @@ import BugReportIcon from '@mui/icons-material/BugReport';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, LayoutGroup } from 'framer-motion'; // 1. Importar de Framer Motion
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function BottomNavBar() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const [isClient, setIsClient] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setIsClient(true);
@@ -36,21 +38,21 @@ export default function BottomNavBar() {
   }
 
   const navActions = [
-  { value: "/", icon: <HomeIcon /> },
-  { value: "/mapa", icon: <MapIcon /> },
-  { value: "/sevilla-spot", icon: <LocationOnIcon /> },
+  { value: "/", icon: <HomeIcon />, label: t('nav.home') },
+  { value: "/mapa", icon: <MapIcon />, label: t('nav.map') },
+  { value: "/sevilla-spot", icon: <LocationOnIcon />, label: t('nav.tourism') },
     // { value: "/spotify", icon: <MusicNoteIcon /> }, // Oculto temporalmente
     ...(user?.role === 'admin'
       ? [
           // { value: "/spotify-production-debug", icon: <BugReportIcon /> }, // Oculto temporalmente
-          { value: "/admin", icon: <AdminPanelSettingsIcon /> }
+          { value: "/admin", icon: <AdminPanelSettingsIcon />, label: "Admin" }
         ]
       : [
-          { value: "/telefonos", icon: <PhoneInTalkIcon /> },
+          { value: "/telefonos", icon: <PhoneInTalkIcon />, label: "Teléfonos" },
         ]),
     ...(isAuthenticated
-      ? [{ value: "/perfil", icon: <AccountCircleIcon /> }]
-      : [{ value: "/login", icon: <LoginIcon /> }]),
+      ? [{ value: "/perfil", icon: <AccountCircleIcon />, label: t('nav.profile') }]
+      : [{ value: "/login", icon: <LoginIcon />, label: "Login" }]),
   ];
 
   return (
