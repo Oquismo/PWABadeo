@@ -38,8 +38,8 @@ export function ConnectionMonitor() {
     // Check inicial
     checkConnection();
 
-    // Check periódico cada 30 segundos
-    const interval = setInterval(checkConnection, 30000);
+    // Check periódico cada 5 minutos (300000 ms)
+    const interval = setInterval(checkConnection, 300000);
 
     return () => clearInterval(interval);
   }, []);
