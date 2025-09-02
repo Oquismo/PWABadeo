@@ -1,6 +1,7 @@
 'use client';
 
 import { Typography, Card, CardContent, Box, IconButton, Tooltip, Chip } from '@mui/material';
+import { useTranslation } from '@/hooks/useTranslation';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LaunchIcon from '@mui/icons-material/Launch';
@@ -781,29 +782,43 @@ export default function ProjectsDashboard() {
           {/* Header con título y botones de control */}
           <Box sx={{ mb: 3, px: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-              <Typography
-                variant="h4"
-                fontWeight={700}
-                sx={{
-                  mb: 0,
-                  background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.secondary} 100%)`,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  textShadow: `0 2px 4px ${palette.shadow}`,
-                  letterSpacing: '-0.02em',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              >
-                Proyectos Activos
-              </Typography>
+              {/* Traducción del título */}
+              {(() => {
+                const { t } = useTranslation();
+                return (
+                  <Typography
+                    variant="h4"
+                    fontWeight={700}
+                    sx={{
+                      mb: 0,
+                      background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.secondary} 100%)`,
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      textShadow: `0 2px 4px ${palette.shadow}`,
+                      letterSpacing: '-0.02em',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  >
+                    {t('pages.home.projectsActive')}
+                  </Typography>
+                );
+              })()}
               <Box sx={{ display: 'flex', gap: 1 }}>
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                {orderedTasks.length} proyectos
-              </Typography>
+              {/* Traducción del contador de proyectos */}
+              {(() => {
+                const { t } = useTranslation();
+                // Reemplazo manual de {{count}} por el valor
+                const countText = t('pages.home.projectsCount').replace('{{count}}', orderedTasks.length.toString());
+                return (
+                  <Typography variant="body2" color="text.secondary">
+                    {countText}
+                  </Typography>
+                );
+              })()}
               <Tooltip 
                 title="💡 Desliza las tarjetas horizontalmente para reorganizar"
                 open={showInfoTooltip}

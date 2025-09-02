@@ -47,28 +47,10 @@ export const translations = {
         announcements: "Anuncios",
         events: "Eventos",
         projects: "Proyectos",
-        calendar: "Calendario"
-      },
-      login: {
-        title: "Iniciar Sesión",
-        email: "Correo electrónico",
-        password: "Contraseña",
-        loginButton: "Iniciar Sesión",
-        forgotPassword: "¿Olvidaste tu contraseña?",
-        noAccount: "¿No tienes cuenta?",
-        createAccount: "Crear cuenta",
-        invalidCredentials: "Credenciales inválidas"
-      },
-      register: {
-        title: "Registrarse",
-        firstName: "Nombre",
-        lastName: "Apellidos",
-        email: "Correo electrónico",
-        password: "Contraseña",
-        confirmPassword: "Confirmar Contraseña",
-        registerButton: "Registrarse",
-        alreadyHaveAccount: "¿Ya tienes cuenta?",
-        loginHere: "Inicia sesión aquí"
+        calendar: "Calendario",
+        projectsActive: "Proyectos Activos",
+        projectsCount: "{{count}} proyectos",
+        loadingCalendar: "Cargando calendario..."
       },
       services: {
         title: "Servicios",
@@ -81,22 +63,6 @@ export const translations = {
           food: "Alimentación",
           shopping: "Compras"
         }
-      },
-      map: {
-        title: "Mapa",
-        description: "Explora los servicios y ubicaciones de tu barrio",
-        locations: "Ubicaciones",
-        search: "Buscar",
-        filter: "Filtrar"
-      },
-      profile: {
-        title: "Mi Perfil",
-        personalInfo: "Información Personal",
-        settings: "Configuración",
-        notifications: "Notificaciones",
-        privacy: "Privacidad",
-        logout: "Cerrar Sesión",
-        editProfile: "Editar Perfil"
       },
       phones: {
         title: "Teléfonos Importantes",
@@ -173,18 +139,6 @@ export const translations = {
     },
     // Main pages
     pages: {
-      home: {
-        title: "Neighborhood of Opportunities",
-        subtitle: "Your digital community",
-        welcomeMessage: "Welcome to your neighborhood!",
-        exploreServices: "Explore our services",
-        latestNews: "Latest news",
-        quickAccess: "Quick access",
-        announcements: "Announcements",
-        events: "Events",
-        projects: "Projects",
-        calendar: "Calendar"
-      },
       login: {
         title: "Sign In",
         email: "Email",
@@ -320,6 +274,8 @@ export const translations = {
         events: "Eventi",
         projects: "Progetti",
         calendar: "Calendario"
+  ,projectsActive: "Progetti Attivi"
+  ,projectsCount: "{{count}} progetti"
       },
       login: {
         title: "Accedi",
@@ -417,18 +373,22 @@ export type TranslationKey = keyof typeof translations.es;
 export function getTranslation(lang: Language, path: string): string {
   const keys = path.split('.');
   let current: any = translations[lang];
-  
-  console.log(`Buscando traducción para "${path}" en idioma "${lang}"`); // Debug
-  
   for (const key of keys) {
-    current = current?.[key];
-    if (!current) {
-      console.log(`No se encontró la clave "${key}" en la ruta "${path}"`); // Debug
-      break;
+    if (current && key in current) {
+      current = current[key];
+    } else {
+      // Fallback: buscar en español si no existe en el idioma actual
+      let fallback: any = translations['es'];
+      for (const k of keys) {
+        if (fallback && k in fallback) {
+          fallback = fallback[k];
+        } else {
+          fallback = undefined;
+          break;
+        }
+      }
+      return fallback || '';
     }
   }
-  
-  const result = current || path;
-  console.log(`Resultado de traducción:`, result); // Debug
-  return result;
+  return typeof current === 'string' ? current : '';
 }

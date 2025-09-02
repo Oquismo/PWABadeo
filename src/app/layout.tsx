@@ -54,7 +54,6 @@ export default function RootLayout({
                   <ServiceWorkerProvider>
                     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
                       <GlobalLanguageSwitch />
-                      <LanguageTest />
                       
                       <Box component="main" sx={{ pb: '90px' }}>
                         <PageTransition>

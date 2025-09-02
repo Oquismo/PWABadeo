@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { useTranslation } from '@/hooks/useTranslation';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { migrateLocalStorageEvents, shouldMigrateEvents } from '@/utils/migrateEvents';
 
@@ -202,10 +203,11 @@ export default function CalendarSection() {
     }
   };
 
+  const { t } = useTranslation();
   if (!isClient) {
     return (
       <Box sx={{ py: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-        <Typography>Cargando calendario...</Typography>
+        <Typography>{t('pages.home.loadingCalendar')}</Typography>
       </Box>
     );
   }

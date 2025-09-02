@@ -38,19 +38,17 @@ export default function GlobalLanguageSwitch() {
         bgcolor: 'rgba(0,0,0,0.6)',
         color: '#fff', 
         zIndex: 1000,
-        fontSize: '0.75rem',
-        minWidth: '50px',
-        borderRadius: '25px',
+        fontSize: '1.5rem',
+        borderRadius: '50%',
+        width: 48,
+        height: 48,
         '&:hover': {
           bgcolor: 'rgba(0,0,0,0.8)'
         }
       }}
-      title={`Current language: ${getLanguageLabel()}`}
+      title={'Cambiar idioma'}
     >
-      <LanguageIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
-      <span style={{ fontSize: '0.7rem', fontWeight: 'bold' }}>
-        {language.toUpperCase()}
-      </span>
+      <LanguageIcon sx={{ fontSize: '2rem' }} />
     </IconButton>
   );
 }
