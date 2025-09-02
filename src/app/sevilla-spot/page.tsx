@@ -123,6 +123,20 @@ export default function SevillaSpotPage() {
           }} 
         />
         
+        {/* Descripción */}
+        <Typography variant="body2" sx={{ 
+          color: '#d0d0d0', 
+          lineHeight: 1.8,
+          mb: 3,
+          fontWeight: 400,
+          textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+          fontSize: '0.95rem',
+          letterSpacing: '0.3px',
+          textAlign: 'justify'
+        }}>
+          La Giralda es el campanario de la Catedral de Sevilla y uno de los monumentos más emblemáticos de la ciudad. Con sus 104 metros de altura, ofrece unas vistas espectaculares de toda Sevilla. Su construcción combina el arte almohade con elementos renacentistas, creando una arquitectura única que la convierte en Patrimonio de la Humanidad.
+        </Typography>
+
         {/* Next exercises */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ 
@@ -230,20 +244,6 @@ export default function SevillaSpotPage() {
             </Box>
           </Card>
         </Link>
-
-        {/* Descripción */}
-        <Typography variant="body2" sx={{ 
-          color: '#d0d0d0', 
-          lineHeight: 1.8,
-          mb: 3,
-          fontWeight: 400,
-          textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-          fontSize: '0.95rem',
-          letterSpacing: '0.3px',
-          textAlign: 'justify'
-        }}>
-          La Giralda es el campanario de la Catedral de Sevilla y uno de los monumentos más emblemáticos de la ciudad. Con sus 104 metros de altura, ofrece unas vistas espectaculares de toda Sevilla. Su construcción combina el arte almohade con elementos renacentistas, creando una arquitectura única que la convierte en Patrimonio de la Humanidad.
-        </Typography>
       </Box>
     </Box>
   );

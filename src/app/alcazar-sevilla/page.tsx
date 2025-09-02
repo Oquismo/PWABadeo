@@ -123,6 +123,20 @@ export default function AlcazarSevillaPage() {
           }} 
         />
         
+        {/* Descripción */}
+        <Typography variant="body2" sx={{ 
+          color: '#d0d0d0', 
+          lineHeight: 1.8,
+          mb: 3,
+          fontWeight: 400,
+          textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+          fontSize: '0.95rem',
+          letterSpacing: '0.3px',
+          textAlign: 'justify'
+        }}>
+          El Real Alcázar de Sevilla es un complejo palaciego amurallado construido en diferentes etapas históricas. Destacan los palacios mudéjares del siglo XIV y los jardines del Alcázar, considerados entre los más bellos de España.
+        </Typography>
+
         {/* Next exercises */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ 
@@ -229,20 +243,6 @@ export default function AlcazarSevillaPage() {
             </Box>
           </Card>
         </Link>
-
-        {/* Descripción */}
-        <Typography variant="body2" sx={{ 
-          color: '#d0d0d0', 
-          lineHeight: 1.8,
-          mb: 3,
-          fontWeight: 400,
-          textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-          fontSize: '0.95rem',
-          letterSpacing: '0.3px',
-          textAlign: 'justify'
-        }}>
-          El Real Alcázar de Sevilla es un complejo palaciego amurallado construido en diferentes etapas históricas. Destacan los palacios mudéjares del siglo XIV y los jardines del Alcázar, considerados entre los más bellos de España.
-        </Typography>
       </Box>
     </Box>
   );

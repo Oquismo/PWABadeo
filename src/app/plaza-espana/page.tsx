@@ -123,6 +123,20 @@ export default function PlazaEspanaPage() {
           }} 
         />
         
+        {/* Descripción */}
+        <Typography variant="body2" sx={{ 
+          color: '#d0d0d0', 
+          lineHeight: 1.8,
+          mb: 3,
+          fontWeight: 400,
+          textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+          fontSize: '0.95rem',
+          letterSpacing: '0.3px',
+          textAlign: 'justify'
+        }}>
+          La Plaza de España es una de las plazas más espectaculares de España, construida para la Exposición Iberoamericana de 1929. Su arquitectura semicircular de estilo regionalista, con sus canales, puentes y azulejos que representan todas las provincias españolas, la convierten en un lugar único.
+        </Typography>
+
         {/* Next exercises */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ 
@@ -229,20 +243,6 @@ export default function PlazaEspanaPage() {
             </Box>
           </Card>
         </Link>
-
-        {/* Descripción */}
-        <Typography variant="body2" sx={{ 
-          color: '#d0d0d0', 
-          lineHeight: 1.8,
-          mb: 3,
-          fontWeight: 400,
-          textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-          fontSize: '0.95rem',
-          letterSpacing: '0.3px',
-          textAlign: 'justify'
-        }}>
-          La Plaza de España es una de las plazas más espectaculares de España, construida para la Exposición Iberoamericana de 1929. Su arquitectura semicircular de estilo regionalista, con sus canales, puentes y azulejos que representan todas las provincias españolas, la convierten en un lugar único.
-        </Typography>
       </Box>
     </Box>
   );
