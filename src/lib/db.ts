@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-// Configuración específica para Vercel
+// Configuración específica para Vercel con optimizaciones para cold starts
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -13,19 +13,40 @@ export const prisma = globalForPrisma.prisma ??
         url: process.env.DATABASE_URL,
       },
     },
+    // Configuraciones para reducir cold starts
+    errorFormat: 'minimal',
+    transactionOptions: {
+      timeout: 10000, // 10 segundos timeout para transacciones
+    },
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
-// Función helper para inicializar Prisma de manera segura
-export async function initPrisma() {
+// Función helper para inicializar Prisma de manera segura con reintentos
+export async function initPrisma(retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await prisma.$connect();
+      console.log('✅ Prisma connected successfully');
+      return prisma;
+    } catch (error) {
+      console.error(`❌ Prisma connection attempt ${i + 1} failed:`, error);
+      if (i === retries - 1) throw error;
+      
+      // Esperar antes del siguiente intento
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+
+// Función para mantener la conexión viva
+export async function keepAlive() {
   try {
-    await prisma.$connect();
-    console.log('✅ Prisma connected successfully');
-    return prisma;
+    await prisma.$queryRaw`SELECT 1`;
+    return true;
   } catch (error) {
-    console.error('❌ Prisma connection failed:', error);
-    throw error;
+    console.warn('Keep-alive ping failed:', error);
+    return false;
   }
 }
 

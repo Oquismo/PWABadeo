@@ -1,6 +1,33 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Variables para gestión de cold starts
+let isWarmingUp = false;
+let lastWarmupTime = 0;
+const WARMUP_INTERVAL = 5 * 60 * 1000; // 5 minutos
+
+// Función para pre-calentar la conexión de base de datos
+async function warmupDatabase() {
+  if (isWarmingUp || Date.now() - lastWarmupTime < WARMUP_INTERVAL) {
+    return;
+  }
+  
+  isWarmingUp = true;
+  lastWarmupTime = Date.now();
+  
+  try {
+    // Ping rápido a la base de datos en background
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/health`, {
+      method: 'GET',
+      headers: { 'x-warmup': 'true' }
+    }).catch(() => {}); // Silenciar errores del warmup
+  } catch (error) {
+    console.warn('Database warmup failed:', error);
+  } finally {
+    isWarmingUp = false;
+  }
+}
+
 // Rutas públicas que no requieren autenticación
 const publicRoutes = [
   '/login',
@@ -34,6 +61,11 @@ const publicPaths = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Activar warmup en background para APIs críticas
+  if (pathname.startsWith('/api/') && !pathname.includes('warmup')) {
+    warmupDatabase();
+  }
 
   // EXCEPCIÓN: Permitir acceso a rutas públicas
   if (publicRoutes.includes(pathname) || publicPaths.includes(pathname)) {

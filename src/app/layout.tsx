@@ -13,6 +13,8 @@ import PageTransition from '@/components/layout/PageTransition';
 import DebugInitializer from '@/components/debug/DebugInitializer';
 import AnnouncementBanner from '@/components/home/AnnouncementBanner';
 import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
+import { ConnectionMonitor } from '@/components/ConnectionMonitor';
+import WarmupInitializer from '@/components/WarmupInitializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -44,6 +46,7 @@ export default function RootLayout({
                 <SpotifyAuthProvider>
                   <CssBaseline />
                   <DebugInitializer />
+                  <WarmupInitializer />
                   <ServiceWorkerProvider>
                     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
                       
@@ -54,6 +57,7 @@ export default function RootLayout({
                       </Box>
 
                       <BottomNavBar />
+                      <ConnectionMonitor />
 
                     </Box>
                   </ServiceWorkerProvider>
