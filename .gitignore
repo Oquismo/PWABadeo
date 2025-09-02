@@ -24,12 +24,47 @@
 .DS_Store
 *.pem
 /noname
+/.noname
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+
+# temporary files
+temp_*
+*.tmp
+*.temp
+
+# test files (local testing only)
+test-*.js
+test-*.ts
+test-*.tsx
+*-test.js
+*-test.ts
+*-test.tsx
+
+# backup and old files
+*.backup
+*.backup.*
+*.old
+*.bak
+
+# documentation files for problems resolved
+PROBLEMA_*.md
+SOLUCION_*.md
+*_RESUELTO.md
+*_FIX.md
+
+# android temp files
+android-settings.json
+
+# sql debug files
+*.sql
+!schema.sql
+!seeds.sql
+!migrations/**/*.sql
 
 # env files (can opt-in for committing if needed)
 .env*

@@ -14,7 +14,7 @@ import DebugInitializer from '@/components/debug/DebugInitializer';
 import AnnouncementBanner from '@/components/home/AnnouncementBanner';
 import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 import { ConnectionMonitor } from '@/components/ConnectionMonitor';
-import WarmupInitializer from '@/components/WarmupInitializer';
+import WarmupInitializer from '../components/WarmupInitializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
