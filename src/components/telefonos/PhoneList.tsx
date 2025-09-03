@@ -7,10 +7,10 @@ import EmergencyIcon from '@mui/icons-material/EmergencyShare'; // Icono para em
 const phoneNumbers = [
     { name: 'Emergencias Generales', number: '112', isEmergency: true },
     { name: 'Policía Nacional', number: '091', isEmergency: true },
-    { name: 'Centro de Salud Local', number: '955 01 00 00' },
+    { name: 'Barrio de oportunidades emergencia', number: '+34649347760' },
     { name: 'Ayuntamiento', number: '955 47 00 00' },
     { name: 'Atención al Ciudadano', number: '010' },
-    { name: 'Oficina de Empleo', number: '955 56 55 56' },
+    { name: 'Barrio de Oportunidades', number: '954 75 49 16' },
 ];
 
 export default function PhoneList() {
