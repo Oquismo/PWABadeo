@@ -64,23 +64,22 @@ interface School {
 }
 
 const schoolTypes = ['pública', 'privada', 'concertada'];
-const schoolLevels = ['infantil', 'primaria', 'secundaria', 'bachillerato', 'fp'];
+const schoolLevels = [
+  'scuola_primaria',
+  'secondaria_primo',
+  'secondaria_secondo',
+  'universita'
+];
 
 export default function SchoolManagement() {
-  const [schools, setSchools] = useState<School[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingSchool, setEditingSchool] = useState<School | null>(null);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<School | null>(null);
-
+  // Estado principal del formulario
   const [formData, setFormData] = useState({
     name: '',
     address: '',
     city: '',
     province: '',
-    country: 'España',
+    town: '',
+    country: 'Italia',
     phoneNumber: '',
     email: '',
     website: '',
@@ -88,6 +87,94 @@ export default function SchoolManagement() {
     level: 'primaria',
     description: ''
   });
+
+  // Provincias por ciudad italiana
+  const cityProvinces: Record<string, string[]> = {
+    // Italia
+    'Roma': ['Roma'],
+    'Milano': ['Milano', 'Monza e Brianza'],
+    'Napoli': ['Napoli'],
+    'Torino': ['Torino'],
+    'Palermo': ['Palermo'],
+    'Genova': ['Genova'],
+    'Bologna': ['Bologna'],
+    'Firenze': ['Firenze'],
+    'Venezia': ['Venezia'],
+    'Bari': ['Bari'],
+    // España
+    'Madrid': ['Madrid'],
+    'Barcelona': ['Barcelona'],
+    'Toledo': ['Toledo']
+  };
+
+  // Ciudades por país
+  const countryCities: Record<string, string[]> = {
+    'Italia': ['Roma', 'Milano', 'Napoli', 'Torino', 'Palermo', 'Genova', 'Bologna', 'Firenze', 'Venezia', 'Bari'],
+    'España': ['Madrid', 'Barcelona', 'Toledo']
+  };
+
+  // Pueblos/localidades por ciudad
+  const cityTowns: Record<string, string[]> = {
+    // Italia
+    'Roma': ['Albano Laziale', 'Anzio', 'Bracciano', 'Castel Gandolfo', 'Ciampino', 'Frascati', 'Genzano di Roma', 'Guidonia Montecelio', 'Ladispoli', 'Marino', 'Nettuno', 'Ostia', 'Palestrina', 'Pomezia', 'Tivoli', 'Velletri', 'Viterbo'],
+    'Milano': ['Abbiategrasso', 'Arese', 'Assago', 'Bergamo', 'Bollate', 'Brescia', 'Busto Arsizio', 'Cinisello Balsamo', 'Como', 'Corsico', 'Cremona', 'Gallarate', 'Legnano', 'Lodi', 'Magenta', 'Mantova', 'Monza', 'Novara', 'Pavia', 'Rho', 'Saronno', 'Sesto San Giovanni', 'Varese'],
+    'Napoli': ['Acerra', 'Afragola', 'Aversa', 'Bacoli', 'Baiano', 'Calvizzano', 'Capri', 'Casalnuovo di Napoli', 'Caserta', 'Castellammare di Stabia', 'Ercolano', 'Giugliano in Campania', 'Ischia', 'Marano di Napoli', 'Nola', 'Pompei', 'Portici', 'Pozzuoli', 'Procida', 'San Giorgio a Cremano', 'Sorrento', 'Torre del Greco', 'Torre Annunziata'],
+    'Torino': ['Alba', 'Alessandria', 'Asti', 'Avigliana', 'Beinasco', 'Biella', 'Borgaro Torinese', 'Chieri', 'Chivasso', 'Collegno', 'Cuneo', 'Grugliasco', 'Ivrea', 'Moncalieri', 'Nichelino', 'Novara', 'Orbassano', 'Pinerolo', 'Rivoli', 'Settimo Torinese', 'Venaria Reale', 'Verbania', 'Vercelli'],
+    'Palermo': ['Bagheria', 'Balestrate', 'Carini', 'Castelvetrano', 'Cefalù', 'Corleone', 'Ficarazzi', 'Gangi', 'Lercara Friddi', 'Marsala', 'Mazara del Vallo', 'Misilmeri', 'Monreale', 'Partinico', 'Petralia Soprana', 'Pollina', 'San Giuseppe Jato', 'Termini Imerese', 'Trabia', 'Trapani'],
+    'Genova': ['Arenzano', 'Bogliasco', 'Camogli', 'Chiavari', 'Cogoleto', 'La Spezia', 'Lavagna', 'Nervi', 'Pegli', 'Portofino', 'Rapallo', 'Recco', 'Santa Margherita Ligure', 'Savona', 'Sestri Levante', 'Sori', 'Varazze', 'Voltri'],
+    'Bologna': ['Anzola dell\'Emilia', 'Budrio', 'Calderara di Reno', 'Casalecchio di Reno', 'Castel Maggiore', 'Castenaso', 'Cento', 'Crevalcore', 'Faenza', 'Ferrara', 'Imola', 'Medicina', 'Modena', 'Molinella', 'Ozzano dell\'Emilia', 'Parma', 'Pianoro', 'Ravenna', 'Reggio Emilia', 'Rimini', 'San Giovanni in Persiceto', 'San Lazzaro di Savena', 'Zola Predosa'],
+    'Firenze': ['Bagno a Ripoli', 'Borgo San Lorenzo', 'Calenzano', 'Campi Bisenzio', 'Empoli', 'Fiesole', 'Figline e Incisa Valdarno', 'Impruneta', 'Lastra a Signa', 'Pontassieve', 'Prato', 'Reggello', 'Rignano sull\'Arno', 'San Casciano in Val di Pesa', 'Scandicci', 'Sesto Fiorentino', 'Signa', 'Vaglia'],
+    'Venezia': ['Caorle', 'Cavallino-Treporti', 'Chioggia', 'Dolo', 'Eraclea', 'Jesolo', 'Marcon', 'Martellago', 'Mira', 'Mirano', 'Musile di Piave', 'Noale', 'Padova', 'Portogruaro', 'Quarto d\'Altino', 'San Donà di Piave', 'Spinea', 'Treviso', 'Verona', 'Vicenza'],
+    'Bari': ['Acquaviva delle Fonti', 'Alberobello', 'Altamura', 'Andria', 'Barletta', 'Bitonto', 'Brindisi', 'Canosa di Puglia', 'Casamassima', 'Castellana Grotte', 'Conversano', 'Corato', 'Foggia', 'Gravina in Puglia', 'Lecce', 'Locorotondo', 'Martina Franca', 'Molfetta', 'Monopoli', 'Polignano a Mare', 'Putignano', 'Ruvo di Puglia', 'Taranto', 'Trani'],
+    // España
+    'Madrid': ['Alcalá de Henares', 'Alcobendas', 'Alcorcón', 'Aranjuez', 'Boadilla del Monte', 'Collado Villalba', 'Coslada', 'El Escorial', 'Fuenlabrada', 'Getafe', 'Las Rozas', 'Leganés', 'Majadahonda', 'Móstoles', 'Parla', 'Pozuelo de Alarcón', 'San Lorenzo de El Escorial', 'Torrejón de Ardoz', 'Tres Cantos', 'Valdemoro'],
+    'Barcelona': ['Badalona', 'Hospitalet de Llobregat', 'Sabadell', 'Terrassa', 'Santa Coloma de Gramenet', 'Cornellà de Llobregat', 'Sant Boi de Llobregat', 'Mataró', 'Granollers', 'Manresa', 'Vic', 'Igualada', 'Vilanova i la Geltrú', 'Girona', 'Lleida', 'Tarragona', 'Reus', 'Sitges', 'Figueres', 'Blanes'],
+    'Toledo': ['Talavera de la Reina', 'Illescas', 'Seseña', 'Azuqueca de Henares', 'Guadalajara', 'Yepes', 'Ocaña', 'Quintanar de la Orden', 'Villacañas', 'Madridejos', 'Consuegra', 'Mora', 'Torrijos', 'Fuensalida', 'La Puebla de Montalbán', 'Sonseca', 'Orgaz', 'Tembleque']
+  };
+  
+  // Estados disponibles
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  // Provincias disponibles según ciudad
+  const [availableProvinces, setAvailableProvinces] = useState<string[]>([]);
+  // Pueblos disponibles según ciudad
+  const [availableTowns, setAvailableTowns] = useState<string[]>([]);
+
+  // Efecto para actualizar ciudades cuando cambia el país
+  useEffect(() => {
+    if (formData.country && countryCities[formData.country]) {
+      setAvailableCities(countryCities[formData.country]);
+      // Resetear ciudad, provincia y pueblo si el país cambió
+      if (!countryCities[formData.country].includes(formData.city)) {
+        setFormData(prev => ({ ...prev, city: '', province: '', town: '' }));
+      }
+    } else {
+      setAvailableCities([]);
+      setFormData(prev => ({ ...prev, city: '', province: '', town: '' }));
+    }
+  }, [formData.country]);
+
+  useEffect(() => {
+    if (formData.city && cityProvinces[formData.city]) {
+      setAvailableProvinces(cityProvinces[formData.city]);
+      setAvailableTowns(cityTowns[formData.city] || []);
+      // Si la provincia actual no es válida, resetear
+      if (!cityProvinces[formData.city].includes(formData.province)) {
+        setFormData(prev => ({ ...prev, province: '', town: '' }));
+      }
+    } else {
+      setAvailableProvinces([]);
+      setAvailableTowns([]);
+      setFormData(prev => ({ ...prev, province: '', town: '' }));
+    }
+  }, [formData.city]);
+
+  const [schools, setSchools] = useState<School[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingSchool, setEditingSchool] = useState<School | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<School | null>(null);
 
   // Cargar escuelas
   const loadSchools = async () => {
@@ -129,6 +216,7 @@ export default function SchoolManagement() {
         address: school.address || '',
         city: school.city || '',
         province: school.province || '',
+        town: (school as any).town || '',
         country: school.country,
         phoneNumber: school.phoneNumber || '',
         email: school.email || '',
@@ -144,7 +232,8 @@ export default function SchoolManagement() {
         address: '',
         city: '',
         province: '',
-        country: 'España',
+        town: '',
+        country: 'Italia',
         phoneNumber: '',
         email: '',
         website: '',
@@ -162,7 +251,7 @@ export default function SchoolManagement() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev: typeof formData) => ({
       ...prev,
       [field]: value
     }));
@@ -281,7 +370,7 @@ export default function SchoolManagement() {
                 Escuelas Públicas
               </Typography>
               <Typography variant="h4">
-                {schools.filter(s => s.type === 'pública').length}
+                {schools.filter((s: School) => s.type === 'pública').length}
               </Typography>
             </CardContent>
           </Card>
@@ -293,7 +382,7 @@ export default function SchoolManagement() {
                 Escuelas Privadas
               </Typography>
               <Typography variant="h4">
-                {schools.filter(s => s.type === 'privada').length}
+                {schools.filter((s: School) => s.type === 'privada').length}
               </Typography>
             </CardContent>
           </Card>
@@ -305,7 +394,7 @@ export default function SchoolManagement() {
                 Con Usuarios
               </Typography>
               <Typography variant="h4">
-                {schools.filter(s => s.users && s.users.length > 0).length}
+                {schools.filter((s: School) => s.users && s.users.length > 0).length}
               </Typography>
             </CardContent>
           </Card>
@@ -327,7 +416,7 @@ export default function SchoolManagement() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {schools.map((school) => (
+            {schools.map((school: School) => (
               <TableRow key={school.id}>
                 <TableCell>
                   <Box>
@@ -417,7 +506,7 @@ export default function SchoolManagement() {
                 fullWidth
                 label="Nombre de la Escuela *"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
                 required
               />
             </Grid>
@@ -427,37 +516,72 @@ export default function SchoolManagement() {
                 fullWidth
                 label="Dirección"
                 value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('address', e.target.value)}
                 multiline
                 rows={2}
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Ciudad"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-              />
+              <FormControl fullWidth>
+                <InputLabel>Ciudad</InputLabel>
+                <Select
+                  value={formData.city}
+                  label="Ciudad"
+                  onChange={(e: any) => handleInputChange('city', e.target.value)}
+                >
+                  <MenuItem value="">Todas</MenuItem>
+                  {availableCities.map((city) => (
+                    <MenuItem key={city} value={city}>{city}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Provincia"
-                value={formData.province}
-                onChange={(e) => handleInputChange('province', e.target.value)}
-              />
+              <FormControl fullWidth disabled={!formData.city || availableProvinces.length === 0}>
+                <InputLabel>Provincia</InputLabel>
+                <Select
+                  value={formData.province}
+                  label="Provincia"
+                  onChange={(e: any) => handleInputChange('province', e.target.value)}
+                >
+                  <MenuItem value="">{availableProvinces.length === 0 ? 'Selecciona ciudad' : 'Todas'}</MenuItem>
+                  {availableProvinces.map((prov: string) => (
+                    <MenuItem key={prov} value={prov}>{prov}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="País"
-                value={formData.country}
-                onChange={(e) => handleInputChange('country', e.target.value)}
-              />
+              <FormControl fullWidth disabled={!formData.city || availableTowns.length === 0}>
+                <InputLabel>Comune</InputLabel>
+                <Select
+                  value={formData.town}
+                  label="Comune"
+                  onChange={(e: any) => handleInputChange('town', e.target.value)}
+                >
+                  <MenuItem value="">{availableTowns.length === 0 ? 'Selecciona ciudad' : 'Tutti'}</MenuItem>
+                  {availableTowns.map((town: string) => (
+                    <MenuItem key={town} value={town}>{town}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>País</InputLabel>
+                <Select
+                  value={formData.country}
+                  label="País"
+                  onChange={(e: any) => handleInputChange('country', e.target.value)}
+                >
+                  <MenuItem value="Italia">Italia</MenuItem>
+                  <MenuItem value="España">España</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -465,7 +589,7 @@ export default function SchoolManagement() {
                 fullWidth
                 label="Teléfono"
                 value={formData.phoneNumber}
-                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('phoneNumber', e.target.value)}
               />
             </Grid>
 
@@ -475,7 +599,7 @@ export default function SchoolManagement() {
                 label="Email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('email', e.target.value)}
               />
             </Grid>
 
@@ -484,7 +608,7 @@ export default function SchoolManagement() {
                 fullWidth
                 label="Sitio Web"
                 value={formData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('website', e.target.value)}
                 placeholder="https://..."
               />
             </Grid>
@@ -514,11 +638,10 @@ export default function SchoolManagement() {
                   label="Nivel Educativo"
                   onChange={(e) => handleInputChange('level', e.target.value)}
                 >
-                  {schoolLevels.map((level) => (
-                    <MenuItem key={level} value={level}>
-                      {level.charAt(0).toUpperCase() + level.slice(1)}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value="scuola_primaria">Scuola Primaria</MenuItem>
+                  <MenuItem value="secondaria_primo">Secondaria di Primo Grado</MenuItem>
+                  <MenuItem value="secondaria_secondo">Secondaria di Secondo Grado</MenuItem>
+                  <MenuItem value="universita">Università</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

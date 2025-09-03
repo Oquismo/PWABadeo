@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, TextField, Button, Link as MuiLink, Grid, Tooltip } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, Link as MuiLink, Grid, Tooltip, FormControl, InputLabel, Select, MenuItem, CircularProgress } from '@mui/material';
 import Link from 'next/link';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import SchoolSelector from '@/components/registro/SchoolSelector';
@@ -16,6 +16,8 @@ interface School {
   address?: string;
   city?: string;
   province?: string;
+  country?: string;
+  town?: string;
   type: string;
   level: string;
   description?: string;
@@ -30,13 +32,105 @@ export default function RegistroPage() {
     age: '',
     arrivalDate: '',
     departureDate: '',
+    country: 'Italia',
+    city: '',
+    town: '',
     adminCode: '',
   });
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [isAdminRegistration, setIsAdminRegistration] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<any>({});
   const router = useRouter();
   const { login } = useAuth();
+  
+  // Ciudades por país
+  const countryCities: Record<string, string[]> = {
+    'Italia': ['Roma', 'Milano', 'Napoli', 'Torino', 'Palermo', 'Genova', 'Bologna', 'Firenze', 'Venezia', 'Bari'],
+    'España': ['Madrid', 'Barcelona', 'Toledo']
+  };
+
+  // Pueblos/localidades por ciudad
+  const cityTowns: Record<string, string[]> = {
+    // Italia
+    'Roma': ['Albano Laziale', 'Anzio', 'Bracciano', 'Castel Gandolfo', 'Ciampino', 'Frascati', 'Genzano di Roma', 'Guidonia Montecelio', 'Ladispoli', 'Marino', 'Nettuno', 'Ostia', 'Palestrina', 'Pomezia', 'Tivoli', 'Velletri', 'Viterbo'],
+    'Milano': ['Abbiategrasso', 'Arese', 'Assago', 'Bergamo', 'Bollate', 'Brescia', 'Busto Arsizio', 'Cinisello Balsamo', 'Como', 'Corsico', 'Cremona', 'Gallarate', 'Legnano', 'Lodi', 'Magenta', 'Mantova', 'Monza', 'Novara', 'Pavia', 'Rho', 'Saronno', 'Sesto San Giovanni', 'Varese'],
+    'Napoli': ['Acerra', 'Afragola', 'Aversa', 'Bacoli', 'Baiano', 'Calvizzano', 'Capri', 'Casalnuovo di Napoli', 'Caserta', 'Castellammare di Stabia', 'Ercolano', 'Giugliano in Campania', 'Ischia', 'Marano di Napoli', 'Nola', 'Pompei', 'Portici', 'Pozzuoli', 'Procida', 'San Giorgio a Cremano', 'Sorrento', 'Torre del Greco', 'Torre Annunziata'],
+    'Torino': ['Alba', 'Alessandria', 'Asti', 'Avigliana', 'Beinasco', 'Biella', 'Borgaro Torinese', 'Chieri', 'Chivasso', 'Collegno', 'Cuneo', 'Grugliasco', 'Ivrea', 'Moncalieri', 'Nichelino', 'Novara', 'Orbassano', 'Pinerolo', 'Rivoli', 'Settimo Torinese', 'Venaria Reale', 'Verbania', 'Vercelli'],
+    'Palermo': ['Bagheria', 'Balestrate', 'Carini', 'Castelvetrano', 'Cefalù', 'Corleone', 'Ficarazzi', 'Gangi', 'Lercara Friddi', 'Marsala', 'Mazara del Vallo', 'Misilmeri', 'Monreale', 'Partinico', 'Petralia Soprana', 'Pollina', 'San Giuseppe Jato', 'Termini Imerese', 'Trabia', 'Trapani'],
+    'Genova': ['Arenzano', 'Bogliasco', 'Camogli', 'Chiavari', 'Cogoleto', 'La Spezia', 'Lavagna', 'Nervi', 'Pegli', 'Portofino', 'Rapallo', 'Recco', 'Santa Margherita Ligure', 'Savona', 'Sestri Levante', 'Sori', 'Varazze', 'Voltri'],
+    'Bologna': ['Anzola dell\'Emilia', 'Budrio', 'Calderara di Reno', 'Casalecchio di Reno', 'Castel Maggiore', 'Castenaso', 'Cento', 'Crevalcore', 'Faenza', 'Ferrara', 'Imola', 'Medicina', 'Modena', 'Molinella', 'Ozzano dell\'Emilia', 'Parma', 'Pianoro', 'Ravenna', 'Reggio Emilia', 'Rimini', 'San Giovanni in Persiceto', 'San Lazzaro di Savena', 'Zola Predosa'],
+    'Firenze': ['Bagno a Ripoli', 'Borgo San Lorenzo', 'Calenzano', 'Campi Bisenzio', 'Empoli', 'Fiesole', 'Figline e Incisa Valdarno', 'Impruneta', 'Lastra a Signa', 'Pontassieve', 'Prato', 'Reggello', 'Rignano sull\'Arno', 'San Casciano in Val di Pesa', 'Scandicci', 'Sesto Fiorentino', 'Signa', 'Vaglia'],
+    'Venezia': ['Caorle', 'Cavallino-Treporti', 'Chioggia', 'Dolo', 'Eraclea', 'Jesolo', 'Marcon', 'Martellago', 'Mira', 'Mirano', 'Musile di Piave', 'Noale', 'Padova', 'Portogruaro', 'Quarto d\'Altino', 'San Donà di Piave', 'Spinea', 'Treviso', 'Verona', 'Vicenza'],
+    'Bari': ['Acquaviva delle Fonti', 'Alberobello', 'Altamura', 'Andria', 'Barletta', 'Bitonto', 'Brindisi', 'Canosa di Puglia', 'Casamassima', 'Castellana Grotte', 'Conversano', 'Corato', 'Foggia', 'Gravina in Puglia', 'Lecce', 'Locorotondo', 'Martina Franca', 'Molfetta', 'Monopoli', 'Polignano a Mare', 'Putignano', 'Ruvo di Puglia', 'Taranto', 'Trani'],
+    // España
+    'Madrid': ['Alcalá de Henares', 'Alcobendas', 'Alcorcón', 'Aranjuez', 'Boadilla del Monte', 'Collado Villalba', 'Coslada', 'El Escorial', 'Fuenlabrada', 'Getafe', 'Las Rozas', 'Leganés', 'Majadahonda', 'Móstoles', 'Parla', 'Pozuelo de Alarcón', 'San Lorenzo de El Escorial', 'Torrejón de Ardoz', 'Tres Cantos', 'Valdemoro'],
+    'Barcelona': ['Badalona', 'Hospitalet de Llobregat', 'Sabadell', 'Terrassa', 'Santa Coloma de Gramenet', 'Cornellà de Llobregat', 'Sant Boi de Llobregat', 'Mataró', 'Granollers', 'Manresa', 'Vic', 'Igualada', 'Vilanova i la Geltrú', 'Girona', 'Lleida', 'Tarragona', 'Reus', 'Sitges', 'Figueres', 'Blanes'],
+    'Toledo': ['Talavera de la Reina', 'Illescas', 'Seseña', 'Azuqueca de Henares', 'Guadalajara', 'Yepes', 'Ocaña', 'Quintanar de la Orden', 'Villacañas', 'Madridejos', 'Consuegra', 'Mora', 'Torrijos', 'Fuensalida', 'La Puebla de Montalbán', 'Sonseca', 'Orgaz', 'Tembleque']
+  };
+
+  // Estados disponibles
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableTowns, setAvailableTowns] = useState<string[]>([]);
+
+  // Efecto para actualizar ciudades cuando cambia el país
+  useEffect(() => {
+    if (formData.country && countryCities[formData.country]) {
+      setAvailableCities(countryCities[formData.country]);
+      // Resetear ciudad y pueblo si el país cambió
+      if (!countryCities[formData.country].includes(formData.city)) {
+        setFormData(prev => ({ ...prev, city: '', town: '' }));
+      }
+    } else {
+      setAvailableCities([]);
+      setFormData(prev => ({ ...prev, city: '', town: '' }));
+    }
+  }, [formData.country]);
+
+  // Efecto para actualizar pueblos cuando cambia la ciudad
+  useEffect(() => {
+    if (formData.city && cityTowns[formData.city]) {
+      setAvailableTowns(cityTowns[formData.city]);
+      // Resetear pueblo si no está disponible para la nueva ciudad
+      if (!cityTowns[formData.city].includes(formData.town)) {
+        setFormData(prev => ({ ...prev, town: '' }));
+      }
+    } else {
+      setAvailableTowns([]);
+      setFormData(prev => ({ ...prev, town: '' }));
+    }
+  }, [formData.city]);
+
+  // Inicializar ciudades disponibles al cargar el componente
+  useEffect(() => {
+    if (formData.country && countryCities[formData.country]) {
+      setAvailableCities(countryCities[formData.country]);
+    }
+  }, []);
+
+  // Efecto para actualizar ubicación cuando se selecciona una escuela
+  useEffect(() => {
+    if (selectedSchool && !isAdminRegistration) {
+      // Actualizar los campos de ubicación con los datos de la escuela
+      setFormData(prev => ({
+        ...prev,
+        country: selectedSchool.country || 'Italia',
+        city: selectedSchool.city || '',
+        town: selectedSchool.town || '',
+      }));
+
+      // Actualizar las ciudades y pueblos disponibles
+      const schoolCountry = selectedSchool.country || 'Italia';
+      if (countryCities[schoolCountry]) {
+        setAvailableCities(countryCities[schoolCountry]);
+      }
+      
+      const schoolCity = selectedSchool.city || '';
+      if (schoolCity && cityTowns[schoolCity]) {
+        setAvailableTowns(cityTowns[schoolCity]);
+      }
+    }
+  }, [selectedSchool, isAdminRegistration]);
   
   // Añadimos esta comprobación para evitar errores de renderizado
   const [isClient, setIsClient] = useState(false);
@@ -62,6 +156,14 @@ export default function RegistroPage() {
     }
   };
 
+  const handleSelectChange = (event: any) => {
+    const { name, value } = event.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const validate = () => {
     let tempErrors: any = {};
     if (!formData.firstName) tempErrors.firstName = 'El nombre es obligatorio.';
@@ -76,6 +178,8 @@ export default function RegistroPage() {
     } else if (formData.password.length < 8) {
       tempErrors.password = 'La contraseña debe tener al menos 8 caracteres.';
     }
+    
+    // Validar edad siempre
     if (!formData.age) {
       tempErrors.age = 'La edad es obligatoria.';
     } else if (isNaN(Number(formData.age)) || Number(formData.age) <= 0) {
@@ -87,8 +191,19 @@ export default function RegistroPage() {
       tempErrors.school = 'La escuela es obligatoria.';
     }
     
-    if (!formData.arrivalDate) tempErrors.arrivalDate = 'La fecha de llegada es obligatoria.';
-    if (!formData.departureDate) tempErrors.departureDate = 'La fecha de salida es obligatoria.';
+    // Solo validar fechas si NO es registro de admin
+    if (!isAdminRegistration) {
+      if (!formData.arrivalDate) tempErrors.arrivalDate = 'La fecha de llegada es obligatoria.';
+      if (!formData.departureDate) tempErrors.departureDate = 'La fecha de salida es obligatoria.';
+    }
+    
+    console.log('🔍 Validación de formulario:', {
+      formData,
+      isAdminRegistration,
+      selectedSchool,
+      tempErrors,
+      errorsCount: Object.keys(tempErrors).length
+    });
     
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -96,8 +211,15 @@ export default function RegistroPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!validate()) return;
+    console.log('🚀 HandleSubmit llamado');
     
+    if (!validate()) {
+      console.log('❌ Validación falló, no se enviará el formulario');
+      return;
+    }
+    
+    console.log('✅ Validación pasó, enviando formulario');
+    setIsSubmitting(true);
     setErrors({}); // Limpiar errores previos
     
     try {
@@ -111,6 +233,9 @@ export default function RegistroPage() {
         schoolId: isAdminRegistration ? null : selectedSchool?.id,
         arrivalDate: formData.arrivalDate,
         departureDate: formData.departureDate,
+        country: formData.country,
+        city: formData.city,
+        town: formData.town,
         isAdmin: isAdminRegistration,
         adminCode: isAdminRegistration ? formData.adminCode : undefined,
       };
@@ -128,6 +253,7 @@ export default function RegistroPage() {
       
       if (!response.ok) {
         setErrors({ api: data.error || 'Error en el registro' });
+        setIsSubmitting(false);
         return;
       }
       
@@ -156,7 +282,7 @@ export default function RegistroPage() {
       };
       
       // Usar el contexto de auth para guardar el usuario
-      login(userData);
+      await login(userData);
       
       // Redirigir a la página principal
       router.push('/');
@@ -164,6 +290,8 @@ export default function RegistroPage() {
     } catch (error) {
       console.error('❌ Error en registro:', error);
       setErrors({ api: 'Error de conexión. Intenta nuevamente.' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -226,40 +354,119 @@ export default function RegistroPage() {
                 </Typography>
               </Grid>
             )}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                name="arrivalDate"
-                required
-                fullWidth
-                label="Fecha de Llegada"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={formData.arrivalDate}
-                onChange={handleChange}
-                error={!!errors.arrivalDate}
-                helperText={errors.arrivalDate}
-              />
+            {!isAdminRegistration && (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="arrivalDate"
+                    required
+                    fullWidth
+                    label="Fecha de Llegada"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.arrivalDate}
+                    onChange={handleChange}
+                    error={!!errors.arrivalDate}
+                    helperText={errors.arrivalDate}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="departureDate"
+                    required
+                    fullWidth
+                    label="Fecha de Salida"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.departureDate}
+                    onChange={handleChange}
+                    error={!!errors.departureDate}
+                    helperText={errors.departureDate}
+                  />
+                </Grid>
+              </>
+            )}
+            
+            {/* Campos de ubicación */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
+                Ubicación
+              </Typography>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                name="departureDate"
-                required
-                fullWidth
-                label="Fecha de Salida"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={formData.departureDate}
-                onChange={handleChange}
-                error={!!errors.departureDate}
-                helperText={errors.departureDate}
-              />
+            
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth disabled={!isAdminRegistration && selectedSchool !== null}>
+                <InputLabel>País</InputLabel>
+                <Select
+                  name="country"
+                  value={formData.country}
+                  label="País"
+                  onChange={handleSelectChange}
+                >
+                  <MenuItem value="Italia">Italia</MenuItem>
+                  <MenuItem value="España">España</MenuItem>
+                </Select>
+                {!isAdminRegistration && selectedSchool && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                    📍 Ubicación automática de la escuela seleccionada
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <FormControl 
+                fullWidth 
+                disabled={(!isAdminRegistration && selectedSchool !== null) || (!formData.country || availableCities.length === 0)}
+              >
+                <InputLabel>Ciudad</InputLabel>
+                <Select
+                  name="city"
+                  value={formData.city}
+                  label="Ciudad"
+                  onChange={handleSelectChange}
+                >
+                  <MenuItem value="">Selecciona una ciudad</MenuItem>
+                  {availableCities.map((city) => (
+                    <MenuItem key={city} value={city}>{city}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <FormControl 
+                fullWidth 
+                disabled={(!isAdminRegistration && selectedSchool !== null) || (!formData.city || availableTowns.length === 0)}
+              >
+                <InputLabel>Localidad</InputLabel>
+                <Select
+                  name="town"
+                  value={formData.town}
+                  label="Localidad"
+                  onChange={handleSelectChange}
+                >
+                  <MenuItem value="">Selecciona una localidad</MenuItem>
+                  {availableTowns.map((town) => (
+                    <MenuItem key={town} value={town}>{town}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
               <TextField required fullWidth name="password" label="Contraseña" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}/>
             </Grid>
           </Grid>
-          <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.5 }}>
-            Registrarse
+          <Button 
+            type="submit" 
+            fullWidth 
+            variant="contained" 
+            color="primary" 
+            disabled={isSubmitting}
+            sx={{ mt: 3, mb: 2, py: 1.5 }}
+            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : undefined}
+          >
+            {isSubmitting ? 'Registrando...' : 'Registrarse'}
           </Button>
           {errors.api && (
             <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>

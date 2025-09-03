@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'userId y avatarUrl requeridos' }, { status: 400 });
     }
 
-    // Validar que sea una URL de imagen base64 o una URL válida
-    if (!avatarUrl.startsWith('data:image/') && !avatarUrl.startsWith('http')) {
+    // Validar que sea una URL de imagen base64, una URL válida o una ruta local permitida
+    if (!avatarUrl.startsWith('data:image/') && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('/img/')) {
       return NextResponse.json({ error: 'Formato de avatar inválido' }, { status: 400 });
     }
 

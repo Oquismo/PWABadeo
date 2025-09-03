@@ -58,7 +58,7 @@ export default function LoginPage() {
       console.log('✅ Login exitoso, usuario:', data.user);
       
       // Usar el contexto de auth para guardar el usuario
-      login(data.user);
+      await login(data.user);
       
       // Redirigir a la página principal
       router.push('/');
@@ -71,14 +71,14 @@ export default function LoginPage() {
 
 
   // Bypass admin: usuario simulado
-  const handleBypassAdmin = () => {
+  const handleBypassAdmin = async () => {
     const fakeAdmin: User = {
       id: 0, // Cambiado a number para cumplir con el tipo User
       email: 'admin@badeo.com',
       name: 'Admin Bypass',
       role: 'admin' as const,
     };
-    login(fakeAdmin);
+    await login(fakeAdmin);
     router.push('/');
   };
 

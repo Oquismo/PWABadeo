@@ -18,8 +18,8 @@ export default function HeroSection() {
   const [modalOpen, setModalOpen] = useState(false);
   const { t } = useTranslation();
   
-  // Emoji de huevo por defecto (como el antiguo Twitter)
-  const defaultEggAvatar = '🥚';
+  // Imagen de huevo por defecto (como el antiguo Twitter)
+  const defaultEggAvatar = '/img/twittereggavatar.jpg';
 
   // Función para obtener el saludo según la hora del día
   const getGreeting = () => {
@@ -75,17 +75,17 @@ export default function HeroSection() {
           <Box sx={{ position: 'relative', display: 'inline-block' }}>
             <Link href={isAuthenticated ? "/perfil" : "/login"} passHref>
               <Avatar
-                src={isAuthenticated ? user?.avatarUrl || undefined : undefined}
+                src={isAuthenticated ? user?.avatarUrl || defaultEggAvatar : undefined}
                 sx={{
                   width: 48,
                   height: 48,
                   cursor: 'pointer',
-                  fontSize: user?.avatarUrl && !user.avatarUrl.startsWith('data:') ? '1.5rem' : 'inherit',
+                  fontSize: user?.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? '1.5rem' : 'inherit',
                   bgcolor: !isAuthenticated ? 'primary.main' : 'primary.light'
                 }}
               >
-                {isAuthenticated && !user?.avatarUrl ? defaultEggAvatar :
-                 isAuthenticated && user?.avatarUrl && !user.avatarUrl.startsWith('data:') ? user.avatarUrl :
+                {isAuthenticated && !user?.avatarUrl ? undefined :
+                 isAuthenticated && user?.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? user.avatarUrl :
                  !isAuthenticated ? undefined : null}
               </Avatar>
             </Link>

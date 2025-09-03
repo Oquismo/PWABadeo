@@ -10,9 +10,22 @@ export async function GET(request: Request) {
     const city = url.searchParams.get('city') || '';
     const type = url.searchParams.get('type') || '';
     const level = url.searchParams.get('level') || '';
+    const id = url.searchParams.get('id');
     
     try {
-      // Construir filtros
+      // Si se proporciona un ID, buscar esa escuela específica
+      if (id) {
+        const school = await prisma.school.findUnique({
+          where: { id: parseInt(id) }
+        });
+        
+        return NextResponse.json({
+          success: true,
+          schools: school ? [school] : [],
+        });
+      }
+      
+      // Construir filtros para búsqueda general
       const where: any = {
         isActive: true
       };

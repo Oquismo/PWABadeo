@@ -29,6 +29,10 @@ model User {
   arrivalDate      String? // Fecha de llegada
   departureDate    String? // Fecha de salida
   avatarUrl        String? // URL del avatar
+  // Campos de ubicación del usuario
+  country          String?           @default("Italia") // País del usuario
+  city             String? // Ciudad del usuario
+  town             String? // Pueblo/Municipio del usuario
   announcements    Announcement[]
   logs             Log[]
   tasks            Task[]
@@ -44,7 +48,8 @@ model School {
   address     String? // Dirección de la escuela
   city        String? // Ciudad
   province    String? // Provincia/Estado
-  country     String   @default("España") // País
+  town        String? // Pueblo/Municipio
+  country     String   @default("Italia") // País
   phoneNumber String? // Teléfono de contacto
   email       String? // Email de contacto
   website     String? // Sitio web

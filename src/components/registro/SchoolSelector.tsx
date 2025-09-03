@@ -27,6 +27,8 @@ interface School {
   address?: string;
   city?: string;
   province?: string;
+  country?: string;
+  town?: string;
   type: string;
   level: string;
   description?: string;
@@ -50,11 +52,77 @@ export default function SchoolSelector({
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
+    country: 'Italia',
     city: '',
     type: '',
-    level: ''
+    level: '',
+    town: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Ciudades por país
+  const countryCities: Record<string, string[]> = {
+    'Italia': ['Roma', 'Milano', 'Napoli', 'Torino', 'Palermo', 'Genova', 'Bologna', 'Firenze', 'Venezia', 'Bari'],
+    'España': ['Madrid', 'Barcelona', 'Toledo']
+  };
+
+  // Pueblos/localidades por ciudad italiana
+  const cityTowns: Record<string, string[]> = {
+    // Italia
+    'Roma': ['Albano Laziale', 'Anzio', 'Bracciano', 'Castel Gandolfo', 'Ciampino', 'Frascati', 'Genzano di Roma', 'Guidonia Montecelio', 'Ladispoli', 'Marino', 'Nettuno', 'Ostia', 'Palestrina', 'Pomezia', 'Tivoli', 'Velletri', 'Viterbo'],
+    'Milano': ['Abbiategrasso', 'Arese', 'Assago', 'Bergamo', 'Bollate', 'Brescia', 'Busto Arsizio', 'Cinisello Balsamo', 'Como', 'Corsico', 'Cremona', 'Gallarate', 'Legnano', 'Lodi', 'Magenta', 'Mantova', 'Monza', 'Novara', 'Pavia', 'Rho', 'Saronno', 'Sesto San Giovanni', 'Varese'],
+    'Napoli': ['Acerra', 'Afragola', 'Aversa', 'Bacoli', 'Baiano', 'Calvizzano', 'Capri', 'Casalnuovo di Napoli', 'Caserta', 'Castellammare di Stabia', 'Ercolano', 'Giugliano in Campania', 'Ischia', 'Marano di Napoli', 'Nola', 'Pompei', 'Portici', 'Pozzuoli', 'Procida', 'San Giorgio a Cremano', 'Sorrento', 'Torre del Greco', 'Torre Annunziata'],
+    'Torino': ['Alba', 'Alessandria', 'Asti', 'Avigliana', 'Beinasco', 'Biella', 'Borgaro Torinese', 'Chieri', 'Chivasso', 'Collegno', 'Cuneo', 'Grugliasco', 'Ivrea', 'Moncalieri', 'Nichelino', 'Novara', 'Orbassano', 'Pinerolo', 'Rivoli', 'Settimo Torinese', 'Venaria Reale', 'Verbania', 'Vercelli'],
+    'Palermo': ['Bagheria', 'Balestrate', 'Carini', 'Castelvetrano', 'Cefalù', 'Corleone', 'Ficarazzi', 'Gangi', 'Lercara Friddi', 'Marsala', 'Mazara del Vallo', 'Misilmeri', 'Monreale', 'Partinico', 'Petralia Soprana', 'Pollina', 'San Giuseppe Jato', 'Termini Imerese', 'Trabia', 'Trapani'],
+    'Genova': ['Arenzano', 'Bogliasco', 'Camogli', 'Chiavari', 'Cogoleto', 'La Spezia', 'Lavagna', 'Nervi', 'Pegli', 'Portofino', 'Rapallo', 'Recco', 'Santa Margherita Ligure', 'Savona', 'Sestri Levante', 'Sori', 'Varazze', 'Voltri'],
+    'Bologna': ['Anzola dell\'Emilia', 'Budrio', 'Calderara di Reno', 'Casalecchio di Reno', 'Castel Maggiore', 'Castenaso', 'Cento', 'Crevalcore', 'Faenza', 'Ferrara', 'Imola', 'Medicina', 'Modena', 'Molinella', 'Ozzano dell\'Emilia', 'Parma', 'Pianoro', 'Ravenna', 'Reggio Emilia', 'Rimini', 'San Giovanni in Persiceto', 'San Lazzaro di Savena', 'Zola Predosa'],
+    'Firenze': ['Bagno a Ripoli', 'Borgo San Lorenzo', 'Calenzano', 'Campi Bisenzio', 'Empoli', 'Fiesole', 'Figline e Incisa Valdarno', 'Impruneta', 'Lastra a Signa', 'Pontassieve', 'Prato', 'Reggello', 'Rignano sull\'Arno', 'San Casciano in Val di Pesa', 'Scandicci', 'Sesto Fiorentino', 'Signa', 'Vaglia'],
+    'Venezia': ['Caorle', 'Cavallino-Treporti', 'Chioggia', 'Dolo', 'Eraclea', 'Jesolo', 'Marcon', 'Martellago', 'Mira', 'Mirano', 'Musile di Piave', 'Noale', 'Padova', 'Portogruaro', 'Quarto d\'Altino', 'San Donà di Piave', 'Spinea', 'Treviso', 'Verona', 'Vicenza'],
+    'Bari': ['Acquaviva delle Fonti', 'Alberobello', 'Altamura', 'Andria', 'Barletta', 'Bitonto', 'Brindisi', 'Canosa di Puglia', 'Casamassima', 'Castellana Grotte', 'Conversano', 'Corato', 'Foggia', 'Gravina in Puglia', 'Lecce', 'Locorotondo', 'Martina Franca', 'Molfetta', 'Monopoli', 'Polignano a Mare', 'Putignano', 'Ruvo di Puglia', 'Taranto', 'Trani'],
+    // España
+    'Madrid': ['Alcalá de Henares', 'Alcobendas', 'Alcorcón', 'Aranjuez', 'Boadilla del Monte', 'Collado Villalba', 'Coslada', 'El Escorial', 'Fuenlabrada', 'Getafe', 'Las Rozas', 'Leganés', 'Majadahonda', 'Móstoles', 'Parla', 'Pozuelo de Alarcón', 'San Lorenzo de El Escorial', 'Torrejón de Ardoz', 'Tres Cantos', 'Valdemoro'],
+    'Barcelona': ['Badalona', 'Hospitalet de Llobregat', 'Sabadell', 'Terrassa', 'Santa Coloma de Gramenet', 'Cornellà de Llobregat', 'Sant Boi de Llobregat', 'Mataró', 'Granollers', 'Manresa', 'Vic', 'Igualada', 'Vilanova i la Geltrú', 'Girona', 'Lleida', 'Tarragona', 'Reus', 'Sitges', 'Figueres', 'Blanes'],
+    'Toledo': ['Talavera de la Reina', 'Illescas', 'Seseña', 'Azuqueca de Henares', 'Guadalajara', 'Yepes', 'Ocaña', 'Quintanar de la Orden', 'Villacañas', 'Madridejos', 'Consuegra', 'Mora', 'Torrijos', 'Fuensalida', 'La Puebla de Montalbán', 'Sonseca', 'Orgaz', 'Tembleque']
+  };
+  
+  // Estados disponibles
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  // Pueblos disponibles según ciudad
+  const [availableTowns, setAvailableTowns] = useState<string[]>([]);
+
+  // Efecto para actualizar ciudades cuando cambia el país
+  useEffect(() => {
+    if (filters.country && countryCities[filters.country]) {
+      setAvailableCities(countryCities[filters.country]);
+      // Resetear ciudad y pueblo si el país cambió
+      if (!countryCities[filters.country].includes(filters.city)) {
+        setFilters(prev => ({ ...prev, city: '', town: '' }));
+      }
+    } else {
+      setAvailableCities([]);
+      setFilters(prev => ({ ...prev, city: '', town: '' }));
+    }
+  }, [filters.country]);
+
+  useEffect(() => {
+    if (filters.city && cityTowns[filters.city]) {
+      setAvailableTowns(cityTowns[filters.city]);
+      // Si el pueblo actual no es válido, resetear
+      if (!cityTowns[filters.city].includes(filters.town)) {
+        setFilters(prev => ({ ...prev, town: '' }));
+      }
+    } else {
+      setAvailableTowns([]);
+      setFilters(prev => ({ ...prev, town: '' }));
+    }
+  }, [filters.city]);
+
+  // Inicializar ciudades al cargar el componente
+  useEffect(() => {
+    if (filters.country && countryCities[filters.country]) {
+      setAvailableCities(countryCities[filters.country]);
+    }
+  }, []);
 
   // Cargar escuelas
   const loadSchools = async () => {
@@ -62,9 +130,11 @@ export default function SchoolSelector({
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
+      if (filters.country) params.append('country', filters.country);
       if (filters.city) params.append('city', filters.city);
       if (filters.type) params.append('type', filters.type);
       if (filters.level) params.append('level', filters.level);
+      if (filters.town) params.append('town', filters.town);
 
       const response = await fetch(`/api/schools?${params.toString()}`);
       const data = await response.json();
@@ -122,6 +192,18 @@ export default function SchoolSelector({
       {/* Filtros */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
         <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel>País</InputLabel>
+          <Select
+            value={filters.country}
+            label="País"
+            onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
+          >
+            <MenuItem value="Italia">Italia</MenuItem>
+            <MenuItem value="España">España</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Ciudad</InputLabel>
           <Select
             value={filters.city}
@@ -129,11 +211,9 @@ export default function SchoolSelector({
             onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
           >
             <MenuItem value="">Todas</MenuItem>
-            <MenuItem value="Madrid">Madrid</MenuItem>
-            <MenuItem value="Barcelona">Barcelona</MenuItem>
-            <MenuItem value="Valencia">Valencia</MenuItem>
-            <MenuItem value="Sevilla">Sevilla</MenuItem>
-            <MenuItem value="Bilbao">Bilbao</MenuItem>
+            {availableCities.map((city) => (
+              <MenuItem key={city} value={city}>{city}</MenuItem>
+            ))}
           </Select>
         </FormControl>
 
@@ -152,18 +232,31 @@ export default function SchoolSelector({
         </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Nivel</InputLabel>
+          <InputLabel>Livello</InputLabel>
           <Select
             value={filters.level}
-            label="Nivel"
+            label="Livello"
             onChange={(e) => setFilters(prev => ({ ...prev, level: e.target.value }))}
           >
-            <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="infantil">Infantil</MenuItem>
-            <MenuItem value="primaria">Primaria</MenuItem>
-            <MenuItem value="secundaria">Secundaria</MenuItem>
-            <MenuItem value="bachillerato">Bachillerato</MenuItem>
-            <MenuItem value="fp">FP</MenuItem>
+            <MenuItem value="">Tutte</MenuItem>
+            <MenuItem value="scuola_primaria">Scuola Primaria</MenuItem>
+            <MenuItem value="secondaria_primo">Secondaria di Primo Grado</MenuItem>
+            <MenuItem value="secondaria_secondo">Secondaria di Secondo Grado</MenuItem>
+            <MenuItem value="universita">Università</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 140 }} disabled={!filters.city || availableTowns.length === 0}>
+          <InputLabel>Comune</InputLabel>
+          <Select
+            value={filters.town}
+            label="Comune"
+            onChange={(e) => setFilters(prev => ({ ...prev, town: e.target.value }))}
+          >
+            <MenuItem value="">{availableTowns.length === 0 ? 'Selecciona ciudad' : 'Tutti'}</MenuItem>
+            {availableTowns.map((town) => (
+              <MenuItem key={town} value={town}>{town}</MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Stack>

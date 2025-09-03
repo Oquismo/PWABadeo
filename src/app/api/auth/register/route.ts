@@ -15,6 +15,9 @@ export async function POST(request: Request) {
       schoolId,
       arrivalDate,
       departureDate,
+      country,
+      city,
+      town,
       isAdmin,
       adminCode
     } = await request.json();
@@ -102,6 +105,9 @@ export async function POST(request: Request) {
         if (schoolId && assignedRole !== 'admin') userData.schoolId = parseInt(schoolId, 10);
         if (arrivalDate) userData.arrivalDate = arrivalDate;
         if (departureDate) userData.departureDate = departureDate;
+        if (country) userData.country = country;
+        if (city) userData.city = city;
+        if (town) userData.town = town;
 
         user = await prisma.user.create({
           data: userData

@@ -44,19 +44,8 @@ export async function POST(request: Request) {
       console.log('🔍 Searching for user:', email);
       const user = await prisma.user.findUnique({
         where: { email },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          firstName: true,
-          lastName: true,
-          password: true,
-          role: true,
-          age: true,
-          schoolId: true,
-          arrivalDate: true,
-          departureDate: true,
-          avatarUrl: true,
+        include: {
+          school: true
         }
       });
       
@@ -88,10 +77,29 @@ export async function POST(request: Request) {
         );
       }
 
-      // No devolver la contraseña
-      const { password: _, ...userWithoutPassword } = user;
+
+      // Construir objeto de usuario asegurando que todos los campos de perfil estén presentes
+      const userProfile = {
+        id: user.id,
+        email: user.email,
+        name: user.name ?? null,
+        firstName: user.firstName ?? null,
+        lastName: user.lastName ?? null,
+        role: user.role,
+        age: user.age ?? null,
+        schoolId: user.schoolId ?? null,
+        school: user.school ?? null,
+        avatarUrl: user.avatarUrl ?? null,
+        arrivalDate: user.arrivalDate ?? null,
+        departureDate: user.departureDate ?? null,
+        country: (user as any).country ?? null,
+        city: (user as any).city ?? null,
+        town: (user as any).town ?? null
+      };
 
       console.log('🎉 Login successful for:', email);
+      console.log('📍 Usuario con perfil completo:', userProfile);
+
       // Registrar log en DB (si migración aplicada)
       try {
         await logActionServer({ userId: user.id, action: 'login', meta: { email: user.email }, updateLastSeen: true });
@@ -99,7 +107,7 @@ export async function POST(request: Request) {
         console.warn('No se pudo registrar log de login', e);
       }
       return NextResponse.json({
-        user: userWithoutPassword,
+        user: userProfile,
         message: 'Login exitoso'
       });
 

@@ -22,7 +22,11 @@ import {
   Divider,
   Fade,
   Stack,
-  Alert
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { PhotoCamera as PhotoCameraIcon, Face as FaceIcon, Person as PersonIcon, Save as SaveIcon, Edit as EditIcon } from '@mui/icons-material';
@@ -38,6 +42,9 @@ export default function EditarPerfilPage() {
     age: '',
     arrivalDate: '',
     departureDate: '',
+    country: '',
+    city: '',
+    town: '',
   });
 
   const [profileImage, setProfileImage] = useState<string>('');
@@ -45,12 +52,82 @@ export default function EditarPerfilPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Emoji de huevo por defecto (como el antiguo Twitter)
-  const defaultEggAvatar = '🥚';
+  // Verificar si el usuario es admin
+  const isAdmin = user?.role === 'admin' || user?.role === 'ADMIN';
+
+  // Ciudades por país
+  const countryCities: Record<string, string[]> = {
+    'Italia': ['Roma', 'Milano', 'Napoli', 'Torino', 'Palermo', 'Genova', 'Bologna', 'Firenze', 'Venezia', 'Bari'],
+    'España': ['Madrid', 'Barcelona', 'Toledo']
+  };
+
+  // Pueblos/localidades por ciudad
+  const cityTowns: Record<string, string[]> = {
+    // Italia
+    'Roma': ['Albano Laziale', 'Anzio', 'Bracciano', 'Castel Gandolfo', 'Ciampino', 'Frascati', 'Genzano di Roma', 'Guidonia Montecelio', 'Ladispoli', 'Marino', 'Nettuno', 'Ostia', 'Palestrina', 'Pomezia', 'Tivoli', 'Velletri', 'Viterbo'],
+    'Milano': ['Abbiategrasso', 'Arese', 'Assago', 'Bergamo', 'Bollate', 'Brescia', 'Busto Arsizio', 'Cinisello Balsamo', 'Como', 'Corsico', 'Cremona', 'Gallarate', 'Legnano', 'Lodi', 'Magenta', 'Mantova', 'Monza', 'Novara', 'Pavia', 'Rho', 'Saronno', 'Sesto San Giovanni', 'Varese'],
+    'Napoli': ['Acerra', 'Afragola', 'Aversa', 'Bacoli', 'Baiano', 'Calvizzano', 'Capri', 'Casalnuovo di Napoli', 'Caserta', 'Castellammare di Stabia', 'Ercolano', 'Giugliano in Campania', 'Ischia', 'Marano di Napoli', 'Nola', 'Pompei', 'Portici', 'Pozzuoli', 'Procida', 'San Giorgio a Cremano', 'Sorrento', 'Torre del Greco', 'Torre Annunziata'],
+    'Torino': ['Alba', 'Alessandria', 'Asti', 'Avigliana', 'Beinasco', 'Biella', 'Borgaro Torinese', 'Chieri', 'Chivasso', 'Collegno', 'Cuneo', 'Grugliasco', 'Ivrea', 'Moncalieri', 'Nichelino', 'Novara', 'Orbassano', 'Pinerolo', 'Rivoli', 'Settimo Torinese', 'Venaria Reale', 'Verbania', 'Vercelli'],
+    'Palermo': ['Bagheria', 'Balestrate', 'Carini', 'Castelvetrano', 'Cefalù', 'Corleone', 'Ficarazzi', 'Gangi', 'Lercara Friddi', 'Marsala', 'Mazara del Vallo', 'Misilmeri', 'Monreale', 'Partinico', 'Petralia Soprana', 'Pollina', 'San Giuseppe Jato', 'Termini Imerese', 'Trabia', 'Trapani'],
+    'Genova': ['Arenzano', 'Bogliasco', 'Camogli', 'Chiavari', 'Cogoleto', 'La Spezia', 'Lavagna', 'Nervi', 'Pegli', 'Portofino', 'Rapallo', 'Recco', 'Santa Margherita Ligure', 'Savona', 'Sestri Levante', 'Sori', 'Varazze', 'Voltri'],
+    'Bologna': ['Anzola dell\'Emilia', 'Budrio', 'Calderara di Reno', 'Casalecchio di Reno', 'Castel Maggiore', 'Castenaso', 'Cento', 'Crevalcore', 'Faenza', 'Ferrara', 'Imola', 'Medicina', 'Modena', 'Molinella', 'Ozzano dell\'Emilia', 'Parma', 'Pianoro', 'Ravenna', 'Reggio Emilia', 'Rimini', 'San Giovanni in Persiceto', 'San Lazzaro di Savena', 'Zola Predosa'],
+    'Firenze': ['Bagno a Ripoli', 'Borgo San Lorenzo', 'Calenzano', 'Campi Bisenzio', 'Empoli', 'Fiesole', 'Figline e Incisa Valdarno', 'Impruneta', 'Lastra a Signa', 'Pontassieve', 'Prato', 'Reggello', 'Rignano sull\'Arno', 'San Casciano in Val di Pesa', 'Scandicci', 'Sesto Fiorentino', 'Signa', 'Vaglia'],
+    'Venezia': ['Caorle', 'Cavallino-Treporti', 'Chioggia', 'Dolo', 'Eraclea', 'Jesolo', 'Marcon', 'Martellago', 'Mira', 'Mirano', 'Musile di Piave', 'Noale', 'Padova', 'Portogruaro', 'Quarto d\'Altino', 'San Donà di Piave', 'Spinea', 'Treviso', 'Verona', 'Vicenza'],
+    'Bari': ['Acquaviva delle Fonti', 'Alberobello', 'Altamura', 'Andria', 'Barletta', 'Bitonto', 'Brindisi', 'Canosa di Puglia', 'Casamassima', 'Castellana Grotte', 'Conversano', 'Corato', 'Foggia', 'Gravina in Puglia', 'Lecce', 'Locorotondo', 'Martina Franca', 'Molfetta', 'Monopoli', 'Polignano a Mare', 'Putignano', 'Ruvo di Puglia', 'Taranto', 'Trani'],
+    // España
+    'Madrid': ['Alcalá de Henares', 'Alcobendas', 'Alcorcón', 'Aranjuez', 'Boadilla del Monte', 'Collado Villalba', 'Coslada', 'El Escorial', 'Fuenlabrada', 'Getafe', 'Las Rozas', 'Leganés', 'Majadahonda', 'Móstoles', 'Parla', 'Pozuelo de Alarcón', 'San Lorenzo de El Escorial', 'Torrejón de Ardoz', 'Tres Cantos', 'Valdemoro'],
+    'Barcelona': ['Badalona', 'Hospitalet de Llobregat', 'Sabadell', 'Terrassa', 'Santa Coloma de Gramenet', 'Cornellà de Llobregat', 'Sant Boi de Llobregat', 'Mataró', 'Granollers', 'Manresa', 'Vic', 'Igualada', 'Vilanova i la Geltrú', 'Girona', 'Lleida', 'Tarragona', 'Reus', 'Sitges', 'Figueres', 'Blanes'],
+    'Toledo': ['Talavera de la Reina', 'Illescas', 'Seseña', 'Azuqueca de Henares', 'Guadalajara', 'Yepes', 'Ocaña', 'Quintanar de la Orden', 'Villacañas', 'Madridejos', 'Consuegra', 'Mora', 'Torrijos', 'Fuensalida', 'La Puebla de Montalbán', 'Sonseca', 'Orgaz', 'Tembleque']
+  };
+
+  // Estados disponibles
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableTowns, setAvailableTowns] = useState<string[]>([]);
+
+  // Efecto para actualizar ciudades cuando cambia el país
+  useEffect(() => {
+    if (formData.country && countryCities[formData.country]) {
+      setAvailableCities(countryCities[formData.country]);
+      // Resetear ciudad y pueblo si el país cambió y la ciudad no está disponible
+      if (!countryCities[formData.country].includes(formData.city)) {
+        setFormData(prev => ({ ...prev, city: '', town: '' }));
+      }
+    } else {
+      setAvailableCities([]);
+      setFormData(prev => ({ ...prev, city: '', town: '' }));
+    }
+  }, [formData.country]);
+
+  // Efecto para actualizar pueblos cuando cambia la ciudad
+  useEffect(() => {
+    if (formData.city && cityTowns[formData.city]) {
+      setAvailableTowns(cityTowns[formData.city]);
+      // Resetear pueblo si no está disponible para la nueva ciudad
+      if (!cityTowns[formData.city].includes(formData.town)) {
+        setFormData(prev => ({ ...prev, town: '' }));
+      }
+    } else {
+      setAvailableTowns([]);
+      setFormData(prev => ({ ...prev, town: '' }));
+    }
+  }, [formData.city]);
+
+  // Inicializar ciudades y pueblos al cargar el componente
+  useEffect(() => {
+    if (formData.country && countryCities[formData.country]) {
+      setAvailableCities(countryCities[formData.country]);
+    }
+    if (formData.city && cityTowns[formData.city]) {
+      setAvailableTowns(cityTowns[formData.city]);
+    }
+  }, [formData.country, formData.city]);
+
+  // Imagen de huevo por defecto (como el antiguo Twitter)
+  const defaultEggAvatar = '/img/twittereggavatar.jpg';
 
   // Predefinir algunas opciones de avatar divertidas
   const predefinedAvatars = [
-    '🥚', '😀', '😎', '🤖', '👑', '🦄', '🐱', '🐶',
+    '/img/twittereggavatar.jpg', '😀', '😎', '🤖', '👑', '🦄', '🐱', '🐶',
     '🦊', '🐸', '🐧', '🦉', '🦆', '🐢', '🦋', '🐝'
   ];
 
@@ -58,7 +135,7 @@ export default function EditarPerfilPage() {
     if (user) {
       // Manejar el campo school que puede ser string o objeto
       let schoolValue = '';
-      if (user.school) {
+      if (user.school && !isAdmin) {
         if (typeof user.school === 'string') {
           schoolValue = user.school;
         } else if (typeof user.school === 'object' && 'name' in user.school) {
@@ -68,13 +145,40 @@ export default function EditarPerfilPage() {
 
       setFormData({
         name: user.name || '',
-        school: schoolValue,
-        age: user.age ? String(user.age) : '',
-        arrivalDate: user.arrivalDate || '',
-        departureDate: user.departureDate || '',
+        school: isAdmin ? '' : schoolValue,
+        age: isAdmin ? '' : (user.age ? String(user.age) : ''),
+        arrivalDate: isAdmin ? '' : (user.arrivalDate || ''),
+        departureDate: isAdmin ? '' : (user.departureDate || ''),
+        country: user.country || 'Italia',
+        city: user.city || '',
+        town: user.town || '',
       });
+
+      // Si el usuario no es admin y tiene una escuela, actualizar ubicación con datos de la escuela
+      if (!isAdmin && user.school && typeof user.school === 'object' && 'country' in user.school) {
+        const school = user.school as any;
+        if (school.country || school.city || school.town) {
+          setFormData(prev => ({
+            ...prev,
+            country: school.country || user.country || 'Italia',
+            city: school.city || user.city || '',
+            town: school.town || user.town || '',
+          }));
+
+          // Actualizar ciudades y pueblos disponibles
+          const schoolCountry = school.country || 'Italia';
+          if (countryCities[schoolCountry]) {
+            setAvailableCities(countryCities[schoolCountry]);
+          }
+          
+          const schoolCity = school.city || '';
+          if (schoolCity && cityTowns[schoolCity]) {
+            setAvailableTowns(cityTowns[schoolCity]);
+          }
+        }
+      }
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   // Cargar imagen de perfil desde el servidor
   useEffect(() => {
@@ -114,19 +218,36 @@ export default function EditarPerfilPage() {
     });
   };
 
+  const handleSelectChange = (event: any) => {
+    const { name, value } = event.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
 
     try {
       // 2. Llamamos a updateUser con los nuevos datos del formulario
-      await updateUser({
+      const updateData: any = {
         name: formData.name,
-        school: formData.school,
-        age: Number(formData.age),
-        arrivalDate: formData.arrivalDate,
-        departureDate: formData.departureDate,
-      });
+        country: formData.country,
+        city: formData.city,
+        town: formData.town,
+      };
+
+      // Solo agregar campos específicos para usuarios no-admin
+      if (!isAdmin) {
+        updateData.school = formData.school;
+        updateData.age = Number(formData.age);
+        updateData.arrivalDate = formData.arrivalDate;
+        updateData.departureDate = formData.departureDate;
+      }
+
+      await updateUser(updateData);
 
       setSuccessMessage('Perfil actualizado con éxito');
       setTimeout(() => {
@@ -284,19 +405,19 @@ export default function EditarPerfilPage() {
 
                     <Box sx={{ position: 'relative', mb: 2 }}>
                       <Avatar
-                        src={profileImage}
+                        src={profileImage || defaultEggAvatar}
                         sx={{
                           width: 120,
                           height: 120,
                           mx: 'auto',
-                          fontSize: profileImage && !profileImage.startsWith('data:') ? '3rem' : 'inherit',
+                          fontSize: profileImage && !profileImage.startsWith('data:') && profileImage !== defaultEggAvatar ? '3rem' : 'inherit',
                           bgcolor: 'primary.light',
                           border: '4px solid',
                           borderColor: 'background.paper',
                           boxShadow: 3
                         }}
                       >
-                        {!profileImage ? defaultEggAvatar : profileImage.startsWith('data:') ? null : profileImage}
+                        {!profileImage ? undefined : profileImage.startsWith('data:') ? null : profileImage === defaultEggAvatar ? undefined : profileImage}
                       </Avatar>
                     </Box>
 
@@ -374,77 +495,173 @@ export default function EditarPerfilPage() {
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        name="school"
-                        required
-                        fullWidth
-                        label="Escuela"
-                        value={formData.school}
-                        onChange={handleChange}
-                        variant="outlined"
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 3
-                          }
-                        }}
-                      />
+                    {!isAdmin && (
+                      <>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            name="school"
+                            required
+                            fullWidth
+                            label="Escuela"
+                            value={formData.school}
+                            onChange={handleChange}
+                            variant="outlined"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 3
+                              }
+                            }}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            name="age"
+                            required
+                            fullWidth
+                            label="Edad"
+                            type="number"
+                            value={formData.age}
+                            onChange={handleChange}
+                            variant="outlined"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 3
+                              }
+                            }}
+                          />
+                        </Grid>
+                      </>
+                    )}
+
+                    {!isAdmin && (
+                      <>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            name="arrivalDate"
+                            required
+                            fullWidth
+                            label="Fecha de Llegada"
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            value={formData.arrivalDate}
+                            onChange={handleChange}
+                            variant="outlined"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 3
+                              }
+                            }}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            name="departureDate"
+                            required
+                            fullWidth
+                            label="Fecha de Salida"
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            value={formData.departureDate}
+                            onChange={handleChange}
+                            variant="outlined"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 3
+                              }
+                            }}
+                          />
+                        </Grid>
+                      </>
+                    )}
+
+                    {/* Campos de ubicación */}
+                    <Grid item xs={12}>
+                      <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 'bold' }}>
+                        Ubicación
+                      </Typography>
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        name="age"
-                        required
+                    <Grid item xs={12} sm={4}>
+                      <FormControl
                         fullWidth
-                        label="Edad"
-                        type="number"
-                        value={formData.age}
-                        onChange={handleChange}
                         variant="outlined"
+                        disabled={!isAdmin && user?.school && typeof user.school === 'object' ? true : false}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 3
                           }
                         }}
-                      />
+                      >
+                        <InputLabel>País</InputLabel>
+                        <Select
+                          name="country"
+                          value={formData.country}
+                          label="País"
+                          onChange={handleSelectChange}
+                        >
+                          <MenuItem value="Italia">Italia</MenuItem>
+                          <MenuItem value="España">España</MenuItem>
+                        </Select>
+                        {!isAdmin && user?.school && typeof user.school === 'object' && (
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                            📍 Ubicación automática de tu escuela
+                          </Typography>
+                        )}
+                      </FormControl>
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        name="arrivalDate"
-                        required
+                    <Grid item xs={12} sm={4}>
+                      <FormControl
                         fullWidth
-                        label="Fecha de Llegada"
-                        type="date"
-                        InputLabelProps={{ shrink: true }}
-                        value={formData.arrivalDate}
-                        onChange={handleChange}
                         variant="outlined"
+                        disabled={(!isAdmin && user?.school && typeof user.school === 'object') || (!formData.country || availableCities.length === 0)}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 3
                           }
                         }}
-                      />
+                      >
+                        <InputLabel>Ciudad</InputLabel>
+                        <Select
+                          name="city"
+                          value={formData.city}
+                          label="Ciudad"
+                          onChange={handleSelectChange}
+                        >
+                          <MenuItem value="">Selecciona una ciudad</MenuItem>
+                          {availableCities.map((city) => (
+                            <MenuItem key={city} value={city}>{city}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        name="departureDate"
-                        required
+                    <Grid item xs={12} sm={4}>
+                      <FormControl
                         fullWidth
-                        label="Fecha de Salida"
-                        type="date"
-                        InputLabelProps={{ shrink: true }}
-                        value={formData.departureDate}
-                        onChange={handleChange}
                         variant="outlined"
+                        disabled={(!isAdmin && user?.school && typeof user.school === 'object') || (!formData.city || availableTowns.length === 0)}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 3
                           }
                         }}
-                      />
+                      >
+                        <InputLabel>Localidad</InputLabel>
+                        <Select
+                          name="town"
+                          value={formData.town}
+                          label="Localidad"
+                          onChange={handleSelectChange}
+                        >
+                          <MenuItem value="">Selecciona una localidad</MenuItem>
+                          {availableTowns.map((town) => (
+                            <MenuItem key={town} value={town}>{town}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -529,7 +746,9 @@ export default function EditarPerfilPage() {
                     transition: 'all 0.2s'
                   }}
                 >
-                  {emoji}
+                  {emoji.startsWith('/img/')
+                    ? <Avatar src={emoji} sx={{ width: 32, height: 32, mx: 'auto' }} />
+                    : emoji}
                 </IconButton>
               </Grid>
             ))}
@@ -548,7 +767,7 @@ export default function EditarPerfilPage() {
           <Button
             onClick={() => selectPredefinedAvatar(defaultEggAvatar)}
             variant="outlined"
-            startIcon={<span>🥚</span>}
+            startIcon={<Avatar src={defaultEggAvatar} sx={{ width: 20, height: 20 }} />}
             sx={{ borderRadius: 2 }}
           >
             Huevo por Defecto

@@ -33,6 +33,8 @@ import NotificationsPanel from '@/components/home/NotificationsPanel';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
 import EmailIcon from '@mui/icons-material/Email';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PublicIcon from '@mui/icons-material/Public';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -49,8 +51,8 @@ export default function PerfilPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const tapTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Emoji de huevo por defecto (como el antiguo Twitter)
-  const defaultEggAvatar = '🥚';
+  // Imagen de huevo por defecto (como el antiguo Twitter)
+  const defaultEggAvatar = '/img/twittereggavatar.jpg';
 
   useEffect(() => {
     // Solo redirigir si definitivamente no hay usuario después de que termine la carga
@@ -210,11 +212,11 @@ export default function PerfilPage() {
               {/* Avatar con mejor diseño */}
               <Box sx={{ position: 'relative', mb: 3 }}>
                 <Avatar
-                  src={user.avatarUrl || undefined}
+                  src={user.avatarUrl || defaultEggAvatar}
                   sx={{
                     width: 120,
                     height: 120,
-                    fontSize: user.avatarUrl && !user.avatarUrl.startsWith('data:') ? '3rem' : 'inherit',
+                    fontSize: user.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? '3rem' : 'inherit',
                     bgcolor: 'primary.light',
                     cursor: 'pointer',
                     boxShadow: modalOpen ? 8 : 3,
@@ -232,7 +234,7 @@ export default function PerfilPage() {
                   onMouseUp={handleAvatarTouchEnd}
                   title="Mantén presionado para ver notificaciones"
                 >
-                  {!user.avatarUrl ? defaultEggAvatar : user.avatarUrl.startsWith('data:') ? null : user.avatarUrl}
+                  {!user.avatarUrl ? undefined : user.avatarUrl.startsWith('data:') ? null : user.avatarUrl === defaultEggAvatar ? undefined : user.avatarUrl}
                 </Avatar>
 
                 {/* Indicador de rol */}
@@ -276,7 +278,7 @@ export default function PerfilPage() {
 
               {/* Información de contacto */}
               <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={isAdmin ? 6 : 4}>
                   <Paper
                     elevation={0}
                     sx={{
@@ -300,35 +302,63 @@ export default function PerfilPage() {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: 'action.hover',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1
-                    }}
-                  >
-                    <SchoolIcon color="action" />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        Escuela
-                      </Typography>
-                      <Typography variant="body2" fontWeight="medium">
-                        {user.school
-                          ? (typeof user.school === 'string'
-                              ? user.school
-                              : user.school.name)
-                          : 'No especificada'}
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
+                {!isAdmin && (
+                  <>
+                    <Grid item xs={12} sm={4}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 2,
+                          borderRadius: 2,
+                          bgcolor: 'action.hover',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}
+                      >
+                        <SchoolIcon color="action" />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Escuela
+                          </Typography>
+                          <Typography variant="body2" fontWeight="medium">
+                            {user.school
+                              ? (typeof user.school === 'string'
+                                  ? user.school
+                                  : user.school.name)
+                              : 'No especificada'}
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
 
-                <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={4}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 2,
+                          borderRadius: 2,
+                          bgcolor: 'action.hover',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}
+                      >
+                        <CakeIcon color="action" />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Edad
+                          </Typography>
+                          <Typography variant="body2" fontWeight="medium">
+                            {user.age ? `${user.age} años` : 'No especificada'}
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  </>
+                )}
+
+                <Grid item xs={12} sm={isAdmin ? 6 : 12}>
                   <Paper
                     elevation={0}
                     sx={{
@@ -340,14 +370,42 @@ export default function PerfilPage() {
                       gap: 1
                     }}
                   >
-                    <CakeIcon color="action" />
+                    <LocationOnIcon color="action" />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        Edad
+                        Ubicación
                       </Typography>
                       <Typography variant="body2" fontWeight="medium">
-                        {user.age ? `${user.age} años` : 'No especificada'}
+                        {(() => {
+                          const isAdmin = user.role === 'admin' || user.role === 'ADMIN';
+                          let parts = [];
+                          
+                          // Si el usuario no es admin y tiene escuela, usar ubicación de la escuela
+                          if (!isAdmin && user.school && typeof user.school === 'object') {
+                            const school = user.school as any;
+                            if (school.town) parts.push(school.town);
+                            if (school.city) parts.push(school.city);
+                            if (school.country) parts.push(school.country);
+                          } else {
+                            // Para admins o usuarios sin escuela, usar ubicación del usuario
+                            if (user.town) parts.push(user.town);
+                            if (user.city) parts.push(user.city);
+                            if (user.country) parts.push(user.country);
+                          }
+                          return parts.length > 0 ? parts.join(', ') : 'No especificada';
+                        })()}
                       </Typography>
+                      {(() => {
+                        const isAdmin = user.role === 'admin' || user.role === 'ADMIN';
+                        if (!isAdmin && user.school && typeof user.school === 'object') {
+                          return (
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
+                              📍 Ubicación de tu escuela
+                            </Typography>
+                          );
+                        }
+                        return null;
+                      })()}
                     </Box>
                   </Paper>
                 </Grid>

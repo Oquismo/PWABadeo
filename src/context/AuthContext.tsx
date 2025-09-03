@@ -14,6 +14,8 @@ export interface User {
     id: number;
     name: string;
     city?: string;
+    country?: string;
+    town?: string;
     type: string;
     level: string;
   } | string | null;
@@ -21,19 +23,26 @@ export interface User {
   avatarUrl?: string | null;
   arrivalDate?: string | null;
   departureDate?: string | null;
+  // Campos de ubicación del usuario
+  country?: string | null;
+  city?: string | null;
+  town?: string | null;
 }
 
 type UserUpdateData = Partial<Omit<User, 'id' | 'email' | 'role' | 'school'>> & {
   school?: string | null; // Para edición de perfil solo permitimos string
+  country?: string | null;
+  city?: string | null;
+  town?: string | null;
 };
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User) => void;
+  login: (userData: User) => Promise<void>;
   logout: () => void;
-  updateUser: (data: UserUpdateData) => void;
+  updateUser: (data: UserUpdateData) => Promise<void>;
   updateAvatar: (avatarUrl: string) => Promise<void>;
   deleteAvatar: () => Promise<void>;
   refreshAvatar: () => Promise<void>;
@@ -66,38 +75,96 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const onlyAdmins = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
 
   useEffect(() => {
+    console.log('🔄 AuthContext: Inicializando...');
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    console.log('📦 AuthContext: Usuario en localStorage:', storedUser ? 'Existe' : 'No existe');
+
+    async function fetchUserFromBackend(email: string) {
       try {
-        const parsed: User = JSON.parse(storedUser);
-        if (!onlyAdmins || parsed.role === 'admin') {
-          setUser(parsed);
+        const response = await fetch('/api/user/by-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        if (response.ok) {
+          const { user } = await response.json();
+          if (user) {
+            setUser(user);
+            localStorage.setItem('user', JSON.stringify(user));
+            console.log('✅ AuthContext: Usuario actualizado desde backend:', user);
+          }
         } else {
-          console.warn('Sesión de usuario no admin eliminada (modo solo admins activo)');
+          setUser(null);
           localStorage.removeItem('user');
         }
       } catch (e) {
-        console.error('Error parseando usuario almacenado, limpiando.', e);
+        setUser(null);
         localStorage.removeItem('user');
+        console.error('❌ AuthContext: Error actualizando usuario desde backend:', e);
       }
     }
-    
-    // Usar un pequeño retraso para permitir que el estado se estabilice en producción
-    const timer = setTimeout(() => {
+
+    const init = async () => {
+      if (storedUser) {
+        try {
+          const parsed: User = JSON.parse(storedUser);
+          console.log('👤 AuthContext: Usuario parseado:', {
+            id: parsed.id,
+            email: parsed.email,
+            role: parsed.role,
+            country: parsed.country,
+            city: parsed.city,
+            town: parsed.town
+          });
+          // Siempre refrescar desde backend para cualquier usuario (admin o no)
+          await fetchUserFromBackend(parsed.email);
+        } catch (e) {
+          console.error('❌ AuthContext: Error parseando usuario almacenado, limpiando.', e);
+          localStorage.removeItem('user');
+        }
+      }
       setIsLoading(false);
-    }, 50);
-    
-    return () => clearTimeout(timer);
+      console.log('✅ AuthContext: Carga completada');
+    };
+    init();
   }, []);
 
-  const login = (userData: User) => {
+  const login = async (userData: User) => {
+    console.log('🔐 AuthContext: Login iniciado para:', userData.email);
+    console.log('👤 AuthContext: Datos completos de usuario:', userData);
+    if (userData.school) {
+      console.log('🏫 AuthContext: userData.school:', userData.school, 'typeof:', typeof userData.school);
+    } else {
+      console.log('🏫 AuthContext: userData.school está vacío:', userData.school);
+    }
+    
     if (onlyAdmins && userData.role !== 'admin') {
-      console.warn('Intento de login bloqueado por modo solo admins.');
+      console.warn('⚠️ AuthContext: Intento de login bloqueado por modo solo admins.');
       return;
     }
+    // Guardar datos iniciales
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     logAction('login', userData.email);
+    // Refrescar inmediatamente desde backend para asegurar datos completos
+    try {
+      const response = await fetch('/api/user/by-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userData.email })
+      });
+      if (response.ok) {
+        const { user } = await response.json();
+        if (user) {
+          setUser(user);
+          localStorage.setItem('user', JSON.stringify(user));
+          console.log('✅ AuthContext: Usuario actualizado tras login desde backend:', user);
+        }
+      }
+    } catch (e) {
+      console.error('❌ AuthContext: Error refrescando usuario tras login:', e);
+    }
+    console.log('✅ AuthContext: Login completado exitosamente');
   };
 
   const logout = () => {
@@ -115,18 +182,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const updateUser = (data: UserUpdateData) => {
-    setUser(prevUser => {
-      if (!prevUser) return null;
+  const updateUser = async (data: UserUpdateData) => {
+    if (!user) return;
 
-      // Si se está actualizando la escuela con un string, mantenerlo como string
-      // En el futuro podríamos convertirlo a objeto si es necesario
-      const updatedData: any = { ...data };
+    try {
+      // Llamar al API para actualizar en el servidor
+      const response = await fetch('/api/user/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          ...data
+        })
+      });
 
-      const updatedUser = { ...prevUser, ...updatedData };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      return updatedUser;
-    });
+      if (!response.ok) {
+        throw new Error('Error al actualizar usuario');
+      }
+
+      const result = await response.json();
+
+      // Actualizar el estado local
+      setUser(prevUser => {
+        if (!prevUser) return null;
+        const updatedUser = { ...prevUser, ...data };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return updatedUser;
+      });
+
+    } catch (error) {
+      console.error('Error actualizando usuario:', error);
+      throw error;
+    }
   };
 
   const updateAvatar = useCallback(async (avatarUrl: string) => {
