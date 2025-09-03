@@ -199,17 +199,11 @@ export default function EditarPerfilPage() {
   }, [user?.id, user?.avatarUrl]);
 
   useEffect(() => {
-    // Solo redirigir si definitivamente no hay usuario después de que termine la carga
-    if (!isAuthenticated && !user) {
-      // Dar tiempo adicional para que el contexto se inicialice en producción
-      const timer = setTimeout(() => {
-        if (!isAuthenticated && !user) {
-          router.push('/login');
-        }
-      }, 100);
-      return () => clearTimeout(timer);
+    // Solo redirigir si la carga ha terminado y no hay usuario autenticado
+    if (!isLoading && !isAuthenticated && !user) {
+      router.push('/login');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, isLoading, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
