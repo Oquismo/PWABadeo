@@ -45,13 +45,7 @@ export default function AjustesPage() {
                 Modo Oscuro (Solo para Administradores)
               </Typography>
               <Stack direction="row" alignItems="center" spacing={1}>
-                <Brightness7Icon sx={{ color: mode === 'light' ? 'primary.main' : 'text.disabled' }} />
-                <Switch
-                  checked={mode === 'dark'}
-                  onChange={() => setTheme(mode === 'light' ? 'dark' : 'light')}
-                  color="primary"
-                />
-                <Brightness4Icon sx={{ color: mode === 'dark' ? 'primary.main' : 'text.disabled' }} />
+                  {/* Eliminado selector de tema: solo modo oscuro disponible */}
               </Stack>
             </Stack>
           </Paper>
