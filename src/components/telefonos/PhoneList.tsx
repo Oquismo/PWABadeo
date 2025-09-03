@@ -8,7 +8,7 @@ const phoneNumbers = [
     { name: 'Emergencias Generales', number: '112', isEmergency: true },
     { name: 'Policía Nacional', number: '091', isEmergency: true },
     { name: 'Barrio de oportunidades emergencia', number: '+34649347760' },
-    { name: 'Ayuntamiento', number: '955 47 00 00' },
+    { name: 'Ayuntamiento', number: '+34 955 010 010' },
     { name: 'Atención al Ciudadano', number: '010' },
     { name: 'Barrio de Oportunidades', number: '954 75 49 16' },
 ];
