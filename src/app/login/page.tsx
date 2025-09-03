@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+// Importación dinámica para evitar problemas SSR
+const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ssr: false });
 import { useRouter } from 'next/navigation';
 import { useAuth, User } from '@/context/AuthContext';
 import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack, IconButton, InputAdornment } from '@mui/material';
@@ -10,13 +13,34 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<any>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [tourDone, setTourDone] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+
+  // Mostrar el tour solo si es la primera vez (localStorage)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const done = localStorage.getItem('onboardingTourDone');
+      if (!done) {
+        setShowTour(true);
+      }
+    }
+  }, []);
+
+  const handleFinishTour = () => {
+    setShowTour(false);
+    setTourDone(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('onboardingTourDone', 'true');
+    }
+  };
 
   const validate = () => {
     let tempErrors: any = {};
@@ -84,6 +108,10 @@ export default function LoginPage() {
 
   return (
     <Container component="main" maxWidth="xs">
+      {/* OnboardingTour solo si showTour */}
+      {showTour && (
+        <OnboardingTour run={showTour} onFinish={handleFinishTour} />
+      )}
       <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h4" fontWeight="bold">
           Iniciar Sesión
@@ -91,7 +119,7 @@ export default function LoginPage() {
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
           {process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true' ? 'Modo restringido: solo administradores.' : 'Ingresa con tu cuenta.'}
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+        <Box id="login-form" component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
           <TextField
             margin="normal"
             required
@@ -149,7 +177,7 @@ export default function LoginPage() {
               </MuiLink>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
-              <MuiLink component={Link} href="/registro" variant="body2">
+              <MuiLink id="register-link" component={Link} href="/registro" variant="body2">
                 {"¿No tienes cuenta? Regístrate"}
               </MuiLink>
             </Box>

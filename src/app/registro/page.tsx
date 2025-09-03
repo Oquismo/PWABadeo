@@ -306,7 +306,7 @@ export default function RegistroPage() {
         <Typography component="h1" variant="h4" fontWeight="bold">
           Crear Cuenta
         </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box id="register-form" component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField name="firstName" required fullWidth label="Nombre" autoFocus value={formData.firstName} onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName}/>
@@ -338,13 +338,15 @@ export default function RegistroPage() {
             </Grid>
             {!isAdminRegistration && (
               <Grid item xs={12}>
-                <SchoolSelector
-                  value={selectedSchool}
-                  onChange={setSelectedSchool}
-                  error={!!errors.school}
-                  helperText={errors.school}
-                  required
-                />
+                <div id="school-select">
+                  <SchoolSelector
+                    value={selectedSchool}
+                    onChange={setSelectedSchool}
+                    error={!!errors.school}
+                    helperText={errors.school}
+                    required
+                  />
+                </div>
               </Grid>
             )}
             {isAdminRegistration && (
@@ -395,7 +397,7 @@ export default function RegistroPage() {
             </Grid>
             
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth disabled={!isAdminRegistration && selectedSchool !== null}>
+              <FormControl id="country-select" fullWidth disabled={!isAdminRegistration && selectedSchool !== null}>
                 <InputLabel>País</InputLabel>
                 <Select
                   name="country"
@@ -458,6 +460,7 @@ export default function RegistroPage() {
             </Grid>
           </Grid>
           <Button 
+            id="submit-register"
             type="submit" 
             fullWidth 
             variant="contained" 
