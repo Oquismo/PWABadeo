@@ -53,10 +53,17 @@ export default function PerfilPage() {
   const defaultEggAvatar = '🥚';
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+    // Solo redirigir si definitivamente no hay usuario después de que termine la carga
+    if (!isLoading && !isAuthenticated && !user) {
+      // Dar tiempo adicional para que el contexto se inicialice en producción
+      const timer = setTimeout(() => {
+        if (!isAuthenticated && !user) {
+          router.push('/login');
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, router, isLoading]);
+  }, [isAuthenticated, user, router, isLoading]);
 
   // Cargar imagen de perfil desde el servidor
   useEffect(() => {
@@ -95,11 +102,21 @@ export default function PerfilPage() {
     router.push('/');
   };
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <Container component="main" maxWidth="md">
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
           <Typography variant="h6" color="text.secondary">Cargando perfil...</Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Container component="main" maxWidth="md">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+          <Typography variant="h6" color="text.secondary">Verificando autenticación...</Typography>
         </Box>
       </Container>
     );

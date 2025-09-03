@@ -29,7 +29,7 @@ import { PhotoCamera as PhotoCameraIcon, Face as FaceIcon, Person as PersonIcon,
 
 export default function EditarPerfilPage() {
   // 1. Traemos las funciones del contexto incluyendo las nuevas de avatar
-  const { user, isAuthenticated, updateUser, updateAvatar, deleteAvatar } = useAuth();
+  const { user, isAuthenticated, isLoading, updateUser, updateAvatar, deleteAvatar } = useAuth();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -95,10 +95,17 @@ export default function EditarPerfilPage() {
   }, [user?.id, user?.avatarUrl]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
+    // Solo redirigir si definitivamente no hay usuario después de que termine la carga
+    if (!isAuthenticated && !user) {
+      // Dar tiempo adicional para que el contexto se inicialice en producción
+      const timer = setTimeout(() => {
+        if (!isAuthenticated && !user) {
+          router.push('/login');
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, user, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -192,8 +199,24 @@ export default function EditarPerfilPage() {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  if (!user) {
-    return null;
+  if (isLoading) {
+    return (
+      <Container component="main" maxWidth="md">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+          <Typography variant="h6" color="text.secondary">Cargando...</Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Container component="main" maxWidth="md">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+          <Typography variant="h6" color="text.secondary">Verificando autenticación...</Typography>
+        </Box>
+      </Container>
+    );
   }
 
   return (

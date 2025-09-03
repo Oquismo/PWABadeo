@@ -81,7 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user');
       }
     }
-    setIsLoading(false);
+    
+    // Usar un pequeño retraso para permitir que el estado se estabilice en producción
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const login = (userData: User) => {
