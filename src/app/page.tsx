@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { Container, Fab, Fade, Box } from "@mui/material";
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
 
 // Importamos los componentes críticos de forma normal
 import HeroSection from "@/components/home/HeroSection";
@@ -19,24 +17,13 @@ import ExternalInfoPanel from "@/components/home/ExternalInfoPanel";
 export default function Home() {
   const [fadeIn, setFadeIn] = useState(false);
   const { t } = useTranslation();
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
     setFadeIn(true);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
-
-  if (isLoading) return null;
-  if (!isAuthenticated) return null;
-
   // Información para el enlace de WhatsApp
-  const phoneNumber = "34000000000"; // Reemplaza con el número de teléfono real
+  const phoneNumber = "+34649347760"; // Reemplaza con el número de teléfono real
   const message = t('pages.home.welcomeMessage'); // Usar traducción
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
