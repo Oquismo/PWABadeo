@@ -24,21 +24,21 @@ interface Event {
 
 // Eventos del programa con fechas realistas para 2025
 const programEvents: Event[] = [
-  { date: new Date(2025, 7, 30), title: 'Taller de Bienvenida', type: 'program' },
-  { date: new Date(2025, 8, 5), title: 'Noche de Tapas Cultural', type: 'program' },
-  { date: new Date(2025, 8, 15), title: 'Excursión a la Playa', type: 'program' },
-  { date: new Date(2025, 8, 20), title: 'Fiesta de Verano', type: 'program' },
-  { date: new Date(2025, 9, 1), title: 'Inicio del Nuevo Trimestre', type: 'program' },
-  { date: new Date(2025, 9, 12), title: 'Día del Patrimonio', type: 'holiday' },
-  { date: new Date(2025, 9, 31), title: 'Halloween Party', type: 'program' },
-  { date: new Date(2025, 10, 1), title: 'Día de Todos los Santos', type: 'holiday' },
-  { date: new Date(2025, 10, 15), title: 'Excursión Otoñal', type: 'program' },
-  { date: new Date(2025, 11, 6), title: 'Día de la Constitución', type: 'holiday' },
-  { date: new Date(2025, 11, 8), title: 'Día de la Inmaculada', type: 'holiday' },
-  { date: new Date(2025, 11, 25), title: 'Navidad en Familia', type: 'program' },
-  { date: new Date(2025, 11, 31), title: 'Nochevieja', type: 'program' },
-  { date: new Date(2026, 0, 1), title: 'Año Nuevo', type: 'holiday' },
-  { date: new Date(2026, 0, 6), title: 'Día de Reyes', type: 'holiday' },
+  { date: new Date(2025, 7, 30), title: 'calendar.welcomeWorkshop', type: 'program' },
+  { date: new Date(2025, 8, 5), title: 'calendar.culturalTapasNight', type: 'program' },
+  { date: new Date(2025, 8, 15), title: 'calendar.beachTrip', type: 'program' },
+  { date: new Date(2025, 8, 20), title: 'calendar.summerParty', type: 'program' },
+  { date: new Date(2025, 9, 1), title: 'calendar.newTermStart', type: 'program' },
+  { date: new Date(2025, 9, 12), title: 'calendar.heritageDay', type: 'holiday' },
+  { date: new Date(2025, 9, 31), title: 'calendar.halloweenParty', type: 'program' },
+  { date: new Date(2025, 10, 1), title: 'calendar.allSaintsDay', type: 'holiday' },
+  { date: new Date(2025, 10, 15), title: 'calendar.autumnTrip', type: 'program' },
+  { date: new Date(2025, 11, 6), title: 'calendar.constitutionDay', type: 'holiday' },
+  { date: new Date(2025, 11, 8), title: 'calendar.immaculateDay', type: 'holiday' },
+  { date: new Date(2025, 11, 25), title: 'calendar.familyChristmas', type: 'program' },
+  { date: new Date(2025, 11, 31), title: 'calendar.newYearEve', type: 'program' },
+  { date: new Date(2026, 0, 1), title: 'calendar.newYear', type: 'holiday' },
+  { date: new Date(2026, 0, 6), title: 'calendar.epiphany', type: 'holiday' },
 ];
 
 // Helper para formatear la fecha
@@ -524,7 +524,7 @@ export default function CalendarSection() {
             }
           }}
         >
-          Próximos Eventos
+          {t('calendar.upcomingEvents')}
         </Typography>
         {isAuthenticated && (
           <Button
@@ -553,7 +553,7 @@ export default function CalendarSection() {
               }
             }}
           >
-            Añadir
+            {t('calendar.addNewEvent')}
           </Button>
         )}
       </Box>
@@ -633,42 +633,48 @@ export default function CalendarSection() {
               >
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                   <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        color: event.type === 'personal' ? '#8AB4F8' :
-                               event.type === 'holiday' ? '#F87171' : '#E8EAED',
-                        fontWeight: 600,
-                        fontSize: '1rem',
-                        lineHeight: 1.3,
-                        fontFamily: '"Google Sans", "Roboto", sans-serif',
-                        mb: 0.5,
-                        letterSpacing: '-0.01em',
-                      }}
-                    >
-                      {event.title}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#9AA0A6',
-                        fontSize: '0.875rem',
-                        fontWeight: 400,
-                        textTransform: 'capitalize',
-                        fontFamily: '"Roboto", sans-serif',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                      }}
-                    >
-                      <CalendarTodayIcon sx={{ fontSize: '16px', opacity: 0.7 }} />
-                      {event.date.toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </Typography>
+                    {/* Render de título y fecha internacionalizado */}
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: event.type === 'personal' ? '#8AB4F8' :
+                                 event.type === 'holiday' ? '#F87171' : '#E8EAED',
+                          fontWeight: 600,
+                          fontSize: '1rem',
+                          lineHeight: 1.3,
+                          fontFamily: '"Google Sans", "Roboto", sans-serif',
+                          mb: 0.5,
+                          letterSpacing: '-0.01em',
+                        }}
+                      >
+                        {event.type === 'program' || event.type === 'holiday' ? t(event.title) : event.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: '#9AA0A6',
+                          fontSize: '0.875rem',
+                          fontWeight: 400,
+                          textTransform: 'capitalize',
+                          fontFamily: '"Roboto", sans-serif',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <CalendarTodayIcon sx={{ fontSize: '16px', opacity: 0.7 }} />
+                        {(() => {
+                          const { language } = useTranslation();
+                          return event.date.toLocaleDateString(language === 'es' ? 'es-ES' : language === 'en' ? 'en-US' : 'it-IT', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          });
+                        })()}
+                      </Typography>
+                    </Box>
                   </Box>
                   
                   {/* Chip indicador del tipo de evento y botón eliminar */}
@@ -798,7 +804,7 @@ export default function CalendarSection() {
                 letterSpacing: '-0.025em'
               }}
             >
-              Añadir Nuevo Evento
+              {t('calendar.addNewEvent')}
             </Typography>
             <IconButton
               onClick={handleClose}
@@ -816,7 +822,7 @@ export default function CalendarSection() {
 
           <Stack spacing={3}>
             <TextField
-              label="Título del Evento"
+              label={t('calendar.eventTitle')}
               variant="outlined"
               value={newEventTitle}
               onChange={(e) => setNewEventTitle(e.target.value)}
@@ -847,7 +853,7 @@ export default function CalendarSection() {
               }}
             />
             <TextField
-              label="Fecha"
+              label={t('calendar.eventDate')}
               type="date"
               InputLabelProps={{
                 shrink: true,
@@ -908,7 +914,7 @@ export default function CalendarSection() {
                 }
               }}
             >
-              {loading ? 'Creando...' : 'Crear Evento'}
+              {loading ? t('calendar.creating') : t('calendar.createEvent')}
             </Button>
           </Stack>
         </Box>

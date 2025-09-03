@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   Box,
   Typography,
@@ -136,28 +137,28 @@ interface WeatherData {
 
 // Mapeo básico de códigos (Open-Meteo) a icono y descripción
 const weatherCodeMap: Record<number, { label: string; icon: React.ReactElement }> = {
-  0: { label: 'Despejado', icon: <WbSunnyIcon fontSize="inherit" /> },
-  1: { label: 'Mayormente despejado', icon: <WbSunnyIcon fontSize="inherit" /> },
-  2: { label: 'Parcialmente nublado', icon: <CloudIcon fontSize="inherit" /> },
-  3: { label: 'Nublado', icon: <CloudIcon fontSize="inherit" /> },
-  45: { label: 'Niebla', icon: <CloudIcon fontSize="inherit" /> },
-  48: { label: 'Niebla con escarcha', icon: <CloudIcon fontSize="inherit" /> },
-  51: { label: 'Llovizna ligera', icon: <GrainIcon fontSize="inherit" /> },
-  53: { label: 'Llovizna', icon: <GrainIcon fontSize="inherit" /> },
-  55: { label: 'Llovizna intensa', icon: <GrainIcon fontSize="inherit" /> },
-  56: { label: 'Llovizna helada ligera', icon: <GrainIcon fontSize="inherit" /> },
-  57: { label: 'Llovizna helada intensa', icon: <GrainIcon fontSize="inherit" /> },
-  61: { label: 'Lluvia ligera', icon: <GrainIcon fontSize="inherit" /> },
-  63: { label: 'Lluvia', icon: <GrainIcon fontSize="inherit" /> },
-  65: { label: 'Lluvia fuerte', icon: <GrainIcon fontSize="inherit" /> },
-  66: { label: 'Lluvia helada ligera', icon: <AcUnitIcon fontSize="inherit" /> },
-  67: { label: 'Lluvia helada', icon: <AcUnitIcon fontSize="inherit" /> },
-  71: { label: 'Nieve ligera', icon: <AcUnitIcon fontSize="inherit" /> },
-  73: { label: 'Nieve', icon: <AcUnitIcon fontSize="inherit" /> },
-  75: { label: 'Nieve intensa', icon: <AcUnitIcon fontSize="inherit" /> },
-  77: { label: 'Granos de nieve', icon: <AcUnitIcon fontSize="inherit" /> },
-  80: { label: 'Chubascos ligeros', icon: <GrainIcon fontSize="inherit" /> },
-  81: { label: 'Chubascos', icon: <GrainIcon fontSize="inherit" /> },
+  0: { label: 'weather.clear', icon: <WbSunnyIcon fontSize="inherit" /> },
+  1: { label: 'weather.mostlyClear', icon: <WbSunnyIcon fontSize="inherit" /> },
+  2: { label: 'weather.partlyCloudy', icon: <CloudIcon fontSize="inherit" /> },
+  3: { label: 'weather.cloudy', icon: <CloudIcon fontSize="inherit" /> },
+  45: { label: 'weather.fog', icon: <CloudIcon fontSize="inherit" /> },
+  48: { label: 'weather.frostFog', icon: <CloudIcon fontSize="inherit" /> },
+  51: { label: 'weather.lightDrizzle', icon: <GrainIcon fontSize="inherit" /> },
+  53: { label: 'weather.drizzle', icon: <GrainIcon fontSize="inherit" /> },
+  55: { label: 'weather.heavyDrizzle', icon: <GrainIcon fontSize="inherit" /> },
+  56: { label: 'weather.lightFreezingDrizzle', icon: <GrainIcon fontSize="inherit" /> },
+  57: { label: 'weather.heavyFreezingDrizzle', icon: <GrainIcon fontSize="inherit" /> },
+  61: { label: 'weather.lightRain', icon: <GrainIcon fontSize="inherit" /> },
+  63: { label: 'weather.rain', icon: <GrainIcon fontSize="inherit" /> },
+  65: { label: 'weather.heavyRain', icon: <GrainIcon fontSize="inherit" /> },
+  66: { label: 'weather.lightFreezingRain', icon: <AcUnitIcon fontSize="inherit" /> },
+  67: { label: 'weather.freezingRain', icon: <AcUnitIcon fontSize="inherit" /> },
+  71: { label: 'weather.lightSnow', icon: <AcUnitIcon fontSize="inherit" /> },
+  73: { label: 'weather.snow', icon: <AcUnitIcon fontSize="inherit" /> },
+  75: { label: 'weather.heavySnow', icon: <AcUnitIcon fontSize="inherit" /> },
+  77: { label: 'weather.snowGrains', icon: <AcUnitIcon fontSize="inherit" /> },
+  80: { label: 'weather.lightShowers', icon: <GrainIcon fontSize="inherit" /> },
+  81: { label: 'weather.showers', icon: <GrainIcon fontSize="inherit" /> },
   82: { label: 'Chubascos fuertes', icon: <GrainIcon fontSize="inherit" /> },
   85: { label: 'Chubascos de nieve ligeros', icon: <AcUnitIcon fontSize="inherit" /> },
   86: { label: 'Chubascos de nieve', icon: <AcUnitIcon fontSize="inherit" /> },
@@ -474,6 +475,7 @@ export default function ExternalInfoPanel() {
   }
 
   const currentWeather = weather;
+  const { t } = useTranslation();
   const weatherInfo = currentWeather ? weatherCodeMap[currentWeather.weathercode] : null;
 
   return (
@@ -623,7 +625,7 @@ export default function ExternalInfoPanel() {
                     color: displayWeatherTheme?.onSurface || theme.palette.text.secondary,
                   }}
                 >
-                  {weatherInfo?.label}
+                  {weatherInfo ? t(weatherInfo.label) : ''}
                 </Typography>
 
                 <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
@@ -663,7 +665,7 @@ export default function ExternalInfoPanel() {
                 </Typography>
 
                 <Typography variant="body1" sx={{ mb: 1.5, opacity: 0.8 }}>
-                  {forecastDay ? weatherCodeMap[forecastDay.weathercode]?.label : ''}
+                  {forecastDay ? t(weatherCodeMap[forecastDay.weathercode]?.label || '') : ''}
                 </Typography>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>

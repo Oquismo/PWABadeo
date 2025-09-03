@@ -1,6 +1,8 @@
-'use client';
-
+"use client";
 import { Box, Typography, Avatar, Stack, IconButton, Modal, Slide, Backdrop } from '@mui/material';
+import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
+// import SearchIcon from '@mui/icons-material/Search';
+// SearchIcon eliminado
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationsPanel from '@/components/home/NotificationsPanel';
 import { useAuth } from '@/context/AuthContext';
@@ -11,6 +13,7 @@ import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar el icono
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function HeroSection() {
+  // ...existing code...
   const { isAuthenticated, user, refreshAvatar } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const { t } = useTranslation();
@@ -30,7 +33,6 @@ export default function HeroSection() {
     }
   };
 
-  // Cargar avatar del servidor cuando el usuario cambie
   useEffect(() => {
     const loadAvatar = async () => {
       if (isAuthenticated && user?.id) {
@@ -42,28 +44,31 @@ export default function HeroSection() {
       }
     };
     loadAvatar();
-  }, [isAuthenticated, user?.id]); // Removido refreshAvatar de las dependencias
+  }, [isAuthenticated, user?.id]);
 
-  // Escuchar cambios de avatar para sincronización en tiempo real
   useEffect(() => {
     const handleAvatarChange = () => {
       if (isAuthenticated && user?.id) {
         refreshAvatar();
       }
     };
-
     window.addEventListener('profileImageChanged', handleAvatarChange);
     return () => {
       window.removeEventListener('profileImageChanged', handleAvatarChange);
     };
-  }, [isAuthenticated, user?.id]); // Removido refreshAvatar de las dependencias
+  }, [isAuthenticated, user?.id]);
 
   return (
     <Box 
       sx={{ 
-        py: { xs: 2, md: 3 }, // Reducimos un poco el padding para un look más compacto
+        py: { xs: 2, md: 3 },
+        position: 'relative'
       }}
     >
+      {/* Botón de cambio de idioma fijo */}
+      <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 1200 }}>
+        <GlobalLanguageSwitch />
+      </Box>
       <Stack direction="row" spacing={2} alignItems="center">
         {/* Parte Izquierda: Avatar, Campana y Saludo */}
         <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1, position: 'relative' }}>
@@ -153,9 +158,7 @@ export default function HeroSection() {
 
         {/* Parte Derecha: Iconos de Acción */}
         <Stack direction="row" spacing={1}>
-          <IconButton>
-            <SearchIcon sx={{ color: 'text.secondary' }} />
-          </IconButton>
+          {/* SearchIcon eliminado */}
           {/* 2. Reemplazamos el icono y lo enlazamos a la página de ajustes */}
           <Link href="/ajustes" passHref>
             <IconButton>

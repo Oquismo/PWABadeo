@@ -1,6 +1,53 @@
 // Sistema de traducciones
 export const translations = {
   es: {
+    calendar: {
+      welcomeWorkshop: "Taller de Bienvenida",
+      culturalTapasNight: "Noche de Tapas Cultural",
+      beachTrip: "Excursión a la Playa",
+      summerParty: "Fiesta de Verano",
+      newTermStart: "Inicio del Nuevo Trimestre",
+      heritageDay: "Día del Patrimonio",
+      halloweenParty: "Fiesta de Halloween",
+      allSaintsDay: "Día de Todos los Santos",
+      autumnTrip: "Excursión Otoñal",
+      constitutionDay: "Día de la Constitución",
+      immaculateDay: "Día de la Inmaculada",
+      familyChristmas: "Navidad en Familia",
+      newYearEve: "Nochevieja",
+      newYear: "Año Nuevo",
+      epiphany: "Día de Reyes"
+  ,upcomingEvents: "Próximos Eventos"
+  ,addNewEvent: "Añadir Nuevo Evento"
+  ,eventTitle: "Título del Evento"
+  ,eventDate: "Fecha"
+  ,creating: "Creando..."
+  ,createEvent: "Crear Evento"
+    },
+    weather: {
+      clear: "Despejado",
+      mostlyClear: "Mayormente despejado",
+      partlyCloudy: "Parcialmente nublado",
+      cloudy: "Nublado",
+      fog: "Niebla",
+      frostFog: "Niebla con escarcha",
+      lightDrizzle: "Llovizna ligera",
+      drizzle: "Llovizna",
+      heavyDrizzle: "Llovizna intensa",
+      lightFreezingDrizzle: "Llovizna helada ligera",
+      heavyFreezingDrizzle: "Llovizna helada intensa",
+      lightRain: "Lluvia ligera",
+      rain: "Lluvia",
+      heavyRain: "Lluvia fuerte",
+      lightFreezingRain: "Lluvia helada ligera",
+      freezingRain: "Lluvia helada",
+      lightSnow: "Nieve ligera",
+      snow: "Nieve",
+      heavySnow: "Nieve intensa",
+      snowGrains: "Granos de nieve",
+      lightShowers: "Chubascos ligeros",
+      showers: "Chubascos"
+    },
     // Navegación
     nav: {
       home: "Inicio",
@@ -103,6 +150,53 @@ export const translations = {
     }
   },
   en: {
+    calendar: {
+      welcomeWorkshop: "Welcome Workshop",
+      culturalTapasNight: "Cultural Tapas Night",
+      beachTrip: "Beach Trip",
+      summerParty: "Summer Party",
+      newTermStart: "New Term Start",
+      heritageDay: "Heritage Day",
+      halloweenParty: "Halloween Party",
+      allSaintsDay: "All Saints' Day",
+      autumnTrip: "Autumn Trip",
+      constitutionDay: "Constitution Day",
+      immaculateDay: "Immaculate Day",
+      familyChristmas: "Family Christmas",
+      newYearEve: "New Year's Eve",
+      newYear: "New Year",
+      epiphany: "Epiphany"
+  ,upcomingEvents: "Upcoming Events"
+  ,addNewEvent: "Add New Event"
+  ,eventTitle: "Event Title"
+  ,eventDate: "Date"
+  ,creating: "Creating..."
+  ,createEvent: "Create Event"
+    },
+    weather: {
+      clear: "Clear",
+      mostlyClear: "Mostly clear",
+      partlyCloudy: "Partly cloudy",
+      cloudy: "Cloudy",
+      fog: "Fog",
+      frostFog: "Frost fog",
+      lightDrizzle: "Light drizzle",
+      drizzle: "Drizzle",
+      heavyDrizzle: "Heavy drizzle",
+      lightFreezingDrizzle: "Light freezing drizzle",
+      heavyFreezingDrizzle: "Heavy freezing drizzle",
+      lightRain: "Light rain",
+      rain: "Rain",
+      heavyRain: "Heavy rain",
+      lightFreezingRain: "Light freezing rain",
+      freezingRain: "Freezing rain",
+      lightSnow: "Light snow",
+      snow: "Snow",
+      heavySnow: "Heavy snow",
+      snowGrains: "Snow grains",
+      lightShowers: "Light showers",
+      showers: "Showers"
+    },
     // Navigation
     nav: {
       home: "Home",
@@ -242,6 +336,53 @@ export const translations = {
     }
   },
   it: {
+    calendar: {
+      welcomeWorkshop: "Laboratorio di Benvenuto",
+      culturalTapasNight: "Notte di Tapas Culturale",
+      beachTrip: "Gita in Spiaggia",
+      summerParty: "Festa d'Estate",
+      newTermStart: "Inizio del Nuovo Trimestre",
+      heritageDay: "Giornata del Patrimonio",
+      halloweenParty: "Festa di Halloween",
+      allSaintsDay: "Ognissanti",
+      autumnTrip: "Gita Autunnale",
+      constitutionDay: "Giornata della Costituzione",
+      immaculateDay: "Giornata dell'Immacolata",
+      familyChristmas: "Natale in Famiglia",
+      newYearEve: "Capodanno",
+      newYear: "Anno Nuovo",
+      epiphany: "Epifania"
+  ,upcomingEvents: "Prossimi Eventi"
+  ,addNewEvent: "Aggiungi Nuovo Evento"
+  ,eventTitle: "Titolo Evento"
+  ,eventDate: "Data"
+  ,creating: "Creando..."
+  ,createEvent: "Crea Evento"
+    },
+    weather: {
+      clear: "Sereno",
+      mostlyClear: "Prevalentemente sereno",
+      partlyCloudy: "Parzialmente nuvoloso",
+      cloudy: "Nuvoloso",
+      fog: "Nebbia",
+      frostFog: "Nebbia gelata",
+      lightDrizzle: "Pioviggine leggera",
+      drizzle: "Pioviggine",
+      heavyDrizzle: "Pioviggine intensa",
+      lightFreezingDrizzle: "Pioviggine gelata leggera",
+      heavyFreezingDrizzle: "Pioviggine gelata intensa",
+      lightRain: "Pioggia leggera",
+      rain: "Pioggia",
+      heavyRain: "Pioggia forte",
+      lightFreezingRain: "Pioggia gelata leggera",
+      freezingRain: "Pioggia gelata",
+      lightSnow: "Neve leggera",
+      snow: "Neve",
+      heavySnow: "Neve intensa",
+      snowGrains: "Granuli di neve",
+      lightShowers: "Rovesci leggeri",
+      showers: "Rovesci"
+    },
     // Navigazione
     nav: {
       home: "Home",
