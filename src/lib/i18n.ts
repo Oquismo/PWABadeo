@@ -139,6 +139,21 @@ export const translations = {
     },
     // Main pages
     pages: {
+      home: {
+        title: "Neighborhood of Opportunities",
+        subtitle: "Your digital community",
+        welcomeMessage: "Welcome to your neighborhood!",
+        exploreServices: "Explore our services",
+        latestNews: "Latest news",
+        quickAccess: "Quick access",
+        announcements: "Announcements",
+        events: "Events",
+        projects: "Projects",
+        calendar: "Calendar",
+        projectsActive: "Active Projects",
+        projectsCount: "{{count}} projects",
+        loadingCalendar: "Loading calendar..."
+      },
       login: {
         title: "Sign In",
         email: "Email",
