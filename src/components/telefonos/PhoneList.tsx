@@ -2,18 +2,32 @@
 
 import { Box, Typography, Container, Stack, Avatar, Divider, Link } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
-import EmergencyIcon from '@mui/icons-material/EmergencyShare'; // Icono para emergencias
+import EmergencyIcon from '@mui/icons-material/EmergencyShare';
+import { getTranslation, Language } from '@/lib/i18n';
+
+// Detectar idioma (puedes mejorar esto según tu lógica global)
+const lang: Language = typeof window !== 'undefined' && (localStorage.getItem('lang') as Language) || 'es';
 
 const phoneNumbers = [
-    { name: 'Emergencias Generales', number: '112', isEmergency: true },
-    { name: 'Policía Nacional', number: '091', isEmergency: true },
-    { name: 'Barrio de oportunidades emergencias', number: '+34649347760' },
-    { name: 'Ayuntamiento', number: '+34 955 010 010' },
-    { name: 'Atención al Ciudadano', number: '010' },
-    { name: 'Barrio de Oportunidades', number: '954 75 49 16' },
+    { nameKey: 'emergencyGeneral', number: '112', isEmergency: true },
+    { nameKey: 'police', number: '091', isEmergency: true },
+    { nameKey: 'neighborhoodEmergency', number: '+34649347760' },
+    { nameKey: 'municipal', number: '+34 955 010 010' },
+    { nameKey: 'citizenService', number: '010' },
+    { nameKey: 'neighborhood', number: '954 75 49 16' },
 ];
 
 export default function PhoneList() {
+    // Traducciones para los nombres de teléfono
+    const nameTranslations: Record<string, string> = {
+        emergencyGeneral: getTranslation(lang, 'pages.phones.emergency') + ' 112',
+        police: getTranslation(lang, 'pages.phones.police'),
+        neighborhoodEmergency: getTranslation(lang, 'pages.phones.neighborhood') + ' ' + getTranslation(lang, 'pages.phones.emergency'),
+        municipal: getTranslation(lang, 'pages.phones.municipal'),
+        citizenService: getTranslation(lang, 'pages.phones.utilities'),
+        neighborhood: getTranslation(lang, 'pages.phones.neighborhood'),
+    };
+
     return (
         <Container sx={{ py: 4 }}>
             <Stack 
@@ -22,13 +36,12 @@ export default function PhoneList() {
             >
                 {phoneNumbers.map((phone) => (
                     <Box 
-                        key={phone.name} 
+                        key={phone.nameKey} 
                         sx={{ 
                             display: 'flex', 
                             alignItems: 'center', 
                             gap: 2, 
                             p: 2,
-                            // Si es de emergencia, le damos un fondo y color distintivo
                             bgcolor: phone.isEmergency ? 'error.dark' : 'transparent',
                             borderRadius: '8px'
                         }}
@@ -38,7 +51,7 @@ export default function PhoneList() {
                         </Avatar>
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography variant="h6" fontWeight="medium">
-                                {phone.name}
+                                {nameTranslations[phone.nameKey] || phone.number}
                             </Typography>
                             <Link href={`tel:${phone.number}`} color="inherit" underline="hover" sx={{ fontSize: '1.1rem' }}>
                                 {phone.number}

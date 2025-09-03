@@ -124,22 +124,18 @@ export const translations = {
     sites: {
       giralda: {
         name: "La Giralda",
-        guide: "Guía: María García",
         description: "La Giralda es el campanario de la Catedral de Sevilla y uno de los monumentos más emblemáticos de la ciudad. Con sus 104 metros de altura, ofrece vistas espectaculares de toda Sevilla. Su construcción combina el arte almohade con elementos renacentistas, creando una arquitectura única que la convierte en Patrimonio de la Humanidad."
       },
       plazaEspana: {
         name: "Plaza de España",
-        guide: "Guía: Carlos Ruiz",
         description: "La Plaza de España es una de las plazas más espectaculares de España, construida para la Exposición Iberoamericana de 1929. Su arquitectura semicircular de estilo regionalista, con sus canales, puentes y azulejos que representan todas las provincias españolas, la convierten en un lugar único."
       },
       alcazar: {
         name: "Alcázar de Sevilla",
-        guide: "Guía: Ana Martínez",
         description: "El Real Alcázar de Sevilla es un conjunto de palacios amurallados construido en diferentes etapas históricas. Destaca el palacio mudéjar del siglo XIV y los jardines del Alcázar, considerados entre los más bellos de España."
       },
       barrioSantaCruz: {
         name: "Barrio de Santa Cruz",
-        guide: "Guía: Javier López",
         description: "El Barrio de Santa Cruz es el antiguo barrio judío de Sevilla, un laberinto de callejuelas empedradas, plazas llenas de naranjos y patios andaluces que desprenden el aroma del azahar."
       }
     },
@@ -310,22 +306,18 @@ export const translations = {
     sites: {
       giralda: {
         name: "La Giralda",
-        guide: "Guide: María García",
         description: "La Giralda is the bell tower of Seville Cathedral and one of the city's most emblematic monuments. At 104 meters high, it offers spectacular views of all Seville. Its construction combines Almohad art with Renaissance elements, creating unique architecture that makes it a World Heritage Site."
       },
       plazaEspana: {
         name: "Plaza de España",
-        guide: "Guide: Carlos Ruiz",
         description: "Plaza de España is one of Spain's most spectacular squares, built for the 1929 Ibero-American Exhibition. Its semicircular regionalist architecture, with its canals, bridges and tiles representing all Spanish provinces, makes it a unique place."
       },
       alcazar: {
         name: "Alcázar of Seville",
-        guide: "Guide: Ana Martínez",
         description: "The Royal Alcázar of Seville is a complex of walled palaces built in different historical stages. The 14th-century Mudéjar palace and the Alcázar gardens, considered among the most beautiful in Spain, stand out."
       },
       barrioSantaCruz: {
         name: "Santa Cruz Neighborhood",
-        guide: "Guide: Javier López",
         description: "The Santa Cruz Neighborhood is Seville's old Jewish quarter, a labyrinth of cobbled streets, squares full of orange trees and Andalusian courtyards that give off the aroma of orange blossom."
       }
     },
@@ -495,22 +487,18 @@ export const translations = {
     sites: {
       giralda: {
         name: "La Giralda",
-        guide: "Guida: María García",
         description: "La Giralda è il campanile della Cattedrale di Siviglia e uno dei monumenti più emblematici della città. Con i suoi 104 metri di altezza, offre viste spettacolari su tutta Siviglia. La sua costruzione combina l'arte almohade con elementi rinascimentali, creando un'architettura unica che la rende Patrimonio dell'Umanità."
       },
       plazaEspana: {
         name: "Plaza de España",
-        guide: "Guida: Carlos Ruiz",
         description: "Plaza de España è una delle piazze più spettacolari della Spagna, costruita per l'Esposizione Ibero-Americana del 1929. La sua architettura semicircolare in stile regionalista, con i suoi canali, ponti e piastrelle che rappresentano tutte le province spagnole, la rendono un luogo unico."
       },
       alcazar: {
         name: "Alcázar di Siviglia",
-        guide: "Guida: Ana Martínez",
         description: "Il Real Alcázar di Siviglia è un complesso di palazzi murati costruito in diverse fasi storiche. Spiccano i palazzi mudéjar del XIV secolo e i giardini dell'Alcázar, considerati tra i più belli di Spagna."
       },
       barrioSantaCruz: {
         name: "Quartiere Santa Cruz",
-        guide: "Guida: Javier López",
         description: "Il Quartiere di Santa Cruz è l'antico quartiere ebraico di Siviglia, un labirinto di stradine lastricate, piazze piene di aranci e cortili andalusi che emanano l'aroma dei fiori d'arancio."
       }
     },
