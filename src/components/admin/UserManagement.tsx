@@ -9,20 +9,18 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    const usersRaw = localStorage.getItem('allUsers');
-    if (usersRaw) {
-      setUsers(JSON.parse(usersRaw));
-    }
+    fetch('/api/admin/users')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setUsers(data))
+      .catch(() => setUsers([]));
   }, []);
 
-  const handleDelete = (userEmail: string) => {
-    if (confirm(`¿Seguro que quieres eliminar al usuario ${userEmail}?`)) {
-      const updatedUsers = users.filter(user => user.email !== userEmail);
-      setUsers(updatedUsers);
-      localStorage.setItem('allUsers', JSON.stringify(updatedUsers));
-      alert('Usuario eliminado.');
-    }
-  };
+  // Eliminar usuario: solo frontend, deshabilitado hasta implementar API
+  // const handleDelete = (userEmail: string) => {
+  //   if (confirm(`¿Seguro que quieres eliminar al usuario ${userEmail}?`)) {
+  //     // Aquí iría la llamada a la API para borrar el usuario
+  //   }
+  // };
 
   return (
     <Box>
@@ -30,13 +28,7 @@ export default function UserManagement() {
       <List sx={{ bgcolor: 'background.paper', borderRadius: '16px' }}>
         {users.map((user, index) => (
           <Box key={user.email}>
-            <ListItem
-              secondaryAction={
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(user.email)}>
-                  <DeleteIcon />
-                </IconButton>
-              }
-            >
+            <ListItem>
               <ListItemAvatar>
                 <Avatar src={user.avatarUrl || undefined} />
               </ListItemAvatar>
