@@ -234,9 +234,9 @@ export const translations = {
     // Main pages
     pages: {
       home: {
-        title: "Neighborhood of Opportunities",
+        title: "Barrio de oportunidades",
         subtitle: "Your digital community",
-        welcomeMessage: "Welcome to your neighborhood!",
+        welcomeMessage: "",
         exploreServices: "Explore our services",
         latestNews: "Latest news",
         quickAccess: "Quick access",
