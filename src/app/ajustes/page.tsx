@@ -24,8 +24,9 @@ export default function AjustesPage() {
     );
   }
 
-  // Si el contexto ya está cargado, extraemos los valores
-  const { mode, setTheme } = themeContext;
+
+  // Solo modo oscuro, extraemos solo mode si se usa, pero no setTheme
+  const { mode } = themeContext;
 
   // Verificar si el usuario es admin
   const isAdmin = user?.role === 'admin' || user?.role === 'ADMIN';
