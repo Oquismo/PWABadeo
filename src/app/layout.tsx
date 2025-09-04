@@ -17,6 +17,7 @@ import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 import { ConnectionMonitor } from '@/components/ConnectionMonitor';
 import WarmupInitializer from '../components/WarmupInitializer';
 import LanguageTest from '@/components/LanguageTest';
+import PullToRefreshPreventer from '@/components/layout/PullToRefreshPreventer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -38,6 +39,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Badeo PWA" />
+        {/* Prevenir pull-to-refresh y mejorar experiencia de app nativa */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
         {/* 2. Hemos eliminado el bloque <style> de aquí */}
       </head>
       <body>
@@ -48,6 +53,7 @@ export default function RootLayout({
                 <TasksProvider>
                   <SpotifyAuthProvider>
                     <CssBaseline />
+                    <PullToRefreshPreventer />
                     <DebugInitializer />
                     <WarmupInitializer />
                   <ServiceWorkerProvider>
