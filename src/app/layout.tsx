@@ -53,7 +53,7 @@ export default function RootLayout({
                 <TasksProvider>
                   <SpotifyAuthProvider>
                     <CssBaseline />
-                    <PullToRefreshPreventer />
+                    {/* <PullToRefreshPreventer /> */}
                     <DebugInitializer />
                     <WarmupInitializer />
                   <ServiceWorkerProvider>
