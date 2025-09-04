@@ -1,5 +1,6 @@
 "use client";
-import { Box, Typography, Chip, Card, CardContent, Stack, IconButton } from "@mui/material";
+import { Box, Typography, Chip, CardContent, Stack, IconButton } from "@mui/material";
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShareIcon from '@mui/icons-material/Share';
 import DirectionsIcon from '@mui/icons-material/Directions';
@@ -59,8 +60,6 @@ export default function AlcazarSevillaPage() {
         <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: '#fff', zIndex: 10 }}>
           <ShareIcon />
         </IconButton>
-        {/* Botón de idioma */}
-        <LanguageSwitch />
         {/* Botón de Maps */}
         <IconButton 
           onClick={openMaps}
@@ -166,14 +165,14 @@ export default function AlcazarSevillaPage() {
 
         {/* Card del sitio actual - clickeable */}
         <Link href="/barrio-santa-cruz" style={{ textDecoration: 'none' }}>
-          <Card sx={{ 
-            bgcolor: '#2a2a2a', 
-            borderRadius: 2, 
-            mb: 3,
-            border: 'none',
-            boxShadow: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
+          <Material3ElevatedCard 
+            interactive={true}
+            sx={{ 
+              bgcolor: '#2a2a2a', 
+              mb: 3,
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
             '&:hover': {
               bgcolor: '#333',
               transform: 'translateY(-2px)',
@@ -247,7 +246,7 @@ export default function AlcazarSevillaPage() {
                 </Stack>
               </Box>
             </Box>
-          </Card>
+          </Material3ElevatedCard>
         </Link>
       </Box>
     </Box>

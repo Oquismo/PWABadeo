@@ -1,6 +1,6 @@
 "use client";
 import { IconButton, Menu, MenuItem } from "@mui/material";
-import LanguageIcon from '@mui/icons-material/Language';
+import TranslateIcon from '@mui/icons-material/Translate';
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -25,16 +25,10 @@ export default function LanguageSwitch() {
   return (
     <>
       <IconButton 
-        onClick={handleClick}
-        sx={{ 
-          position: 'absolute', 
-          top: 16, 
-          right: 124, 
-          color: '#fff', 
-          zIndex: 10 
-        }}
+  onClick={handleClick}
+  color="default"
       >
-        <LanguageIcon />
+  <TranslateIcon />
       </IconButton>
       <Menu
         anchorEl={anchorEl}

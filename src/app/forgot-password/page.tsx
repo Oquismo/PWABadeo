@@ -13,6 +13,7 @@ import {
   Paper,
   CircularProgress
 } from '@mui/material';
+import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
 import { 
   Email as EmailIcon,
   ArrowBack as ArrowBackIcon,
@@ -143,7 +144,7 @@ export default function ForgotPasswordPage() {
           >
             {loading ? (
               <>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Material3LoadingIndicator size="small" sx={{ mr: 1 }} />
                 Enviando...
               </>
             ) : (

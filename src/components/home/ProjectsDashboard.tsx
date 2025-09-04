@@ -1,6 +1,7 @@
 'use client';
 
-import { Typography, Card, CardContent, Box, IconButton, Tooltip, Chip } from '@mui/material';
+import { Typography, CardContent, Box, IconButton, Tooltip, Chip } from '@mui/material';
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import { useTranslation } from '@/hooks/useTranslation';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -901,7 +902,7 @@ export default function ProjectsDashboard() {
                     flexShrink: 0
                   }}
                 >
-                  <Card
+                  <Material3ElevatedCard
                     id={`task-${task.id || index}`}
                     data-swapy-item={dragMode === 'swapy' ? `item-${index}` : undefined}
                     className={dragMode === 'swapy' ? "swapy-item" : ""}
@@ -912,6 +913,8 @@ export default function ProjectsDashboard() {
                     onTouchStart={(e) => handleTouchStart(e, index)}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
+                    isDragged={false}
+                    interactive={true}
                     sx={{
                       // 🎨 Material You - Colores dinámicos
                       background: `linear-gradient(135deg,
@@ -921,7 +924,6 @@ export default function ProjectsDashboard() {
                       color: 'white',
                       width: '100%',
                       height: carouselConfig.cardHeight,
-                      borderRadius: 4, // Bordes más redondeados Material You
                       position: 'relative',
                       overflow: 'hidden',
                       cursor: dragMode === 'swapy' ? 'grab' : dragMode === 'html5' ? 'grab' : 'pointer',
@@ -1085,7 +1087,7 @@ export default function ProjectsDashboard() {
 
                     {/* Badge de ID para debug */}
 
-                  </Card>
+                  </Material3ElevatedCard>
                 </div>
               ))}
             </Box>

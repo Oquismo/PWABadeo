@@ -1,6 +1,6 @@
 "use client";
 import { IconButton } from "@mui/material";
-import LanguageIcon from '@mui/icons-material/Language';
+import TranslateIcon from '@mui/icons-material/Translate';
 import { useLanguage } from '@/hooks/useLanguage';
 
 export default function GlobalLanguageSwitch() {
@@ -31,24 +31,10 @@ export default function GlobalLanguageSwitch() {
   return (
     <IconButton 
       onClick={handleLanguageToggle}
-      sx={{ 
-        position: 'fixed', 
-        top: 16, 
-        right: 16, 
-        bgcolor: 'rgba(0,0,0,0.6)',
-        color: '#fff', 
-        zIndex: 1000,
-        fontSize: '1.5rem',
-        borderRadius: '50%',
-        width: 48,
-        height: 48,
-        '&:hover': {
-          bgcolor: 'rgba(0,0,0,0.8)'
-        }
-      }}
+      color="default"
       title={'Cambiar idioma'}
     >
-      <LanguageIcon sx={{ fontSize: '2rem' }} />
+      <TranslateIcon />
     </IconButton>
   );
 }

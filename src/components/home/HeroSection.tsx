@@ -1,15 +1,14 @@
 "use client";
-import { Box, Typography, Avatar, Stack, IconButton, Modal, Slide, Backdrop } from '@mui/material';
+import { Box, Typography, Avatar, Stack, IconButton } from '@mui/material';
 import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
-// import SearchIcon from '@mui/icons-material/Search';
-// SearchIcon eliminado
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import Material3Dialog from '@/components/ui/Material3Dialog';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import NotificationsPanel from '@/components/home/NotificationsPanel';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsIcon from '@mui/icons-material/Settings'; // 1. Importar el icono de Ajustes
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import TuneIcon from '@mui/icons-material/Tune';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function HeroSection() {
@@ -65,10 +64,6 @@ export default function HeroSection() {
         position: 'relative'
       }}
     >
-      {/* Botón de cambio de idioma fijo */}
-      <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 1200 }}>
-        <GlobalLanguageSwitch />
-      </Box>
       <Stack direction="row" spacing={2} alignItems="center">
         {/* Parte Izquierda: Avatar, Campana y Saludo */}
         <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1, position: 'relative' }}>
@@ -106,44 +101,21 @@ export default function HeroSection() {
                 size="small"
                 title="Ver notificaciones"
               >
-                <NotificationsIcon color={modalOpen ? 'primary' : 'action'} fontSize="small" />
+                <NotificationsOutlinedIcon color={modalOpen ? 'primary' : 'action'} fontSize="small" />
               </IconButton>
             )}
-            {/* Modal de notificaciones deslizante */}
-            <Modal
+            {/* Material 3 Dialog de notificaciones */}
+            <Material3Dialog
               open={modalOpen}
               onClose={() => setModalOpen(false)}
-              closeAfterTransition
-              slots={{ backdrop: Backdrop }}
-              slotProps={{ backdrop: { timeout: 300 } }}
-              sx={{ zIndex: 1500 }}
+              title="Notificaciones"
+              icon={<NotificationsOutlinedIcon />}
+              supportingText="Revisa tus notificaciones y actualizaciones importantes."
+              maxWidth="md"
+              fullWidth
             >
-              <Slide direction="down" in={modalOpen} mountOnEnter unmountOnExit>
-                <Box
-                  sx={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    borderRadius: 0,
-                    p: { xs: 1, md: 3 },
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    overflowY: 'auto',
-                  }}
-                  onClick={(e) => {
-                    // Solo cerrar si se hace click fuera del panel (no sobre el contenido)
-                    if (e.target === e.currentTarget) setModalOpen(false);
-                  }}
-                >
-                  <NotificationsPanel />
-                </Box>
-              </Slide>
-            </Modal>
+              <NotificationsPanel />
+            </Material3Dialog>
           </Box>
           <Box>
             <Typography 
@@ -158,11 +130,11 @@ export default function HeroSection() {
 
         {/* Parte Derecha: Iconos de Acción */}
         <Stack direction="row" spacing={1}>
-          {/* SearchIcon eliminado */}
-          {/* 2. Reemplazamos el icono y lo enlazamos a la página de ajustes */}
+          {/* Icono de cambio de idioma adaptado a Material Google, junto a ajustes */}
+          <GlobalLanguageSwitch />
           <Link href="/ajustes" passHref>
             <IconButton>
-              <SettingsIcon sx={{ color: 'text.secondary' }} />
+              <TuneIcon sx={{ color: 'text.secondary' }} />
             </IconButton>
           </Link>
         </Stack>

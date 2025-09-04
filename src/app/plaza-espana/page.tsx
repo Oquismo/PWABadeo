@@ -1,5 +1,6 @@
 "use client";
-import { Box, Typography, Chip, Card, CardContent, Stack, IconButton } from "@mui/material";
+import { Box, Typography, Chip, CardContent, Stack, IconButton } from "@mui/material";
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShareIcon from '@mui/icons-material/Share';
 import DirectionsIcon from '@mui/icons-material/Directions';
@@ -59,8 +60,6 @@ export default function PlazaEspanaPage() {
         <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: '#fff', zIndex: 10 }}>
           <ShareIcon />
         </IconButton>
-        {/* Botón de idioma */}
-        <LanguageSwitch />
         {/* Botón de Maps */}
         <IconButton 
           onClick={openMaps}
@@ -166,7 +165,9 @@ export default function PlazaEspanaPage() {
 
         {/* Card del sitio actual - clickeable */}
         <Link href="/alcazar-sevilla" style={{ textDecoration: 'none' }}>
-          <Card sx={{ 
+          <Material3ElevatedCard 
+            interactive={true}
+            sx={{ 
             bgcolor: '#2a2a2a', 
             borderRadius: 2, 
             mb: 3,
@@ -247,7 +248,7 @@ export default function PlazaEspanaPage() {
                 </Stack>
               </Box>
             </Box>
-          </Card>
+          </Material3ElevatedCard>
         </Link>
       </Box>
     </Box>

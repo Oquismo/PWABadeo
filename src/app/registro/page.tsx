@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, TextField, Button, Link as MuiLink, Grid, Tooltip, FormControl, InputLabel, Select, MenuItem, CircularProgress } from '@mui/material';
+import { Container, Box, Typography, Button, Link as MuiLink, Grid, Tooltip, FormControl, InputLabel, Select, MenuItem, CircularProgress } from '@mui/material';
+import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
+import MaterialTextField from '@/components/ui/MaterialTextField';
 import Link from 'next/link';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import SchoolSelector from '@/components/registro/SchoolSelector';
@@ -309,19 +311,19 @@ export default function RegistroPage() {
         <Box id="register-form" component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField name="firstName" required fullWidth label="Nombre" autoFocus value={formData.firstName} onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName}/>
+              <MaterialTextField name="firstName" required fullWidth label="Nombre" autoFocus value={formData.firstName} onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName}/>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField required fullWidth label="Apellidos" name="lastName" value={formData.lastName} onChange={handleChange} error={!!errors.lastName} helperText={errors.lastName}/>
+              <MaterialTextField required fullWidth label="Apellidos" name="lastName" value={formData.lastName} onChange={handleChange} error={!!errors.lastName} helperText={errors.lastName}/>
             </Grid>
             <Grid item xs={12}>
-              <TextField required fullWidth label="Correo Electrónico" name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email}/>
+              <MaterialTextField required fullWidth label="Correo Electrónico" name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email}/>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
+              <MaterialTextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField 
+              <MaterialTextField 
                 name="adminCode" 
                 fullWidth 
                 label="Código Admin (opcional)" 
@@ -359,7 +361,7 @@ export default function RegistroPage() {
             {!isAdminRegistration && (
               <>
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <MaterialTextField
                     name="arrivalDate"
                     required
                     fullWidth
@@ -373,7 +375,7 @@ export default function RegistroPage() {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <MaterialTextField
                     name="departureDate"
                     required
                     fullWidth
@@ -456,7 +458,7 @@ export default function RegistroPage() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField required fullWidth name="password" label="Contraseña" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}/>
+              <MaterialTextField required fullWidth name="password" label="Contraseña" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}/>
             </Grid>
           </Grid>
           <Button 
@@ -467,7 +469,7 @@ export default function RegistroPage() {
             color="primary" 
             disabled={isSubmitting}
             sx={{ mt: 3, mb: 2, py: 1.5 }}
-            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : undefined}
+            startIcon={isSubmitting ? <Material3LoadingIndicator size="small" /> : undefined}
           >
             {isSubmitting ? 'Registrando...' : 'Registrarse'}
           </Button>

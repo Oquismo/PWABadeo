@@ -1,7 +1,8 @@
 // src/components/places/PlaceCard.tsx
 'use client';
 
-import { Box, Card, CardContent, Typography, Button, CardMedia, Chip, Stack } from '@mui/material';
+import { Box, CardContent, Typography, Button, CardMedia, Chip, Stack } from '@mui/material';
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import LaunchIcon from '@mui/icons-material/Launch';
 import MapIcon from '@mui/icons-material/Map';
@@ -16,12 +17,11 @@ export default function PlaceCard({ place }: PlaceCardProps) {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
 
   return (
-    <Card 
+    <Material3ElevatedCard 
+      interactive={true}
       sx={{ 
         display: 'flex', 
         mb: 2, 
-        borderRadius: '16px', 
-        boxShadow: 3,
         overflow: 'hidden',
         flexDirection: { xs: 'column', sm: 'row' } // En móvil, apila verticalmente
       }}
@@ -83,6 +83,6 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           </Stack>
         </Box>
       </Box>
-    </Card>
+    </Material3ElevatedCard>
   );
 }

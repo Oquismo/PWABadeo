@@ -3,18 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "prisma generate && next dev",
-    "build": "prisma generate && next build",
-    "build:simple": "prisma generate && next build",
-    "build:vercel": "prisma generate && prisma db push --skip-generate && next build",
-    "build:migrate": "prisma generate && prisma migrate deploy && next build",
+    "dev": "next dev",
+    "dev:full": "prisma generate && next dev",
+    "build": "next build",
+    "build:simple": "next build",
+    "build:vercel": "prisma db push --skip-generate && next build",
+    "build:migrate": "prisma migrate deploy && next build",
     "start": "next start",
     "prestart": "prisma migrate deploy",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:baseline": "prisma migrate resolve --applied",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prisma:generate": "prisma generate"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -24,7 +26,7 @@
     "@mui/icons-material": "^5.15.20",
     "@mui/material": "^5.15.20",
     "@mui/material-nextjs": "5.15.11",
-    "@prisma/client": "^6.14.0",
+    "@prisma/client": "^6.15.0",
     "@types/leaflet": "^1.9.20",
     "@types/react-calendar": "^3.9.0",
     "@vercel/analytics": "^1.5.0",
@@ -36,8 +38,9 @@
     "leaflet": "^1.9.4",
     "leaflet.heat": "^0.2.0",
     "next": "14.2.4",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.1",
-    "prisma": "^6.14.0",
+    "prisma": "^6.15.0",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-calendar": "^6.0.0",
@@ -47,7 +50,8 @@
     "react-leaflet": "^4.2.1",
     "sqlite3": "^5.1.7",
     "swapy": "^1.0.5",
-    "swiper": "^11.2.10"
+    "swiper": "^11.2.10",
+    "undici": "^7.15.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.4.5",

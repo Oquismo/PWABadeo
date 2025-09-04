@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db';
 
 // GET - Obtener eventos del usuario
 export async function GET(request: NextRequest) {
@@ -11,23 +11,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no autenticado' }, { status: 401 });
     }
 
+    // Si el usuario es admin, ver todos. Si no, solo los suyos o públicos
+    const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
+    const isAdmin = user?.role === 'admin';
     const events = await prisma.userEvent.findMany({
-      where: {
-        userId: parseInt(userId)
-      },
-      orderBy: {
-        date: 'asc'
-      }
+      where: isAdmin
+        ? undefined
+        : {
+            OR: [
+              { userId: parseInt(userId) },
+              { isPublic: true as any }
+            ]
+          },
+      orderBy: { date: 'asc' }
     });
-
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       events: events.map((event: any) => ({
         id: event.id.toString(),
         title: event.title,
         date: event.date.toISOString(),
         type: event.type,
-        createdAt: event.createdAt.toISOString()
+        createdAt: event.createdAt.toISOString(),
+        isPublic: event.isPublic
       }))
     });
 
@@ -48,12 +54,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no autenticado' }, { status: 401 });
     }
 
-    const { title, date, type = 'personal' } = await request.json();
+    const { title, date, type = 'personal', isPublic = false } = await request.json();
 
     if (!title || !date) {
-      return NextResponse.json({ 
-        error: 'Título y fecha son requeridos' 
+      return NextResponse.json({
+        error: 'Título y fecha son requeridos'
       }, { status: 400 });
+    }
+
+    // Solo admin puede crear eventos públicos
+    let makePublic = false;
+    if (isPublic) {
+      const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
+      if (user?.role === 'admin') {
+        makePublic = true;
+      }
     }
 
     const newEvent = await prisma.userEvent.create({
@@ -61,18 +76,20 @@ export async function POST(request: NextRequest) {
         title,
         date: new Date(date),
         type,
-        userId: parseInt(userId)
+        userId: parseInt(userId),
+        isPublic: makePublic as any
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       event: {
         id: newEvent.id.toString(),
         title: newEvent.title,
         date: newEvent.date.toISOString(),
         type: newEvent.type,
-        createdAt: newEvent.createdAt.toISOString()
+        createdAt: newEvent.createdAt.toISOString(),
+        isPublic: (newEvent as any).isPublic
       }
     });
 

@@ -5,9 +5,10 @@ import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
-import { Box, Typography, Fab, TextField, IconButton, InputAdornment, Button, Stack, Chip } from '@mui/material';
+import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, Chip } from '@mui/material';
+import MaterialTextField from '@/components/ui/MaterialTextField';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import Image from 'next/image';
 
@@ -330,19 +331,19 @@ export default function InteractiveMap() {
 
   return (
     <Box>
-      <TextField
+      <MaterialTextField
         fullWidth
         variant="outlined"
         placeholder="Buscar un lugar en Sevilla..."
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+        onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
         sx={{ mb: 2 }}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
               <IconButton onClick={handleSearch} edge="end">
-                <SearchIcon />
+                <SearchOutlinedIcon />
               </IconButton>
             </InputAdornment>
           ),

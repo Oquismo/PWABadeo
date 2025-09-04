@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
-import { Box, Typography, Chip, Card, CardMedia, CardContent, Stack } from "@mui/material";
+import { Box, Typography, Chip, CardMedia, CardContent, Stack } from "@mui/material";
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 
 // Ejemplo de sitio en Sevilla
 const site = {
@@ -15,14 +16,13 @@ const site = {
 
 export default function CheckInCard() {
   return (
-    <Card
+    <Material3ElevatedCard
+      interactive={true}
       sx={{
         maxWidth: 400,
         mx: "auto",
         bgcolor: "#18181c",
         color: "#fff",
-        borderRadius: 4,
-        boxShadow: 6,
         overflow: "hidden",
       }}
     >
@@ -46,6 +46,6 @@ export default function CheckInCard() {
           <Chip label={site.activity} color="default" variant="filled" sx={{ bgcolor: "#22223a", color: "#fff" }} />
         </Stack>
       </CardContent>
-    </Card>
+    </Material3ElevatedCard>
   );
 }

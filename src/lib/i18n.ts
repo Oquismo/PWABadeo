@@ -82,6 +82,13 @@ export const translations = {
         evening: "Buenas noches"
       }
     },
+    feedback: {
+      title: "¡Tu opinión nos ayuda a mejorar!",
+      placeholder: "¿Qué te gustaría mejorar o comentar?",
+      send: "Enviar",
+      thanks: "¡Gracias por tu feedback!",
+      buttonLabel: "Enviar feedback"
+    },
     // Páginas principales
     pages: {
       home: {
@@ -226,6 +233,13 @@ export const translations = {
         afternoon: "Good afternoon",
         evening: "Good evening"
       }
+    },
+    feedback: {
+      title: "Your opinion helps us improve!",
+      placeholder: "What would you like to improve or comment on?",
+      send: "Send",
+      thanks: "Thank you for your feedback!",
+      buttonLabel: "Send feedback"
     },
     // Main pages
     pages: {
@@ -408,6 +422,13 @@ export const translations = {
         afternoon: "Buon pomeriggio",
         evening: "Buonasera"
       }
+    },
+    feedback: {
+      title: "La tua opinione ci aiuta a migliorare!",
+      placeholder: "Cosa vorresti migliorare o commentare?",
+      send: "Invia",
+      thanks: "Grazie per il tuo feedback!",
+      buttonLabel: "Invia feedback"
     },
     // Pagine principali
     pages: {

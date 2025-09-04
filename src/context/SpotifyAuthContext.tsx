@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { Box, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Alert } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
+import Material3Dialog from '@/components/ui/Material3Dialog';
 import { MusicNote } from '@mui/icons-material';
 
 interface SpotifyUser {
@@ -325,49 +327,51 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
     <SpotifyAuthContext.Provider value={value}>
       {children}
 
-      {/* Diálogo de login */}
-      <Dialog open={showLoginDialog} onClose={() => setShowLoginDialog(false)}>
-        <DialogTitle>Conectar con Spotify</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Para obtener recomendaciones musicales personalizadas basadas en el clima,
-            conecta tu cuenta de Spotify.
-          </Typography>
+      {/* Material 3 Dialog de conexión con Spotify */}
+      <Material3Dialog
+        open={showLoginDialog}
+        onClose={() => setShowLoginDialog(false)}
+        title="Conectar con Spotify"
+        icon={<MusicNote />}
+        supportingText="Para obtener recomendaciones musicales personalizadas basadas en el clima, conecta tu cuenta de Spotify."
+        actions={
+          <>
+            <Button onClick={() => setShowLoginDialog(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                setShowLoginDialog(false);
+                login();
+              }}
+              variant="contained"
+              sx={{ bgcolor: '#1DB954', '&:hover': { bgcolor: '#1ed760' } }}
+            >
+              Conectar Spotify
+            </Button>
+          </>
+        }
+      >
+        {loginError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {loginError}
+          </Alert>
+        )}
 
-          {loginError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {loginError}
-            </Alert>
-          )}
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-            <MusicNote sx={{ color: 'green.600' }} />
-            <Box>
-              <Typography variant="body2" fontWeight="bold">
-                Beneficios de conectar Spotify:
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                • Listas de reproducción personalizadas por clima
-                • Recomendaciones basadas en tus gustos
-                • Control total de la reproducción
-              </Typography>
-            </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+          <MusicNote sx={{ color: 'green.600' }} />
+          <Box>
+            <Typography variant="body2" fontWeight="bold">
+              Beneficios de conectar Spotify:
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              • Listas de reproducción personalizadas por clima
+              • Recomendaciones basadas en tus gustos
+              • Control total de la reproducción
+            </Typography>
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowLoginDialog(false)}>Cancelar</Button>
-          <Button
-            onClick={() => {
-              setShowLoginDialog(false);
-              login();
-            }}
-            variant="contained"
-            sx={{ bgcolor: '#1DB954', '&:hover': { bgcolor: '#1ed760' } }}
-          >
-            Conectar Spotify
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Box>
+      </Material3Dialog>
     </SpotifyAuthContext.Provider>
   );
 };
@@ -379,8 +383,7 @@ export const SpotifyAuthStatus: React.FC = () => {
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <CircularProgress size={16} />
-        <Typography variant="caption">Conectando...</Typography>
+        <Material3LoadingIndicator size="small" text="Conectando..." />
       </Box>
     );
   }

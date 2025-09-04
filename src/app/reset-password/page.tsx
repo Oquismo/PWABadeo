@@ -6,7 +6,6 @@ import {
   Container, 
   Box, 
   Typography, 
-  TextField, 
   Button, 
   Link as MuiLink, 
   Alert,
@@ -14,6 +13,8 @@ import {
   CircularProgress,
   LinearProgress
 } from '@mui/material';
+import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
+import MaterialTextField from '@/components/ui/MaterialTextField';
 import { 
   Lock as LockIcon,
   CheckCircle as CheckCircleIcon,
@@ -136,10 +137,11 @@ function ResetPasswordForm() {
     return (
       <Container maxWidth="sm" sx={{ py: 8 }}>
         <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <CircularProgress sx={{ mb: 2 }} />
-          <Typography variant="h6">
-            Validando enlace de recuperación...
-          </Typography>
+          <Material3LoadingIndicator 
+            contained
+            text="Validando enlace de recuperación..."
+            sx={{ mb: 2 }}
+          />
         </Paper>
       </Container>
     );
@@ -226,7 +228,7 @@ function ResetPasswordForm() {
 
       <Paper sx={{ p: 4 }}>
         <Box component="form" onSubmit={handleSubmit}>
-          <TextField
+          <MaterialTextField
             fullWidth
             label="Nueva Contraseña"
             type={showPassword ? 'text' : 'password'}
@@ -266,7 +268,7 @@ function ResetPasswordForm() {
             </Box>
           )}
 
-          <TextField
+          <MaterialTextField
             fullWidth
             label="Confirmar Contraseña"
             type={showConfirmPassword ? 'text' : 'password'}
@@ -306,7 +308,7 @@ function ResetPasswordForm() {
           >
             {loading ? (
               <>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Material3LoadingIndicator size="small" sx={{ mr: 1 }} />
                 Restableciendo...
               </>
             ) : (
@@ -331,10 +333,10 @@ export default function ResetPasswordPage() {
     <Suspense fallback={
       <Container maxWidth="sm" sx={{ py: 8 }}>
         <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <CircularProgress sx={{ mb: 2 }} />
-          <Typography variant="h6">
-            Cargando...
-          </Typography>
+          <Material3LoadingIndicator 
+            contained
+            text="Cargando..."
+          />
         </Paper>
       </Container>
     }>

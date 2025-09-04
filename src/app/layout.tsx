@@ -16,7 +16,6 @@ import AnnouncementBanner from '@/components/home/AnnouncementBanner';
 import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 import { ConnectionMonitor } from '@/components/ConnectionMonitor';
 import WarmupInitializer from '../components/WarmupInitializer';
-import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import LanguageTest from '@/components/LanguageTest';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -53,7 +52,6 @@ export default function RootLayout({
                     <WarmupInitializer />
                   <ServiceWorkerProvider>
                     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-                      <GlobalLanguageSwitch />
                       
                       <Box component="main" sx={{ pb: '90px' }}>
                         <PageTransition>

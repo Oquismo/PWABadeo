@@ -19,9 +19,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Modal,
-  Slide,
-  Backdrop,
   Card,
   CardContent,
   Chip,
@@ -29,6 +26,9 @@ import {
   Fade,
   Grid
 } from '@mui/material';
+import Material3Dialog from '@/components/ui/Material3Dialog';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import NotificationsPanel from '@/components/home/NotificationsPanel';
 import SchoolIcon from '@mui/icons-material/School';
 import CakeIcon from '@mui/icons-material/Cake';
@@ -106,11 +106,10 @@ export default function PerfilPage() {
 
   if (isLoading) {
     return (
-      <Container component="main" maxWidth="md">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-          <Typography variant="h6" color="text.secondary">Cargando perfil...</Typography>
-        </Box>
-      </Container>
+      <Material3LoadingPage 
+        text="Cargando perfil..."
+        subtitle="Obteniendo información de tu cuenta"
+      />
     );
   }
 
@@ -136,31 +135,17 @@ export default function PerfilPage() {
 
   return (
     <Container component="main" maxWidth="md" sx={{ py: 2 }}>
-      <Modal
+      <Material3Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        closeAfterTransition
-        slots={{ backdrop: Backdrop }}
-        slotProps={{ backdrop: { timeout: 300 } }}
+        title="Notificaciones"
+        icon={<NotificationsOutlinedIcon />}
+        supportingText="Revisa todas tus notificaciones importantes."
+        maxWidth="sm"
+        fullWidth
       >
-        <Slide direction="down" in={modalOpen} mountOnEnter unmountOnExit>
-          <Box sx={{
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            borderRadius: 3,
-            p: 3,
-            minWidth: 340,
-            maxWidth: 500,
-            mt: 2
-          }}>
-            <NotificationsPanel />
-          </Box>
-        </Slide>
-      </Modal>
+        <NotificationsPanel />
+      </Material3Dialog>
 
       {/* Header con acciones */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

@@ -28,6 +28,8 @@ import {
   Select,
   MenuItem
 } from '@mui/material';
+import Material3Dialog from '@/components/ui/Material3Dialog';
+import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { PhotoCamera as PhotoCameraIcon, Face as FaceIcon, Person as PersonIcon, Save as SaveIcon, Edit as EditIcon } from '@mui/icons-material';
 
@@ -316,11 +318,10 @@ export default function EditarPerfilPage() {
 
   if (isLoading) {
     return (
-      <Container component="main" maxWidth="md">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-          <Typography variant="h6" color="text.secondary">Cargando...</Typography>
-        </Box>
-      </Container>
+      <Material3LoadingPage 
+        text="Cargando editor..."
+        subtitle="Preparando tu información para editar"
+      />
     );
   }
 
@@ -693,81 +694,64 @@ export default function EditarPerfilPage() {
         </Fade>
       </Box>
 
-      {/* Diálogo para seleccionar avatares predefinidos */}
-      <Dialog
+      {/* Material 3 Dialog para seleccionar avatares predefinidos */}
+      <Material3Dialog
         open={showProfileDialog}
         onClose={() => setShowProfileDialog(false)}
+        title="Elegir Avatar"
+        icon={<FaceIcon />}
+        supportingText="Selecciona un emoji como tu avatar de perfil:"
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          sx: { borderRadius: 4 }
-        }}
+        actions={
+          <>
+            <Button
+              onClick={() => setShowProfileDialog(false)}
+              sx={{ borderRadius: 2 }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => selectPredefinedAvatar(defaultEggAvatar)}
+              variant="outlined"
+              startIcon={<Avatar src={defaultEggAvatar} sx={{ width: 20, height: 20 }} />}
+              sx={{ borderRadius: 2 }}
+            >
+              Huevo por Defecto
+            </Button>
+          </>
+        }
       >
-        <DialogTitle sx={{ pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FaceIcon color="primary" />
-            <Typography variant="h6" fontWeight="bold">
-              Elegir Avatar
-            </Typography>
-          </Box>
-        </DialogTitle>
 
-        <Divider />
-
-        <DialogContent sx={{ py: 3 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Selecciona un emoji como tu avatar de perfil:
-          </Typography>
-
-          <Grid container spacing={1}>
-            {predefinedAvatars.map((emoji, index) => (
-              <Grid item xs={3} sm={2} key={index}>
-                <IconButton
-                  onClick={() => selectPredefinedAvatar(emoji)}
-                  sx={{
-                    width: '100%',
-                    height: 60,
-                    fontSize: '1.8rem',
-                    border: profileImage === emoji ? 2 : 1,
-                    borderColor: profileImage === emoji ? 'primary.main' : 'divider',
-                    borderStyle: 'solid',
-                    borderRadius: 2,
-                    bgcolor: profileImage === emoji ? 'primary.light' : 'transparent',
-                    '&:hover': {
-                      bgcolor: 'primary.light',
-                      transform: 'scale(1.1)'
-                    },
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {emoji.startsWith('/img/')
-                    ? <Avatar src={emoji} sx={{ width: 32, height: 32, mx: 'auto' }} />
-                    : emoji}
-                </IconButton>
-              </Grid>
-            ))}
-          </Grid>
-        </DialogContent>
-
-        <Divider />
-
-        <DialogActions sx={{ p: 3, pt: 2 }}>
-          <Button
-            onClick={() => setShowProfileDialog(false)}
-            sx={{ borderRadius: 2 }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={() => selectPredefinedAvatar(defaultEggAvatar)}
-            variant="outlined"
-            startIcon={<Avatar src={defaultEggAvatar} sx={{ width: 20, height: 20 }} />}
-            sx={{ borderRadius: 2 }}
-          >
-            Huevo por Defecto
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Grid container spacing={1}>
+          {predefinedAvatars.map((emoji, index) => (
+            <Grid item xs={3} sm={2} key={index}>
+              <IconButton
+                onClick={() => selectPredefinedAvatar(emoji)}
+                sx={{
+                  width: '100%',
+                  height: 60,
+                  fontSize: '1.8rem',
+                  border: profileImage === emoji ? 2 : 1,
+                  borderColor: profileImage === emoji ? 'primary.main' : 'divider',
+                  borderStyle: 'solid',
+                  borderRadius: 2,
+                  bgcolor: profileImage === emoji ? 'primary.light' : 'transparent',
+                  '&:hover': {
+                    bgcolor: 'primary.light',
+                    transform: 'scale(1.1)'
+                  },
+                  transition: 'all 0.2s'
+                }}
+              >
+                {emoji.startsWith('/img/')
+                  ? <Avatar src={emoji} sx={{ width: 32, height: 32, mx: 'auto' }} />
+                  : emoji}
+              </IconButton>
+            </Grid>
+          ))}
+        </Grid>
+      </Material3Dialog>
     </Container>
   );
 }

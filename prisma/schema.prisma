@@ -38,6 +38,7 @@ model User {
   tasks            Task[]
   userEvents       UserEvent[]       // Relación con eventos personalizados
   pushSubscription PushSubscription?
+  feedbacks        Feedback[]        // Relación con feedbacks
   
   @@index([schoolId])
 }
@@ -147,4 +148,18 @@ model UserEvent {
   @@index([userId])
   @@index([date])
   @@index([type])
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  message   String
+  userId    Int?     // Opcional para feedback anónimo
+  user      User?    @relation(fields: [userId], references: [id])
+  language  String   @default("es") // Idioma en que se envió el feedback
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false) // Para marcar si ha sido leído por admin
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isRead])
 }

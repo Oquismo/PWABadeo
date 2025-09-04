@@ -1,6 +1,7 @@
 'use client';
 
-import { Container, Typography, Box, Paper, Stack, Switch, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, Paper, Stack, Switch, CircularProgress, IconButton } from '@mui/material';
+import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import { useThemeContext } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -33,10 +34,12 @@ export default function AjustesPage() {
 
   return (
     <Container>
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 4 }}>
-          Ajustes
-        </Typography>
+      <Box sx={{ py: 4, position: 'relative' }}>
+        <Stack direction="row" alignItems="center" justifyContent="flex-start" spacing={2} sx={{ mb: 4 }}>
+          <Typography variant="h3" component="h1" fontWeight="bold">
+            Ajustes
+          </Typography>
+        </Stack>
 
         {isAdmin && (
           <Paper sx={{ p: 2, mb: 2 }}>

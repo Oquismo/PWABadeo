@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Box, Container, Typography, CircularProgress, Fab, Drawer, IconButton } from '@mui/material';
+import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import GeolocalizacionDemo from '@/components/GeolocalizacionDemo';
 import dynamic from 'next/dynamic';
 import RoutePlanner from '@/components/mapa/RoutePlanner'; 
@@ -14,9 +15,11 @@ const InteractiveMap = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '70vh' }}>
-        <CircularProgress />
-      </Box>
+      <Material3LoadingPage 
+        text="Cargando mapa..."
+        subtitle="Preparando los lugares de interés en Sevilla"
+        size="large"
+      />
     )
   }
 );

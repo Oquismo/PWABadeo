@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
-import { Box, Typography, Chip, Card, CardContent, Stack, IconButton } from "@mui/material";
+import { Box, Typography, Chip, CardContent, Stack, IconButton } from "@mui/material";
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShareIcon from '@mui/icons-material/Share';
 
@@ -19,12 +20,11 @@ const spot = {
 export default function SevillaSpotCard() {
   return (
     <Box sx={{ width: '100%', maxWidth: 400, mx: 'auto', mt: 2 }}>
-      <Card
+      <Material3ElevatedCard
+        interactive={true}
         sx={{
           bgcolor: '#18181c',
           color: '#fff',
-          borderRadius: 4,
-          boxShadow: 6,
           overflow: 'hidden',
           position: 'relative',
         }}
@@ -60,7 +60,7 @@ export default function SevillaSpotCard() {
             <Chip label={spot.level} color="info" variant="filled" sx={{ bgcolor: '#22223a', color: '#fff' }} />
           </Stack>
         </CardContent>
-      </Card>
+      </Material3ElevatedCard>
     </Box>
   );
 }
