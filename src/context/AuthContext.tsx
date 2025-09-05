@@ -84,7 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await fetch('/api/user/by-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email }),
+          credentials: 'include'
         });
         if (response.ok) {
           const { user } = await response.json();
@@ -151,7 +152,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch('/api/user/by-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userData.email })
+        body: JSON.stringify({ email: userData.email }),
+        credentials: 'include'
       });
       if (response.ok) {
         const { user } = await response.json();
@@ -193,7 +195,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({
           userId: user.id,
           ...data
-        })
+        }),
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -223,7 +226,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch('/api/avatar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, avatarUrl })
+        body: JSON.stringify({ userId: user.id, avatarUrl }),
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -251,7 +255,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await fetch(`/api/avatar?userId=${user.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -276,7 +281,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/avatar?userId=${user.id}`);
+      const response = await fetch(`/api/avatar?userId=${user.id}`, {
+        credentials: 'include'
+      });
 
       if (!response.ok) {
         throw new Error('Error al obtener avatar');

@@ -6,14 +6,18 @@ import { barrioDeTasks } from '@/data/barrioTasks';
 import { useAuth } from './AuthContext';
 
 interface TasksContextType {
-  tasks: TaskData[];               // Tareas visibles para el usuario actual
-  addTask: (task: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role'] }) => void;
+  tasks: TaskData[];               // Tareas visibles para el usuario actual (filtradas por escuela)
+  allTasks: TaskData[];            // Todas las tareas (para admins)
+  addTask: (task: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role']; comun?: boolean; schoolIds?: number[] }) => void;
   updateTask: (id: string, task: Partial<TaskData>) => void;
   deleteTask: (id: string) => void;
   resetToDefault: () => void;
   loadBarrioTasks: () => void;
   loadMixedTasks: () => void;
   canManageAdminTasks: boolean;    // Permiso para editar tareas role=admin
+  currentSchoolId: number | null;  // Escuela actual del usuario
+  setCurrentSchoolId: (schoolId: number | null) => void;
+  refreshTasks: () => void;        // Refrescar tasks desde el servidor
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -34,42 +38,71 @@ interface TasksProviderProps {
 export function TasksProvider({ children }: TasksProviderProps) {
   const { user } = useAuth();
   const [allTasks, setAllTasks] = useState<TaskData[]>([]);
+  const [currentSchoolId, setCurrentSchoolId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Cargar tareas del localStorage al inicializar
-  // Carga inicial desde API
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch('/api/tasks');
-        const data = await res.json();
-        if (res.ok) {
-          const norm = (data.tasks || []).map((t: any) => ({
-            ...t,
-            avatars: Array.isArray(t.avatars) ? t.avatars : (t.avatars ? t.avatars : [])
-          }));
-          setAllTasks(norm);
-          setError(null);
-        } else {
-          setError(data.error || 'Error cargando tareas');
-        }
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
+  // Función para cargar tasks desde el servidor
+  const fetchTasks = async (schoolId?: number | null) => {
+    setLoading(true);
+    try {
+      let url = '/api/tasks';
+      const params = new URLSearchParams();
+      
+      if (user?.id) params.append('userId', user.id.toString());
+      if (schoolId) params.append('schoolId', schoolId.toString());
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
       }
-    };
-    fetchTasks();
-  }, []);
+
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (res.ok) {
+        const norm = (data.tasks || []).map((t: any) => ({
+          ...t,
+          avatars: Array.isArray(t.avatars) ? t.avatars : (t.avatars ? t.avatars : [])
+        }));
+        setAllTasks(norm);
+        setError(null);
+      } else {
+        setError(data.error || 'Error cargando tareas');
+      }
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar tareas al inicializar y cuando cambie el usuario o la escuela
+  useEffect(() => {
+    // Si el usuario tiene una escuela asignada y no hemos seleccionado una escuela manualmente
+    if (user?.schoolId && currentSchoolId === null) {
+      setCurrentSchoolId(user.schoolId);
+    }
+    fetchTasks(currentSchoolId || user?.schoolId);
+  }, [user?.id, user?.schoolId, currentSchoolId]);
 
   const canManageAdminTasks = user?.role === 'admin';
 
-  // Ahora todas las tareas son visibles; el rol solo controla quién puede CREAR/EDITAR/ELIMINAR tareas de rol 'admin'
-  const tasks = allTasks as TaskData[];
+  // Filtrar tasks según la escuela actual (si no es admin)
+  const tasks = canManageAdminTasks ? allTasks : allTasks.filter(task => {
+    // Si no hay escuela seleccionada, mostrar todas las tasks comunes
+    if (!currentSchoolId && !user?.schoolId) {
+      return task.comun === true;
+    }
+    // Si hay escuela seleccionada, mostrar tasks comunes + tasks de la escuela
+    const userSchoolId = currentSchoolId || user?.schoolId;
+    return task.comun === true || (task.schools && task.schools.some((s: any) => s.id === userSchoolId));
+  });
 
-  const addTask = (taskData: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role'] }) => {
+  const refreshTasks = () => {
+    fetchTasks(currentSchoolId || user?.schoolId);
+  };
+
+  const addTask = (taskData: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role']; comun?: boolean; schoolIds?: number[] }) => {
     const role: TaskData['role'] = taskData.role || 'user';
     if (role === 'admin' && !canManageAdminTasks) {
       console.warn('Intento no autorizado de crear tarea admin');
@@ -84,7 +117,13 @@ export function TasksProvider({ children }: TasksProviderProps) {
     fetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...newTask, userId: user?.id })
+      body: JSON.stringify({ 
+        ...newTask, 
+        userId: user?.id,
+        comun: taskData.comun || false,
+        schoolIds: taskData.schoolIds || []
+      }),
+      credentials: 'include'
     }).then(async r => {
       if (!r.ok) {
         const d = await r.json();
@@ -106,7 +145,8 @@ export function TasksProvider({ children }: TasksProviderProps) {
     fetch('/api/tasks', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: typeof id === 'string' ? parseInt(id, 10) : id, updates, userId: user?.id })
+      body: JSON.stringify({ id: typeof id === 'string' ? parseInt(id, 10) : id, updates, userId: user?.id }),
+      credentials: 'include'
     }).then(async r => {
       const d = await r.json();
       if (!r.ok) {
@@ -123,7 +163,10 @@ export function TasksProvider({ children }: TasksProviderProps) {
 
   const deleteTask = (id: string) => {
     const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
-    fetch(`/api/tasks?id=${numericId}&userId=${user?.id}`, { method: 'DELETE' })
+    fetch(`/api/tasks?id=${numericId}&userId=${user?.id}`, { 
+      method: 'DELETE',
+      credentials: 'include'
+    })
       .then(async r => {
         const d = await r.json();
         if (!r.ok) {
@@ -142,7 +185,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
     // Dejamos stub que vuelve a cargar
     (async () => {
       try {
-        const res = await fetch('/api/tasks');
+        const res = await fetch('/api/tasks', { credentials: 'include' });
         const data = await res.json();
         if (res.ok) setAllTasks(data.tasks || []);
       } catch {}
@@ -153,7 +196,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
     // Carga selectiva: filtrar role user (placeholder)
     (async () => {
       try {
-        const res = await fetch('/api/tasks?role=user');
+        const res = await fetch('/api/tasks?role=user', { credentials: 'include' });
         const data = await res.json();
         if (res.ok) setAllTasks(data.tasks || []);
       } catch {}
@@ -165,7 +208,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
     // Mezcla simulada (por ahora recarga todo)
     (async () => {
       try {
-        const res = await fetch('/api/tasks');
+        const res = await fetch('/api/tasks', { credentials: 'include' });
         const data = await res.json();
         if (res.ok) setAllTasks(data.tasks || []);
       } catch {}
@@ -175,14 +218,18 @@ export function TasksProvider({ children }: TasksProviderProps) {
   return (
     <TasksContext.Provider
       value={{
-  tasks,
+        tasks,
+        allTasks,
         addTask,
         updateTask,
         deleteTask,
         resetToDefault,
         loadBarrioTasks,
-  loadMixedTasks,
-  canManageAdminTasks
+        loadMixedTasks,
+        canManageAdminTasks,
+        currentSchoolId,
+        setCurrentSchoolId,
+        refreshTasks
       }}
     >
       {children}

@@ -77,10 +77,36 @@ export async function POST(request: Request) {
           console.warn('No se pudo registrar log de login (retry)', e);
         }
 
-        return NextResponse.json({
+        // Crear respuesta con cookies para autenticación
+        const response = NextResponse.json({
           user: userWithoutPassword,
           message: 'Login exitoso'
         });
+
+        // Establecer cookies para el middleware
+        const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
+        
+        console.log('🍪 [RETRY] Estableciendo cookies de autenticación:', {
+          authToken: authToken.substring(0, 20) + '...',
+          userRole: userWithoutPassword.role,
+          userId: user.id
+        });
+        
+        response.cookies.set('auth-token', authToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7 // 7 días
+        });
+
+        response.cookies.set('user', JSON.stringify(userWithoutPassword), {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7 // 7 días
+        });
+
+        return response;
 
       } catch (queryError) {
         queryAttempts++;

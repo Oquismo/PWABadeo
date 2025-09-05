@@ -9,6 +9,21 @@ export interface TaskData {
   date?: string;
   // Rol mínimo requerido para crear/gestionar esta tarea (edición/eliminación)
   role?: 'admin' | 'user';
+  // Nueva propiedades para sistema de escuelas
+  comun?: boolean;  // Si es true, se muestra a todas las escuelas
+  schools?: Array<{  // Escuelas a las que está asignada esta task
+    id: number;
+    name: string;
+    city: string;
+    type: string;
+    level: string;
+  }>;
+  user?: {         // Usuario que creó la task
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export const carouselTasks: TaskData[] = [

@@ -70,10 +70,30 @@ export async function POST(request: Request) {
     // Retornar sin la contraseña
     const { password: _, ...safeUser } = user;
 
-    return NextResponse.json({
+    // Crear respuesta con cookies para autenticación
+    const response = NextResponse.json({
       user: safeUser,
       message: 'Login exitoso'
     });
+
+    // Establecer cookies para el middleware
+    const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
+    
+    response.cookies.set('auth-token', authToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7 días
+    });
+
+    response.cookies.set('user', JSON.stringify(safeUser), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7 días
+    });
+
+    return response;
 
   } catch (error) {
     console.error('Login error:', error);

@@ -180,7 +180,9 @@ export default function SchoolManagement() {
   const loadSchools = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/schools');
+      const response = await fetch('/api/admin/schools', {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setSchools(data.schools || []);
@@ -277,6 +279,7 @@ export default function SchoolManagement() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -304,6 +307,7 @@ export default function SchoolManagement() {
     try {
       const response = await fetch(`/api/admin/schools/${school.id}`, {
         method: 'DELETE',
+        credentials: 'include'
       });
 
       if (response.ok) {

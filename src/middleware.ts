@@ -103,6 +103,17 @@ export function middleware(request: NextRequest) {
 
   // PROTEGER SOLO APIs CRÍTICAS
   if (pathname.startsWith('/api/admin/')) {
+    console.log('🔍 MIDDLEWARE DEBUG - API Admin Request:', {
+      path: pathname,
+      hasAuthToken: !!authToken,
+      hasUserData: !!userData,
+      authTokenPreview: authToken ? authToken.substring(0, 20) + '...' : 'NONE',
+      userDataPreview: userData ? userData.substring(0, 50) + '...' : 'NONE',
+      allCookies: Object.fromEntries(
+        Array.from(request.cookies.getAll()).map(cookie => [cookie.name, cookie.value.substring(0, 30) + '...'])
+      )
+    });
+
     if (!authToken || !userData) {
       console.log('🚨 API ADMIN BLOQUEADA - Sin autenticación:', pathname);
       return NextResponse.json(

@@ -9,7 +9,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/users')
+    fetch('/api/admin/users', { credentials: 'include' })
       .then(res => res.ok ? res.json() : [])
       .then(data => setUsers(data))
       .catch(() => setUsers([]));

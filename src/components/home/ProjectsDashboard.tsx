@@ -15,6 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { createSwapy } from 'swapy';
 import dynamic from 'next/dynamic';
+import SchoolSelector from '@/components/SchoolSelector';
 
 // Lazy loading para el componente de debug pesado
 const DebugMetrics = dynamic(() => import('@/components/admin/DebugMetrics'), {
@@ -861,6 +862,11 @@ export default function ProjectsDashboard() {
                 </IconButton>
               </Tooltip>
             </Box>
+          </Box>
+
+          {/* Selector de Escuela para filtrar tasks (solo admins) */}
+          <Box sx={{ px: 2, mb: 2 }}>
+            <SchoolSelector />
           </Box>
           
           {/* Carrusel horizontal con swipe support */}

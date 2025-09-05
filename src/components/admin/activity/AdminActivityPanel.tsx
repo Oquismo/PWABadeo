@@ -14,8 +14,8 @@ export default function AdminActivityPanel() {
     setLoading(true);
     try {
       const [logsRes, usersRes] = await Promise.all([
-        fetch('/api/admin/logs?page=1&pageSize=10').then(r=>r.json()),
-        fetch('/api/admin/active-users').then(r=>r.json())
+        fetch('/api/admin/logs?page=1&pageSize=10', { credentials: 'include' }).then(r=>r.json()),
+        fetch('/api/admin/active-users', { credentials: 'include' }).then(r=>r.json())
       ]);
       setLogs(logsRes.items || []);
       setActiveUsers(usersRes.users || []);

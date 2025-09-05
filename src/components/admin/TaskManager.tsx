@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -20,7 +20,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Alert
+  Alert,
+  Checkbox,
+  FormControlLabel,
+  ListItemText
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -59,6 +62,11 @@ export default function TaskManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskData | null>(null);
   const [showAlert, setShowAlert] = useState(false);
+  
+  // Estados para escuelas
+  const [schools, setSchools] = useState<any[]>([]);
+  const [selectedSchoolIds, setSelectedSchoolIds] = useState<number[]>([]);
+  const [isCommonTask, setIsCommonTask] = useState(false);
 
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
@@ -70,6 +78,22 @@ export default function TaskManager() {
   });
   const [taskRole, setTaskRole] = useState<'admin' | 'user'>('user');
 
+  // Cargar escuelas al montar el componente
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        const response = await fetch('/api/schools');
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setSchools(data.schools);
+        }
+      } catch (error) {
+        console.error('Error cargando escuelas:', error);
+      }
+    };
+    fetchSchools();
+  }, []);
+
   const openDialog = (task?: TaskData) => {
     if (task) {
       setEditingTask(task);
@@ -78,10 +102,19 @@ export default function TaskManager() {
         description: task.description,
         progress: task.progress,
         color: task.color,
-        avatars: task.avatars.join(', '),
+        avatars: Array.isArray(task.avatars) ? task.avatars.join(', ') : '',
         date: task.date || ''
       });
       setTaskRole(task.role || 'user');
+      
+      // Configurar escuelas para edición
+      if (task.schools && task.schools.length > 0) {
+        setSelectedSchoolIds(task.schools.map((s: any) => s.id));
+        setIsCommonTask(false);
+      } else {
+        setSelectedSchoolIds([]);
+        setIsCommonTask(task.comun || false);
+      }
     } else {
       setEditingTask(null);
       setFormData({
@@ -93,6 +126,8 @@ export default function TaskManager() {
         date: ''
       });
       setTaskRole('user');
+      setSelectedSchoolIds([]);
+      setIsCommonTask(false);
     }
     setDialogOpen(true);
   };
@@ -100,6 +135,17 @@ export default function TaskManager() {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingTask(null);
+    setSelectedSchoolIds([]);
+    setIsCommonTask(false);
+    setFormData({
+      title: '',
+      description: '',
+      progress: 0,
+      color: gradientOptions[0].value,
+      avatars: '',
+      date: ''
+    });
+    setTaskRole('user');
   };
 
   const handleSubmit = () => {
@@ -112,7 +158,9 @@ export default function TaskManager() {
       color: formData.color,
       avatars: formData.avatars.split(',').map(a => a.trim()).filter(a => a),
       date: formData.date || undefined,
-      role: taskRole
+      role: taskRole,
+      schoolIds: isCommonTask ? [] : selectedSchoolIds,
+      comun: isCommonTask
     };
 
     if (editingTask) {
@@ -319,6 +367,48 @@ export default function TaskManager() {
               fullWidth
               placeholder="Mar 02"
             />
+
+            {/* Selector de escuelas */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isCommonTask}
+                  onChange={(e) => {
+                    setIsCommonTask(e.target.checked);
+                    if (e.target.checked) {
+                      setSelectedSchoolIds([]);
+                    }
+                  }}
+                />
+              }
+              label="Tarea común para todas las escuelas"
+            />
+
+            {!isCommonTask && (
+              <FormControl fullWidth>
+                <InputLabel>Escuelas asignadas</InputLabel>
+                <Select
+                  multiple
+                  value={selectedSchoolIds}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSelectedSchoolIds(typeof value === 'string' ? [] : value);
+                  }}
+                  label="Escuelas asignadas"
+                  renderValue={(selected) => {
+                    const selectedSchools = schools.filter(school => selected.includes(school.id));
+                    return selectedSchools.map(school => school.name).join(', ');
+                  }}
+                >
+                  {schools.map((school) => (
+                    <MenuItem key={school.id} value={school.id}>
+                      <Checkbox checked={selectedSchoolIds.indexOf(school.id) > -1} />
+                      <ListItemText primary={school.name} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>

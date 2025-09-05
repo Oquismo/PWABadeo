@@ -106,14 +106,41 @@ export async function POST(request: Request) {
       } catch (e) {
         console.warn('No se pudo registrar log de login', e);
       }
-      return NextResponse.json({
+
+      // Crear respuesta con cookies para autenticación
+      const response = NextResponse.json({
         user: userProfile,
         message: 'Login exitoso'
       });
 
+      // Establecer cookies para el middleware
+      const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
+      
+      console.log('🍪 Estableciendo cookies de autenticación:', {
+        authToken: authToken.substring(0, 20) + '...',
+        userRole: userProfile.role,
+        userId: user.id
+      });
+      
+      response.cookies.set('auth-token', authToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 días
+      });
+
+      response.cookies.set('user', JSON.stringify(userProfile), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 días
+      });
+
+      return response;
+
     } finally {
       console.log('🔌 Disconnecting from database...');
-  await prisma.$disconnect();
+      await prisma.$disconnect();
     }
 
   } catch (error) {

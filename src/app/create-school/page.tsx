@@ -54,6 +54,7 @@ export default function CreateSchoolPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(schoolData),
+        credentials: 'include'
       });
 
       const data = await response.json();

@@ -18,7 +18,25 @@ export async function POST(req: Request) {
     }
     // Actualizar lastSeen inmediato
     try { await (prisma as any).user.update({ where: { id: userId }, data: { lastSeen: new Date() } }); } catch {}
-    return NextResponse.json({ ok: true });
+    
+    // Crear respuesta y limpiar cookies
+    const response = NextResponse.json({ ok: true });
+    
+    response.cookies.set('auth-token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0 // Eliminar cookie
+    });
+    
+    response.cookies.set('user', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0 // Eliminar cookie
+    });
+    
+    return response;
   } catch (e: any) {
     return NextResponse.json({ error: 'Error en logout', details: e.message }, { status: 500 });
   }
