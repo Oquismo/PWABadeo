@@ -19,7 +19,7 @@ export async function GET() {
           }
         },
         orderBy: {
-          name: 'asc'
+          createdAt: 'desc' // Ordenar por fecha de creación (más reciente primero)
         }
       });
 
