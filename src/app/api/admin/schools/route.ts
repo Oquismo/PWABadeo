@@ -3,10 +3,47 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Obtener todas las escuelas con el conteo de usuarios
+    // Obtener información del usuario desde las cookies
+    const userData = request.headers.get('cookie')?.match(/user=([^;]+)/)?.[1];
+    
+    if (!userData) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado en la sesión' },
+        { status: 401 }
+      );
+    }
+
+    let user;
+    try {
+      user = JSON.parse(decodeURIComponent(userData));
+      console.log('👤 Usuario decodificado:', {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        schoolId: user.schoolId
+      });
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Datos de usuario inválidos' },
+        { status: 401 }
+      );
+    }
+
+    // Si el usuario tiene una escuela asignada, solo mostrar esa escuela
+    // Si no tiene escuela asignada y es admin, mostrar todas
+    let whereClause = {};
+    if (user.schoolId) {
+      console.log('🏫 Filtrando escuelas para usuario con schoolId:', user.schoolId);
+      whereClause = { id: user.schoolId };
+    } else {
+      console.log('🏫 Usuario sin escuela asignada, mostrando todas las escuelas');
+    }
+
+    // Obtener las escuelas según el filtro aplicado
     const schools = await (prisma as any).school.findMany({
+      where: whereClause,
       include: {
         users: {
           select: {

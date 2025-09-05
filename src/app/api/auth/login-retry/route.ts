@@ -35,6 +35,7 @@ export async function POST(request: Request) {
             name: true,
             password: true,
             role: true,
+            schoolId: true, // Incluir schoolId para filtrar escuelas
           }
         });
         
