@@ -9,6 +9,7 @@ import RoutePlanner from '@/components/mapa/RoutePlanner';
 import ListIcon from '@mui/icons-material/List';
 import CloseIcon from '@mui/icons-material/Close';
 import PlacesListSection from '@/components/mapa/PlacesListSection'; 
+import { Place } from '@/data/places';
 
 const InteractiveMap = dynamic(
   () => import('@/components/mapa/InteractiveMap'),
@@ -26,21 +27,23 @@ const InteractiveMap = dynamic(
 
 export default function MapaPage() {
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Place | undefined>();
+
+  const handlePlaceSelect = (place: Place) => {
+    setSelectedPlace(place);
+    setOpenDrawer(false); // Cerrar el drawer cuando se selecciona un lugar
+    
+    // Reset selectedPlace después de un tiempo para no interferir con futuras navegaciones
+    setTimeout(() => {
+      setSelectedPlace(undefined);
+    }, 3000);
+  };
 
   return (
     <Container>
-      <Box sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="h3" component="h1" fontWeight="bold">
-          Mapa Interactivo
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mt: 1 }}>
-          Tus lugares importantes en la ciudad.
-        </Typography>
-      </Box>
-
   {/* Permiso y explicación de geolocalización */}
   <GeolocalizacionDemo />
-  <InteractiveMap />
+  <InteractiveMap selectedPlace={selectedPlace} />
 
       {/* Sección del planificador de rutas */}
       <Box sx={{ mt: 4 }}>
@@ -79,7 +82,7 @@ export default function MapaPage() {
             <CloseIcon />
           </IconButton>
         </Box>
-        <PlacesListSection />
+        <PlacesListSection onPlaceSelect={handlePlaceSelect} />
       </Drawer>
     </Container>
   );

@@ -146,6 +146,65 @@ export const translations = {
         description: "El Barrio de Santa Cruz es el antiguo barrio judío de Sevilla, un laberinto de callejuelas empedradas, plazas llenas de naranjos y patios andaluces que desprenden el aroma del azahar."
       }
     },
+    // Lugares del mapa interactivo
+    places: {
+      residenciaAmro: {
+        name: "Residencia AMRO Sevilla",
+        description: "Residencia universitaria con excelente ubicación cerca del centro. Habitaciones individuales y zonas comunes."
+      },
+      residenciaOne: {
+        name: "Residencia Universitaria ONE Sevilla (Livinnx)",
+        description: "Residencia moderna con todas las comodidades para estudiantes internacionales. WiFi, cocina equipada, salas de estudio."
+      },
+      oficinaBarrio: {
+        name: "Oficina Barrio de Oportunidades",
+        description: "Oficina principal del programa Barrio de Oportunidades. Punto de encuentro y gestiones."
+      },
+      plazaEspana: {
+        name: "Plaza de España",
+        description: "Una de las plazas más espectaculares de España, construida para la Exposición Iberoamericana de 1929. Arquitectura semicircular con canales, puentes y azulejos representando las provincias españolas."
+      },
+      plazaArmas: {
+        name: "Plaza de Armas",
+        description: "Histórica estación de autobuses y centro de transporte de Sevilla. Punto de conexión importante para desplazarse por la ciudad y la región."
+      },
+      metroPuertaJerez: {
+        name: "Metro Puerta Jerez",
+        description: "Estación de metro en el centro histórico de Sevilla. Conexión principal del metro ligero con el casco antiguo y las zonas turísticas."
+      },
+      tropiqal: {
+        name: "Tropiqal",
+        description: "Restaurante para comer en Sevilla. Excelente opción gastronómica para estudiantes y visitantes."
+      },
+      terraviva: {
+        name: "Terraviva",
+        description: "Restaurante para comer en Sevilla. Excelente opción gastronómica para estudiantes y visitantes."
+      },
+      elSellaTriana: {
+        name: "Restaurante El Sella Triana",
+        description: "Restaurante en el barrio de Triana, Sevilla. Excelente opción gastronómica para estudiantes y visitantes."
+      },
+      hospitalVirgenRocio: {
+        name: "Hospital Universitario Virgen del Rocío",
+        description: "Hospital principal de Sevilla. Centro sanitario de referencia para estudiantes y residentes en la ciudad."
+      },
+      hospitalMacarena: {
+        name: "Hospital Universitario La Macarena",
+        description: "Hospital de referencia en Sevilla. Centro sanitario importante para estudiantes y residentes en la zona norte de la ciudad."
+      },
+      hospitalViamedFatima: {
+        name: "Hospital Viamed Fátima Sevilla",
+        description: "Hospital privado en Sevilla. Centro sanitario especializado para estudiantes y residentes que busquen atención médica privada."
+      },
+      barManhattan: {
+        name: "Bar Manhattan Sevilla",
+        description: "Bar de ocio en Sevilla. Lugar ideal para estudiantes y jóvenes para disfrutar del ambiente nocturno."
+      },
+      makievaello: {
+        name: "Makievaello Sevilla",
+        description: "Lugar de ocio en Sevilla. Excelente opción para estudiantes y visitantes para disfrutar del ambiente local."
+      }
+    },
     difficulty: {
       tourist: "Turístico",
       historic: "Histórico",
@@ -333,6 +392,65 @@ export const translations = {
       barrioSantaCruz: {
         name: "Santa Cruz Neighborhood",
         description: "The Santa Cruz Neighborhood is Seville's old Jewish quarter, a labyrinth of cobbled streets, squares full of orange trees and Andalusian courtyards that give off the aroma of orange blossom."
+      }
+    },
+    // Interactive map places
+    places: {
+      residenciaAmro: {
+        name: "AMRO Residence Seville",
+        description: "University residence with excellent location near the center. Individual rooms and common areas."
+      },
+      residenciaOne: {
+        name: "ONE University Residence Seville (Livinnx)",
+        description: "Modern residence with all amenities for international students. WiFi, equipped kitchen, study rooms."
+      },
+      oficinaBarrio: {
+        name: "Barrio de Oportunidades Office",
+        description: "Main office of the Barrio de Oportunidades program. Meeting point and administrative procedures."
+      },
+      plazaEspana: {
+        name: "Plaza de España",
+        description: "One of Spain's most spectacular squares, built for the 1929 Ibero-American Exhibition. Semicircular architecture with canals, bridges and tiles representing Spanish provinces."
+      },
+      plazaArmas: {
+        name: "Plaza de Armas",
+        description: "Historic bus station and transport center of Seville. Important connection point for getting around the city and region."
+      },
+      metroPuertaJerez: {
+        name: "Puerta Jerez Metro",
+        description: "Metro station in Seville's historic center. Main light rail connection with the old town and tourist areas."
+      },
+      tropiqal: {
+        name: "Tropiqal",
+        description: "Restaurant for dining in Seville. Excellent gastronomic option for students and visitors."
+      },
+      terraviva: {
+        name: "Terraviva",
+        description: "Restaurant for dining in Seville. Excellent gastronomic option for students and visitors."
+      },
+      elSellaTriana: {
+        name: "El Sella Triana Restaurant",
+        description: "Restaurant in Triana neighborhood, Seville. Excellent gastronomic option for students and visitors."
+      },
+      hospitalVirgenRocio: {
+        name: "Virgen del Rocío University Hospital",
+        description: "Main hospital in Seville. Reference healthcare center for students and residents in the city."
+      },
+      hospitalMacarena: {
+        name: "La Macarena University Hospital",
+        description: "Reference hospital in Seville. Important healthcare center for students and residents in the north area of the city."
+      },
+      hospitalViamedFatima: {
+        name: "Viamed Fátima Hospital Seville",
+        description: "Private hospital in Seville. Specialized healthcare center for students and residents seeking private medical care."
+      },
+      barManhattan: {
+        name: "Manhattan Bar Seville",
+        description: "Entertainment bar in Seville. Ideal place for students and young people to enjoy the nightlife."
+      },
+      makievaello: {
+        name: "Makievaello Seville",
+        description: "Entertainment venue in Seville. Excellent option for students and visitors to enjoy the local atmosphere."
       }
     },
     difficulty: {
@@ -527,6 +645,64 @@ export const translations = {
       tourist: "Turistico",
       historic: "Storico",
       picturesque: "Pittoresco"
+    },
+    places: {
+      "Catedral de Sevilla": {
+        name: "Cattedrale di Siviglia",
+        description: "La cattedrale gotica più grande del mondo, dichiarata Patrimonio dell'Umanità dall'UNESCO"
+      },
+      "Real Alcázar de Sevilla": {
+        name: "Alcázar Reale di Siviglia",
+        description: "Palazzo reale mudéjar e residenza della famiglia reale spagnola a Siviglia"
+      },
+      "Plaza de España": {
+        name: "Plaza de España",
+        description: "Plaza semicircolare spettacolare costruita per l'Esposizione Iberoamericana del 1929"
+      },
+      "Barrio Santa Cruz": {
+        name: "Quartiere Santa Cruz",
+        description: "L'antico quartiere ebraico di Siviglia con stradine pittoresche e cortili andalusi"
+      },
+      "Setas de Sevilla": {
+        name: "Setas de Siviglia",
+        description: "Struttura moderna in legno conosciuta come Metropol Parasol, con vista panoramica sulla città"
+      },
+      "Triana": {
+        name: "Triana",
+        description: "Quartiere tradizionale oltre il fiume Guadalquivir, famoso per il flamenco e la ceramica"
+      },
+      "Torre del Oro": {
+        name: "Torre dell'Oro",
+        description: "Torre di controllo militare del XIII secolo situata sulle rive del fiume Guadalquivir"
+      },
+      "Parque de María Luisa": {
+        name: "Parco di María Luisa",
+        description: "Il parco principale di Siviglia, perfetto per passeggiare e rilassarsi"
+      },
+      "Isla Mágica": {
+        name: "Isla Mágica",
+        description: "Parco a tema con attrazioni e spettacoli per tutta la famiglia"
+      },
+      "Centro Comercial Nervión Plaza": {
+        name: "Centro Commerciale Nervión Plaza",
+        description: "Grande centro commerciale con negozi, ristoranti e cinema"
+      },
+      "Hospital Universitario Virgen Macarena": {
+        name: "Ospedale Universitario Virgen Macarena",
+        description: "Ospedale pubblico di riferimento nel nord di Siviglia"
+      },
+      "Universidad de Sevilla": {
+        name: "Università di Siviglia",
+        description: "Una delle università più antiche di Spagna, fondata nel 1505"
+      },
+      "Estación de Autobuses Plaza de Armas": {
+        name: "Stazione Autobus Plaza de Armas",
+        description: "Principale stazione degli autobus per collegamenti interurbani e internazionali"
+      },
+      "Metro Puerta Jerez": {
+        name: "Metro Puerta Jerez",
+        description: "Stazione della metropolitana nel centro storico, collegamento con le principali attrazioni"
+      }
     }
   }
 };

@@ -34,15 +34,14 @@ const Transition = React.forwardRef(function Transition(
 const Material3DialogPaper = styled(Paper)(({ theme }) => ({
   borderRadius: '28px', // --md-sys-shape-corner-extra-large según spec
   backgroundColor: theme.palette.mode === 'dark' 
-    ? alpha(theme.palette.common.white, 0.05) // colorSurfaceContainerHigh dark
-    : '#F3F4F6', // colorSurfaceContainerHigh light
-  backdropFilter: 'blur(20px)',
+    ? '#2D3748' // Fondo sólido oscuro
+    : '#FFFFFF', // Fondo sólido claro
   border: theme.palette.mode === 'dark'
     ? '1px solid rgba(255, 255, 255, 0.08)'
-    : '1px solid rgba(0, 0, 0, 0.05)',
+    : '1px solid rgba(0, 0, 0, 0.08)',
   boxShadow: theme.palette.mode === 'dark'
-    ? '0 8px 32px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.08)'
-    : '0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+    ? '0 8px 32px rgba(0, 0, 0, 0.32)'
+    : '0 8px 32px rgba(0, 0, 0, 0.12)',
   minWidth: '280px',
   maxWidth: '560px',
   margin: '48px', // backgroundInset según spec
@@ -57,7 +56,7 @@ const Material3DialogTitle = styled(DialogTitle)(({ theme }) => ({
   fontSize: '1.375rem', // --md-sys-typescale-headline-small
   fontWeight: 600,
   lineHeight: 1.3,
-  color: theme.palette.mode === 'dark' ? '#E8EAED' : '#1F2937', // colorOnSurface
+  color: theme.palette.mode === 'dark' ? '#FFFFFF' : '#000000', // Colores más contrastados
   letterSpacing: '-0.025em',
   display: 'flex',
   alignItems: 'center',
@@ -72,7 +71,7 @@ const Material3DialogContent = styled(DialogContent)(({ theme }) => ({
   fontSize: '0.875rem', // --md-sys-typescale-body-medium
   fontWeight: 400,
   lineHeight: 1.5,
-  color: theme.palette.mode === 'dark' ? '#9AA0A6' : '#6B7280', // colorOnSurfaceVariant
+  color: theme.palette.mode === 'dark' ? '#E0E0E0' : '#333333', // Colores más contrastados
   '&::-webkit-scrollbar': {
     width: '8px',
   },

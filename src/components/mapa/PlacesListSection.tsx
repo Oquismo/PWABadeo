@@ -1,50 +1,65 @@
 'use client';
 
-import { Box, Typography, List, ListItem, ListItemText, Divider, Avatar, ListItemAvatar } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Divider, Avatar, ListItemAvatar, ListItemButton } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
 import HomeIcon from '@mui/icons-material/Home';
 import SchoolIcon from '@mui/icons-material/School';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'; // Icono para lugares históricos
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import TrainIcon from '@mui/icons-material/Train';
+import HotelIcon from '@mui/icons-material/Hotel';
+import { placesData, Place } from '@/data/places';
 
-// Lista de lugares de interés que se mostrarán en el panel
-const places = [
-  {
-    name: 'Oficina Barrio de Oportunidades',
-    description: 'Plaza de España, Sevilla',
-    icon: <BusinessIcon />
-  },
-  {
-    name: 'Tu Empresa / Universidad (Ejemplo)',
-    description: 'Isla de la Cartuja',
-    icon: <SchoolIcon />
-  },
-  {
-    name: 'Catedral de Sevilla',
-    description: 'Av. de la Constitución, s/n',
-    icon: <AccountBalanceIcon />
-  },
-  {
-    name: 'Real Alcázar de Sevilla',
-    description: 'Patio de Banderas, s/n',
-    icon: <AccountBalanceIcon />
+// Función para obtener el icono según la categoría
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'Residencia':
+      return <HotelIcon />;
+    case 'Servicios':
+      return <BusinessIcon />;
+    case 'Cultural':
+      return <AccountBalanceIcon />;
+    case 'Transporte':
+      return <DirectionsBusIcon />;
+    case 'Metro':
+      return <TrainIcon />;
+    case 'Estudio':
+      return <SchoolIcon />;
+    default:
+      return <BusinessIcon />;
   }
-];
+};
 
-export default function PlacesListSection() {
+interface PlacesListSectionProps {
+  onPlaceSelect?: (place: Place) => void;
+}
+
+export default function PlacesListSection({ onPlaceSelect }: PlacesListSectionProps) {
+  const handlePlaceClick = (place: Place) => {
+    if (onPlaceSelect) {
+      onPlaceSelect(place);
+    }
+  };
+
   return (
     <Box sx={{ p: 2 }}>
       <List>
-        {places.map((place, index) => (
-          <Box key={place.name}>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                  {place.icon}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={place.name} secondary={place.description} />
+        {placesData.map((place, index) => (
+          <Box key={place.id}>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handlePlaceClick(place)}>
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: 'primary.main' }}>
+                    {getCategoryIcon(place.category)}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText 
+                  primary={place.name} 
+                  secondary={place.address || `${place.coordinates.lat.toFixed(4)}, ${place.coordinates.lng.toFixed(4)}`} 
+                />
+              </ListItemButton>
             </ListItem>
-            {index < places.length - 1 && <Divider variant="inset" component="li" />}
+            {index < placesData.length - 1 && <Divider variant="inset" component="li" />}
           </Box>
         ))}
       </List>

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
-import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, Chip } from '@mui/material';
+import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, Chip, CircularProgress } from '@mui/material';
 import MaterialTextField from '@/components/ui/MaterialTextField';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
@@ -69,6 +69,7 @@ const getCategoryIcon = (category: string) => {
     'Comida': '/icons/food-svgrepo-com.svg',
     'Salud': '/icons/health-svgrepo-com.svg',
     'Transporte': '/icons/bus-svgrepo-com.svg',
+    'Metro': '/icons/location-pin-svgrepo-com.svg', // Icono diferente para metro
     'Ocio': '/icons/school-bell-svgrepo-com.svg',
     'Cultural': '/icons/location-pin-svgrepo-com.svg',
     'Servicios': '/icons/location-pin-svgrepo-com.svg',
@@ -107,40 +108,113 @@ interface LocationPoint {
 }
 
 const locations: LocationPoint[] = [
-  {
-    position: [37.3828, -5.9732],
-    name: 'Oficina Barrio de Oportunidades',
-    description: 'Plaza de España'
-  },
-  {
-    position: [37.4023, -5.9965],
-    name: 'Tu Empresa / Universidad',
-    description: 'Isla de la Cartuja'
-  },
-  {
-    position: [37.3756, -5.9926],
-    name: 'Residencia Universitaria One Sevilla',
-    description: 'C. Páez de Rivera, 1, 41012 Sevilla'
-  },
+  // Ubicaciones se gestionan desde places.ts
 ];
 
-function MapController({ setMap }: { setMap: (map: L.Map) => void }) {
+function MapController({ setMap, setIsMapReady }: { setMap: (map: L.Map) => void; setIsMapReady: (ready: boolean) => void }) {
   const map = useMap();
   useEffect(() => {
-    setMap(map);
-  }, [map, setMap]);
+    if (map) {
+      setMap(map);
+      setIsMapReady(true);
+    }
+  }, [map, setMap, setIsMapReady]);
   return null;
 }
 
 function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
   const map = useMap();
+  const [isLocating, setIsLocating] = useState(false);
+
   const handleClick = () => {
-    map.locate().on('locationfound', function (e) {
-      setUserPosition(e.latlng);
-      map.flyTo(e.latlng, 15);
-    }).on('locationerror', function(e){
-      alert(e.message);
-    });
+    // Verificar si la geolocalización está disponible
+    if (!navigator.geolocation) {
+      alert('Tu dispositivo no soporta geolocalización.');
+      return;
+    }
+
+    setIsLocating(true);
+
+    // Configuración para máxima precisión y confiabilidad
+    const options = {
+      enableHighAccuracy: true, // Usar GPS de alta precisión
+      timeout: 20000, // Tiempo suficiente para obtener GPS preciso
+      maximumAge: 0 // Siempre obtener ubicación fresca, no usar cache
+    };
+
+    console.log('Solicitando ubicación con GPS de alta precisión...');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        const latlng = { lat, lng } as LatLng;
+        
+        setUserPosition(latlng);
+        map.flyTo([lat, lng], 18); // Zoom muy cercano para mayor precisión visual
+        
+        // Mostrar información de precisión
+        console.log(`✅ Ubicación precisa encontrada: ${lat.toFixed(6)}, ${lng.toFixed(6)} (Precisión: ${Math.round(accuracy)}m)`);
+        
+        // Feedback de éxito
+        if ('vibrate' in navigator) {
+          navigator.vibrate([50, 50, 50]); // Patrón de éxito
+        }
+        
+        // Mostrar toast de éxito (temporal)
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed; 
+          top: 20px; 
+          left: 50%; 
+          transform: translateX(-50%); 
+          background: #4caf50; 
+          color: white; 
+          padding: 12px 24px; 
+          border-radius: 24px; 
+          z-index: 2000;
+          font-family: system-ui;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        toast.textContent = `📍 Ubicación encontrada (±${Math.round(accuracy)}m)`;
+        document.body.appendChild(toast);
+        setTimeout(() => document.body.removeChild(toast), 3000);
+        
+        setIsLocating(false);
+      },
+      (error) => {
+        setIsLocating(false);
+        let errorMessage = 'Error al obtener ubicación';
+        let errorDetails = '';
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Permisos de ubicación denegados';
+            errorDetails = 'Ve a los ajustes de tu dispositivo y permite el acceso a la ubicación para esta aplicación.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Ubicación no disponible';
+            errorDetails = 'Asegúrate de tener el GPS activado y estar en un lugar con buena señal.';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Tiempo de espera agotado';
+            errorDetails = 'La búsqueda de ubicación tardó demasiado. Intenta en un lugar con mejor señal GPS.';
+            break;
+        }
+        
+        console.error('❌ Error de geolocalización:', error);
+        
+        // Mostrar error más informativo
+        alert(`${errorMessage}\n\n${errorDetails}`);
+        
+        // Vibración de error
+        if ('vibrate' in navigator) {
+          navigator.vibrate([100, 100, 100, 100, 100]);
+        }
+      },
+      options
+    );
   };
 
   return (
@@ -148,10 +222,23 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
       color="primary"
       size="small"
       onClick={handleClick}
-      sx={{ position: 'absolute', top: 85, right: 10, zIndex: 1000 }}
-      aria-label="find my location"
+      disabled={isLocating}
+      sx={{ 
+        position: 'absolute', 
+        top: 85, 
+        right: 10, 
+        zIndex: 1000,
+        '& .MuiCircularProgress-root': {
+          color: 'white'
+        }
+      }}
+      aria-label="encontrar mi ubicación"
     >
-      <MyLocationIcon />
+      {isLocating ? (
+        <CircularProgress size={20} color="inherit" />
+      ) : (
+        <MyLocationIcon />
+      )}
     </Fab>
   );
 }
@@ -177,7 +264,8 @@ function MapResizer() {
   return null;
 }
 
-export default function InteractiveMap() {
+export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Place }) {
+  const [isMapReady, setIsMapReady] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
   // Botón flotante para alternar el heatmap
   const HeatmapToggleButton = () => (
@@ -194,7 +282,7 @@ export default function InteractiveMap() {
 
   // Estado para forzar actualización del heatmap al hacer clic
   const [heatmapVersion, setHeatmapVersion] = useState(0);
-  const defaultPosition: LatLngExpression = [37.3891, -5.9845];
+  const defaultPosition: LatLngExpression = [37.3850, -5.9925]; // Centrado entre el casco histórico y las residencias
   const [userPosition, setUserPosition] = useState<LatLng | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState<L.Map | null>(null);
@@ -207,12 +295,14 @@ export default function InteractiveMap() {
 
   const filterCategories: string[] = [
     'Todos',
+    'Residencia',
     'Cultural',
     'Comida',
     'Ocio',
     'Servicios',
     'Estudio',
     'Transporte',
+    'Metro',
     'Salud',
     'Personalizado'
   ];
@@ -289,6 +379,25 @@ export default function InteractiveMap() {
     localStorage.setItem('userCustomPlaces', JSON.stringify(customPlaces));
   }, [customPlaces]);
 
+  // Effect para centrar el mapa cuando se selecciona un lugar desde la lista
+  useEffect(() => {
+    if (selectedPlace && map && isMapReady) {
+      // Centrar el mapa en el lugar seleccionado
+      map.flyTo([selectedPlace.coordinates.lat, selectedPlace.coordinates.lng], 16);
+      
+      // Simular click en el marcador para abrir el popup
+      // Actualizamos el contador de clicks
+      let clickMap: Record<string, number> = {};
+      try {
+        const raw = localStorage.getItem('placeClicks');
+        if (raw) clickMap = JSON.parse(raw);
+      } catch {}
+      clickMap[selectedPlace.id] = (clickMap[selectedPlace.id] || 0) + 1;
+      localStorage.setItem('placeClicks', JSON.stringify(clickMap));
+      setHeatmapVersion(v => v + 1);
+    }
+  }, [selectedPlace, map, isMapReady]);
+
 
   const handleSearch = async () => {
     if (!searchQuery || !map) return;
@@ -326,25 +435,6 @@ export default function InteractiveMap() {
 
   return (
     <Box>
-      <MaterialTextField
-        fullWidth
-        variant="outlined"
-        placeholder="Buscar un lugar en Sevilla..."
-        value={searchQuery}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-        onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
-        sx={{ mb: 2 }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={handleSearch} edge="end">
-                <SearchOutlinedIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-
       <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', py: 1, mb: 2, '::-webkit-scrollbar': { display: 'none' } }}>
         {filterCategories.map((category) => (
           <Chip
@@ -373,10 +463,11 @@ export default function InteractiveMap() {
       <Box sx={{ position: 'relative' }}>
         <HeatmapToggleButton />
       <MapContainer 
+        key="interactive-map-container"
         center={defaultPosition} 
         zoom={14} 
         style={{ 
-          height: '65vh',
+          height: '85vh',
           width: '100%', 
           borderRadius: '16px', 
           position: 'relative', 
@@ -587,20 +678,17 @@ export default function InteractiveMap() {
             <Marker 
               position={userPosition}
               icon={L.icon({
-                iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+                iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0Mjg1RjQiLz4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iOCIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iNCIgZmlsbD0iIzQyODVGNCIvPgo8L3N2Zz4K',
                 iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                popupAnchor: [0, -32],
-                shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-                shadowSize: [41, 41],
-                shadowAnchor: [13, 41]
+                iconAnchor: [16, 16],
+                popupAnchor: [0, -16]
               })}
             >
-                <Popup>Estás aquí</Popup>
+                <Popup>📍 Tu ubicación actual</Popup>
             </Marker>
         )}
 
-  <MapController setMap={setMap} />
+  <MapController setMap={setMap} setIsMapReady={setIsMapReady} />
   <LocationButton setUserPosition={setUserPosition} />
   <MapResizer />
   {/* Capa de heatmap */}

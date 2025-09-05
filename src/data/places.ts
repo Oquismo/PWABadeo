@@ -4,7 +4,7 @@ export interface Place {
   id: string;
   name: string;
   description: string;
-  category: 'Cultural' | 'Comida' | 'Ocio' | 'Servicios' | 'Estudio' | 'Transporte' | 'Salud';
+  category: 'Cultural' | 'Comida' | 'Ocio' | 'Servicios' | 'Estudio' | 'Transporte' | 'Salud' | 'Residencia' | 'Metro';
   coordinates: { lat: number; lng: number };
   imageUrl?: string;
   address?: string;
@@ -12,90 +12,141 @@ export interface Place {
 }
 
 export const placesData: Place[] = [
+  // === RESIDENCIAS PARA ESTUDIANTES ERASMUS ===
   {
-    id: 'plaza-espana',
+    id: 'residencia-amro',
+    name: 'Residencia AMRO Sevilla',
+    description: 'Residencia universitaria con excelente ubicación cerca del centro. Habitaciones individuales y zonas comunes.',
+    category: 'Residencia',
+    coordinates: { lat: 37.35195144264452, lng: -5.97526460125809 }, // Coordenadas exactas de Google Maps
+    address: 'C. Elche, C. Ali Al-Gomari, 41013 Sevilla',
+    link: 'https://www.residenciauniversitaria.es/'
+  },
+  {
+    id: 'residencia-one-sevilla',
+    name: 'Residencia Universitaria ONE Sevilla (Livinnx)',
+    description: 'Residencia moderna con todas las comodidades para estudiantes internacionales. WiFi, cocina equipada, salas de estudio.',
+    category: 'Residencia',
+    coordinates: { lat: 37.363285317786854, lng: -5.984741107568575 }, // Coordenadas exactas de Google Maps
+    address: 'C/ Páez de Rivera, 1, 41012 Sevilla',
+    link: 'https://www.livinnx.com/'
+  },
+
+  // === OFICINAS Y SERVICIOS ===
+  {
+    id: 'oficina-barrio-oportunidades',
+    name: 'Oficina Barrio de Oportunidades',
+    description: 'Oficina principal del programa Barrio de Oportunidades. Punto de encuentro y gestiones.',
+    category: 'Servicios',
+    coordinates: { lat: 37.3895687188777, lng: -5.9916432331313185 }, // Coordenadas exactas de Google Maps
+    address: 'Cta. del Rosario, 8, Casa 1, 4F, Casco Antiguo, 41004 Sevilla',
+    link: 'https://www.google.com/maps/place/Cta.+del+Rosario,+8,+Casa+1,+4F,+Casco+Antiguo,+41004+Sevilla'
+  },
+
+  // === LUGARES CULTURALES ===
+  {
+    id: 'plaza-de-espana',
     name: 'Plaza de España',
-    description: 'Impresionante conjunto arquitectónico, ideal para pasear y hacer fotos.',
+    description: 'Una de las plazas más espectaculares de España, construida para la Exposición Iberoamericana de 1929. Arquitectura semicircular con canales, puentes y azulejos representando las provincias españolas.',
     category: 'Cultural',
-    coordinates: { lat: 37.3776, lng: -5.9865 },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Plaza_de_Espa%C3%B1a_-_Sevilla_2016-04-12_15-12-07.jpg',
-    address: 'Av. Isabel la Católica, 41013 Sevilla',
-    link: 'https://es.wikipedia.org/wiki/Plaza_de_Espa%C3%B1a_(Sevilla)'
+    coordinates: { lat: 37.37725611928226, lng: -5.986883526606402 }, // Coordenadas exactas de Google Maps
+    address: 'Av. de Isabel la Católica, 41013 Sevilla',
+    link: 'https://www.google.com/maps/place/Plaza+de+Espa%C3%B1a,+41013+Sevilla'
   },
   {
-    id: 'setas-sevilla',
-    name: 'Las Setas de Sevilla',
-    description: 'Estructura de madera moderna con mirador y mercado en la planta baja.',
-    category: 'Ocio',
-    coordinates: { lat: 37.3948, lng: -5.9917 },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Setas_de_Sevilla_-_Panor%C3%A1mica.jpg',
-    address: 'Pl. de la Encarnación, 41003 Sevilla',
-    link: 'https://setasdesevilla.com/'
-  },
-  {
-    id: 'tussam-parada-prado',
-    name: 'Parada TUSSAM Prado S. S.',
-    description: 'Importante nudo de transporte público y parada del Bus Especial Aeropuerto (EA).',
+    id: 'plaza-de-armas',
+    name: 'Plaza de Armas',
+    description: 'Histórica estación de autobuses y centro de transporte de Sevilla. Punto de conexión importante para desplazarse por la ciudad y la región.',
     category: 'Transporte',
-    coordinates: { lat: 37.3768, lng: -5.9904 },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Estaci%C3%B3n_de_autobuses_Prado_de_San_Sebasti%C3%A1n.jpg/1200px-Estaci%C3%B3n_de_autobuses_Prado_de_San_Sebasti%C3%A1n.jpg',
-    address: 'Av. Portugal, s/n, 41004 Sevilla',
-    link: 'https://www.tussam.es/es/paradas'
+    coordinates: { lat: 37.39212732174192, lng: -6.003608779440957 }, // Coordenadas exactas de Google Maps
+    address: 'Av. del Cristo de la Expiración, 2, 41001 Sevilla',
+    link: 'https://www.google.com/maps/place/Plaza+de+Armas,+41001+Sevilla'
   },
-  // --- NUEVAS PARADAS DE METRO ---
   {
     id: 'metro-puerta-jerez',
     name: 'Metro Puerta Jerez',
-    description: 'Estación de metro céntrica, ideal para conectar con el centro histórico.',
-    category: 'Transporte',
-    coordinates: { lat: 37.3828, lng: -5.9961 },
-    address: 'Av. de la Constitución, s/n, 41001 Sevilla',
-    link: 'https://www.metrodesevilla.es/estaciones/puerta-jerez'
+    description: 'Estación de metro en el centro histórico de Sevilla. Conexión principal del metro ligero con el casco antiguo y las zonas turísticas.',
+    category: 'Metro',
+    coordinates: { lat: 37.381861907401436, lng: -5.994523946051503 }, // Coordenadas exactas de Google Maps
+    address: 'Puerta Jerez, 41001 Sevilla',
+    link: 'https://www.google.com/maps/place/Metro+Puerta+Jerez,+41001+Sevilla'
   },
+
+  // === RESTAURANTES ===
   {
-    id: 'metro-prado-san-sebastian',
-    name: 'Metro Prado S. S.',
-    description: 'Estación de metro y autobús, un gran intercambiador de transporte.',
-    category: 'Transporte',
-    coordinates: { lat: 37.3769, lng: -5.9904 },
-    address: 'Av. de Carlos V, s/n, 41004 Sevilla',
-    link: 'https://www.metrodesevilla.es/estaciones/prado-de-san-sebastian'
-  },
-  {
-    id: 'metro-san-bernardo',
-    name: 'Metro San Bernardo',
-    description: 'Conexión con tren de cercanías y varias líneas de autobús.',
-    category: 'Transporte',
-    coordinates: { lat: 37.3769, lng: -5.9818 },
-    address: 'Av. de la Buhaira, s/n, 41018 Sevilla',
-    link: 'https://www.metrodesevilla.es/estaciones/san-bernardo'
-  },
-  {
-    id: 'metro-nervion',
-    name: 'Metro Nervión',
-    description: 'Estación que da servicio a la zona comercial y al estadio Ramón Sánchez-Pizjuán.',
-    category: 'Transporte',
-    coordinates: { lat: 37.3879, lng: -5.9723 },
-    address: 'Av. Eduardo Dato, 41005 Sevilla',
-    link: 'https://www.metrodesevilla.es/estaciones/nervion'
-  },
-  // --- FIN NUEVAS PARADAS DE METRO ---
-  {
-    id: 'hospital-virgen-rocio',
-    name: 'Hospital Universitario Virgen del Rocío',
-    description: 'Uno de los hospitales más grandes de Sevilla.',
-    category: 'Salud',
-    coordinates: { lat: 37.3592, lng: -5.9868 },
-    address: 'Av. Manuel Siurot, s/n, 41013 Sevilla',
-    link: 'https://www.juntadeandalucia.es/servicioandaluzdesalud/huvr/'
-  },
-  {
-    id: 'bar-el-sardinero',
-    name: 'Bar El Sardinero',
-    description: 'Tapas tradicionales sevillanas a buen precio.',
+    id: 'tropiqal-sevilla',
+    name: 'Tropiqal',
+    description: 'Restaurante para comer en Sevilla. Excelente opción gastronómica para estudiantes y visitantes.',
     category: 'Comida',
-    coordinates: { lat: 37.3917, lng: -5.9855 },
-    address: 'C. Gravina, 16, 41001 Sevilla',
-    link: 'https://www.tripadvisor.es/Restaurant_Review-g187443-d2508000-Reviews-Restaurante_El_Sardinero-Seville_Province_of_Seville_Andalucia.html'
+    coordinates: { lat: 37.39355028773172, lng: -5.992344771133435 }, // Coordenadas exactas de Google Maps
+    address: 'Sevilla, España',
+    link: 'https://www.google.com/maps/place/37.39355028773172,-5.992344771133435'
+  },
+  {
+    id: 'terraviva-sevilla',
+    name: 'Terraviva',
+    description: 'Restaurante para comer en Sevilla. Excelente opción gastronómica para estudiantes y visitantes.',
+    category: 'Comida',
+    coordinates: { lat: 37.38887365499451, lng: -5.996489364166827 }, // Coordenadas exactas de Google Maps
+    address: 'Sevilla, España',
+    link: 'https://www.google.com/maps/place/37.38887365499451,-5.996489364166827'
+  },
+  {
+    id: 'el-sella-triana',
+    name: 'Restaurante El Sella Triana',
+    description: 'Restaurante en el barrio de Triana, Sevilla. Excelente opción gastronómica para estudiantes y visitantes.',
+    category: 'Comida',
+    coordinates: { lat: 37.3850075161731, lng: -6.002730464762367 }, // Coordenadas exactas de Google Maps
+    address: 'Triana, Sevilla, España',
+    link: 'https://www.google.com/maps/place/37.3850075161731,-6.002730464762367'
+  },
+
+  // === SERVICIOS DE SALUD ===
+  {
+    id: 'hospital-virgen-del-rocio',
+    name: 'Hospital Universitario Virgen del Rocío',
+    description: 'Hospital principal de Sevilla. Centro sanitario de referencia para estudiantes y residentes en la ciudad.',
+    category: 'Salud',
+    coordinates: { lat: 37.36201536886432, lng: -5.980415928893226 }, // Coordenadas exactas de Google Maps
+    address: 'Av. Manuel Siurot, s/n, 41013 Sevilla',
+    link: 'https://www.google.com/maps/place/37.36201536886432,-5.980415928893226'
+  },
+  {
+    id: 'hospital-la-macarena',
+    name: 'Hospital Universitario La Macarena',
+    description: 'Hospital de referencia en Sevilla. Centro sanitario importante para estudiantes y residentes en la zona norte de la ciudad.',
+    category: 'Salud',
+    coordinates: { lat: 37.40697693097462, lng: -5.986696544309879 }, // Coordenadas exactas de Google Maps
+    address: 'Av. Dr. Fedriani, 3, 41009 Sevilla',
+    link: 'https://www.google.com/maps/place/37.40697693097462,-5.986696544309879'
+  },
+  {
+    id: 'hospital-viamed-fatima',
+    name: 'Hospital Viamed Fátima Sevilla',
+    description: 'Hospital privado en Sevilla. Centro sanitario especializado para estudiantes y residentes que busquen atención médica privada.',
+    category: 'Salud',
+    coordinates: { lat: 37.369201233762254, lng: -5.988228684485652 }, // Coordenadas exactas de Google Maps
+    address: 'Sevilla, España',
+    link: 'https://www.google.com/maps/place/37.369201233762254,-5.988228684485652'
+  },
+
+  // === OCIO Y ENTRETENIMIENTO ===
+  {
+    id: 'bar-manhattan-sevilla',
+    name: 'Bar Manhattan Sevilla',
+    description: 'Bar de ocio en Sevilla. Lugar ideal para estudiantes y jóvenes para disfrutar del ambiente nocturno.',
+    category: 'Ocio',
+    coordinates: { lat: 37.378548212770326, lng: -5.993453873446093 }, // Coordenadas exactas de Google Maps
+    address: 'Sevilla, España',
+    link: 'https://www.google.com/maps/place/37.378548212770326,-5.993453873446093'
+  },
+  {
+    id: 'makievaello-sevilla',
+    name: 'Makievaello Sevilla',
+    description: 'Lugar de ocio en Sevilla. Excelente opción para estudiantes y visitantes para disfrutar del ambiente local.',
+    category: 'Ocio',
+    coordinates: { lat: 37.37528781245707, lng: -5.991693157730823 }, // Coordenadas exactas de Google Maps
+    address: 'Sevilla, España',
+    link: 'https://www.google.com/maps/place/37.37528781245707,-5.991693157730823'
   }
-];
+]
