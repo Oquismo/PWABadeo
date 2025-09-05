@@ -57,9 +57,19 @@ export default function RootLayout({
                     <DebugInitializer />
                     <WarmupInitializer />
                   <ServiceWorkerProvider>
-                    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+                    <Box sx={{ 
+                      minHeight: '100vh', 
+                      bgcolor: 'background.default',
+                      width: '100%',
+                      overflow: 'hidden', // Prevenir scrollbars horizontales
+                      position: 'relative' // Asegurar contexto de posicionamiento
+                    }}>
                       
-                      <Box component="main" sx={{ pb: '90px' }}>
+                      <Box component="main" sx={{ 
+                        pb: '90px',
+                        width: '100%',
+                        overflow: 'visible' // Permitir que el contenido fluya naturalmente
+                      }}>
                         <PageTransition>
                           {children}
                         </PageTransition>

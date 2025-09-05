@@ -1,6 +1,8 @@
 /* Deshabilitar pull-to-refresh manteniendo scroll normal */
 html {
   overscroll-behavior-y: contain;
+  /* Prevenir saltos causados por scrollbar que aparece/desaparece */
+  overflow-y: scroll; /* Siempre mostrar espacio para scrollbar */
 }
 
 body {
@@ -8,4 +10,42 @@ body {
   -webkit-overflow-scrolling: touch;
   /* Permitir scroll normal pero prevenir pull-to-refresh */
   touch-action: manipulation;
+  /* Asegurar que no haya saltos horizontales */
+  overflow-x: hidden;
+  /* Mantener ancho consistente */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Alternativa: usar scrollbars overlay en navegadores compatibles */
+@supports (overflow: overlay) {
+  html {
+    overflow-y: overlay;
+  }
+}
+
+/* Para WebKit (Safari, Chrome en móviles) usar scrollbars invisibles */
+@media (max-width: 768px) {
+  html {
+    /* En móviles, usar scrollbar overlay invisible */
+    overflow-y: auto;
+  }
+  
+  /* Ocultar scrollbar en WebKit pero mantener funcionalidad */
+  html::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+/* Prevenir saltos durante transiciones de página */
+* {
+  box-sizing: border-box;
+}
+
+/* Asegurar que los contenedores principales mantengan dimensiones consistentes */
+#__next {
+  min-height: 100vh;
+  width: 100%;
 }

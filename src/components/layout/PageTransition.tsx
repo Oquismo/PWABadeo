@@ -27,6 +27,12 @@ export default function PageTransition({ children }: { children: ReactNode }) {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 20 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
+        style={{
+          // Prevenir saltos durante las transiciones
+          width: '100%',
+          willChange: 'opacity, transform', // Optimización de rendimiento
+          backfaceVisibility: 'hidden', // Prevenir flickering
+        }}
       >
         {children}
       </motion.div>

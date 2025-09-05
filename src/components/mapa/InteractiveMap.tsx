@@ -108,11 +108,6 @@ interface LocationPoint {
 
 const locations: LocationPoint[] = [
   {
-    position: [37.3891, -5.9845],
-    name: 'Tu Alojamiento',
-    description: 'Calle Falsa, 123'
-  },
-  {
     position: [37.3828, -5.9732],
     name: 'Oficina Barrio de Oportunidades',
     description: 'Plaza de España'
@@ -400,7 +395,7 @@ export default function InteractiveMap() {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`;
             const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${lat},${lng}`;
             return (
-              <Marker key={loc.name} position={loc.position} icon={getCategoryIcon('Tu Alojamiento')}>
+              <Marker key={loc.name} position={loc.position} icon={getCategoryIcon('Oficina')}>
                   <Popup>
                       <Box>
                           <Typography variant="subtitle2" component="div" fontWeight="bold">{loc.name}</Typography>

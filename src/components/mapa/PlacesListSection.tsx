@@ -14,11 +14,6 @@ const places = [
     icon: <BusinessIcon />
   },
   {
-    name: 'Tu Alojamiento (Ejemplo)',
-    description: 'Calle Falsa, 123',
-    icon: <HomeIcon />
-  },
-  {
     name: 'Tu Empresa / Universidad (Ejemplo)',
     description: 'Isla de la Cartuja',
     icon: <SchoolIcon />
