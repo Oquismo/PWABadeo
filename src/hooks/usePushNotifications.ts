@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 interface PushSubscriptionData {
   endpoint: string;
@@ -22,6 +23,7 @@ interface UsePushNotificationsReturn {
 }
 
 export function usePushNotifications(): UsePushNotificationsReturn {
+  const { user } = useAuth();
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,10 +103,19 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       // Send subscription to server
       const userIdRaw = localStorage.getItem('userId');
       console.log('🔍 usePushNotifications: userIdRaw:', userIdRaw);
-      const userId = userIdRaw ? Number(userIdRaw) : null;
-      console.log('🔍 usePushNotifications: userId parsed:', userId);
+      console.log('🔍 usePushNotifications: user from context:', user);
+      let userId = userIdRaw ? Number(userIdRaw) : null;
+      
+      // Fallback: intentar obtener el userId del contexto de autenticación
+      if (!userId && user?.id) {
+        userId = user.id;
+        console.log('🔍 usePushNotifications: usando userId del contexto:', userId);
+        localStorage.setItem('userId', userId.toString());
+      }
+      
+      console.log('🔍 usePushNotifications: userId final:', userId);
       if (!userId || isNaN(userId)) {
-        console.error('❌ usePushNotifications: userId no válido:', { userIdRaw, userId });
+        console.error('❌ usePushNotifications: userId no válido:', { userIdRaw, userId, userFromContext: user });
         setError('No se encontró el userId del usuario. Debes iniciar sesión.');
         setIsLoading(false);
         return;

@@ -146,7 +146,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Guardar datos iniciales
     localStorage.setItem('user', JSON.stringify(userData));
     if (userData.id) {
+      console.log('🔍 AuthContext: Guardando userId en localStorage:', userData.id);
       localStorage.setItem('userId', userData.id.toString());
+      console.log('✅ AuthContext: userId guardado:', localStorage.getItem('userId'));
+    } else {
+      console.error('❌ AuthContext: userData.id no está presente:', userData);
     }
     setUser(userData);
     logAction('login', userData.email);
@@ -164,7 +168,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(user);
           localStorage.setItem('user', JSON.stringify(user));
           if (user.id) {
+            console.log('🔍 AuthContext: Actualizando userId tras refresco:', user.id);
             localStorage.setItem('userId', user.id.toString());
+            console.log('✅ AuthContext: userId actualizado:', localStorage.getItem('userId'));
           }
           console.log('✅ AuthContext: Usuario actualizado tras login desde backend:', user);
         }
