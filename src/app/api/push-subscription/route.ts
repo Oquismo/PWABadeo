@@ -23,16 +23,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // Guardar o actualizar la suscripción
-    const pushSubscription = await prisma.pushSubscription.upsert({
+    // Guardar o actualizar la suscripción (eliminar duplicados primero)
+    await prisma.pushSubscription.deleteMany({
       where: {
         userId: parseInt(userId)
-      },
-      update: {
-        subscription: subscription,
-        updatedAt: new Date()
-      },
-      create: {
+      }
+    });
+    
+    // Crear nueva suscripción única
+    const pushSubscription = await prisma.pushSubscription.create({
+      data: {
         userId: parseInt(userId),
         subscription: subscription
       }

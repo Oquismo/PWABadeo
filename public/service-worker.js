@@ -31,9 +31,10 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Cache para evitar notificaciones duplicadas
-let notificationCache = new Set();
-const NOTIFICATION_CACHE_SIZE = 50;
+// Cache para evitar notificaciones duplicadas más estricto
+let notificationCache = new Map();
+let lastNotificationTime = 0;
+const MIN_NOTIFICATION_INTERVAL = 10000; // 10 segundos mínimo entre notificaciones
 
 // Manejo de notificaciones push
 self.addEventListener('push', (event) => {
@@ -43,23 +44,33 @@ self.addEventListener('push', (event) => {
     data = event.data.json();
   }
 
-  // Crear un ID único para la notificación
-  const notificationId = `${data.title || 'Nuevo Anuncio'}-${data.body}-${Date.now()}`;
-  const cacheKey = `${data.title || 'Nuevo Anuncio'}-${data.body}`;
+  const now = Date.now();
+  const notificationKey = `${data.title || 'Nuevo Anuncio'}-${data.body || ''}`;
   
-  // Verificar si ya mostramos esta notificación recientemente
-  if (notificationCache.has(cacheKey)) {
-    console.log('Notificación duplicada detectada, ignorando:', cacheKey);
+  // Verificar tiempo mínimo entre notificaciones
+  if (now - lastNotificationTime < MIN_NOTIFICATION_INTERVAL) {
+    console.log('Notificación bloqueada por throttling temporal');
     return;
   }
   
-  // Añadir al cache
-  notificationCache.add(cacheKey);
+  // Verificar si ya existe en cache
+  if (notificationCache.has(notificationKey)) {
+    const cachedTime = notificationCache.get(notificationKey);
+    if (now - cachedTime < 60000) { // 1 minuto de cache
+      console.log('Notificación duplicada detectada, ignorando:', notificationKey);
+      return;
+    }
+  }
   
-  // Limpiar cache si está muy grande
-  if (notificationCache.size > NOTIFICATION_CACHE_SIZE) {
-    const firstItem = notificationCache.values().next().value;
-    notificationCache.delete(firstItem);
+  // Actualizar cache y tiempo
+  notificationCache.set(notificationKey, now);
+  lastNotificationTime = now;
+  
+  // Limpiar cache viejo (más de 5 minutos)
+  for (const [key, time] of notificationCache.entries()) {
+    if (now - time > 300000) { // 5 minutos
+      notificationCache.delete(key);
+    }
   }
 
   const options = {
@@ -67,9 +78,9 @@ self.addEventListener('push', (event) => {
     icon: '/icons/icon_192x192.png',
     badge: '/icons/icon_192x192.png',
     image: data.image || null,
-    tag: 'announcement', // Esto ya previene duplicados por tag
+    tag: `announcement-${now}`, // Tag único para cada notificación
     requireInteraction: true,
-    vibrate: [200, 100, 200], // Patrón de vibración para notificaciones push
+    vibrate: [200, 100, 200],
     actions: [
       {
         action: 'view',
@@ -84,18 +95,16 @@ self.addEventListener('push', (event) => {
     data: {
       url: data.url || '/',
       announcementId: data.announcementId,
-      notificationId: notificationId
+      notificationId: data.notificationId || `notif-${now}`,
+      timestamp: now
     }
   };
 
+  console.log('Mostrando notificación:', notificationKey);
+  
   event.waitUntil(
     self.registration.showNotification(data.title || 'Nuevo Anuncio', options)
   );
-  
-  // Limpiar cache después de 5 minutos
-  setTimeout(() => {
-    notificationCache.delete(cacheKey);
-  }, 5 * 60 * 1000);
 });
 
 // Manejo de clicks en notificaciones

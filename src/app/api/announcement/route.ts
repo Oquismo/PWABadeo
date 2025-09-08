@@ -20,8 +20,20 @@ export async function GET() {
 }
 
 // POST: Publicar un nuevo anuncio global
+let lastAnnouncementTime = 0;
+const MIN_ANNOUNCEMENT_INTERVAL = 5000; // 5 segundos mínimo entre anuncios
+
 export async function POST(req: Request) {
   try {
+    const now = Date.now();
+    
+    // Throttling para evitar spam de anuncios
+    if (now - lastAnnouncementTime < MIN_ANNOUNCEMENT_INTERVAL) {
+      return NextResponse.json({ 
+        error: 'Debes esperar al menos 5 segundos antes de crear otro anuncio.' 
+      }, { status: 429 });
+    }
+    
     const { message, userId } = await req.json();
     if (!message || !userId) {
       return NextResponse.json({ error: 'Mensaje y userId son requeridos.' }, { status: 400 });
@@ -30,6 +42,10 @@ export async function POST(req: Request) {
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Solo los administradores pueden publicar anuncios.' }, { status: 403 });
     }
+    
+    // Actualizar tiempo del último anuncio
+    lastAnnouncementTime = now;
+    
     const announcement = await prisma.announcement.create({
       data: { message, createdBy: userId },
     });
