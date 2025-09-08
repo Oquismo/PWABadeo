@@ -4,6 +4,7 @@ import { Button } from '@mui/material';
 import { useState } from 'react';
 import { Box, Typography, Chip, CardMedia, CardContent, Stack } from "@mui/material";
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
+import { useHaptics } from '@/hooks/useHaptics';
 
 // Ejemplo de sitio en Sevilla
 const site = {
@@ -18,14 +19,22 @@ const site = {
 
 export default function CheckInCard() {
   const [notifStatus, setNotifStatus] = useState<"default"|"granted"|"denied">(typeof window !== 'undefined' ? Notification.permission : "default");
+  const { success: hapticSuccess, error: hapticError, buttonClick: hapticButtonClick } = useHaptics();
 
   const handleRequestPermission = async () => {
     if (!('Notification' in window)) {
       alert('Las notificaciones no son compatibles con tu navegador.');
+      await hapticError();
       return;
     }
     const result = await Notification.requestPermission();
     setNotifStatus(result);
+    
+    if (result === 'granted') {
+      await hapticSuccess();
+    } else if (result === 'denied') {
+      await hapticError();
+    }
   };
   return (
     <Material3ElevatedCard

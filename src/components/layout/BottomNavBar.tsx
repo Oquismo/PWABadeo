@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useHaptics } from '@/hooks/useHaptics';
 import { Paper, BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MapIcon from '@mui/icons-material/Map';
@@ -21,6 +22,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 export default function BottomNavBar() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
+  const { tap } = useHaptics();
   const [isClient, setIsClient] = useState(false);
   const { t } = useTranslation();
 
@@ -98,6 +100,7 @@ export default function BottomNavBar() {
                   href={action.value}
                   value={action.value}
                   icon={action.icon}
+                  onClick={() => tap()} // Vibración al hacer tap en navegación
                   sx={{
                     position: 'relative',
                     color: isActive ? 'primary.main' : 'text.secondary',

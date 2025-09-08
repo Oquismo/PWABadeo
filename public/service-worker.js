@@ -46,6 +46,7 @@ self.addEventListener('push', (event) => {
     image: data.image || null,
     tag: 'announcement',
     requireInteraction: true,
+    vibrate: [200, 100, 200], // Patrón de vibración para notificaciones push
     actions: [
       {
         action: 'view',

@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ssr: false });
 import { useRouter } from 'next/navigation';
 import { useAuth, User } from '@/context/AuthContext';
+import { useHaptics } from '@/hooks/useHaptics';
 import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack, IconButton, InputAdornment } from '@mui/material';
 import Link from 'next/link';
 // import EngineeringIcon from '@mui/icons-material/Engineering';
@@ -23,6 +24,7 @@ export default function LoginPage() {
   const [tourDone, setTourDone] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+  const { success: hapticSuccess, error: hapticError, buttonClick: hapticButtonClick } = useHaptics();
 
   // Mostrar el tour solo si es la primera vez (localStorage)
   useEffect(() => {
@@ -76,6 +78,7 @@ export default function LoginPage() {
       
       if (!response.ok) {
         setErrors({ api: data.error || 'Error al iniciar sesión' });
+        await hapticError(); // Vibrar en caso de error
         return;
       }
       
@@ -85,12 +88,16 @@ export default function LoginPage() {
       // Usar el contexto de auth para guardar el usuario
       await login(data.user);
       
+      // Vibración de éxito
+      await hapticSuccess();
+      
       // Redirigir a la página principal
       router.push('/');
       
     } catch (error) {
       console.error('❌ Error en login:', error);
       setErrors({ api: 'Error de conexión. Intenta nuevamente.' });
+      await hapticError(); // Vibrar en caso de error de conexión
     }
   };
 

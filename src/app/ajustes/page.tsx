@@ -5,9 +5,11 @@ import { useState } from 'react';
 import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import { useThemeContext } from '@/context/ThemeContext';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useHaptics } from '@/hooks/useHaptics';
 import { useAuth } from '@/context/AuthContext';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import VibrationIcon from '@mui/icons-material/Vibration';
 
 export default function AjustesPage() {
   const {
@@ -19,6 +21,14 @@ export default function AjustesPage() {
     subscribeToPush,
     unsubscribeFromPush
   } = usePushNotifications();
+  
+  const {
+    isSupported: hapticsSupported,
+    isEnabled: hapticsEnabled,
+    setEnabled: setHapticsEnabled,
+    success: hapticSuccess,
+    buttonClick: hapticButtonClick
+  } = useHaptics();
   // Usamos una variable temporal para el contexto para poder verificarlo
   const themeContext = useThemeContext();
   const { user, isLoading: authLoading } = useAuth();
@@ -72,8 +82,12 @@ export default function AjustesPage() {
               onChange={async (e) => {
                 if (e.target.checked) {
                   await subscribeToPush();
+                  if (isSubscribed) {
+                    await hapticSuccess(); // Vibrar cuando se activa exitosamente
+                  }
                 } else {
                   await unsubscribeFromPush();
+                  await hapticButtonClick(); // Vibración ligera al desactivar
                 }
               }}
               color={isSubscribed ? 'success' : permission === 'denied' ? 'error' : 'primary'}
@@ -101,6 +115,42 @@ export default function AjustesPage() {
               <span style={{ color: 'red', marginLeft: 8 }}>{error}</span>
             )}
           </Typography>
+          
+          {/* Control de vibraciones hápticas */}
+          {hapticsSupported && (
+            <>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 3 }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <VibrationIcon />
+                  <Typography fontWeight="medium">
+                    Vibraciones hápticas
+                  </Typography>
+                </Stack>
+                <Switch
+                  checked={hapticsEnabled}
+                  onChange={async (e) => {
+                    setHapticsEnabled(e.target.checked);
+                    if (e.target.checked) {
+                      await hapticSuccess(); // Demostrar la vibración al activar
+                    }
+                  }}
+                  color="primary"
+                  inputProps={{ 'aria-label': 'Activar vibraciones' }}
+                />
+              </Stack>
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 1,
+                  color: hapticsEnabled ? 'success.main' : 'text.secondary'
+                }}
+              >
+                {hapticsEnabled
+                  ? 'Vibraciones activadas para mejorar la experiencia'
+                  : 'Activa las vibraciones para feedback háptico'}
+              </Typography>
+            </>
+          )}
         </Paper>
       </Box>
     </Container>
