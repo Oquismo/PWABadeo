@@ -33,7 +33,36 @@ export async function POST(req: Request) {
     const announcement = await prisma.announcement.create({
       data: { message, createdBy: userId },
     });
-    return NextResponse.json({ success: true, announcement });
+
+    // Obtener todas las suscripciones push
+    const pushSubscriptions = await prisma.pushSubscription.findMany();
+    // Importar web-push dinámicamente
+    const webpush = (await import('web-push')).default;
+    const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+    webpush.setVapidDetails(
+      'mailto:admin@badeo.com',
+      VAPID_PUBLIC_KEY!,
+      VAPID_PRIVATE_KEY!
+    );
+    // Enviar notificación a cada usuario suscrito
+    const sendResults = [];
+    for (const sub of pushSubscriptions) {
+      const payload = JSON.stringify({
+        title: 'Nuevo anuncio',
+        body: message,
+        url: '/',
+        image: null
+      });
+      try {
+        const subscriptionObj = typeof sub.subscription === 'string' ? JSON.parse(sub.subscription) : sub.subscription;
+        await webpush.sendNotification(subscriptionObj, payload);
+        sendResults.push({ userId: sub.userId, success: true });
+      } catch (err) {
+        sendResults.push({ userId: sub.userId, success: false, error: String(err) });
+      }
+    }
+    return NextResponse.json({ success: true, announcement, pushResults: sendResults });
   } catch (error) {
     return NextResponse.json({ error: 'Error al publicar el anuncio.' }, { status: 500 });
   }
