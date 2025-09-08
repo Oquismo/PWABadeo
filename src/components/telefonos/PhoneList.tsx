@@ -46,9 +46,11 @@ export default function PhoneList() {
                             borderRadius: '8px'
                         }}
                     >
-                        <Avatar sx={{ bgcolor: phone.isEmergency ? 'error.main' : 'primary.main' }}>
-                            {phone.isEmergency ? <EmergencyIcon /> : <PhoneIcon />}
-                        </Avatar>
+                                                <Link href={`tel:${phone.number}`} sx={{ display: 'inline-flex' }}>
+                                                    <Avatar sx={{ bgcolor: phone.isEmergency ? 'error.main' : 'primary.main', cursor: 'pointer' }}>
+                                                            {phone.isEmergency ? <EmergencyIcon /> : <PhoneIcon />}
+                                                    </Avatar>
+                                                </Link>
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography variant="h6" fontWeight="medium">
                                 {nameTranslations[phone.nameKey] || phone.number}
