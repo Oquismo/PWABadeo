@@ -22,7 +22,7 @@ export default function PhoneList() {
     const nameTranslations: Record<string, string> = {
         emergencyGeneral: getTranslation(lang, 'pages.phones.emergency') + ' 112',
         police: getTranslation(lang, 'pages.phones.police'),
-        neighborhoodEmergency: getTranslation(lang, 'pages.phones.neighborhood') + ' ' + getTranslation(lang, 'pages.phones.emergency'),
+    neighborhoodEmergency: getTranslation(lang, 'pages.phones.emergency') + ' barrio',
         municipal: getTranslation(lang, 'pages.phones.municipal'),
         citizenService: getTranslation(lang, 'pages.phones.utilities'),
         neighborhood: getTranslation(lang, 'pages.phones.neighborhood'),
