@@ -1,6 +1,7 @@
 'use client';
 
-import { Container, Typography, Box, Paper, Stack, Switch, CircularProgress, IconButton } from '@mui/material';
+import { Container, Typography, Box, Paper, Stack, CircularProgress, IconButton } from '@mui/material';
+import MaterialSwitch from '@/components/MaterialSwitch';
 import { useState } from 'react';
 import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import { useThemeContext } from '@/context/ThemeContext';
@@ -77,20 +78,19 @@ export default function AjustesPage() {
             <Typography fontWeight="medium">
               Notificaciones push
             </Typography>
-            <Switch
+            <MaterialSwitch
               checked={isSubscribed}
               onChange={async (e) => {
                 if (e.target.checked) {
                   await subscribeToPush();
                   if (isSubscribed) {
-                    await hapticSuccess(); // Vibrar cuando se activa exitosamente
+                    await hapticSuccess();
                   }
                 } else {
                   await unsubscribeFromPush();
-                  await hapticButtonClick(); // Vibración ligera al desactivar
+                  await hapticButtonClick();
                 }
               }}
-              color={isSubscribed ? 'success' : permission === 'denied' ? 'error' : 'primary'}
               disabled={!isSupported || isLoading}
               inputProps={{ 'aria-label': 'Permitir notificaciones push' }}
             />
@@ -126,15 +126,14 @@ export default function AjustesPage() {
                     Vibraciones hápticas
                   </Typography>
                 </Stack>
-                <Switch
+                <MaterialSwitch
                   checked={hapticsEnabled}
                   onChange={async (e) => {
                     setHapticsEnabled(e.target.checked);
                     if (e.target.checked) {
-                      await hapticSuccess(); // Demostrar la vibración al activar
+                      await hapticSuccess();
                     }
                   }}
-                  color="primary"
                   inputProps={{ 'aria-label': 'Activar vibraciones' }}
                 />
               </Stack>
