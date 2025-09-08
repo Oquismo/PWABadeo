@@ -100,8 +100,11 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
       // Send subscription to server
       const userIdRaw = localStorage.getItem('userId');
+      console.log('🔍 usePushNotifications: userIdRaw:', userIdRaw);
       const userId = userIdRaw ? Number(userIdRaw) : null;
+      console.log('🔍 usePushNotifications: userId parsed:', userId);
       if (!userId || isNaN(userId)) {
+        console.error('❌ usePushNotifications: userId no válido:', { userIdRaw, userId });
         setError('No se encontró el userId del usuario. Debes iniciar sesión.');
         setIsLoading(false);
         return;
