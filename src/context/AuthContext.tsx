@@ -145,6 +145,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     // Guardar datos iniciales
     localStorage.setItem('user', JSON.stringify(userData));
+    if (userData.id) {
+      localStorage.setItem('userId', userData.id.toString());
+    }
     setUser(userData);
     logAction('login', userData.email);
     // Refrescar inmediatamente desde backend para asegurar datos completos
@@ -160,6 +163,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (user) {
           setUser(user);
           localStorage.setItem('user', JSON.stringify(user));
+          if (user.id) {
+            localStorage.setItem('userId', user.id.toString());
+          }
           console.log('✅ AuthContext: Usuario actualizado tras login desde backend:', user);
         }
       }

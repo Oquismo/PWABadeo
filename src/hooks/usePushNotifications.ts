@@ -99,13 +99,20 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       });
 
       // Send subscription to server
+      const userIdRaw = localStorage.getItem('userId');
+      const userId = userIdRaw ? Number(userIdRaw) : null;
+      if (!userId || isNaN(userId)) {
+        setError('No se encontró el userId del usuario. Debes iniciar sesión.');
+        setIsLoading(false);
+        return;
+      }
       const response = await fetch('/api/push-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: localStorage.getItem('userId'), // You might want to get this from context
+          userId,
           subscription: subscription.toJSON()
         })
       });
@@ -137,13 +144,20 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         await subscription.unsubscribe();
 
         // Remove from server
+        const userIdRaw = localStorage.getItem('userId');
+        const userId = userIdRaw ? Number(userIdRaw) : null;
+        if (!userId || isNaN(userId)) {
+          setError('No se encontró el userId del usuario. Debes iniciar sesión.');
+          setIsLoading(false);
+          return;
+        }
         await fetch('/api/push-subscription', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: localStorage.getItem('userId')
+            userId
           })
         });
       }

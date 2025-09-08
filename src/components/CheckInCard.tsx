@@ -1,5 +1,7 @@
 "use client";
 import React from "react";
+import { Button } from '@mui/material';
+import { useState } from 'react';
 import { Box, Typography, Chip, CardMedia, CardContent, Stack } from "@mui/material";
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 
@@ -15,6 +17,16 @@ const site = {
 };
 
 export default function CheckInCard() {
+  const [notifStatus, setNotifStatus] = useState<"default"|"granted"|"denied">(typeof window !== 'undefined' ? Notification.permission : "default");
+
+  const handleRequestPermission = async () => {
+    if (!('Notification' in window)) {
+      alert('Las notificaciones no son compatibles con tu navegador.');
+      return;
+    }
+    const result = await Notification.requestPermission();
+    setNotifStatus(result);
+  };
   return (
     <Material3ElevatedCard
       interactive={true}
@@ -45,6 +57,16 @@ export default function CheckInCard() {
           <Chip label={site.time} color="secondary" variant="filled" sx={{ bgcolor: "#22223a", color: "#fff" }} />
           <Chip label={site.activity} color="default" variant="filled" sx={{ bgcolor: "#22223a", color: "#fff" }} />
         </Stack>
+          <Box sx={{ mt: 2, mb: 1 }}>
+            <Button
+              variant="contained"
+              color={notifStatus === 'granted' ? 'success' : notifStatus === 'denied' ? 'error' : 'primary'}
+              onClick={handleRequestPermission}
+              disabled={notifStatus === 'granted'}
+            >
+              {notifStatus === 'granted' ? 'Notificaciones activadas' : notifStatus === 'denied' ? 'Permiso denegado' : 'Activar notificaciones'}
+            </Button>
+          </Box>
       </CardContent>
     </Material3ElevatedCard>
   );

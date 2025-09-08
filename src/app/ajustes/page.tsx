@@ -1,13 +1,24 @@
 'use client';
 
 import { Container, Typography, Box, Paper, Stack, Switch, CircularProgress, IconButton } from '@mui/material';
+import { useState } from 'react';
 import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import { useThemeContext } from '@/context/ThemeContext';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useAuth } from '@/context/AuthContext';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 export default function AjustesPage() {
+  const {
+    isSupported,
+    isSubscribed,
+    isLoading,
+    error,
+    permission,
+    subscribeToPush,
+    unsubscribeFromPush
+  } = usePushNotifications();
   // Usamos una variable temporal para el contexto para poder verificarlo
   const themeContext = useThemeContext();
   const { user, isLoading: authLoading } = useAuth();
@@ -41,8 +52,8 @@ export default function AjustesPage() {
           </Typography>
         </Stack>
 
-        {isAdmin && (
-          <Paper sx={{ p: 2, mb: 2 }}>
+        <Paper sx={{ p: 2, mb: 2 }}>
+          {isAdmin && (
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography fontWeight="medium">
                 Modo Oscuro (Solo para Administradores)
@@ -51,17 +62,46 @@ export default function AjustesPage() {
                   {/* Eliminado selector de tema: solo modo oscuro disponible */}
               </Stack>
             </Stack>
-          </Paper>
-        )}
-
-        {!isAdmin && (
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="body1" color="text.secondary">
-              Los ajustes de apariencia están temporalmente deshabilitados para usuarios regulares.
-              Solo los administradores pueden modificar el modo oscuro por motivos de prueba.
+          )}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 3 }}>
+            <Typography fontWeight="medium">
+              Notificaciones push
             </Typography>
-          </Paper>
-        )}
+            <Switch
+              checked={isSubscribed}
+              onChange={async (e) => {
+                if (e.target.checked) {
+                  await subscribeToPush();
+                } else {
+                  await unsubscribeFromPush();
+                }
+              }}
+              color={isSubscribed ? 'success' : permission === 'denied' ? 'error' : 'primary'}
+              disabled={!isSupported || isLoading}
+              inputProps={{ 'aria-label': 'Permitir notificaciones push' }}
+            />
+          </Stack>
+          <Typography
+            variant="body2"
+            sx={{
+              mt: 1,
+              color: isSubscribed
+                ? 'success.main'
+                : permission === 'denied'
+                  ? 'error.main'
+                  : 'text.secondary'
+            }}
+          >
+            {isSubscribed
+              ? 'Notificaciones activadas'
+              : permission === 'denied'
+                ? 'Permiso denegado'
+                : 'Pulsa el switch para activar las notificaciones push'}
+            {error && (
+              <span style={{ color: 'red', marginLeft: 8 }}>{error}</span>
+            )}
+          </Typography>
+        </Paper>
       </Box>
     </Container>
   );
