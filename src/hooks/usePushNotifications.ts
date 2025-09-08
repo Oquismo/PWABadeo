@@ -213,9 +213,22 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     }
 
     try {
+      // Limpiar todos los service workers existentes primero
+      const existingRegistrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(
+        existingRegistrations.map(registration => {
+          console.log('Unregistering existing service worker:', registration.scope);
+          return registration.unregister();
+        })
+      );
+
+      // Pequeña pausa para asegurar limpieza completa
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Registrar el nuevo service worker
       const registration = await navigator.serviceWorker.register('/service-worker.js');
       await navigator.serviceWorker.ready;
-      console.log('Service worker registered successfully');
+      console.log('Service worker registered successfully after cleanup');
     } catch (err) {
       console.error('Error registering service worker:', err);
       setError('Error registering service worker');

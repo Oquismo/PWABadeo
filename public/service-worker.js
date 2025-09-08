@@ -31,45 +31,55 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Cache para evitar notificaciones duplicadas más estricto
-let notificationCache = new Map();
-let lastNotificationTime = 0;
-const MIN_NOTIFICATION_INTERVAL = 10000; // 10 segundos mínimo entre notificaciones
+// Sistema anti-duplicados más estricto
+const NOTIFICATION_STORE = 'badeo-notifications';
+let processedNotifications = new Set();
 
-// Manejo de notificaciones push
-self.addEventListener('push', (event) => {
+// Función para obtener hash del contenido
+function getNotificationHash(data) {
+  return btoa(`${data.title || ''}-${data.body || ''}`).replace(/=/g, '');
+}
+
+// Manejo de notificaciones push con protección absoluta
+self.addEventListener('push', async (event) => {
   let data = {};
 
   if (event.data) {
-    data = event.data.json();
-  }
-
-  const now = Date.now();
-  const notificationKey = `${data.title || 'Nuevo Anuncio'}-${data.body || ''}`;
-  
-  // Verificar tiempo mínimo entre notificaciones
-  if (now - lastNotificationTime < MIN_NOTIFICATION_INTERVAL) {
-    console.log('Notificación bloqueada por throttling temporal');
-    return;
-  }
-  
-  // Verificar si ya existe en cache
-  if (notificationCache.has(notificationKey)) {
-    const cachedTime = notificationCache.get(notificationKey);
-    if (now - cachedTime < 60000) { // 1 minuto de cache
-      console.log('Notificación duplicada detectada, ignorando:', notificationKey);
+    try {
+      data = event.data.json();
+    } catch (e) {
+      console.error('Error parsing push data:', e);
       return;
     }
   }
+
+  const contentHash = getNotificationHash(data);
+  const notificationId = `${contentHash}-${Date.now()}`;
   
-  // Actualizar cache y tiempo
-  notificationCache.set(notificationKey, now);
-  lastNotificationTime = now;
+  // Verificar si ya procesamos esta notificación exacta
+  if (processedNotifications.has(contentHash)) {
+    console.log('🚫 Notificación duplicada bloqueada:', contentHash);
+    return;
+  }
+
+  // Añadir al set de procesadas
+  processedNotifications.add(contentHash);
   
-  // Limpiar cache viejo (más de 5 minutos)
-  for (const [key, time] of notificationCache.entries()) {
-    if (now - time > 300000) { // 5 minutos
-      notificationCache.delete(key);
+  // Limpiar el set cada 5 minutos
+  setTimeout(() => {
+    processedNotifications.delete(contentHash);
+  }, 5 * 60 * 1000);
+
+  // Verificar si ya existe una notificación visible con el mismo contenido
+  const existingNotifications = await self.registration.getNotifications({
+    tag: 'announcement'
+  });
+  
+  for (const notification of existingNotifications) {
+    if (notification.title === (data.title || 'Nuevo Anuncio') && 
+        notification.body === (data.body || 'Nuevo anuncio disponible')) {
+      console.log('🚫 Notificación visible duplicada, cerrando anterior');
+      notification.close();
     }
   }
 
@@ -78,7 +88,8 @@ self.addEventListener('push', (event) => {
     icon: '/icons/icon_192x192.png',
     badge: '/icons/icon_192x192.png',
     image: data.image || null,
-    tag: `announcement-${now}`, // Tag único para cada notificación
+    tag: 'announcement', // Tag fijo para reemplazar automáticamente
+    renotify: false, // No re-notificar si ya existe
     requireInteraction: true,
     vibrate: [200, 100, 200],
     actions: [
@@ -95,12 +106,12 @@ self.addEventListener('push', (event) => {
     data: {
       url: data.url || '/',
       announcementId: data.announcementId,
-      notificationId: data.notificationId || `notif-${now}`,
-      timestamp: now
+      notificationId: notificationId,
+      contentHash: contentHash
     }
   };
 
-  console.log('Mostrando notificación:', notificationKey);
+  console.log('✅ Mostrando notificación única:', contentHash);
   
   event.waitUntil(
     self.registration.showNotification(data.title || 'Nuevo Anuncio', options)
