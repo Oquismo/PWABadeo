@@ -34,8 +34,16 @@ export async function POST(req: Request) {
       data: { message, createdBy: userId },
     });
 
-    // Obtener todas las suscripciones push
-    const pushSubscriptions = await prisma.pushSubscription.findMany();
+    // Obtener todas las suscripciones push únicas (sin duplicados por userId)
+    const pushSubscriptions = await prisma.pushSubscription.findMany({
+      distinct: ['userId'], // Solo una suscripción por usuario
+      orderBy: {
+        updatedAt: 'desc' // La más reciente si hay varias
+      }
+    });
+    
+    console.log(`Enviando notificación push a ${pushSubscriptions.length} usuarios únicos`);
+    
     // Importar web-push dinámicamente
     const webpush = (await import('web-push')).default;
     const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -45,6 +53,10 @@ export async function POST(req: Request) {
       VAPID_PUBLIC_KEY!,
       VAPID_PRIVATE_KEY!
     );
+    
+    // Crear ID único para esta notificación
+    const notificationId = `announcement-${announcement.id}-${Date.now()}`;
+    
     // Enviar notificación a cada usuario suscrito
     const sendResults = [];
     for (const sub of pushSubscriptions) {
@@ -52,13 +64,16 @@ export async function POST(req: Request) {
         title: 'Nuevo anuncio',
         body: message,
         url: '/',
-        image: null
+        image: null,
+        notificationId: notificationId,
+        timestamp: Date.now()
       });
       try {
         const subscriptionObj = typeof sub.subscription === 'string' ? JSON.parse(sub.subscription) : sub.subscription;
         await webpush.sendNotification(subscriptionObj, payload);
         sendResults.push({ userId: sub.userId, success: true });
       } catch (err) {
+        console.error(`Error enviando push a usuario ${sub.userId}:`, err);
         sendResults.push({ userId: sub.userId, success: false, error: String(err) });
       }
     }

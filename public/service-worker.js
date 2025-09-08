@@ -31,6 +31,10 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Cache para evitar notificaciones duplicadas
+let notificationCache = new Set();
+const NOTIFICATION_CACHE_SIZE = 50;
+
 // Manejo de notificaciones push
 self.addEventListener('push', (event) => {
   let data = {};
@@ -39,12 +43,31 @@ self.addEventListener('push', (event) => {
     data = event.data.json();
   }
 
+  // Crear un ID único para la notificación
+  const notificationId = `${data.title || 'Nuevo Anuncio'}-${data.body}-${Date.now()}`;
+  const cacheKey = `${data.title || 'Nuevo Anuncio'}-${data.body}`;
+  
+  // Verificar si ya mostramos esta notificación recientemente
+  if (notificationCache.has(cacheKey)) {
+    console.log('Notificación duplicada detectada, ignorando:', cacheKey);
+    return;
+  }
+  
+  // Añadir al cache
+  notificationCache.add(cacheKey);
+  
+  // Limpiar cache si está muy grande
+  if (notificationCache.size > NOTIFICATION_CACHE_SIZE) {
+    const firstItem = notificationCache.values().next().value;
+    notificationCache.delete(firstItem);
+  }
+
   const options = {
     body: data.body || 'Nuevo anuncio disponible',
     icon: '/icons/icon_192x192.png',
     badge: '/icons/icon_192x192.png',
     image: data.image || null,
-    tag: 'announcement',
+    tag: 'announcement', // Esto ya previene duplicados por tag
     requireInteraction: true,
     vibrate: [200, 100, 200], // Patrón de vibración para notificaciones push
     actions: [
@@ -60,13 +83,19 @@ self.addEventListener('push', (event) => {
     ],
     data: {
       url: data.url || '/',
-      announcementId: data.announcementId
+      announcementId: data.announcementId,
+      notificationId: notificationId
     }
   };
 
   event.waitUntil(
     self.registration.showNotification(data.title || 'Nuevo Anuncio', options)
   );
+  
+  // Limpiar cache después de 5 minutos
+  setTimeout(() => {
+    notificationCache.delete(cacheKey);
+  }, 5 * 60 * 1000);
 });
 
 // Manejo de clicks en notificaciones
