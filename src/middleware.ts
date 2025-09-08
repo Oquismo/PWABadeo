@@ -77,6 +77,12 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/public/') ||
+    pathname.startsWith('/icons/') ||
+    pathname === '/manifest.json' ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/service-worker.js' ||
+    pathname === '/offline.html' ||
     pathname.includes('.') // archivos con extensión
   ) {
     return NextResponse.next();
@@ -166,10 +172,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - public folder files (icons, manifest, etc.)
      * - API routes (except specific ones we want to protect)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/|api/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icons/|manifest.json|robots.txt|sitemap.xml|service-worker.js|offline.html|api/).*)',
     '/api/admin/:path*',
     '/api/debug/:path*'
   ]

@@ -15,7 +15,7 @@ class ConnectionWarmer {
 
   constructor(private options: WarmupOptions = {}) {
     this.options = {
-      endpoints: ['/api/health', '/api/auth/me'],
+      endpoints: ['/api/announcement'],
       interval: 4 * 60 * 1000, // 4 minutos
       maxRetries: 2,
       ...options
