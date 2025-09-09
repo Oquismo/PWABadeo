@@ -103,16 +103,17 @@ export default function LoginPage() {
 
 
   // Bypass admin: usuario simulado
-  const handleBypassAdmin = async () => {
-    const fakeAdmin: User = {
-      id: 0, // Cambiado a number para cumplir con el tipo User
-      email: 'admin@badeo.com',
-      name: 'Admin Bypass',
-      role: 'admin' as const,
-    };
-    await login(fakeAdmin);
-    router.push('/');
-  };
+  // Bypass admin oculto en producción
+  // const handleBypassAdmin = async () => {
+  //   const fakeAdmin: User = {
+  //     id: 0, // Cambiado a number para cumplir con el tipo User
+  //     email: 'admin@badeo.com',
+  //     name: 'Admin Bypass',
+  //     role: 'admin' as const,
+  //   };
+  //   await login(fakeAdmin);
+  //   router.push('/');
+  // };
 
   return (
     <Container component="main" maxWidth="xs">
@@ -169,9 +170,12 @@ export default function LoginPage() {
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.5 }}>
             Entrar
           </Button>
+          {/* Botón Bypass admin oculto en producción */}
+          {/*
           <Button onClick={handleBypassAdmin} fullWidth variant="outlined" color="secondary" sx={{ mb: 2, py: 1.5 }} startIcon={<AdminPanelSettingsIcon />}>
             Bypass admin
           </Button>
+          */}
             {errors.api && (
               <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
                 {errors.api}
