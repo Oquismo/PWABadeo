@@ -24,6 +24,7 @@ import {
   Grid
 } from '@mui/material';
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
+import ReviewDialog from '@/components/perfil/ReviewDialog';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
@@ -43,6 +44,13 @@ import Link from 'next/link';
 import TaskManager from '@/components/admin/TaskManager';
 
 export default function PerfilPage() {
+  // Abrir el modal de reseña automáticamente al recibir el evento
+  useEffect(() => {
+    const handler = () => setReviewOpen(true);
+    window.addEventListener('showGoogleReviewPrompt', handler);
+    return () => window.removeEventListener('showGoogleReviewPrompt', handler);
+  }, []);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const { user, isAuthenticated, isLoading, logout, refreshAvatar } = useAuth();
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string>('');
@@ -426,8 +434,15 @@ export default function PerfilPage() {
           </Material3ElevatedCard>
       )}
 
-      {/* Botón de cerrar sesión */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+      {/* Botón de reseña y cerrar sesión */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setReviewOpen(true)}
+        >
+          Escribir Reseña Google
+        </Button>
         <Button
           onClick={handleLogout}
           variant="outlined"
@@ -447,6 +462,8 @@ export default function PerfilPage() {
           Cerrar Sesión
         </Button>
       </Box>
+
+      <ReviewDialog open={reviewOpen} onClose={() => setReviewOpen(false)} />
     </Container>
   );
 }

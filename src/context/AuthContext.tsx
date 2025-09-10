@@ -74,6 +74,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const onlyAdmins = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
 
+
+  // ...
+  // Declaraciones de useState
+  // ...
+
+  // Notificación de reseña Google
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedUserRaw = localStorage.getItem('user');
+    if (!storedUserRaw) return;
+    // Guardar fecha de registro si no existe
+    if (!localStorage.getItem('userRegisteredAt')) {
+      localStorage.setItem('userRegisteredAt', new Date().toISOString());
+    }
+    // Verificar si han pasado 2 días
+    const registeredAt = localStorage.getItem('userRegisteredAt');
+    if (registeredAt) {
+      const now = new Date();
+      const regDate = new Date(registeredAt);
+      const diffDays = (now.getTime() - regDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (diffDays >= 2 && !localStorage.getItem('reviewPrompted')) {
+        // Lanzar evento personalizado para mostrar notificación
+        window.dispatchEvent(new CustomEvent('showGoogleReviewPrompt'));
+        localStorage.setItem('reviewPrompted', 'true');
+      }
+    }
+  }, [user]);
+
   useEffect(() => {
     console.log('🔄 AuthContext: Inicializando...');
     const storedUser = localStorage.getItem('user');

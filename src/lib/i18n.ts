@@ -1,6 +1,14 @@
 // Sistema de traducciones
 export const translations = {
   es: {
+    review: {
+      title: "Escribe tu reseña",
+      textLabel: "Tu reseña",
+      placeholder: "Cuéntanos qué tal tu experiencia...",
+      motivationTitle: "¡Tu opinión nos ayuda a mejorar!",
+      motivationText: "Cuéntanos qué tal tu experiencia en Barrio de Oportunidades. Cada reseña nos ayuda a crecer y ofrecerte un mejor servicio.",
+      copyInfo: "Al continuar, tu reseña se copiará automáticamente y se abrirá Google para que la pegues y la publiques."
+    },
     map: {
       loading: "Cargando mapa...",
       preparingPlaces: "Preparando los lugares de interés en Sevilla",
@@ -277,6 +285,14 @@ export const translations = {
     }
   },
   en: {
+    review: {
+      title: "Write your review",
+      textLabel: "Your review",
+      placeholder: "Tell us about your experience...",
+      motivationTitle: "Your feedback helps us improve!",
+      motivationText: "Tell us about your experience in Barrio de Oportunidades. Every review helps us grow and offer you a better service.",
+      copyInfo: "When you continue, your review will be copied automatically and Google will open so you can paste and publish it."
+    },
     map: {
       loading: "Loading map...",
       preparingPlaces: "Preparing places of interest in Seville",
@@ -590,6 +606,14 @@ export const translations = {
     }
   },
   it: {
+    review: {
+      title: "Scrivi la tua recensione",
+      textLabel: "La tua recensione",
+      placeholder: "Raccontaci com'è stata la tua esperienza...",
+      motivationTitle: "La tua opinione ci aiuta a migliorare!",
+      motivationText: "Raccontaci com'è stata la tua esperienza a Barrio de Oportunidades. Ogni recensione ci aiuta a crescere e offrirti un servizio migliore.",
+      copyInfo: "Continuando, la tua recensione verrà copiata automaticamente e si aprirà Google per incollarla e pubblicarla."
+    },
     map: {
       loading: "Caricamento mappa...",
       preparingPlaces: "Preparando i luoghi di interesse a Siviglia",
