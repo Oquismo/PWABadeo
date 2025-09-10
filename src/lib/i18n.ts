@@ -1,6 +1,29 @@
 // Sistema de traducciones
 export const translations = {
   es: {
+    register: {
+      title: "Crear Cuenta",
+      firstName: "Nombre",
+      lastName: "Apellido",
+      email: "Correo Electrónico",
+      password: "Contraseña",
+      confirmPassword: "Confirmar Contraseña",
+      registerButton: "Registrarse",
+      alreadyHaveAccount: "¿Ya tienes cuenta?",
+      loginHere: "Inicia sesión aquí"
+    },
+    login: {
+      title: "Iniciar Sesión",
+      subtitle: "Ingresa con tu cuenta.",
+      adminOnly: "Modo restringido: solo administradores.",
+      email: "Correo Electrónico",
+      password: "Contraseña",
+      showPassword: "Mostrar contraseña",
+      hidePassword: "Ocultar contraseña",
+      submit: "Entrar",
+      forgotPassword: "¿Has olvidado tu contraseña?",
+      noAccount: "¿No tienes cuenta? Regístrate"
+    },
     calendar: {
       welcomeWorkshop: "Taller de Bienvenida",
       culturalTapasNight: "Noche de Tapas Cultural",
@@ -212,6 +235,29 @@ export const translations = {
     }
   },
   en: {
+    register: {
+      title: "Sign Up",
+      firstName: "First Name",
+      lastName: "Last Name",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Confirm Password",
+      registerButton: "Sign Up",
+      alreadyHaveAccount: "Already have an account?",
+      loginHere: "Sign in here"
+    },
+    login: {
+      title: "Sign In",
+      subtitle: "Sign in with your account.",
+      adminOnly: "Restricted mode: admin only.",
+      email: "Email",
+      password: "Password",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
+      submit: "Sign In",
+      forgotPassword: "Forgot your password?",
+      noAccount: "Don't have an account? Register"
+    },
     calendar: {
       welcomeWorkshop: "Welcome Workshop",
       culturalTapasNight: "Cultural Tapas Night",
@@ -460,6 +506,29 @@ export const translations = {
     }
   },
   it: {
+    register: {
+      title: "Registrati",
+      firstName: "Nome",
+      lastName: "Cognome",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Conferma Password",
+      registerButton: "Registrati",
+      alreadyHaveAccount: "Hai già un account?",
+      loginHere: "Accedi qui"
+    },
+    login: {
+      title: "Accedi",
+      subtitle: "Accedi con il tuo account.",
+      adminOnly: "Modalità ristretta: solo amministratori.",
+      email: "Email",
+      password: "Password",
+      showPassword: "Mostra password",
+      hidePassword: "Nascondi password",
+      submit: "Accedi",
+      forgotPassword: "Hai dimenticato la password?",
+      noAccount: "Non hai un account? Registrati"
+    },
     calendar: {
       welcomeWorkshop: "Laboratorio di Benvenuto",
       culturalTapasNight: "Notte di Tapas Culturale",

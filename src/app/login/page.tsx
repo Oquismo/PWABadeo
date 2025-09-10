@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth, User } from '@/context/AuthContext';
 import { useHaptics } from '@/hooks/useHaptics';
 import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack, IconButton, InputAdornment } from '@mui/material';
+import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import Link from 'next/link';
 // import EngineeringIcon from '@mui/icons-material/Engineering';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -16,6 +17,11 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 
 export default function LoginPage() {
+  // Traducción
+  const { t } = require('@/hooks/useTranslation').useTranslation();
+  // Si usas import, reemplaza la línea anterior por:
+  // import { useTranslation } from '@/hooks/useTranslation';
+  // const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<any>({});
@@ -122,18 +128,21 @@ export default function LoginPage() {
         <OnboardingTour run={showTour} onFinish={handleFinishTour} />
       )}
       <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box sx={{ position: 'absolute', top: 24, right: 24 }}>
+          <GlobalLanguageSwitch />
+        </Box>
         <Typography component="h1" variant="h4" fontWeight="bold">
-          Iniciar Sesión
+          {t('login.title')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
-          {process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true' ? 'Modo restringido: solo administradores.' : 'Ingresa con tu cuenta.'}
+          {process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true' ? t('login.adminOnly') : t('login.subtitle')}
         </Typography>
         <Box id="login-form" component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
           <TextField
             margin="normal"
             required
             fullWidth
-            label="Correo Electrónico"
+            label={t('login.email')}
             name="email"
             autoFocus
             value={email}
@@ -146,7 +155,7 @@ export default function LoginPage() {
             required
             fullWidth
             name="password"
-            label="Contraseña"
+            label={t('login.password')}
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -156,7 +165,7 @@ export default function LoginPage() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                     onClick={() => setShowPassword(p => !p)}
                     edge="end"
                     size="small"
@@ -168,7 +177,7 @@ export default function LoginPage() {
             }}
           />
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.5 }}>
-            Entrar
+            {t('login.submit')}
           </Button>
           {/* Botón Bypass admin oculto en producción */}
           {/*
@@ -185,12 +194,12 @@ export default function LoginPage() {
           <Stack spacing={1} sx={{ mt: 2 }}>
             <Box sx={{ textAlign: 'center' }}>
               <MuiLink component={Link} href="/forgot-password" variant="body2" color="primary">
-                {"¿Has olvidado tu contraseña?"}
+                {t('login.forgotPassword')}
               </MuiLink>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
               <MuiLink id="register-link" component={Link} href="/registro" variant="body2">
-                {"¿No tienes cuenta? Regístrate"}
+                {t('login.noAccount')}
               </MuiLink>
             </Box>
           </Stack>

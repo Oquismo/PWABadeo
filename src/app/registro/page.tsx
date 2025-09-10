@@ -26,6 +26,8 @@ interface School {
 }
 
 export default function RegistroPage() {
+  // Traducción
+  const { t } = require('@/hooks/useTranslation').useTranslation();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -306,18 +308,18 @@ export default function RegistroPage() {
     <Container component="main" maxWidth="xs">
       <Box sx={{ marginTop: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
         <Typography component="h1" variant="h4" fontWeight="bold">
-          Crear Cuenta
+          {t('register.title')}
         </Typography>
         <Box id="register-form" component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <MaterialTextField name="firstName" required fullWidth label="Nombre" autoFocus value={formData.firstName} onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName}/>
+              <MaterialTextField name="firstName" required fullWidth label={t('register.firstName')} autoFocus value={formData.firstName} onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName}/>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <MaterialTextField required fullWidth label="Apellidos" name="lastName" value={formData.lastName} onChange={handleChange} error={!!errors.lastName} helperText={errors.lastName}/>
+              <MaterialTextField required fullWidth label={t('register.lastName')} name="lastName" value={formData.lastName} onChange={handleChange} error={!!errors.lastName} helperText={errors.lastName}/>
             </Grid>
             <Grid item xs={12}>
-              <MaterialTextField required fullWidth label="Correo Electrónico" name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email}/>
+              <MaterialTextField required fullWidth label={t('register.email')} name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email}/>
             </Grid>
             <Grid item xs={12} sm={6}>
               <MaterialTextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
@@ -458,7 +460,7 @@ export default function RegistroPage() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <MaterialTextField required fullWidth name="password" label="Contraseña" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}/>
+              <MaterialTextField required fullWidth name="password" label={t('register.password')} type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}/>
             </Grid>
           </Grid>
           <Button 
@@ -471,7 +473,7 @@ export default function RegistroPage() {
             sx={{ mt: 3, mb: 2, py: 1.5 }}
             startIcon={isSubmitting ? <Material3LoadingIndicator size="small" /> : undefined}
           >
-            {isSubmitting ? 'Registrando...' : 'Registrarse'}
+            {isSubmitting ? t('common.loading') : t('register.registerButton')}
           </Button>
           {errors.api && (
             <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
@@ -480,7 +482,7 @@ export default function RegistroPage() {
           )}
           <Box sx={{ textAlign: 'center' }}>
             <MuiLink component={Link} href="/login" variant="body2">
-              ¿Ya tienes una cuenta? Inicia sesión
+              {t('register.alreadyHaveAccount')} {t('register.loginHere')}
             </MuiLink>
           </Box>
         </Box>
