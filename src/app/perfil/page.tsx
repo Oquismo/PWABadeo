@@ -9,7 +9,6 @@ import {
   Typography,
   Button,
   Avatar,
-  Paper,
   List,
   ListItem,
   ListItemIcon,
@@ -19,13 +18,12 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Card,
-  CardContent,
   Chip,
   Divider,
   Fade,
   Grid
 } from '@mui/material';
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
@@ -49,10 +47,16 @@ export default function PerfilPage() {
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const tapTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Imagen de huevo por defecto (como el antiguo Twitter)
   const defaultEggAvatar = '/img/twittereggavatar.jpg';
+
+  // Estado para evitar errores de hidratación con Fade
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     // Solo redirigir si definitivamente no hay usuario después de que termine la carga
@@ -113,7 +117,9 @@ export default function PerfilPage() {
     );
   }
 
-  if (!isAuthenticated || !user) {
+  // Solo renderizar el contenido si el usuario está autenticado y existe
+  const isReady = isAuthenticated && !!user && isMounted;
+  if (!isReady) {
     return (
       <Container component="main" maxWidth="md">
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -181,238 +187,175 @@ export default function PerfilPage() {
       </Box>
 
       {/* Card principal del perfil */}
-      <Fade in={true} timeout={600}>
-        <Card
-          elevation={0}
-          sx={{
-            mb: 3,
-            borderRadius: 4,
-            border: '1px solid',
-            borderColor: 'divider',
-            overflow: 'visible'
-          }}
-        >
-          <CardContent sx={{ p: 4 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-              {/* Avatar con mejor diseño */}
-              <Box sx={{ position: 'relative', mb: 3 }}>
-                <Avatar
-                  src={user.avatarUrl || defaultEggAvatar}
-                  sx={{
-                    width: 120,
-                    height: 120,
-                    fontSize: user.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? '3rem' : 'inherit',
-                    bgcolor: 'primary.light',
-                    cursor: 'pointer',
-                    boxShadow: modalOpen ? 8 : 3,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: '4px solid',
-                    borderColor: 'background.paper',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                      boxShadow: 6
-                    }
-                  }}
-                  onTouchStart={handleAvatarTouchStart}
-                  onTouchEnd={handleAvatarTouchEnd}
-                  onMouseDown={handleAvatarTouchStart}
-                  onMouseUp={handleAvatarTouchEnd}
-                  title="Mantén presionado para ver notificaciones"
-                >
-                  {!user.avatarUrl ? undefined : user.avatarUrl.startsWith('data:') ? null : user.avatarUrl === defaultEggAvatar ? undefined : user.avatarUrl}
-                </Avatar>
+      <Material3ElevatedCard sx={{ mb: 3, p: 4, borderRadius: 4, overflow: 'visible' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          {/* Avatar con mejor diseño */}
+          <Box sx={{ position: 'relative', mb: 3 }}>
+              <Avatar
+                src={user.avatarUrl || defaultEggAvatar}
+                sx={{
+                  width: 120,
+                  height: 120,
+                  fontSize: user.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? '3rem' : 'inherit',
+                  bgcolor: 'primary.light',
+                  cursor: 'pointer',
+                  boxShadow: modalOpen ? 8 : 3,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  border: '4px solid',
+                  borderColor: 'background.paper',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: 6
+                  }
+                }}
+                onTouchStart={handleAvatarTouchStart}
+                onTouchEnd={handleAvatarTouchEnd}
+                onMouseDown={handleAvatarTouchStart}
+                onMouseUp={handleAvatarTouchEnd}
+                title="Mantén presionado para ver notificaciones"
+              >
+                {!user.avatarUrl ? undefined : user.avatarUrl.startsWith('data:') ? null : user.avatarUrl === defaultEggAvatar ? undefined : user.avatarUrl}
+              </Avatar>
 
-                {/* Indicador de rol */}
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 8,
-                    right: 8,
-                    bgcolor: isAdmin ? 'secondary.main' : 'primary.main',
-                    borderRadius: '50%',
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: 2,
-                    border: '2px solid',
-                    borderColor: 'background.paper'
-                  }}
-                >
-                  {isAdmin ? (
-                    <AdminPanelSettingsIcon sx={{ fontSize: 16, color: 'white' }} />
-                  ) : (
-                    <PersonIcon sx={{ fontSize: 16, color: 'white' }} />
-                  )}
-                </Box>
-              </Box>
-
-              {/* Información principal */}
-              <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
-                {user.name || 'Usuario'}
-              </Typography>
-
-              <Chip
-                icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
-                label={isAdmin ? 'Administrador' : 'Usuario'}
-                color={isAdmin ? 'secondary' : 'primary'}
-                variant="filled"
-                sx={{ mb: 2, fontWeight: 'medium' }}
-              />
-
-              {/* Información de contacto */}
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12} sm={isAdmin ? 6 : 4}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: 'action.hover',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1
-                    }}
-                  >
-                    <EmailIcon color="action" />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        Email
-                      </Typography>
-                      <Typography variant="body2" fontWeight="medium">
-                        {user.email}
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
-
-                {!isAdmin && (
-                  <>
-                    <Grid item xs={12} sm={4}>
-                      <Paper
-                        elevation={0}
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: 'action.hover',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1
-                        }}
-                      >
-                        <SchoolIcon color="action" />
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Escuela
-                          </Typography>
-                          <Typography variant="body2" fontWeight="medium">
-                            {user.school
-                              ? (typeof user.school === 'string'
-                                  ? user.school
-                                  : user.school.name)
-                              : 'No especificada'}
-                          </Typography>
-                        </Box>
-                      </Paper>
-                    </Grid>
-
-                    <Grid item xs={12} sm={4}>
-                      <Paper
-                        elevation={0}
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: 'action.hover',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1
-                        }}
-                      >
-                        <CakeIcon color="action" />
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Edad
-                          </Typography>
-                          <Typography variant="body2" fontWeight="medium">
-                            {user.age ? `${user.age} años` : 'No especificada'}
-                          </Typography>
-                        </Box>
-                      </Paper>
-                    </Grid>
-                  </>
+              {/* Indicador de rol */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 8,
+                  right: 8,
+                  bgcolor: isAdmin ? 'secondary.main' : 'primary.main',
+                  borderRadius: '50%',
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 2,
+                  border: '2px solid',
+                  borderColor: 'background.paper'
+                }}
+              >
+                {isAdmin ? (
+                  <AdminPanelSettingsIcon sx={{ fontSize: 16, color: 'white' }} />
+                ) : (
+                  <PersonIcon sx={{ fontSize: 16, color: 'white' }} />
                 )}
+              </Box>
+            </Box>
 
-                <Grid item xs={12} sm={isAdmin ? 6 : 12}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: 'action.hover',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1
-                    }}
-                  >
-                    <LocationOnIcon color="action" />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        Ubicación
-                      </Typography>
-                      <Typography variant="body2" fontWeight="medium">
-                        {(() => {
-                          const isAdmin = user.role === 'admin' || user.role === 'ADMIN';
-                          let parts = [];
-                          
-                          // Si el usuario no es admin y tiene escuela, usar ubicación de la escuela
-                          if (!isAdmin && user.school && typeof user.school === 'object') {
-                            const school = user.school as any;
-                            if (school.town) parts.push(school.town);
-                            if (school.city) parts.push(school.city);
-                            if (school.country) parts.push(school.country);
-                          } else {
-                            // Para admins o usuarios sin escuela, usar ubicación del usuario
-                            if (user.town) parts.push(user.town);
-                            if (user.city) parts.push(user.city);
-                            if (user.country) parts.push(user.country);
-                          }
-                          return parts.length > 0 ? parts.join(', ') : 'No especificada';
-                        })()}
-                      </Typography>
+            {/* Información principal */}
+            <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
+              {user.name || 'Usuario'}
+            </Typography>
+
+            <Chip
+              icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+              label={isAdmin ? 'Administrador' : 'Usuario'}
+              color={isAdmin ? 'secondary' : 'primary'}
+              variant="filled"
+              sx={{ mb: 2, fontWeight: 'medium' }}
+            />
+
+            {/* Información de contacto */}
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12} sm={isAdmin ? 6 : 4}>
+                <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <EmailIcon color="action" />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Email
+                    </Typography>
+                    <Typography variant="body2" fontWeight="medium">
+                      {user.email}
+                    </Typography>
+                  </Box>
+                </Material3ElevatedCard>
+              </Grid>
+
+              {!isAdmin && (
+                <>
+                  <Grid item xs={12} sm={4}>
+                    <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <SchoolIcon color="action" />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Escuela
+                        </Typography>
+                        <Typography variant="body2" fontWeight="medium">
+                          {user.school
+                            ? (typeof user.school === 'string'
+                                ? user.school
+                                : user.school.name)
+                            : 'No especificada'}
+                        </Typography>
+                      </Box>
+                    </Material3ElevatedCard>
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CakeIcon color="action" />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Edad
+                        </Typography>
+                        <Typography variant="body2" fontWeight="medium">
+                          {user.age ? `${user.age} años` : 'No especificada'}
+                        </Typography>
+                      </Box>
+                    </Material3ElevatedCard>
+                  </Grid>
+                </>
+              )}
+
+              <Grid item xs={12} sm={isAdmin ? 6 : 12}>
+                <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LocationOnIcon color="action" />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Ubicación
+                    </Typography>
+                    <Typography variant="body2" fontWeight="medium">
                       {(() => {
                         const isAdmin = user.role === 'admin' || user.role === 'ADMIN';
+                        let parts = [];
+                        // Si el usuario no es admin y tiene escuela, usar ubicación de la escuela
                         if (!isAdmin && user.school && typeof user.school === 'object') {
-                          return (
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
-                              📍 Ubicación de tu escuela
-                            </Typography>
-                          );
+                          const school = user.school as any;
+                          if (school.town) parts.push(school.town);
+                          if (school.city) parts.push(school.city);
+                          if (school.country) parts.push(school.country);
+                        } else {
+                          // Para admins o usuarios sin escuela, usar ubicación del usuario
+                          if (user.town) parts.push(user.town);
+                          if (user.city) parts.push(user.city);
+                          if (user.country) parts.push(user.country);
                         }
-                        return null;
+                        return parts.length > 0 ? parts.join(', ') : 'No especificada';
                       })()}
-                    </Box>
-                  </Paper>
-                </Grid>
+                    </Typography>
+                    {(() => {
+                      const isAdmin = user.role === 'admin' || user.role === 'ADMIN';
+                      if (!isAdmin && user.school && typeof user.school === 'object') {
+                        return (
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
+                            📍 Ubicación de tu escuela
+                          </Typography>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </Box>
+                </Material3ElevatedCard>
               </Grid>
-            </Box>
-          </CardContent>
-        </Card>
-      </Fade>
+            </Grid>
+          </Box>
+        </Material3ElevatedCard>
 
       {/* Sección de tareas personales */}
-      <Fade in={true} timeout={800}>
-        <Card
+      <Material3ElevatedCard sx={{ mb: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+        <Accordion
           elevation={0}
-          sx={{
-            mb: 3,
-            borderRadius: 4,
-            border: '1px solid',
-            borderColor: 'divider'
-          }}
-        >
-          <Accordion
-            elevation={0}
             sx={{
               '&:before': { display: 'none' },
               borderRadius: 4,
@@ -441,31 +384,19 @@ export default function PerfilPage() {
               <TaskManager />
             </AccordionDetails>
           </Accordion>
-        </Card>
-      </Fade>
+        </Material3ElevatedCard>
 
       {/* Panel de administración solo visible para admin */}
       {isAdmin && (
-        <Fade in={true} timeout={1000}>
-          <Card
+        <Material3ElevatedCard sx={{ mb: 3, borderRadius: 4, border: '1px solid', borderColor: 'secondary.main', bgcolor: 'secondary.main', color: 'secondary.contrastText' }}>
+          <Accordion
             elevation={0}
             sx={{
-              mb: 3,
+              '&:before': { display: 'none' },
               borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'secondary.main',
-              bgcolor: 'secondary.main',
-              color: 'secondary.contrastText'
-            }}
-          >
-            <Accordion
-              elevation={0}
-              sx={{
-                '&:before': { display: 'none' },
-                borderRadius: 4,
-                bgcolor: 'transparent',
-                color: 'inherit',
-                '& .MuiAccordionSummary-root': {
+              bgcolor: 'transparent',
+              color: 'inherit',
+              '& .MuiAccordionSummary-root': {
                   borderRadius: 4,
                   color: 'inherit'
                 }
@@ -492,33 +423,30 @@ export default function PerfilPage() {
                 <TaskManager />
               </AccordionDetails>
             </Accordion>
-          </Card>
-        </Fade>
+          </Material3ElevatedCard>
       )}
 
       {/* Botón de cerrar sesión */}
-      <Fade in={true} timeout={1200}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Button
-            onClick={handleLogout}
-            variant="outlined"
-            color="error"
-            size="large"
-            sx={{
-              px: 4,
-              py: 1.5,
-              borderRadius: 3,
-              fontWeight: 'bold',
-              '&:hover': {
-                bgcolor: 'error.main',
-                color: 'error.contrastText'
-              }
-            }}
-          >
-            Cerrar Sesión
-          </Button>
-        </Box>
-      </Fade>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Button
+          onClick={handleLogout}
+          variant="outlined"
+          color="error"
+          size="large"
+          sx={{
+            px: 4,
+            py: 1.5,
+            borderRadius: 3,
+            fontWeight: 'bold',
+            '&:hover': {
+              bgcolor: 'error.main',
+              color: 'error.contrastText'
+            }
+          }}
+        >
+          Cerrar Sesión
+        </Button>
+      </Box>
     </Container>
   );
 }

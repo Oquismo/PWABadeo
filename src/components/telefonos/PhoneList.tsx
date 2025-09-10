@@ -31,23 +31,28 @@ export default function PhoneList() {
 
     return (
         <Container sx={{ py: 4 }}>
-            <Stack spacing={3}>
-                {phoneNumbers.map((phone) => (
-                    <Material3ElevatedCard key={phone.nameKey} sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: phone.isEmergency ? 'error.dark' : undefined }}>
-                        <Link href={`tel:${phone.number}`} sx={{ display: 'inline-flex' }}>
-                            <Avatar sx={{ bgcolor: phone.isEmergency ? 'error.main' : 'primary.main', cursor: 'pointer' }}>
-                                {phone.isEmergency ? <EmergencyIcon /> : <PhoneIcon />}
-                            </Avatar>
-                        </Link>
-                        <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="h6" fontWeight="medium">
-                                {nameTranslations[phone.nameKey] || phone.number}
-                            </Typography>
-                            <Link href={`tel:${phone.number}`} color="inherit" underline="hover" sx={{ fontSize: '1.1rem' }}>
-                                {phone.number}
+            <Stack spacing={0}>
+                {phoneNumbers.map((phone, idx) => (
+                    <>
+                        <Material3ElevatedCard key={phone.nameKey} sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: phone.isEmergency ? 'error.dark' : undefined }}>
+                            <Link href={`tel:${phone.number}`} sx={{ display: 'inline-flex' }}>
+                                <Avatar sx={{ bgcolor: phone.isEmergency ? 'error.main' : 'primary.main', cursor: 'pointer' }}>
+                                    {phone.isEmergency ? <EmergencyIcon /> : <PhoneIcon />}
+                                </Avatar>
                             </Link>
-                        </Box>
-                    </Material3ElevatedCard>
+                            <Box sx={{ flexGrow: 1 }}>
+                                <Typography variant="h6" fontWeight="medium">
+                                    {nameTranslations[phone.nameKey] || phone.number}
+                                </Typography>
+                                <Link href={`tel:${phone.number}`} color="inherit" underline="hover" sx={{ fontSize: '1.1rem' }}>
+                                    {phone.number}
+                                </Link>
+                            </Box>
+                        </Material3ElevatedCard>
+                        {idx < phoneNumbers.length - 1 && (
+                            <Divider variant="middle" sx={{ my: 2, mx: 4, borderColor: 'rgba(0,0,0,0.08)' }} />
+                        )}
+                    </>
                 ))}
             </Stack>
         </Container>
