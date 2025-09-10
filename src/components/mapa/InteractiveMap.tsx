@@ -5,8 +5,9 @@ import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
-import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, Chip, CircularProgress } from '@mui/material';
+import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, CircularProgress } from '@mui/material';
 import MaterialTextField from '@/components/ui/MaterialTextField';
+import MaterialFilterChips from '@/components/ui/MaterialFilterChips';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import DirectionsIcon from '@mui/icons-material/Directions';
@@ -291,10 +292,9 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
 
   const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
   const [coordsToAddPlace, setCoordsToAddPlace] = useState<LatLng | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const filterCategories: string[] = [
-    'Todos',
     'Residencia',
     'Cultural',
     'Comida',
@@ -435,30 +435,11 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
 
   return (
     <Box>
-      <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', py: 1, mb: 2, '::-webkit-scrollbar': { display: 'none' } }}>
-        {filterCategories.map((category) => (
-          <Chip
-            key={category}
-            label={category}
-            onClick={() => setSelectedCategory(category)}
-            sx={{
-              color: selectedCategory !== category ? 'text.secondary' : undefined,
-              borderColor: selectedCategory !== category ? 'rgba(255, 255, 255, 0.23)' : 'primary.main',
-              fontWeight: 'bold',
-              fontSize: '0.875rem',
-              py: 2,
-              px: 1.5,
-              cursor: 'pointer',
-              backgroundColor: selectedCategory === category ? 'primary.main' : 'transparent',
-              '&.MuiChip-filled.MuiChip-colorPrimary': { 
-                color: selectedCategory === category ? 'white' : undefined, 
-              }
-            }}
-            variant={selectedCategory === category ? 'filled' : 'outlined'}
-            color={selectedCategory === category ? 'primary' : undefined}
-          />
-        ))}
-      </Stack>
+      <MaterialFilterChips
+        categories={filterCategories}
+        selectedCategories={selectedCategories}
+        onCategoriesChange={setSelectedCategories}
+      />
 
       <Box sx={{ position: 'relative' }}>
         <HeatmapToggleButton />
@@ -519,7 +500,7 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
         })}
 
         {/* Marcadores de Lugares de Interés predefinidos (FILTRADOS Y CON ICONO PERSONALIZADO) */}
-        {placesData.filter(place => selectedCategory === 'Todos' || place.category === selectedCategory).map((place) => {
+        {placesData.filter(place => selectedCategories.length === 0 || selectedCategories.includes(place.category)).map((place) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
             const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
             // Handler para contar clicks en el marcador
@@ -601,7 +582,16 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
         })}
 
         {/* Marcadores de Puntos de Interés Personalizados por el Usuario (FILTRADOS Y CON ICONO PERSONALIZADO) */}
-        {customPlaces.filter(place => selectedCategory === 'Todos' || (selectedCategory === 'Personalizado' && !placesData.some(p => p.id === place.id)) || (selectedCategory !== 'Personalizado' && place.category === selectedCategory) ).map((place) => {
+        {customPlaces.filter(place => {
+          // Si no hay categorías seleccionadas, mostrar todos
+          if (selectedCategories.length === 0) return true;
+          
+          // Si 'Personalizado' está seleccionado, mostrar lugares personalizados únicos
+          if (selectedCategories.includes('Personalizado') && !placesData.some(p => p.id === place.id)) return true;
+          
+          // Si la categoría del lugar está seleccionada
+          return selectedCategories.includes(place.category);
+        }).map((place) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
             const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
             // La lógica de filtrado ya está en el `.filter` de arriba.

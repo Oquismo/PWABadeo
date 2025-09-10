@@ -49,3 +49,39 @@ body {
   min-height: 100vh;
   width: 100%;
 }
+
+/* Material Design 3 Chips styling personalizado */
+.material-chip-set {
+  /* Ocultar scrollbar en todos los navegadores */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.material-chip-set::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.material-filter-chip {
+  /* Evitar selección de texto */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  
+  /* Evitar efectos de tap en móviles */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.material-filter-chip:focus {
+  outline: 2px solid rgb(255, 107, 53);
+  outline-offset: 2px;
+}
+
+.material-filter-chip:active {
+  transform: translateY(1px) !important;
+}
+
+/* Eliminar estilos anteriores de md-filter-chip ya que ahora usamos elementos personalizados */
+md-filter-chip {
+  display: none;
+}

@@ -164,6 +164,28 @@ export default function Material3Dialog({
 }: Material3DialogProps) {
   const theme = useTheme();
 
+  // Memorizar el icono renderizado
+  const memoIcon = React.useMemo(() => {
+    if (!icon) return null;
+    return (
+      <Box 
+        sx={{ 
+          color: theme.palette.secondary.main,
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '24px'
+        }}
+      >
+        {icon}
+      </Box>
+    );
+  }, [icon, theme.palette.secondary.main]);
+
+  // Memorizar el handler de cierre
+  const handleClose = React.useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    onClose?.(e, 'backdropClick');
+  }, [onClose]);
+
   return (
     <Dialog
       {...props}
@@ -188,18 +210,7 @@ export default function Material3Dialog({
       {(title || showCloseButton) && (
         <Material3DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-            {icon && (
-              <Box 
-                sx={{ 
-                  color: theme.palette.secondary.main, // colorSecondary según spec
-                  display: 'flex',
-                  alignItems: 'center',
-                  fontSize: '24px'
-                }}
-              >
-                {icon}
-              </Box>
-            )}
+            {memoIcon}
             <Box>
               {title && (
                 <Typography
@@ -232,10 +243,9 @@ export default function Material3Dialog({
               )}
             </Box>
           </Box>
-          
           {showCloseButton && (
             <IconButton
-              onClick={(e) => onClose?.(e, 'backdropClick')}
+              onClick={handleClose}
               sx={{
                 color: theme.palette.mode === 'dark' ? '#9AA0A6' : '#6B7280',
                 padding: '8px',
@@ -285,3 +295,5 @@ export {
   Material3DialogActions,
   Material3Backdrop
 };
+// Exportar el componente memoizado
+export const MemoizedMaterial3Dialog = React.memo(Material3Dialog);

@@ -1,6 +1,48 @@
 // Sistema de traducciones
 export const translations = {
   es: {
+    map: {
+      loading: "Cargando mapa...",
+      preparingPlaces: "Preparando los lugares de interés en Sevilla",
+      showPlacesList: "Ver lista de lugares",
+      categories: {
+        all: "Todos",
+        residence: "Residencia",
+        cultural: "Cultural", 
+        food: "Comida",
+        leisure: "Ocio",
+        services: "Servicios",
+        study: "Estudio",
+        transport: "Transporte",
+        metro: "Metro",
+        health: "Salud",
+        custom: "Personalizado"
+      }
+    },
+    addPlace: {
+      title: "Añadir Nuevo Lugar Personalizado",
+      coords: "Coordenadas",
+      addButton: "Añadir Lugar",
+      name: "Nombre del Lugar",
+      nameHelp: "Introduce el nombre del lugar que quieres añadir",
+      description: "Descripción",
+      descriptionHelp: "Describe brevemente el lugar y sus características",
+      category: "Categoría",
+      selectCategory: "Selecciona una categoría",
+      cultural: "Cultural",
+      food: "Comida",
+      leisure: "Ocio",
+      services: "Servicios",
+      study: "Estudio",
+      transport: "Transporte",
+      health: "Salud",
+      imageUrl: "URL de la Imagen (opcional)",
+      imageUrlHelp: "Puedes añadir una imagen del lugar con una URL",
+      address: "Dirección (opcional)",
+      addressHelp: "Añade la dirección del lugar si la conoces",
+      link: "Enlace web (opcional)",
+      linkHelp: "Sitio web, redes sociales o información adicional"
+    },
     register: {
       title: "Crear Cuenta",
       firstName: "Nombre",
@@ -235,6 +277,48 @@ export const translations = {
     }
   },
   en: {
+    map: {
+      loading: "Loading map...",
+      preparingPlaces: "Preparing places of interest in Seville",
+      showPlacesList: "Show places list",
+      categories: {
+        all: "All",
+        residence: "Residence",
+        cultural: "Cultural",
+        food: "Food", 
+        leisure: "Leisure",
+        services: "Services",
+        study: "Study",
+        transport: "Transport",
+        metro: "Metro",
+        health: "Health",
+        custom: "Custom"
+      }
+    },
+    addPlace: {
+      title: "Add New Custom Place",
+      coords: "Coordinates",
+      addButton: "Add Place",
+      name: "Place Name",
+      nameHelp: "Enter the name of the place you want to add",
+      description: "Description",
+      descriptionHelp: "Briefly describe the place and its characteristics",
+      category: "Category",
+      selectCategory: "Select a category",
+      cultural: "Cultural",
+      food: "Food",
+      leisure: "Leisure",
+      services: "Services",
+      study: "Study",
+      transport: "Transport",
+      health: "Health",
+      imageUrl: "Image URL (optional)",
+      imageUrlHelp: "You can add an image of the place with a URL",
+      address: "Address (optional)",
+      addressHelp: "Add the address of the place if you know it",
+      link: "Web link (optional)",
+      linkHelp: "Website, social media or additional information"
+    },
     register: {
       title: "Sign Up",
       firstName: "First Name",
@@ -506,6 +590,48 @@ export const translations = {
     }
   },
   it: {
+    map: {
+      loading: "Caricamento mappa...",
+      preparingPlaces: "Preparando i luoghi di interesse a Siviglia",
+      showPlacesList: "Mostra elenco luoghi",
+      categories: {
+        all: "Tutti",
+        residence: "Residenza",
+        cultural: "Culturale",
+        food: "Cibo",
+        leisure: "Tempo libero", 
+        services: "Servizi",
+        study: "Studio",
+        transport: "Trasporti",
+        metro: "Metro",
+        health: "Salute",
+        custom: "Personalizzato"
+      }
+    },
+    addPlace: {
+      title: "Aggiungi Nuovo Luogo Personalizzato",
+      coords: "Coordinate",
+      addButton: "Aggiungi Luogo",
+      name: "Nome del Luogo",
+      nameHelp: "Inserisci il nome del luogo che vuoi aggiungere",
+      description: "Descrizione",
+      descriptionHelp: "Descrivi brevemente il luogo e le sue caratteristiche",
+      category: "Categoria",
+      selectCategory: "Seleziona una categoria",
+      cultural: "Culturale",
+      food: "Cibo",
+      leisure: "Tempo libero",
+      services: "Servizi",
+      study: "Studio",
+      transport: "Trasporti",
+      health: "Salute",
+      imageUrl: "URL Immagine (opzionale)",
+      imageUrlHelp: "Puoi aggiungere un'immagine del luogo con un URL",
+      address: "Indirizzo (opzionale)",
+      addressHelp: "Aggiungi l'indirizzo del luogo se lo conosci",
+      link: "Link web (opzionale)",
+      linkHelp: "Sito web, social media o informazioni aggiuntive"
+    },
     register: {
       title: "Registrati",
       firstName: "Nome",
