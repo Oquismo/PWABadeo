@@ -922,11 +922,8 @@ export default function ProjectsDashboard() {
                     isDragged={false}
                     interactive={true}
                     sx={{
-                      // 🎨 Material You - Colores dinámicos
-                      background: `linear-gradient(135deg,
-                        ${getProjectColors(task.title, index).primary}E6 0%,
-                        ${getProjectColors(task.title, index).secondary}CC 50%,
-                        ${getProjectColors(task.title, index).primary}B3 100%)`,
+                      // 🎨 Material You - Color sólido
+                      background: getProjectColors(task.title, index).primary,
                       color: 'white',
                       width: '100%',
                       height: carouselConfig.cardHeight,

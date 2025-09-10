@@ -31,7 +31,7 @@ export const carouselTasks: TaskData[] = [
     title: 'Erasmus+',
     description: 'Nuevos participantes europeos',
     progress: 85,
-    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: '#667eea',
     avatars: ['E', 'U', 'M', '+15'],
   date: 'Ago 20',
   role: 'user'
@@ -40,7 +40,7 @@ export const carouselTasks: TaskData[] = [
     title: 'Formación',
     description: 'Cursos de español e inmersión',
     progress: 72,
-    color: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+    color: '#84fab0',
     avatars: ['ES', 'EN', 'IT', '+8'],
   date: 'Sep 01',
   role: 'user'
@@ -49,7 +49,7 @@ export const carouselTasks: TaskData[] = [
     title: 'Alojamiento',
     description: 'Coordinación de pisos Sevilla',
     progress: 65,
-    color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    color: '#f093fb',
     avatars: ['H', 'L', '+12'],
   date: 'Ago 25',
   role: 'user'
@@ -58,7 +58,7 @@ export const carouselTasks: TaskData[] = [
     title: 'Prácticas',
     description: 'Tirocini en empresas locales',
     progress: 78,
-    color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+    color: '#ffecd2',
     avatars: ['T', 'P', 'E', '+20'],
   date: 'Sep 10',
   role: 'user'
@@ -67,7 +67,7 @@ export const carouselTasks: TaskData[] = [
     title: 'Cultura',
     description: 'Tours monumentos y museos',
     progress: 90,
-    color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    color: '#a8edea',
     avatars: ['C', 'G', '+25'],
   date: 'Viernes',
   role: 'user'
@@ -76,7 +76,7 @@ export const carouselTasks: TaskData[] = [
     title: 'PCTO',
     description: 'Competencias transversales',
     progress: 55,
-    color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    color: '#fa709a',
     avatars: ['PC', 'TO', '+10'],
   date: 'Sep 15',
   role: 'user'
@@ -85,7 +85,7 @@ export const carouselTasks: TaskData[] = [
     title: 'Partnerships',
     description: 'Nuevas instituciones EU',
     progress: 45,
-    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: '#667eea',
     avatars: ['EU', 'IT', 'DE', '+6'],
   date: 'Oct 01',
   role: 'admin'
@@ -94,7 +94,7 @@ export const carouselTasks: TaskData[] = [
     title: 'Evaluación',
     description: 'Valoración de candidatos',
     progress: 88,
-    color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+    color: '#ff9a9e',
     avatars: ['V', 'A', '+4'],
   date: 'Ago 30',
   role: 'admin'
