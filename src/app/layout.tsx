@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+"use client";
 import { Inter } from 'next/font/google';
 import React, { useState, useEffect } from 'react';
 import './globals.css'; // 1. Importar el archivo de estilos globales
@@ -21,11 +21,6 @@ import LanguageTest from '@/components/LanguageTest';
 import PullToRefreshPreventer from '@/components/layout/PullToRefreshPreventer';
 
 const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: 'Barrio de Oportunidades',
-  description: 'Una nueva app para el barrio',
-};
 
 export default function RootLayout({
   children,
@@ -101,9 +96,25 @@ export default function RootLayout({
                             maxWidth: 420,
                             padding: 32,
                             textAlign: 'center',
+                            color: '#222',
                           }}>
-                            <h2 style={{marginBottom: 16}}>Política de Privacidad</h2>
-                            <p style={{marginBottom: 16}}>Para usar la app Barrio de Oportunidades debes aceptar nuestra <a href="/privacidad" target="_blank" rel="noopener noreferrer">política de privacidad</a>.</p>
+                            <h2 style={{marginBottom: 16, color: '#222'}}>Política de Privacidad</h2>
+                            <div style={{maxHeight: 300, overflowY: 'auto', marginBottom: 16, textAlign: 'left', fontSize: '14px', color: '#444', lineHeight: 1.6}}>
+                              <p><strong>Información que recopilamos:</strong></p>
+                              <ul>
+                                <li>Datos de registro (nombre, correo electrónico, etc.)</li>
+                                <li>Información de uso y actividad dentro de la app</li>
+                                <li>Datos de ubicación (si el usuario lo permite)</li>
+                              </ul>
+                              <p><strong>Uso de la información:</strong></p>
+                              <ul>
+                                <li>Mejorar la experiencia y los servicios ofrecidos</li>
+                                <li>Personalizar el contenido y las notificaciones</li>
+                                <li>Contactar al usuario en caso necesario</li>
+                              </ul>
+                              <p><strong>Protección de datos:</strong> La información se almacena de forma segura y no se comparte con terceros salvo obligación legal o consentimiento explícito del usuario.</p>
+                              <p><strong>Contacto:</strong> Para cualquier duda escribir a info@badeo.es</p>
+                            </div>
                             <button style={{
                               background: '#1976d2',
                               color: '#fff',

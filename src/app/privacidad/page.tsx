@@ -39,7 +39,7 @@ export default function PrivacyPolicyApp() {
         </Typography>
         <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>Contacto</Typography>
         <Typography variant="body1">
-          Para cualquier duda o solicitud relacionada con la privacidad, puedes escribir a <Link href="mailto:info@barriodeoportunidades.com">info@barriodeoportunidades.com</Link>.
+          Para cualquier duda o solicitud relacionada con la privacidad, puedes escribir a <Link href="mailto:info@badeo.es">info@badeo.es</Link>.
         </Typography>
       </Box>
     </Container>
