@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import React, { useState, useEffect } from 'react';
 import './globals.css'; // 1. Importar el archivo de estilos globales
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { AuthProvider } from '@/context/AuthContext';
@@ -31,6 +32,21 @@ export default function RootLayout({
 }: {
   children: React.ReactNode; 
 }) {
+  // ...existing code...
+  // Diálogo de política de privacidad
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const accepted = localStorage.getItem('privacyAccepted');
+      if (!accepted) setShowPrivacy(true);
+    }
+  }, []);
+
+  const handleAcceptPrivacy = () => {
+    localStorage.setItem('privacyAccepted', 'true');
+    setShowPrivacy(false);
+  };
+
   return (
     <html lang="es" className={inter.className}>
       <head>
@@ -64,7 +80,44 @@ export default function RootLayout({
                       overflow: 'hidden', // Prevenir scrollbars horizontales
                       position: 'relative' // Asegurar contexto de posicionamiento
                     }}>
-                      
+                      {/* Diálogo de privacidad */}
+                      {showPrivacy && (
+                        <div style={{
+                          position: 'fixed',
+                          top: 0,
+                          left: 0,
+                          width: '100vw',
+                          height: '100vh',
+                          background: 'rgba(0,0,0,0.45)',
+                          zIndex: 9999,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          <div style={{
+                            background: '#fff',
+                            borderRadius: 16,
+                            boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
+                            maxWidth: 420,
+                            padding: 32,
+                            textAlign: 'center',
+                          }}>
+                            <h2 style={{marginBottom: 16}}>Política de Privacidad</h2>
+                            <p style={{marginBottom: 16}}>Para usar la app Barrio de Oportunidades debes aceptar nuestra <a href="/privacidad" target="_blank" rel="noopener noreferrer">política de privacidad</a>.</p>
+                            <button style={{
+                              background: '#1976d2',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 8,
+                              padding: '10px 28px',
+                              fontSize: '1rem',
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              marginTop: 8,
+                            }} onClick={handleAcceptPrivacy}>Aceptar y continuar</button>
+                          </div>
+                        </div>
+                      )}
                       <Box component="main" sx={{ 
                         pb: '90px',
                         width: '100%',
