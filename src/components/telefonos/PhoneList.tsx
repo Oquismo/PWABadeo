@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, Typography, Container, Stack, Avatar, Divider, Link } from '@mui/material';
+import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmergencyIcon from '@mui/icons-material/EmergencyShare';
 import { getTranslation, Language } from '@/lib/i18n';
@@ -30,27 +31,14 @@ export default function PhoneList() {
 
     return (
         <Container sx={{ py: 4 }}>
-            <Stack 
-                divider={<Divider orientation="horizontal" flexItem sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />} 
-                spacing={2}
-            >
+            <Stack spacing={3}>
                 {phoneNumbers.map((phone) => (
-                    <Box 
-                        key={phone.nameKey} 
-                        sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: 2, 
-                            p: 2,
-                            bgcolor: phone.isEmergency ? 'error.dark' : 'transparent',
-                            borderRadius: '8px'
-                        }}
-                    >
-                                                <Link href={`tel:${phone.number}`} sx={{ display: 'inline-flex' }}>
-                                                    <Avatar sx={{ bgcolor: phone.isEmergency ? 'error.main' : 'primary.main', cursor: 'pointer' }}>
-                                                            {phone.isEmergency ? <EmergencyIcon /> : <PhoneIcon />}
-                                                    </Avatar>
-                                                </Link>
+                    <Material3ElevatedCard key={phone.nameKey} sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: phone.isEmergency ? 'error.dark' : undefined }}>
+                        <Link href={`tel:${phone.number}`} sx={{ display: 'inline-flex' }}>
+                            <Avatar sx={{ bgcolor: phone.isEmergency ? 'error.main' : 'primary.main', cursor: 'pointer' }}>
+                                {phone.isEmergency ? <EmergencyIcon /> : <PhoneIcon />}
+                            </Avatar>
+                        </Link>
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography variant="h6" fontWeight="medium">
                                 {nameTranslations[phone.nameKey] || phone.number}
@@ -59,7 +47,7 @@ export default function PhoneList() {
                                 {phone.number}
                             </Link>
                         </Box>
-                    </Box>
+                    </Material3ElevatedCard>
                 ))}
             </Stack>
         </Container>
