@@ -197,9 +197,7 @@ export default function PerfilPage() {
               <SettingsIcon />
             </IconButton>
           </Link>
-          <Button variant="outlined" color="inherit" onClick={handleLogout} sx={{ ml: 1 }}>
-            Cerrar sesión
-          </Button>
+          {/* logout button removed per request */}
         </Stack>
       </Box>
 
