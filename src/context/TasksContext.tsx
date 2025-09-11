@@ -17,7 +17,7 @@ interface TasksContextType {
   canManageAdminTasks: boolean;    // Permiso para editar tareas role=admin
   currentSchoolId: number | null;  // Escuela actual del usuario
   setCurrentSchoolId: (schoolId: number | null) => void;
-  refreshTasks: () => void;        // Refrescar tasks desde el servidor
+  refreshTasks: (schoolId?: number | null) => void;        // Refrescar tasks desde el servidor (opcionalmente con schoolId)
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -98,8 +98,9 @@ export function TasksProvider({ children }: TasksProviderProps) {
     return task.comun === true || (task.schools && task.schools.some((s: any) => s.id === userSchoolId));
   });
 
-  const refreshTasks = () => {
-    fetchTasks(currentSchoolId || user?.schoolId);
+  const refreshTasks = (schoolId?: number | null) => {
+    // Permite forzar la recarga con un schoolId proporcionado (útil desde selectores)
+    fetchTasks(typeof schoolId !== 'undefined' ? schoolId : (currentSchoolId || user?.schoolId));
   };
 
   const addTask = (taskData: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role']; comun?: boolean; schoolIds?: number[] }) => {

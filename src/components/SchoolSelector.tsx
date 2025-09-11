@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
+import { Box, FormControl, InputLabel, Select, MenuItem, CircularProgress, IconButton, Typography } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
 
 interface School {
   id: number;
@@ -27,9 +29,9 @@ const SchoolSelector: React.FC = () => {
       setLoading(true);
       const response = await fetch('/api/schools');
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
-        setSchools(data.schools);
+        setSchools(data.schools || []);
       } else {
         setError('Error cargando escuelas');
       }
@@ -42,7 +44,8 @@ const SchoolSelector: React.FC = () => {
 
   const handleSchoolChange = (schoolId: number | null) => {
     setCurrentSchoolId(schoolId);
-    refreshTasks();
+    // Forzar recarga con el id seleccionado para evitar inconsistencias por setState asíncrono
+    refreshTasks(schoolId);
   };
 
   // Si el usuario no es admin, no mostrar el selector (se filtra automáticamente por su escuela)
@@ -52,47 +55,44 @@ const SchoolSelector: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-600">
-        <span>Cargando escuelas...</span>
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <CircularProgress size={18} />
+        <Typography variant="body2" color="text.secondary">Cargando escuelas...</Typography>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <div className="text-sm text-red-600">
-        {error}
-      </div>
+      <Typography variant="body2" color="error">{error}</Typography>
     );
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <label className="text-sm font-medium text-gray-700">
-        Filtrar por escuela:
-      </label>
-      <select
-        value={currentSchoolId || ''}
-        onChange={(e) => handleSchoolChange(e.target.value ? parseInt(e.target.value) : null)}
-        className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      >
-        <option value="">Todas las escuelas</option>
-        {schools.map((school) => (
-          <option key={school.id} value={school.id}>
-            {school.name} - {school.city} ({school.type})
-          </option>
-        ))}
-      </select>
-      
-      {currentSchoolId && (
-        <button
-          onClick={() => handleSchoolChange(null)}
-          className="text-xs text-blue-600 hover:text-blue-800 underline"
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <FormControl size="small" sx={{ minWidth: 260 }}>
+        <InputLabel id="school-filter-label">Filtrar por escuela</InputLabel>
+        <Select
+          labelId="school-filter-label"
+          value={currentSchoolId ?? ''}
+          label="Filtrar por escuela"
+          onChange={(e) => handleSchoolChange(e.target.value === '' ? null : Number(e.target.value))}
         >
-          Limpiar filtro
-        </button>
+          <MenuItem value="">Todas las escuelas</MenuItem>
+          {schools.map((school) => (
+            <MenuItem key={school.id} value={school.id} sx={{ whiteSpace: 'normal' }}>
+              {school.name} — {school.city} ({school.type})
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {currentSchoolId && (
+        <IconButton aria-label="Limpiar filtro" size="small" onClick={() => handleSchoolChange(null)}>
+          <ClearIcon fontSize="small" />
+        </IconButton>
       )}
-    </div>
+    </Box>
   );
 };
 
