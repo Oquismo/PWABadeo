@@ -12,9 +12,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Slider,
   IconButton,
-  Chip,
   Grid,
   FormControl,
   InputLabel,
@@ -35,24 +33,10 @@ import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
 import { TaskData } from '@/data/tasks';
 
-// Gradientes predefinidos para elegir
-const gradientOptions = [
-  { name: 'Azul-Púrpura', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-  { name: 'Rosa-Rojo', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-  { name: 'Turquesa-Rosa', value: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
-  { name: 'Naranja-Durazno', value: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
-  { name: 'Verde-Azul', value: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
-  { name: 'Rosa-Amarillo', value: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
-  { name: 'Morado-Azul', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-  { name: 'Verde-Menta', value: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' }
-];
 
 interface TaskFormData {
   title: string;
   description: string;
-  progress: number;
-  color: string;
-  avatars: string;
   date: string;
 }
 
@@ -71,9 +55,6 @@ export default function TaskManager() {
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
-    progress: 0,
-    color: gradientOptions[0].value,
-    avatars: '',
     date: ''
   });
   const [taskRole, setTaskRole] = useState<'admin' | 'user'>('user');
@@ -98,12 +79,9 @@ export default function TaskManager() {
     if (task) {
       setEditingTask(task);
       setFormData({
-        title: task.title,
-        description: task.description,
-        progress: task.progress,
-        color: task.color,
-        avatars: Array.isArray(task.avatars) ? task.avatars.join(', ') : '',
-        date: task.date || ''
+  title: task.title,
+  description: task.description,
+  date: task.date || ''
       });
       setTaskRole(task.role || 'user');
       
@@ -118,15 +96,17 @@ export default function TaskManager() {
     } else {
       setEditingTask(null);
       setFormData({
-        title: '',
-        description: '',
-        progress: 0,
-        color: gradientOptions[0].value,
-        avatars: '',
-        date: ''
+  title: '',
+  description: '',
+  date: ''
       });
       setTaskRole('user');
-      setSelectedSchoolIds([]);
+      // Si el usuario no es admin, asignar su propia escuela por defecto y evitar que elija otras
+      if (user && user.role !== 'admin') {
+        setSelectedSchoolIds(user.schoolId ? [user.schoolId] : []);
+      } else {
+        setSelectedSchoolIds([]);
+      }
       setIsCommonTask(false);
     }
     setDialogOpen(true);
@@ -140,9 +120,6 @@ export default function TaskManager() {
     setFormData({
       title: '',
       description: '',
-      progress: 0,
-      color: gradientOptions[0].value,
-      avatars: '',
       date: ''
     });
     setTaskRole('user');
@@ -154,30 +131,44 @@ export default function TaskManager() {
     const taskData = {
       title: formData.title.trim(),
       description: formData.description.trim(),
-      progress: formData.progress,
-      color: formData.color,
-      avatars: formData.avatars.split(',').map(a => a.trim()).filter(a => a),
-      date: formData.date || undefined,
+      // Convert datetime-local value (local) to ISO for backend
+      date: formData.date ? new Date(formData.date).toISOString() : undefined,
       role: taskRole,
+      // defaults for removed fields
+      progress: 0,
+      color: '#667eea',
+      avatars: [],
       schoolIds: isCommonTask ? [] : selectedSchoolIds,
       comun: isCommonTask
-    };
+    } as any;
 
-    if (editingTask) {
-      updateTask(editingTask.id!, taskData);
-    } else {
-      addTask(taskData);
-    }
-
-    closeDialog();
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 3000);
+    (async () => {
+      if (editingTask) {
+        const res = await updateTask(editingTask.id!, taskData);
+        if (res) {
+          closeDialog();
+          setShowAlert(true);
+          setTimeout(() => setShowAlert(false), 3000);
+        }
+      } else {
+        const res = await addTask(taskData);
+        if (res) {
+          closeDialog();
+          setShowAlert(true);
+          setTimeout(() => setShowAlert(false), 3000);
+        }
+      }
+    })();
   };
 
   const handleDelete = (id: string) => {
-    deleteTask(id);
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 3000);
+    (async () => {
+      const ok = await deleteTask(id);
+      if (ok) {
+        setShowAlert(true);
+        setTimeout(() => setShowAlert(false), 3000);
+      }
+    })();
   };
 
   return (
@@ -228,7 +219,11 @@ export default function TaskManager() {
                     {task.title}
                   </Typography>
                   <Box>
-                    {((task.role || 'user') === 'user' || canManageAdminTasks) && (
+                    {(
+                      canManageAdminTasks ||
+                      // Permitir editar/Eliminar sólo si la tarea no es admin y fue creada por el user actual
+                      (((task.role || 'user') === 'user') && user && task.user && Number(task.user.id) === Number(user.id))
+                    ) && (
                       <>
                         <IconButton 
                           size="small" 
@@ -252,26 +247,6 @@ export default function TaskManager() {
                 <Typography variant="body2" sx={{ opacity: 0.85, mb: 2, fontSize: '0.8rem' }}>
                   {task.description}
                 </Typography>
-                
-                <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.7rem' }}>
-                  Progreso: {task.progress}%
-                </Typography>
-                
-                <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
-                  {(Array.isArray(task.avatars) ? task.avatars : []).map((avatar, index) => (
-                    <Chip 
-                      key={index}
-                      label={avatar} 
-                      size="small" 
-                      sx={{ 
-                        bgcolor: 'rgba(255,255,255,0.2)', 
-                        color: 'white', 
-                        fontSize: '0.7rem',
-                        height: '20px'
-                      }} 
-                    />
-                  ))}
-                </Box>
               </CardContent>
             </Card>
           </Grid>
@@ -315,99 +290,63 @@ export default function TaskManager() {
               rows={2}
             />
 
-            <Box>
-              <Typography gutterBottom>Progreso: {formData.progress}%</Typography>
-              <Slider
-                value={formData.progress}
-                onChange={(_, value) => setFormData({ ...formData, progress: value as number })}
-                min={0}
-                max={100}
-                step={5}
-                marks
-              />
-            </Box>
-
-            <FormControl fullWidth>
-              <InputLabel>Color de fondo</InputLabel>
-              <Select
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                label="Color de fondo"
-              >
-                {gradientOptions.map((option, index) => (
-                  <MenuItem key={index} value={option.value}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box 
-                        sx={{ 
-                          width: 20, 
-                          height: 20, 
-                          background: option.value, 
-                          borderRadius: 1 
-                        }} 
-                      />
-                      {option.name}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {/* progress, color and collaborators removed per request */}
 
             <TextField
-              label="Colaboradores (separados por comas)"
-              value={formData.avatars}
-              onChange={(e) => setFormData({ ...formData, avatars: e.target.value })}
-              fullWidth
-              placeholder="J, M, A, +2"
-            />
-
-            <TextField
-              label="Fecha (opcional)"
+              label="Fecha y hora (opcional)"
+              type="datetime-local"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               fullWidth
-              placeholder="Mar 02"
+              InputLabelProps={{ shrink: true }}
             />
 
             {/* Selector de escuelas */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={isCommonTask}
-                  onChange={(e) => {
-                    setIsCommonTask(e.target.checked);
-                    if (e.target.checked) {
-                      setSelectedSchoolIds([]);
-                    }
-                  }}
-                />
-              }
-              label="Tarea común para todas las escuelas"
-            />
+            {canManageAdminTasks && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isCommonTask}
+                    onChange={(e) => {
+                      setIsCommonTask(e.target.checked);
+                      if (e.target.checked) {
+                        setSelectedSchoolIds([]);
+                      }
+                    }}
+                  />
+                }
+                label="Tarea común para todas las escuelas"
+              />
+            )}
 
             {!isCommonTask && (
-              <FormControl fullWidth>
-                <InputLabel>Escuelas asignadas</InputLabel>
-                <Select
-                  multiple
-                  value={selectedSchoolIds}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setSelectedSchoolIds(typeof value === 'string' ? [] : value);
-                  }}
-                  label="Escuelas asignadas"
-                  renderValue={(selected) => {
-                    const selectedSchools = schools.filter(school => selected.includes(school.id));
-                    return selectedSchools.map(school => school.name).join(', ');
-                  }}
-                >
-                  {schools.map((school) => (
-                    <MenuItem key={school.id} value={school.id}>
-                      <Checkbox checked={selectedSchoolIds.indexOf(school.id) > -1} />
-                      <ListItemText primary={school.name} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <>
+                {user && user.role !== 'admin' ? null : (
+                  <FormControl fullWidth>
+                    <InputLabel>Escuelas asignadas</InputLabel>
+                    <Select
+                      multiple
+                      value={selectedSchoolIds}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSelectedSchoolIds(typeof value === 'string' ? [] : value);
+                      }}
+                      label="Escuelas asignadas"
+                      renderValue={(selected) => {
+                        const selectedSchools = schools.filter(school => selected.includes(school.id));
+                        return selectedSchools.map(school => school.name).join(', ');
+                      }}
+                    >
+                      {schools.map((school) => (
+                        <MenuItem key={school.id} value={school.id}>
+                          <Checkbox checked={selectedSchoolIds.indexOf(school.id) > -1} />
+                          <ListItemText primary={school.name} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </>
             )}
           </Box>
         </DialogContent>

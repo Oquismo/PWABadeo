@@ -8,9 +8,9 @@ import { useAuth } from './AuthContext';
 interface TasksContextType {
   tasks: TaskData[];               // Tareas visibles para el usuario actual (filtradas por escuela)
   allTasks: TaskData[];            // Todas las tareas (para admins)
-  addTask: (task: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role']; comun?: boolean; schoolIds?: number[] }) => void;
-  updateTask: (id: string, task: Partial<TaskData>) => void;
-  deleteTask: (id: string) => void;
+  addTask: (task: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role']; comun?: boolean; schoolIds?: number[] }) => Promise<TaskData | null>;
+  updateTask: (id: string, task: Partial<TaskData>) => Promise<TaskData | null>;
+  deleteTask: (id: string) => Promise<boolean>;
   resetToDefault: () => void;
   loadBarrioTasks: () => void;
   loadMixedTasks: () => void;
@@ -46,31 +46,43 @@ export function TasksProvider({ children }: TasksProviderProps) {
   const fetchTasks = async (schoolId?: number | null) => {
     setLoading(true);
     try {
+      // Sentinel: schoolId === -1 means explicitly "NINGUNA" -> no mostrar tareas
+      if (typeof schoolId !== 'undefined' && schoolId === -1) {
+        setAllTasks([]);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       let url = '/api/tasks';
       const params = new URLSearchParams();
-      
+
       if (user?.id) params.append('userId', user.id.toString());
-      if (schoolId) params.append('schoolId', schoolId.toString());
-      
+      if (typeof schoolId !== 'undefined' && schoolId !== null) params.append('schoolId', String(schoolId));
+
       if (params.toString()) {
         url += `?${params.toString()}`;
       }
 
-      const res = await fetch(url);
+      const res = await fetch(url, { credentials: 'include' });
       const data = await res.json();
-      
+
       if (res.ok) {
+        // Normalizar forma de las tareas: asegurar id como string y avatars como array
         const norm = (data.tasks || []).map((t: any) => ({
           ...t,
+          id: typeof t.id === 'undefined' ? generateId() : String(t.id),
           avatars: Array.isArray(t.avatars) ? t.avatars : (t.avatars ? t.avatars : [])
         }));
         setAllTasks(norm);
         setError(null);
       } else {
         setError(data.error || 'Error cargando tareas');
+        setAllTasks([]);
       }
     } catch (e: any) {
-      setError(e.message);
+      setError(e.message || 'Error de red');
+      setAllTasks([]);
     } finally {
       setLoading(false);
     }
@@ -103,82 +115,200 @@ export function TasksProvider({ children }: TasksProviderProps) {
     fetchTasks(typeof schoolId !== 'undefined' ? schoolId : (currentSchoolId || user?.schoolId));
   };
 
-  const addTask = (taskData: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role']; comun?: boolean; schoolIds?: number[] }) => {
+  const addTask = async (taskData: Omit<TaskData, 'id'> & { id?: string; role?: TaskData['role']; comun?: boolean; schoolIds?: number[] }): Promise<TaskData | null> => {
     const role: TaskData['role'] = taskData.role || 'user';
+    // Prevent non-admin users from creating admin tasks
     if (role === 'admin' && !canManageAdminTasks) {
       console.warn('Intento no autorizado de crear tarea admin');
-      return;
+      return null;
     }
-    const newTask: TaskData = {
+
+    const payload = {
       ...taskData,
       role,
-      id: taskData.id || generateId()
+      userId: user?.id,
+      // Non-admin users cannot create 'comun' tasks
+      comun: user && user.role !== 'admin' ? false : (taskData.comun || false),
+      // If the user is not admin, force schoolIds to their own school (or empty)
+      schoolIds: user && user.role !== 'admin' ? (user.schoolId ? [user.schoolId] : []) : (taskData.schoolIds || [])
     };
-    // Persistir
-    fetch('/api/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        ...newTask, 
-        userId: user?.id,
-        comun: taskData.comun || false,
-        schoolIds: taskData.schoolIds || []
-      }),
-      credentials: 'include'
-    }).then(async r => {
-      if (!r.ok) {
-        const d = await r.json();
-        console.error('Error creando tarea', d);
-        return;
-      }
-      const d = await r.json();
-      setAllTasks(prev => [
-        {
-          ...d.task,
-          avatars: Array.isArray(d.task.avatars) ? d.task.avatars : (d.task.avatars ? d.task.avatars : [])
-        },
-        ...prev
-      ]);
-    });
-  };
 
-  const updateTask = (id: string, updates: Partial<TaskData>) => {
-    fetch('/api/tasks', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: typeof id === 'string' ? parseInt(id, 10) : id, updates, userId: user?.id }),
-      credentials: 'include'
-    }).then(async r => {
-      const d = await r.json();
-      if (!r.ok) {
-        console.error('Error actualizando tarea', d);
-        return;
-      }
-      setAllTasks(prev => prev.map(t => (
-        t.id === d.task.id
-          ? { ...d.task, avatars: Array.isArray(d.task.avatars) ? d.task.avatars : (d.task.avatars ? d.task.avatars : []) }
-          : t
-      )));
-    });
-  };
-
-  const deleteTask = (id: string) => {
-    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
-    fetch(`/api/tasks?id=${numericId}&userId=${user?.id}`, { 
-      method: 'DELETE',
-      credentials: 'include'
-    })
-      .then(async r => {
-        const d = await r.json();
-        if (!r.ok) {
-          console.error('Error eliminando tarea', d);
-          return;
-        }
-        setAllTasks(prev => prev.filter(t => {
-          const tid = typeof t.id === 'string' ? parseInt(t.id, 10) : t.id;
-            return tid !== numericId;
-        }));
+    try {
+      setLoading(true);
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include'
       });
+
+      const d = await res.json();
+      if (!res.ok) {
+        console.error('Error creando tarea', d);
+        setError(d?.error || 'Error creando tarea');
+        return null;
+      }
+
+      // Normalizar el task retornado por el servidor y refrescar estado desde servidor para evitar inconsistencias
+      const created: TaskData = {
+        ...d.task,
+        id: typeof d.task.id === 'undefined' ? generateId() : String(d.task.id),
+        avatars: Array.isArray(d.task.avatars) ? d.task.avatars : (d.task.avatars ? d.task.avatars : [])
+      };
+
+  // Insertar localmente y luego forzar recarga para garantizar consistencia con filtros/escuela
+  setAllTasks(prev => [created, ...prev]);
+  setError(null);
+  // Refrescar para asegurar que la vista del usuario muestre el estado real del servidor
+  await fetchTasks(currentSchoolId || user?.schoolId);
+  return created;
+  } catch (e: any) {
+      console.error('Error de red creando tarea', e);
+      setError(e?.message || 'Error de red');
+    } finally {
+      setLoading(false);
+    }
+  return null;
+  };
+
+  const updateTask = async (id: string, updates: Partial<TaskData>): Promise<TaskData | null> => {
+    try {
+      setLoading(true);
+      // Si el id no es numérico (p.ej. id generado localmente), realizar sólo update local
+      const numericId = typeof id === 'string' ? parseInt(id, 10) : (id as any);
+      if (typeof numericId === 'number' && isNaN(numericId)) {
+        // ID local -- actualizar sólo en memoria
+        setAllTasks(prev => prev.map(t => (
+          String(t.id) === String(id) ? { ...t, ...updates } : t
+        )));
+        setError(null);
+  setLoading(false);
+        // devolver la tarea actualizada desde el estado local
+        const local = (allTasks || []).find(t => String(t.id) === String(id));
+        return local ? { ...local, ...updates } : null;
+      }
+
+      // Ownership check: non-admin users can only update their own tasks
+      if (user && user.role !== 'admin') {
+        const existing = allTasks.find(t => String(t.id) === String(id));
+        if (existing && existing.user && Number(existing.user.id) !== Number(user.id)) {
+          console.warn('Usuario no autorizado para actualizar tarea ajena');
+          setError('No autorizado');
+          setLoading(false);
+          return null;
+        }
+      }
+
+      // Prevent non-admins from changing role to 'admin'
+      if ((updates as any).role === 'admin' && !canManageAdminTasks) {
+        console.warn('Intento no autorizado de elevar role a admin');
+        return null;
+      }
+
+      // Prepare payload for PUT: remove schoolIds as this needs separate API handling
+      const updatesCopy: any = { ...updates };
+      const schoolIds = Array.isArray((updatesCopy as any).schoolIds) ? (updatesCopy as any).schoolIds as number[] : undefined;
+      const makeCommon = typeof (updatesCopy as any).comun !== 'undefined' ? (updatesCopy as any).comun as boolean : undefined;
+      delete updatesCopy.schoolIds;
+
+      // If the user is not admin, ensure they cannot assign arbitrary schoolIds
+      if (user && user.role !== 'admin' && Array.isArray(schoolIds)) {
+        const allowed = user.schoolId ? [user.schoolId] : [];
+        // Intersect requested schoolIds with allowed list
+        const filtered = schoolIds.filter(s => allowed.includes(s));
+        // If none allowed, force to user's school if present
+        (updatesCopy as any)._forcedSchoolIdsForClient = filtered.length ? filtered : (allowed.length ? allowed : []);
+      }
+
+      const res = await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: typeof id === 'string' ? parseInt(id, 10) : id, updates: updatesCopy, userId: user?.id }),
+        credentials: 'include'
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        console.error('Error actualizando tarea', d);
+        setError(d?.error || 'Error actualizando tarea');
+        return null;
+      }
+      const updatedTask = { ...d.task, id: String(d.task.id), avatars: Array.isArray(d.task.avatars) ? d.task.avatars : (d.task.avatars ? d.task.avatars : []) };
+  setAllTasks(prev => prev.map(t => (String(t.id) === String(updatedTask.id) ? updatedTask : t)));
+      setError(null);
+      // If schoolIds were provided, call assign-schools endpoint to assign them
+      try {
+        if (schoolIds && schoolIds.length > 0) {
+          // If user is not admin, ensure schoolIds are filtered server-side; here we also filter conservatively
+          const filteredSchoolIds = user && user.role !== 'admin' ? (user.schoolId ? schoolIds.filter(s => s === user.schoolId) : []) : schoolIds;
+          if (filteredSchoolIds.length > 0) {
+            await fetch('/api/tasks/assign-schools', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ taskId: parseInt(String(updatedTask.id), 10), schoolIds: filteredSchoolIds, userId: user?.id, action: 'assign' }),
+              credentials: 'include'
+            });
+          }
+        }
+        // If comun flag is set true, call unassign to make the task common
+        if (typeof makeCommon !== 'undefined' && makeCommon === true) {
+          await fetch('/api/tasks/assign-schools', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ taskId: parseInt(String(updatedTask.id), 10), schoolIds: [], userId: user?.id, action: 'unassign' }),
+            credentials: 'include'
+          });
+        }
+      } catch (e) {
+        // swallow; fetchTasks below will resync
+      }
+
+      // mantener sincronía con servidor
+      await fetchTasks(currentSchoolId || user?.schoolId);
+  return updatedTask;
+  } catch (e: any) {
+      console.error('Error de red actualizando tarea', e);
+      setError(e?.message || 'Error de red');
+    } finally {
+      setLoading(false);
+    }
+  return null;
+  };
+
+  const deleteTask = async (id: string): Promise<boolean> => {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    try {
+      setLoading(true);
+      // Ownership check: non-admin users can only delete their own tasks
+      if (user && user.role !== 'admin') {
+        const existing = allTasks.find(t => String(t.id) === String(id));
+        if (existing && existing.user && Number(existing.user.id) !== Number(user.id)) {
+          console.warn('Usuario no autorizado para eliminar tarea ajena');
+          setError('No autorizado');
+          setLoading(false);
+          return false;
+        }
+      }
+      const res = await fetch(`/api/tasks?id=${numericId}&userId=${user?.id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        console.error('Error eliminando tarea', d);
+        setError(d?.error || 'Error eliminando tarea');
+        return false;
+      }
+      setAllTasks(prev => prev.filter(t => String(t.id) !== String(numericId)));
+      setError(null);
+      await fetchTasks(currentSchoolId || user?.schoolId);
+      return true;
+    } catch (e: any) {
+      console.error('Error de red eliminando tarea', e);
+      setError(e?.message || 'Error de red');
+    } finally {
+      setLoading(false);
+    }
+    return false;
   };
 
   const resetToDefault = () => {

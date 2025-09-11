@@ -5,7 +5,8 @@ import {
   Card, 
   CardProps,
   useTheme,
-  styled 
+  styled,
+  ButtonBase
 } from '@mui/material';
 
 // Material 3 Elevated Card Component según especificaciones oficiales
@@ -23,28 +24,39 @@ const Material3ElevatedCardRoot = styled(Card, {
     : '#F7F2FA', // Surface container low light
   
   // 🏔️ Elevation - 1dp base elevation for elevated cards
-  boxShadow: isDragged 
-    ? '0px 8px 16px rgba(0, 0, 0, 0.24), 0px 16px 32px rgba(0, 0, 0, 0.12)' // Elevated when dragged
-    : '0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24)', // Standard elevation 1dp
+  boxShadow: isDragged
+    ? (theme.palette.mode === 'dark'
+        ? '0 10px 24px rgba(0,0,0,0.6), 0 16px 40px rgba(0,0,0,0.45)'
+        : '0px 8px 16px rgba(0, 0, 0, 0.24), 0px 16px 32px rgba(0, 0, 0, 0.12)') // Elevated when dragged
+    : (theme.palette.mode === 'dark'
+        ? '0 4px 12px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.4)'
+        : '0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24)'), // Standard elevation
   
   // 🖱️ Interactive States
-  transition: 'all 0.2s cubic-bezier(0.2, 0, 0, 1)', // Material motion easing
-  
-  // Hover state
-  '&:hover': {
-    boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.16), 0px 2px 4px rgba(0, 0, 0, 0.24)', // Elevation 2dp on hover
-    transform: 'translateY(-1px)', // Subtle lift effect
+  // Transitions sólo sobre transform y box-shadow para reducir repaints
+  transition: 'transform 200ms cubic-bezier(.2,.9,.3,1), box-shadow 200ms cubic-bezier(.2,.9,.3,1), opacity 120ms linear',
+  willChange: 'transform, box-shadow, opacity',
+
+  // Hover state (solo en dispositivos con hover pointer fine)
+  '@media (hover: hover) and (pointer: fine)': {
+    '&:hover': {
+      boxShadow: theme.palette.mode === 'dark'
+        ? '0 18px 44px rgba(0,0,0,0.6), 0 10px 24px rgba(0,0,0,0.45)'
+        : '0 12px 30px rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.08)', // Elevation visual más marcada
+      transform: 'translateY(-6px) scale(1.01)', // Lift más perceptible
+    }
   },
   
   // Focus state
   '&:focus-visible': {
     outline: `2px solid ${theme.palette.primary.main}`,
     outlineOffset: '2px',
+    transform: 'translateY(-2px) scale(1.005)',
   },
   
   // Active/pressed state
   '&:active': {
-    transform: 'translateY(0px)', // Return to original position
+    transform: 'translateY(0px) scale(0.999)', // Return to original position with slight press
     boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24)', // Back to base elevation
   },
   
@@ -76,6 +88,23 @@ const Material3ElevatedCardRoot = styled(Card, {
   
   // 🖼️ Prevent corner overlap for images
   overflow: 'hidden',
+
+  // 🖐️ Mobile-friendly defaults
+  touchAction: 'manipulation', // reduce delayed taps
+  WebkitTapHighlightColor: 'transparent',
+  WebkitUserSelect: 'none',
+  userSelect: 'none',
+
+  // Tamaño mínimo y padding más cómodo en móvil para hit targets nativos
+  [theme.breakpoints.down('sm')]: {
+    borderRadius: '16px',
+    minHeight: 68,
+    padding: 8,
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 6px 18px rgba(0,0,0,0.55), 0 8px 24px rgba(0,0,0,0.42)'
+      : '0 6px 16px rgba(0,0,0,0.10), 0 8px 22px rgba(0,0,0,0.08)',
+    transition: 'transform 180ms cubic-bezier(.2,.9,.3,1), box-shadow 180ms ease'
+  },
   
   // 📏 Default padding
   padding: 0, // Let CardContent handle padding
@@ -112,21 +141,38 @@ export default function Material3ElevatedCard({
       {...props}
       isDragged={isDragged}
       isChecked={isChecked}
-      onClick={onClick}
-      // Add interactive properties if needed
-      {...(interactive && {
-        component: 'button',
-        role: 'button',
-        tabIndex: 0,
-        'aria-pressed': isChecked ? 'true' : 'false',
-      })}
-      // Accessibility
-      {...(onClick && {
-        role: 'button',
-        tabIndex: 0,
-      })}
+      data-interactive={interactive ? 'true' : undefined}
     >
-      {children}
+      {interactive ? (
+        <ButtonBase
+          component="div"
+          onClick={onClick}
+          disableRipple={false}
+          aria-pressed={isChecked ? true : undefined}
+          sx={{
+            display: 'flex',
+            alignItems: 'stretch',
+            width: '100%',
+            textAlign: 'left',
+            borderRadius: 'inherit',
+            overflow: 'hidden',
+            padding: { xs: 1, sm: 0 },
+            minHeight: { xs: 68, sm: 'auto' },
+            touchAction: 'manipulation'
+          }}
+        >
+          {children}
+        </ButtonBase>
+      ) : (
+        <div
+          onClick={onClick}
+          role={onClick ? 'button' : undefined}
+          tabIndex={onClick ? 0 : undefined}
+          style={{ display: 'block', width: '100%' }}
+        >
+          {children}
+        </div>
+      )}
     </Material3ElevatedCardRoot>
   );
 }

@@ -47,6 +47,26 @@ export async function GET(req: Request) {
       }
     }
     
+    // Cleanup expired tasks: if a task has a date (ISO string) and it's in the past, delete it.
+    try {
+      const dated = await tasksClient.findMany({ where: { date: { not: null } }, select: { id: true, date: true } });
+      const now = new Date();
+      const graceMs = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+      for (const t of dated) {
+        try {
+          const d = new Date(String(t.date));
+          // delete only if date is at least 2 hours in the past (grace period)
+          if (!isNaN(d.getTime()) && (d.getTime() + graceMs) <= now.getTime()) {
+            await tasksClient.delete({ where: { id: t.id } });
+          }
+        } catch (e) {
+          // ignore parse/delete errors for individual tasks
+        }
+      }
+    } catch (e) {
+      // non-fatal cleanup error
+    }
+
     const tasks = await tasksClient.findMany({
       where: whereCondition,
       orderBy: { createdAt: 'desc' },

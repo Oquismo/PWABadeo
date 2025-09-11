@@ -148,6 +148,7 @@ export default function PerfilPage() {
   const isAdmin = user.role === 'admin' || user.role === 'ADMIN';
 
   return (
+    <Fade in={true} timeout={350}>
     <Container component="main" maxWidth="md" sx={{ py: 2 }}>
       <Material3Dialog
         open={modalOpen}
@@ -163,9 +164,12 @@ export default function PerfilPage() {
 
       {/* Header con acciones */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" fontWeight="bold">
-          Mi Perfil
-        </Typography>
+        <Box>
+          <Typography variant="h4" component="h1" fontWeight="bold" sx={{ letterSpacing: '-0.02em' }}>
+            Mi Perfil
+          </Typography>
+          <Typography variant="body2" color="text.secondary">Actualiza tu información y gestiona tus tareas</Typography>
+        </Box>
         <Stack direction="row" spacing={1}>
           <Link href="/perfil/editar" passHref>
             <IconButton
@@ -173,7 +177,8 @@ export default function PerfilPage() {
               size="large"
               sx={{
                 bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected' }
+                '&:hover': { bgcolor: 'action.selected', transform: 'translateY(-2px)' },
+                transition: 'all 200ms ease'
               }}
             >
               <EditIcon />
@@ -185,17 +190,21 @@ export default function PerfilPage() {
               size="large"
               sx={{
                 bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected' }
+                '&:hover': { bgcolor: 'action.selected', transform: 'translateY(-2px)' },
+                transition: 'all 200ms ease'
               }}
             >
               <SettingsIcon />
             </IconButton>
           </Link>
+          <Button variant="outlined" color="inherit" onClick={handleLogout} sx={{ ml: 1 }}>
+            Cerrar sesión
+          </Button>
         </Stack>
       </Box>
 
       {/* Card principal del perfil */}
-      <Material3ElevatedCard sx={{ mb: 3, p: 4, borderRadius: 4, overflow: 'visible' }}>
+  <Material3ElevatedCard sx={{ mb: 3, p: 4, borderRadius: 4, overflow: 'visible', transition: 'transform 220ms ease, box-shadow 220ms ease', '&:hover': { transform: 'translateY(-6px)', boxShadow: 8 } }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           {/* Avatar con mejor diseño */}
           <Box sx={{ position: 'relative', mb: 3 }}>
@@ -207,13 +216,13 @@ export default function PerfilPage() {
                   fontSize: user.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? '3rem' : 'inherit',
                   bgcolor: 'primary.light',
                   cursor: 'pointer',
-                  boxShadow: modalOpen ? 8 : 3,
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: modalOpen ? 12 : 4,
+                  transition: 'transform 240ms cubic-bezier(0.2, 0, 0, 1), box-shadow 240ms ease',
                   border: '4px solid',
                   borderColor: 'background.paper',
                   '&:hover': {
-                    transform: 'scale(1.05)',
-                    boxShadow: 6
+                    transform: 'scale(1.06)',
+                    boxShadow: 10
                   }
                 }}
                 onTouchStart={handleAvatarTouchStart}
@@ -261,13 +270,13 @@ export default function PerfilPage() {
               label={isAdmin ? 'Administrador' : 'Usuario'}
               color={isAdmin ? 'secondary' : 'primary'}
               variant="filled"
-              sx={{ mb: 2, fontWeight: 'medium' }}
+              sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
             />
 
             {/* Información de contacto */}
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12} sm={isAdmin ? 6 : 4}>
-                <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
                   <EmailIcon color="action" />
                   <Box>
                     <Typography variant="caption" color="text.secondary">
@@ -283,7 +292,7 @@ export default function PerfilPage() {
               {!isAdmin && (
                 <>
                   <Grid item xs={12} sm={4}>
-                    <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
                       <SchoolIcon color="action" />
                       <Box>
                         <Typography variant="caption" color="text.secondary">
@@ -301,7 +310,7 @@ export default function PerfilPage() {
                   </Grid>
 
                   <Grid item xs={12} sm={4}>
-                    <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
                       <CakeIcon color="action" />
                       <Box>
                         <Typography variant="caption" color="text.secondary">
@@ -317,7 +326,7 @@ export default function PerfilPage() {
               )}
 
               <Grid item xs={12} sm={isAdmin ? 6 : 12}>
-                <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
                   <LocationOnIcon color="action" />
                   <Box>
                     <Typography variant="caption" color="text.secondary">
@@ -465,5 +474,6 @@ export default function PerfilPage() {
 
       <ReviewDialog open={reviewOpen} onClose={() => setReviewOpen(false)} />
     </Container>
+    </Fade>
   );
 }

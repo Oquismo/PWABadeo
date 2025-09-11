@@ -79,6 +79,7 @@ const SchoolSelector: React.FC = () => {
           onChange={(e) => handleSchoolChange(e.target.value === '' ? null : Number(e.target.value))}
         >
           <MenuItem value="">Todas las escuelas</MenuItem>
+          <MenuItem value={-1}>NINGUNA (sin tareas)</MenuItem>
           {schools.map((school) => (
             <MenuItem key={school.id} value={school.id} sx={{ whiteSpace: 'normal' }}>
               {school.name} — {school.city} ({school.type})
