@@ -37,7 +37,7 @@ export default function RegistroPage() {
     arrivalDate: '',
     departureDate: '',
     country: 'Italia',
-  residence: '',
+    // residence: '', // TEMPORARILY DISABLED - field not in DB
     city: '',
     town: '',
     adminCode: '',
@@ -236,7 +236,7 @@ export default function RegistroPage() {
         password: formData.password,
         age: parseInt(formData.age, 10),
         schoolId: isAdminRegistration ? null : selectedSchool?.id,
-  residence: isAdminRegistration ? undefined : (formData.residence || null),
+        // residence: isAdminRegistration ? undefined : (formData.residence || null), // TEMPORARILY DISABLED
         arrivalDate: formData.arrivalDate,
         departureDate: formData.departureDate,
         country: formData.country,
@@ -274,7 +274,7 @@ export default function RegistroPage() {
         name: data.user.name,
         email: data.user.email,
         age: data.user.age,
-  residence: data.user.residence || formData.residence || null,
+        // residence: data.user.residence || formData.residence || null, // TEMPORARILY DISABLED
         role: data.user.role || 'USER',
         arrivalDate: data.user.arrivalDate,
         departureDate: data.user.departureDate,
@@ -363,6 +363,7 @@ export default function RegistroPage() {
                 </Typography>
               </Grid>
             )}
+            {/* RESIDENCE FIELD TEMPORARILY DISABLED
             {!isAdminRegistration && (
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
@@ -381,6 +382,7 @@ export default function RegistroPage() {
                 </FormControl>
               </Grid>
             )}
+            */}
             {!isAdminRegistration && (
               <>
                 <Grid item xs={12} sm={6}>

@@ -265,6 +265,7 @@ export default function PerfilPage() {
             </Typography>
 
             {/* Mostrar la residencia si existe; si no, mostrar el rol como fallback */}
+            {/* RESIDENCE TEMPORARILY DISABLED - field not in DB
             {user?.residence ? (
               <Chip
                 icon={<HotelIcon />}
@@ -273,15 +274,16 @@ export default function PerfilPage() {
                 variant="filled"
                 sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
               />
-            ) : (
-              <Chip
-                icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
-                label={isAdmin ? 'Administrador' : 'Usuario'}
-                color={isAdmin ? 'secondary' : 'primary'}
-                variant="filled"
-                sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
-              />
-            )}
+            ) : ( */}
+            {/* Show role as fallback since residence is disabled */}
+            <Chip
+              icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+              label={isAdmin ? 'Administrador' : 'Usuario'}
+              color={isAdmin ? 'secondary' : 'primary'}
+              variant="filled"
+              sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
+            />
+            {/* )} */}
 
             {/* Información de contacto */}
             <Grid container spacing={2} sx={{ mt: 1 }}>
