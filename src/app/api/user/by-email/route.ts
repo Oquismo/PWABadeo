@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { prisma, initPrisma } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -7,6 +7,14 @@ export async function POST(request: Request) {
     if (!email) {
       return NextResponse.json({ error: 'Email requerido' }, { status: 400 });
     }
+    // Ensure Prisma is connected (helps with cold-starts / transient DB issues)
+    try {
+      await initPrisma(2);
+    } catch (connErr) {
+      console.error('DB init failed in /api/user/by-email:', connErr);
+      return NextResponse.json({ error: 'Error de conexión a la base de datos (init failed)' }, { status: 503 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
       include: { school: true }
@@ -34,6 +42,13 @@ export async function POST(request: Request) {
     };
     return NextResponse.json({ user: userProfile });
   } catch (error) {
-    return NextResponse.json({ error: 'Error interno', details: error instanceof Error ? error.message : error }, { status: 500 });
+    // Loguear error completo en servidor para diagnóstico
+    try {
+      console.error('Error en /api/user/by-email:', error);
+    } catch (logErr) {}
+
+    const debugEnabled = process.env.ENABLE_API_DEBUG === 'true' || process.env.NODE_ENV !== 'production';
+    const details = debugEnabled ? (error instanceof Error ? error.stack || error.message : String(error)) : 'Error interno';
+    return NextResponse.json({ error: 'Error interno', details }, { status: 500 });
   }
 }
