@@ -36,27 +36,35 @@ export async function POST(request: Request) {
     });
     console.log('👤 User query result:', user ? 'found' : 'not found');
     if (!user) {
+      console.log('❌ Usuario no encontrado para email:', email);
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
     // Construir objeto de usuario asegurando que todos los campos estén presentes
-    const userProfile = {
-      id: user.id,
-      email: user.email,
-      name: user.name ?? null,
-      firstName: user.firstName ?? null,
-      lastName: user.lastName ?? null,
-      role: user.role,
-      age: user.age ?? null,
-      schoolId: user.schoolId ?? null,
-      school: user.school ?? null,
-      avatarUrl: user.avatarUrl ?? null,
-      arrivalDate: user.arrivalDate ?? null,
-      departureDate: user.departureDate ?? null,
-      country: (user as any).country ?? null,
-      city: (user as any).city ?? null,
-      town: (user as any).town ?? null
-    };
-    return NextResponse.json({ user: userProfile });
+    console.log('🔨 Building user profile object...');
+    try {
+      const userProfile = {
+        id: user.id,
+        email: user.email,
+        name: user.name ?? null,
+        firstName: user.firstName ?? null,
+        lastName: user.lastName ?? null,
+        role: user.role,
+        age: user.age ?? null,
+        schoolId: user.schoolId ?? null,
+        school: user.school ?? null,
+        avatarUrl: user.avatarUrl ?? null,
+        arrivalDate: user.arrivalDate ?? null,
+        departureDate: user.departureDate ?? null,
+        country: (user as any).country ?? null,
+        city: (user as any).city ?? null,
+        town: (user as any).town ?? null
+      };
+      console.log('✅ User profile built successfully');
+      return NextResponse.json({ user: userProfile });
+    } catch (profileErr) {
+      console.error('❌ Error building user profile:', profileErr);
+      return NextResponse.json({ error: 'Error procesando datos de usuario' }, { status: 500 });
+    }
   } catch (error) {
     // Loguear error completo en servidor para diagnóstico
     try {

@@ -6,10 +6,25 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    console.log('🔐 /api/auth/login-retry called');
+    
+    let email, password;
+    try {
+      const body = await request.json();
+      email = body.email;
+      password = body.password;
+      console.log('📧 Login attempt for email:', email ? 'provided' : 'missing');
+      console.log('🔑 Password provided:', password ? 'yes' : 'no');
+    } catch (jsonErr) {
+      console.error('❌ JSON parse error in login-retry:', jsonErr);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
     const onlyAdmins = process.env.ONLY_ADMIN_LOGIN === 'true';
+    console.log('👮 Admin-only mode:', onlyAdmins);
 
     if (!email || !password) {
+      console.log('❌ Missing credentials - email:', !!email, 'password:', !!password);
       return NextResponse.json(
         { error: 'Email y contraseña requeridos' }, 
         { status: 400 }
@@ -45,17 +60,22 @@ export async function POST(request: Request) {
         
         const user = await Promise.race([queryPromise, timeoutPromise]) as any;
         console.log('✅ Consulta ejecutada exitosamente');
+        console.log('👤 User found:', user ? 'yes' : 'no');
 
         if (!user) {
+          console.log('❌ Credenciales inválidas - usuario no encontrado');
           return NextResponse.json(
             { error: 'Credenciales inválidas' }, 
             { status: 401 }
           );
         }
 
+        console.log('🔍 Verifying password...');
         const isValid = await bcrypt.compare(password, user.password);
+        console.log('🔑 Password valid:', isValid);
         
         if (!isValid) {
+          console.log('❌ Credenciales inválidas - contraseña incorrecta');
           return NextResponse.json(
             { error: 'Credenciales inválidas' }, 
             { status: 401 }
@@ -64,6 +84,7 @@ export async function POST(request: Request) {
 
         // Solo restringir si flag activo
         if (onlyAdmins && user.role !== 'admin') {
+          console.log('❌ Acceso denegado - usuario no es admin, role:', user.role);
           return NextResponse.json(
             { error: 'Solo administradores pueden iniciar sesión.' },
             { status: 403 }
