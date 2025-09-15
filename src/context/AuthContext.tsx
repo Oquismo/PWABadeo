@@ -10,7 +10,7 @@ export interface User {
   email: string;
   role: 'admin' | 'user' | 'USER' | 'ADMIN';
   age?: number | null;
-  residence?: string | null;
+  // residence?: string | null; // FIELD TEMPORARILY DISABLED - not in production DB
   school?: {
     id: number;
     name: string;
@@ -65,7 +65,7 @@ const getSafeUserForStorageTop = (u: User | null) => {
     schoolId,
     avatarUrl,
     country: u.country ?? null,
-  residence: u.residence ?? null,
+    // residence: u.residence ?? null, // FIELD TEMPORARILY DISABLED
     city: u.city ?? null,
     town: u.town ?? null
   } as any;
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       schoolId,
       avatarUrl,
       country: u.country ?? null,
-  residence: u.residence ?? null,
+      // residence: u.residence ?? null, // FIELD TEMPORARILY DISABLED
       city: u.city ?? null,
       town: u.town ?? null
     } as any;
