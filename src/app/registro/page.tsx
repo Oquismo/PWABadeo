@@ -37,6 +37,7 @@ export default function RegistroPage() {
     arrivalDate: '',
     departureDate: '',
     country: 'Italia',
+  residence: '',
     city: '',
     town: '',
     adminCode: '',
@@ -235,6 +236,7 @@ export default function RegistroPage() {
         password: formData.password,
         age: parseInt(formData.age, 10),
         schoolId: isAdminRegistration ? null : selectedSchool?.id,
+  residence: isAdminRegistration ? undefined : (formData.residence || null),
         arrivalDate: formData.arrivalDate,
         departureDate: formData.departureDate,
         country: formData.country,
@@ -272,6 +274,7 @@ export default function RegistroPage() {
         name: data.user.name,
         email: data.user.email,
         age: data.user.age,
+  residence: data.user.residence || formData.residence || null,
         role: data.user.role || 'USER',
         arrivalDate: data.user.arrivalDate,
         departureDate: data.user.departureDate,
@@ -358,6 +361,24 @@ export default function RegistroPage() {
                 <Typography variant="body2" color="success.main" sx={{ textAlign: 'center', p: 1, bgcolor: '#e8f5e8', borderRadius: 1 }}>
                   🔐 Modo Administrador: La selección de escuela no es requerida
                 </Typography>
+              </Grid>
+            )}
+            {!isAdminRegistration && (
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="residence-label">Residencia</InputLabel>
+                  <Select
+                    labelId="residence-label"
+                    name="residence"
+                    value={formData.residence}
+                    label="Residencia"
+                    onChange={handleSelectChange}
+                  >
+                    <MenuItem value="">Ninguna</MenuItem>
+                    <MenuItem value="ONE">ONE</MenuItem>
+                    <MenuItem value="AMBRO">Ambro</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
             )}
             {!isAdminRegistration && (

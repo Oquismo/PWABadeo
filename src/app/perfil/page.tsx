@@ -42,6 +42,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import Link from 'next/link';
 import TaskManager from '@/components/admin/TaskManager';
+import HotelIcon from '@mui/icons-material/Hotel';
 
 export default function PerfilPage() {
   // Abrir el modal de reseña automáticamente al recibir el evento
@@ -263,13 +264,24 @@ export default function PerfilPage() {
               {user.name || 'Usuario'}
             </Typography>
 
-            <Chip
-              icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
-              label={isAdmin ? 'Administrador' : 'Usuario'}
-              color={isAdmin ? 'secondary' : 'primary'}
-              variant="filled"
-              sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
-            />
+            {/* Mostrar la residencia si existe; si no, mostrar el rol como fallback */}
+            {user?.residence ? (
+              <Chip
+                icon={<HotelIcon />}
+                label={String(user.residence).toUpperCase()}
+                color="primary"
+                variant="filled"
+                sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
+              />
+            ) : (
+              <Chip
+                icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+                label={isAdmin ? 'Administrador' : 'Usuario'}
+                color={isAdmin ? 'secondary' : 'primary'}
+                variant="filled"
+                sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
+              />
+            )}
 
             {/* Información de contacto */}
             <Grid container spacing={2} sx={{ mt: 1 }}>

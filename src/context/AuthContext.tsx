@@ -10,6 +10,7 @@ export interface User {
   email: string;
   role: 'admin' | 'user' | 'USER' | 'ADMIN';
   age?: number | null;
+  residence?: string | null;
   school?: {
     id: number;
     name: string;
@@ -50,6 +51,36 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Top-level helpers so they can be reused outside the provider (and exposed to window)
+const getSafeUserForStorageTop = (u: User | null) => {
+  if (!u) return null;
+  const schoolId = typeof u.school === 'object' && (u.school as any)?.id ? (u.school as any).id : (u.schoolId ?? null);
+  const name = (u.name ?? (`${u.firstName ?? ''}${u.lastName ? ' ' + u.lastName : ''}`.trim())) || undefined;
+  const avatarUrl = u.avatarUrl && typeof u.avatarUrl === 'string' && !u.avatarUrl.startsWith('data:') ? u.avatarUrl : null;
+  return {
+    id: u.id,
+    name,
+    email: u.email,
+    role: u.role,
+    schoolId,
+    avatarUrl,
+    country: u.country ?? null,
+  residence: u.residence ?? null,
+    city: u.city ?? null,
+    town: u.town ?? null
+  } as any;
+};
+
+const saveUserToLocalTop = (u: User | null) => {
+  try {
+    const safe = getSafeUserForStorageTop(u);
+    if (safe) localStorage.setItem('user', JSON.stringify(safe));
+    else localStorage.removeItem('user');
+  } catch (e) {
+    console.error('Error guardando user en localStorage (saveUserToLocalTop):', e);
+  }
+};
+
 // --- NUEVA FUNCIÓN PARA REGISTRAR ACCIONES ---
 const logAction = (action: string, userEmail: string) => {
   try {
@@ -70,6 +101,39 @@ const logAction = (action: string, userEmail: string) => {
 
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // Guardar sólo una versión compacta del usuario en localStorage para evitar QuotaExceeded
+  const getSafeUserForStorage = (u: User | null) => {
+    if (!u) return null;
+    const schoolId = typeof u.school === 'object' && (u.school as any)?.id ? (u.school as any).id : (u.schoolId ?? null);
+  const name = (u.name ?? (`${u.firstName ?? ''}${u.lastName ? ' ' + u.lastName : ''}`.trim())) || undefined;
+    // No almacenar avatares en base64 (data:), sólo URLs
+    const avatarUrl = u.avatarUrl && typeof u.avatarUrl === 'string' && !u.avatarUrl.startsWith('data:') ? u.avatarUrl : null;
+    return {
+      id: u.id,
+      name,
+      email: u.email,
+      role: u.role,
+      schoolId,
+      avatarUrl,
+      country: u.country ?? null,
+  residence: u.residence ?? null,
+      city: u.city ?? null,
+      town: u.town ?? null
+    } as any;
+  };
+
+  const saveUserToLocal = (u: User | null) => {
+    try {
+      const safe = getSafeUserForStorage(u);
+      if (safe) {
+  localStorage.setItem('user', JSON.stringify(safe));
+      } else {
+        localStorage.removeItem('user');
+      }
+    } catch (e) {
+      console.error('Error guardando user en localStorage (saveUserToLocal):', e);
+    }
+  };
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const onlyAdmins = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
@@ -118,8 +182,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (response.ok) {
           const { user } = await response.json();
           if (user) {
+            // Si localStorage guarda una residencia (cliente-only), preservarla si el backend no la devuelve
+            try {
+              const storedRaw = localStorage.getItem('user');
+              if (storedRaw) {
+                const parsedStored = JSON.parse(storedRaw) as any;
+                if (parsedStored?.residence && !user.residence) {
+                  user.residence = parsedStored.residence;
+                }
+              }
+            } catch (e) {
+              // ignore JSON parse errors
+            }
             setUser(user);
-            localStorage.setItem('user', JSON.stringify(user));
+            // Use safe storage helper to avoid storing large base64 avatars
+            saveUserToLocal(user);
             console.log('✅ AuthContext: Usuario actualizado desde backend:', user);
           }
         } else {
@@ -171,8 +248,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.warn('⚠️ AuthContext: Intento de login bloqueado por modo solo admins.');
       return;
     }
-    // Guardar datos iniciales
-    localStorage.setItem('user', JSON.stringify(userData));
+  // Guardar datos iniciales (safe)
+  saveUserToLocal(userData);
     if (userData.id) {
       console.log('🔍 AuthContext: Guardando userId en localStorage:', userData.id);
       localStorage.setItem('userId', userData.id.toString());
@@ -193,8 +270,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const { user } = await response.json();
         if (user) {
+          // Si el backend no incluye residence (modo cliente-only), conservar la que vino en userData
+          if (!user.residence && (userData as any).residence) {
+            (user as any).residence = (userData as any).residence;
+          }
           setUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
+          saveUserToLocal(user);
           if (user.id) {
             console.log('🔍 AuthContext: Actualizando userId tras refresco:', user.id);
             localStorage.setItem('userId', user.id.toString());
@@ -220,7 +301,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ userId: currentUser.id })
       }).catch(() => {});
     }
-    localStorage.removeItem('user');
+  // ensure safe remove
+  saveUserToLocal(null);
     setUser(null);
   };
 
@@ -249,7 +331,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(prevUser => {
         if (!prevUser) return null;
         const updatedUser = { ...prevUser, ...data };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        saveUserToLocal(updatedUser as User);
         return updatedUser;
       });
 
@@ -280,7 +362,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(prevUser => {
         if (!prevUser) return null;
         const updatedUser = { ...prevUser, avatarUrl: data.avatarUrl };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        saveUserToLocal(updatedUser as User);
         return updatedUser;
       });
 
@@ -307,7 +389,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(prevUser => {
         if (!prevUser) return null;
         const updatedUser = { ...prevUser, avatarUrl: null };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        saveUserToLocal(updatedUser as User);
         return updatedUser;
       });
 
@@ -335,7 +417,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(prevUser => {
         if (!prevUser) return null;
         const updatedUser = { ...prevUser, avatarUrl: data.avatarUrl };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        saveUserToLocal(updatedUser as User);
         return updatedUser;
       });
 
@@ -368,4 +450,24 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+}
+
+// Export default for compatibility
+export default useAuth;
+
+// Expose helper globally as a fallback for simple pages/scripts
+try {
+  if (typeof window !== 'undefined') {
+    (window as any).saveUserToLocal = (u: User | null) => {
+      try {
+        const safe = getSafeUserForStorageTop(u);
+        if (safe) localStorage.setItem('user', JSON.stringify(safe));
+        else localStorage.removeItem('user');
+      } catch (e) {
+        console.error('window.saveUserToLocal error:', e);
+      }
+    };
+  }
+} catch (e) {
+  // ignore in SSR
 }

@@ -31,8 +31,16 @@ export default function SimpleLoginPage() {
         setMessage('✅ Login exitoso!');
         console.log('User:', data.user);
         
-        // Guardar usuario en localStorage de manera simple
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Guardar usuario en localStorage de forma segura si el helper está disponible
+        try {
+          if (typeof window !== 'undefined' && (window as any).saveUserToLocal) {
+            (window as any).saveUserToLocal(data.user);
+          } else {
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
+        } catch (e) {
+          console.error('Error guardando user en localStorage:', e);
+        }
         
         // Redirigir después de un momento
         setTimeout(() => {
@@ -50,8 +58,8 @@ export default function SimpleLoginPage() {
   };
 
   const testLogin = () => {
-    setEmail('hemetmas@gmail.com');
-    setPassword('tuenti2311S');
+    setEmail('test@example.com');
+    setPassword('password123');
   };
 
   return (

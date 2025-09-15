@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useHaptics } from '@/hooks/useHaptics';
-import { Paper, BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
+import { Paper, BottomNavigation, BottomNavigationAction, Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MapIcon from '@mui/icons-material/Map';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -14,6 +14,8 @@ import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import HotelIcon from '@mui/icons-material/Hotel';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, LayoutGroup } from 'framer-motion'; // 1. Importar de Framer Motion
@@ -40,21 +42,26 @@ export default function BottomNavBar() {
   }
 
   const navActions = [
-  { value: "/", icon: <HomeIcon />, label: t('nav.home') },
-  { value: "/mapa", icon: <MapIcon />, label: t('nav.map') },
-  { value: "/sevilla-spot", icon: <LocationOnIcon />, label: t('nav.tourism') },
-    // { value: "/spotify", icon: <MusicNoteIcon /> }, // Oculto temporalmente
+    { value: "/", icon: <HomeIcon />, label: t('nav.home') },
+    { value: "/mapa", icon: <MapIcon />, label: t('nav.map') },
+    // Actions principales (mostrar directamente)
     ...(user?.role === 'admin'
       ? [
-          // { value: "/spotify-production-debug", icon: <BugReportIcon /> }, // Oculto temporalmente
           { value: "/admin", icon: <AdminPanelSettingsIcon />, label: "Admin" }
         ]
-      : [
-          { value: "/telefonos", icon: <PhoneInTalkIcon />, label: "Teléfonos" },
-        ]),
+      : []),
+    { value: "/telefonos", icon: <PhoneInTalkIcon />, label: "Teléfonos" },
     ...(isAuthenticated
       ? [{ value: "/perfil", icon: <AccountCircleIcon />, label: t('nav.profile') }]
       : [{ value: "/login", icon: <LoginIcon />, label: "Login" }]),
+  ];
+
+  // Acciones que van al overflow (Menú "Más") — diseño expresivo tipo Material
+  const overflowActions = [
+    { value: "/sevilla-spot", icon: <LocationOnIcon />, label: 'Tour' },
+    { value: "/residencia", icon: <HotelIcon />, label: "Residencia" },
+    // opciones adicionales temporales
+    // { value: "/spotify", icon: <MusicNoteIcon />, label: "Spotify" },
   ];
 
   return (
@@ -98,6 +105,7 @@ export default function BottomNavBar() {
                   key={action.value}
                   component={Link}
                   href={action.value}
+                  aria-label={action.label || action.value}
                   value={action.value}
                   icon={action.icon}
                   onClick={() => tap()} // Vibración al hacer tap en navegación
@@ -128,9 +136,90 @@ export default function BottomNavBar() {
                 </BottomNavigationAction>
               );
             })}
+
+            {/* Botón 'Más' para overflow */}
+            <Box sx={{ display: 'flex', alignItems: 'center', ml: 0.5 }}>
+              <MoreMenu overflowActions={overflowActions} tap={tap} pathname={pathname} />
+            </Box>
           </BottomNavigation>
         </LayoutGroup>
       </Paper>
+    </>
+  );
+}
+
+// Componente interno: menú "Más" para acciones en overflow
+function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; tap: () => void; pathname: string }) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(e.currentTarget);
+    tap();
+  };
+  const handleClose = () => setAnchorEl(null);
+
+  return (
+    <>
+      <IconButton
+        aria-label="más"
+        aria-controls={open ? 'more-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleOpen}
+        size="large"
+        sx={{
+          color: open ? 'primary.main' : 'text.secondary',
+          zIndex: 2,
+          backgroundColor: open ? 'rgba(25,118,210,0.08)' : 'transparent',
+          borderRadius: 2,
+          '&:hover': { backgroundColor: open ? 'rgba(25,118,210,0.12)' : 'rgba(255,255,255,0.04)' }
+        }}
+      >
+        <MoreVertIcon />
+      </IconButton>
+      <Menu
+        id="more-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        PaperProps={{ elevation: 16, sx: {
+            minWidth: 220,
+            borderRadius: 3,
+            bgcolor: 'background.paper',
+            border: theme => `1px solid rgba(0,0,0,${theme.palette.mode === 'dark' ? 0.24 : 0.08})`,
+            boxShadow: '0px 12px 40px rgba(0,0,0,0.28)',
+            px: 0.5,
+          }
+        }}
+        MenuListProps={{ dense: true }}
+      >
+        {overflowActions.map((item) => (
+          <MenuItem
+            key={item.value}
+            component={Link}
+            href={item.value}
+            aria-label={item.label || item.value}
+            onClick={() => {
+              tap();
+              handleClose();
+            }}
+            selected={pathname === item.value}
+            sx={{
+              borderRadius: 2,
+              mx: 0.5,
+              my: 0.25,
+              '&.Mui-selected': { backgroundColor: 'rgba(25,118,210,0.12)' },
+              '&:hover': { backgroundColor: 'rgba(25,118,210,0.08)' }
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+            <ListItemText>{item.label}</ListItemText>
+          </MenuItem>
+        ))}
+      </Menu>
     </>
   );
 }

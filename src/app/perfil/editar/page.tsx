@@ -47,6 +47,7 @@ export default function EditarPerfilPage() {
     country: '',
     city: '',
     town: '',
+  residence: '',
   });
 
   const [profileImage, setProfileImage] = useState<string>('');
@@ -154,6 +155,7 @@ export default function EditarPerfilPage() {
         country: user.country || 'Italia',
         city: user.city || '',
         town: user.town || '',
+  residence: user.residence || '',
       });
 
       // Si el usuario no es admin y tiene una escuela, actualizar ubicación con datos de la escuela
@@ -233,6 +235,7 @@ export default function EditarPerfilPage() {
         country: formData.country,
         city: formData.city,
         town: formData.town,
+  residence: formData.residence || null,
       };
 
       // Solo agregar campos específicos para usuarios no-admin
@@ -474,6 +477,22 @@ export default function EditarPerfilPage() {
                 <Grid item xs={12} md={8}>
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="edit-residence-label">Residencia</InputLabel>
+                      <Select
+                        labelId="edit-residence-label"
+                        name="residence"
+                        value={formData.residence}
+                        label="Residencia"
+                        onChange={handleSelectChange}
+                      >
+                        <MenuItem value="">Ninguna</MenuItem>
+                        <MenuItem value="ONE">ONE</MenuItem>
+                        <MenuItem value="AMBRO">Ambro</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
                       <TextField
                         name="name"
                         required

@@ -478,6 +478,17 @@ export default function ExternalInfoPanel() {
   const { t } = useTranslation();
   const weatherInfo = currentWeather ? weatherCodeMap[currentWeather.weathercode] : null;
 
+  // Header background opacity configurable vía NEXT_PUBLIC_WEATHER_HEADER_OPACITY (0..1).
+  // Si no está definida, dejamos el header transparente.
+  const headerOpacityRaw = process.env.NEXT_PUBLIC_WEATHER_HEADER_OPACITY;
+  let headerBackground = 'transparent';
+  if (headerOpacityRaw) {
+    const op = parseFloat(headerOpacityRaw);
+    if (!Number.isNaN(op)) {
+      headerBackground = alpha(displayWeatherTheme?.surface || theme.palette.background.paper, Math.max(0, Math.min(1, op)));
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -509,7 +520,7 @@ export default function ExternalInfoPanel() {
           justifyContent: 'space-between',
           p: 2,
           pb: 1,
-          background: alpha(displayWeatherTheme?.surface || theme.palette.background.paper, 0.8),
+    background: headerBackground,
           backdropFilter: 'blur(8px)',
         }}
       >

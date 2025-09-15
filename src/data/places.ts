@@ -31,6 +31,15 @@ export const placesData: Place[] = [
     address: 'C/ Páez de Rivera, 1, 41012 Sevilla',
     link: 'https://www.livinnx.com/'
   },
+  {
+    id: 'residencia-estanislao',
+    name: 'Residencia Estanislao',
+    description: 'Residencia para estudiantes con buena ubicación y servicios básicos. Ideal para quienes estudian en el centro de Sevilla.',
+    category: 'Residencia',
+    coordinates: { lat: 37.35645121300518, lng: -5.978122866568905 },
+    address: 'Zona Residencial, Sevilla',
+    link: ''
+  },
 
   // === OFICINAS Y SERVICIOS ===
   {
