@@ -3,22 +3,38 @@ import { prisma, initPrisma } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    console.log('🔍 /api/user/by-email called');
+    
+    let email;
+    try {
+      const body = await request.json();
+      email = body.email;
+      console.log('📧 Email from request:', email ? 'provided' : 'missing');
+    } catch (jsonErr) {
+      console.error('❌ JSON parse error:', jsonErr);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
     if (!email) {
+      console.log('❌ Email missing in request');
       return NextResponse.json({ error: 'Email requerido' }, { status: 400 });
     }
     // Ensure Prisma is connected (helps with cold-starts / transient DB issues)
+    console.log('🔄 Initializing Prisma connection...');
     try {
       await initPrisma(2);
+      console.log('✅ Prisma initialized successfully');
     } catch (connErr) {
       console.error('DB init failed in /api/user/by-email:', connErr);
       return NextResponse.json({ error: 'Error de conexión a la base de datos (init failed)' }, { status: 503 });
     }
 
+    console.log('🔍 Querying user with email:', email);
     const user = await prisma.user.findUnique({
       where: { email },
       include: { school: true }
     });
+    console.log('👤 User query result:', user ? 'found' : 'not found');
     if (!user) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
