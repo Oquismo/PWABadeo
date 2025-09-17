@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import React, { useState, useEffect } from 'react';
 import './globals.css'; // 1. Importar el archivo de estilos globales
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { AuthProvider } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
@@ -143,8 +144,9 @@ export default function RootLayout({
                       <BottomNavBar />
                       <ConnectionMonitor />
 
-                        {/* Vercel Analytics for App Router */}
+                        {/* Vercel Analytics and Speed Insights for App Router */}
                         <Analytics />
+                        <SpeedInsights />
 
                     </Box>
                   </ServiceWorkerProvider>
