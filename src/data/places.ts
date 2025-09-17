@@ -23,15 +23,7 @@ export const placesData: Place[] = [
     link: 'https://www.residenciauniversitaria.es/'
   },
   {
-    id: 'residencia-one-sevilla',
-    name: 'Residencia Universitaria ONE Sevilla (Livinnx)',
-    description: 'Residencia moderna con todas las comodidades para estudiantes internacionales. WiFi, cocina equipada, salas de estudio.',
-    category: 'Residencia',
-    coordinates: { lat: 37.363285317786854, lng: -5.984741107568575 }, // Coordenadas exactas de Google Maps
-    address: 'C/ Páez de Rivera, 1, 41012 Sevilla',
-    link: 'https://www.livinnx.com/'
-  },
-  {
+  
     id: 'residencia-estanislao',
     name: 'Residencia Estanislao',
     description: 'Residencia para estudiantes con buena ubicación y servicios básicos. Ideal para quienes estudian en el centro de Sevilla.',
@@ -39,6 +31,17 @@ export const placesData: Place[] = [
     coordinates: { lat: 37.35645121300518, lng: -5.978122866568905 },
     address: 'Zona Residencial, Sevilla',
     link: ''
+  },
+
+  // Micampus Armendáriz – Residencia Universitaria (añadido)
+  {
+    id: 'micampus-armendariz',
+    name: 'Micampus Armendáriz – Residencia Universitaria',
+    description: 'Residencia universitaria Micampus cerca del centro, ideal para estudiantes.',
+    category: 'Residencia',
+    coordinates: { lat: 37.357238681403636, lng: -5.976824126984121 },
+    address: 'C. Armendáriz, Sevilla',
+    link: 'https://www.micampus.com/'
   },
 
   // === OFICINAS Y SERVICIOS ===

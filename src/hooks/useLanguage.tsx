@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import loggerClient from '@/lib/loggerClient';
 import { Language } from '../lib/i18n';
 
 interface LanguageContextType {
@@ -17,19 +18,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const savedLanguage = localStorage.getItem('language') as Language;
     if (savedLanguage && ['es', 'en', 'it'].includes(savedLanguage)) {
       setLanguageState(savedLanguage);
-      console.log(`Idioma cargado desde localStorage: ${savedLanguage}`); // Debug
+      loggerClient.debug(`Idioma cargado desde localStorage: ${savedLanguage}`); // Debug
     } else {
       // Detectar idioma del navegador
       const browserLang = navigator.language.split('-')[0];
       if (['es', 'en', 'it'].includes(browserLang)) {
         setLanguageState(browserLang as Language);
-        console.log(`Idioma detectado del navegador: ${browserLang}`); // Debug
+        loggerClient.debug(`Idioma detectado del navegador: ${browserLang}`); // Debug
       }
     }
   }, []);
 
   const setLanguage = (lang: Language) => {
-    console.log(`Cambiando idioma a: ${lang}`); // Debug
+    loggerClient.debug(`Cambiando idioma a: ${lang}`); // Debug
     setLanguageState(lang);
     localStorage.setItem('language', lang);
   };

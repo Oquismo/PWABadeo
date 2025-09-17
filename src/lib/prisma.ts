@@ -12,6 +12,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Forzar regeneración del tipo
-prisma.$connect().catch(console.error);
+import loggerClient from '@/lib/loggerClient';
+
+prisma.$connect().catch((err) => loggerClient.error('Prisma connect error:', err));
 
 export default prisma;

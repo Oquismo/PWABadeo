@@ -176,7 +176,7 @@ export default function CreateSchoolPage() {
                   {school.address}, {school.city} ({school.province})
                 </Typography>
                 <Typography variant="body2">
-                  {school.type} - {school.level}
+                  {school.type}
                 </Typography>
               </CardContent>
             </Card>

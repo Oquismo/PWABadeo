@@ -1,30 +1,31 @@
 import { NextResponse } from 'next/server';
 import { logActionServer } from '@/lib/logger';
 import { prisma } from '@/lib/db';
+import loggerClient from '@/lib/loggerClient';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    console.log('🔐 /api/auth/login-retry called');
+  loggerClient.info('🔐 /api/auth/login-retry called');
     
     let email, password;
     try {
       const body = await request.json();
       email = body.email;
       password = body.password;
-      console.log('📧 Login attempt for email:', email ? 'provided' : 'missing');
-      console.log('🔑 Password provided:', password ? 'yes' : 'no');
+  loggerClient.debug('📧 Login attempt for email:', email ? 'provided' : 'missing');
+  loggerClient.debug('🔑 Password provided:', password ? 'yes' : 'no');
     } catch (jsonErr) {
-      console.error('❌ JSON parse error in login-retry:', jsonErr);
+      loggerClient.error('❌ JSON parse error in login-retry:', jsonErr);
       return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
     }
     
     const onlyAdmins = process.env.ONLY_ADMIN_LOGIN === 'true';
-    console.log('👮 Admin-only mode:', onlyAdmins);
+  loggerClient.debug('👮 Admin-only mode:', onlyAdmins);
 
     if (!email || !password) {
-      console.log('❌ Missing credentials - email:', !!email, 'password:', !!password);
+      loggerClient.warn('❌ Missing credentials', { hasEmail: !!email, hasPassword: !!password });
       return NextResponse.json(
         { error: 'Email y contraseña requeridos' }, 
         { status: 400 }
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     
     while (queryAttempts < maxAttempts) {
       try {
-        console.log(`🔄 Intento ${queryAttempts + 1} de consulta a base de datos`);
+  loggerClient.debug(`🔄 Intento ${queryAttempts + 1} de consulta a base de datos`);
         
         const bcrypt = await import('bcrypt');
         
@@ -59,23 +60,23 @@ export async function POST(request: Request) {
         );
         
         const user = await Promise.race([queryPromise, timeoutPromise]) as any;
-        console.log('✅ Consulta ejecutada exitosamente');
-        console.log('👤 User found:', user ? 'yes' : 'no');
+  loggerClient.info('✅ Consulta ejecutada exitosamente');
+  loggerClient.debug('👤 User found:', user ? 'yes' : 'no');
 
         if (!user) {
-          console.log('❌ Credenciales inválidas - usuario no encontrado');
+          loggerClient.warn('❌ Credenciales inválidas - usuario no encontrado');
           return NextResponse.json(
             { error: 'Credenciales inválidas' }, 
             { status: 401 }
           );
         }
 
-        console.log('🔍 Verifying password...');
-        const isValid = await bcrypt.compare(password, user.password);
-        console.log('🔑 Password valid:', isValid);
+  loggerClient.debug('🔍 Verifying password...');
+  const isValid = await bcrypt.compare(password, user.password);
+  loggerClient.debug('🔑 Password valid:', isValid);
         
         if (!isValid) {
-          console.log('❌ Credenciales inválidas - contraseña incorrecta');
+          loggerClient.warn('❌ Credenciales inválidas - contraseña incorrecta');
           return NextResponse.json(
             { error: 'Credenciales inválidas' }, 
             { status: 401 }
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
 
         // Solo restringir si flag activo
         if (onlyAdmins && user.role !== 'admin') {
-          console.log('❌ Acceso denegado - usuario no es admin, role:', user.role);
+          loggerClient.warn('❌ Acceso denegado - usuario no es admin, role:', user.role);
           return NextResponse.json(
             { error: 'Solo administradores pueden iniciar sesión.' },
             { status: 403 }
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
         try {
           await logActionServer({ userId: user.id, action: 'login', meta: { email: user.email, retry: true }, updateLastSeen: true });
         } catch (e) {
-          console.warn('No se pudo registrar log de login (retry)', e);
+    loggerClient.warn('No se pudo registrar log de login (retry)', e);
         }
 
         // Crear respuesta con cookies para autenticación
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
         // Establecer cookies para el middleware
         const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
         
-        console.log('🍪 [RETRY] Estableciendo cookies de autenticación:', {
+  loggerClient.debug('🍪 [RETRY] Estableciendo cookies de autenticación:', {
           authToken: authToken.substring(0, 20) + '...',
           userRole: userWithoutPassword.role,
           userId: user.id
@@ -128,11 +129,11 @@ export async function POST(request: Request) {
           maxAge: 60 * 60 * 24 * 7 // 7 días
         });
 
-        return response;
+  return response;
 
-      } catch (queryError) {
-        queryAttempts++;
-        console.error(`❌ Error en intento ${queryAttempts}:`, queryError);
+    } catch (queryError) {
+    queryAttempts++;
+  loggerClient.error(`❌ Error en intento ${queryAttempts}:`, queryError);
         
         if (queryAttempts >= maxAttempts) {
           // Si fallaron todos los intentos, devolver error específico
@@ -153,7 +154,7 @@ export async function POST(request: Request) {
     }
 
   } catch (error) {
-    console.error('❌ Error general en login:', error);
+  loggerClient.error('❌ Error general en login:', error);
     return NextResponse.json(
       { 
         error: 'Error interno del servidor',

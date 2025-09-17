@@ -5,12 +5,13 @@ import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
-import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, CircularProgress } from '@mui/material';
+import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, CircularProgress, Card, CardContent, CardActions } from '@mui/material';
 import MaterialTextField from '@/components/ui/MaterialTextField';
 import MaterialFilterChips from '@/components/ui/MaterialFilterChips';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import DirectionsIcon from '@mui/icons-material/Directions';
+import LanguageIcon from '@mui/icons-material/Language';
 import Image from 'next/image';
 
 import { placesData, Place } from '@/data/places'; 
@@ -18,6 +19,7 @@ import AddPlaceModal from './AddPlaceModal';
 
 import L from 'leaflet';
 import 'leaflet.heat';
+import loggerClient from '@/lib/loggerClient';
 // Genera los puntos del heatmap a partir de los datos reales de placesData y clicks almacenados en localStorage
 function getHeatmapPointsFromClicks(places: Place[]): [number, number, number?][] {
   // Recupera el objeto de clicks por id de localStorage
@@ -143,7 +145,7 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
       maximumAge: 0 // Siempre obtener ubicación fresca, no usar cache
     };
 
-    console.log('Solicitando ubicación con GPS de alta precisión...');
+  loggerClient.debug('Solicitando ubicación con GPS de alta precisión...');
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -155,8 +157,8 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
         setUserPosition(latlng);
         map.flyTo([lat, lng], 18); // Zoom muy cercano para mayor precisión visual
         
-        // Mostrar información de precisión
-        console.log(`✅ Ubicación precisa encontrada: ${lat.toFixed(6)}, ${lng.toFixed(6)} (Precisión: ${Math.round(accuracy)}m)`);
+  // Mostrar información de precisión
+  loggerClient.info(`✅ Ubicación precisa encontrada: ${lat.toFixed(6)}, ${lng.toFixed(6)} (Precisión: ${Math.round(accuracy)}m)`);
         
         // Feedback de éxito
         if ('vibrate' in navigator) {
@@ -204,7 +206,7 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
             break;
         }
         
-        console.error('❌ Error de geolocalización:', error);
+  loggerClient.error('❌ Error de geolocalización:', error);
         
         // Mostrar error más informativo
         alert(`${errorMessage}\n\n${errorDetails}`);
@@ -265,8 +267,9 @@ function MapResizer() {
   return null;
 }
 
-export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Place }) {
+export default function InteractiveMap({ selectedPlace, compact = false, height = '85vh', markersOnly = false }: { selectedPlace?: Place; compact?: boolean; height?: string | number; markersOnly?: boolean }) {
   const [isMapReady, setIsMapReady] = useState(false);
+  const selectedMarkerRef = useRef<any>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
   // Botón flotante para alternar el heatmap
   const HeatmapToggleButton = () => (
@@ -369,7 +372,7 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
       try {
         setCustomPlaces(JSON.parse(savedPlacesRaw));
       } catch (e) {
-        console.error("Error al parsear lugares personalizados desde localStorage:", e);
+        loggerClient.error("Error al parsear lugares personalizados desde localStorage:", e);
         setCustomPlaces([]);
       }
     }
@@ -395,6 +398,23 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
       clickMap[selectedPlace.id] = (clickMap[selectedPlace.id] || 0) + 1;
       localStorage.setItem('placeClicks', JSON.stringify(clickMap));
       setHeatmapVersion(v => v + 1);
+      // Abrir el popup del marcador seleccionado (si existe)
+      try {
+        // Pequeño delay para asegurar que el Marker ya está montado en el DOM
+        setTimeout(() => {
+          if (selectedMarkerRef.current && typeof selectedMarkerRef.current.openPopup === 'function') {
+            selectedMarkerRef.current.openPopup();
+          } else if (selectedMarkerRef.current && selectedMarkerRef.current.getPopup) {
+            const popup = selectedMarkerRef.current.getPopup();
+            if (popup && popup.openOn) {
+              popup.openOn(map);
+            }
+          }
+        }, 180);
+      } catch (e) {
+        // no bloquear en caso de error
+        loggerClient.warn('No se pudo abrir el popup programáticamente', e);
+      }
     }
   }, [selectedPlace, map, isMapReady]);
 
@@ -416,7 +436,7 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
         alert('No se encontraron resultados para tu búsqueda en el área de Sevilla.');
       }
     } catch (error) {
-      console.error("Error en la búsqueda:", error);
+      loggerClient.error("Error en la búsqueda:", error);
       alert('Ocurrió un error al realizar la búsqueda.');
     }
   };
@@ -435,20 +455,22 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
 
   return (
     <Box>
-      <MaterialFilterChips
-        categories={filterCategories}
-        selectedCategories={selectedCategories}
-        onCategoriesChange={setSelectedCategories}
-      />
+      {!markersOnly && (
+        <MaterialFilterChips
+          categories={filterCategories}
+          selectedCategories={selectedCategories}
+          onCategoriesChange={setSelectedCategories}
+        />
+      )}
 
       <Box sx={{ position: 'relative' }}>
-        <HeatmapToggleButton />
+        {!markersOnly && <HeatmapToggleButton />}
       <MapContainer 
         key="interactive-map-container"
         center={defaultPosition} 
         zoom={14} 
         style={{ 
-          height: '85vh',
+          height: compact ? (typeof height === 'number' ? `${height}px` : '260px') : height,
           width: '100%', 
           borderRadius: '16px', 
           position: 'relative', 
@@ -460,9 +482,9 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
             attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>'
         />
         
-        {/* Marcadores de ubicaciones predefinidas (siempre visibles, no filtradas por categoría) */}
-        {/* Usamos el icono por defecto para estas ubicaciones generales */}
-        {locations.map((loc) => {
+  {/* Marcadores de ubicaciones predefinidas (siempre visibles, no filtradas por categoría) */}
+  {/* Usamos el icono por defecto para estas ubicaciones generales */}
+  {!markersOnly && locations.map((loc) => {
             const [lat, lng] = Array.isArray(loc.position) ? loc.position : [loc.position.lat, loc.position.lng];
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`;
             const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${lat},${lng}`;
@@ -499,8 +521,8 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
             );
         })}
 
-        {/* Marcadores de Lugares de Interés predefinidos (FILTRADOS Y CON ICONO PERSONALIZADO) */}
-        {placesData.filter(place => selectedCategories.length === 0 || selectedCategories.includes(place.category)).map((place) => {
+  {/* Marcadores de Lugares de Interés predefinidos (FILTRADOS Y CON ICONO PERSONALIZADO) */}
+  {!markersOnly && placesData.filter(place => selectedCategories.length === 0 || selectedCategories.includes(place.category)).map((place) => {
             const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
             const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
             // Handler para contar clicks en el marcador
@@ -581,8 +603,8 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
             );
         })}
 
-        {/* Marcadores de Puntos de Interés Personalizados por el Usuario (FILTRADOS Y CON ICONO PERSONALIZADO) */}
-        {customPlaces.filter(place => {
+  {/* Marcadores de Puntos de Interés Personalizados por el Usuario (FILTRADOS Y CON ICONO PERSONALIZADO) */}
+  {!markersOnly && customPlaces.filter(place => {
           // Si no hay categorías seleccionadas, mostrar todos
           if (selectedCategories.length === 0) return true;
           
@@ -663,8 +685,69 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
             );
         })}
 
+        {/* Si nos pasan un selectedPlace explícito (ej. vista compacta de residencia), mostrar su marcador siempre */}
+        {selectedPlace && (
+          <Marker ref={selectedMarkerRef} position={selectedPlace.coordinates} icon={getCategoryIcon(selectedPlace.category || 'Residencia')}>
+            <Popup>
+              <Box sx={{ maxWidth: 200, width: '100%' }}>
+                <Card elevation={0} sx={{
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  px: 0,
+                  bgcolor: 'rgba(6,10,12,0.72)',
+                  color: 'common.white',
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  backdropFilter: 'blur(6px)'
+                }}>
+                  <CardContent sx={{ pb: 0.25, pt: 0.6, px: 1 }}>
+                    <Typography variant="subtitle2" fontWeight={800} gutterBottom noWrap sx={{ color: 'common.white' }}>
+                      {selectedPlace.name}
+                    </Typography>
+                    {selectedPlace.address && (
+                      <Typography variant="caption" sx={{ display: 'block', mb: 0.2, color: 'rgba(255,255,255,0.78)' }} noWrap>
+                        {selectedPlace.address}
+                      </Typography>
+                    )}
+                    <Typography variant="caption" sx={{ mb: 0.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', color: 'rgba(255,255,255,0.68)' }}>
+                      {selectedPlace.description}
+                    </Typography>
+                  </CardContent>
+                  <CardActions sx={{ display: 'flex', gap: 0.5, p: 0.4 }}>
+                    {selectedPlace.link && (
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                        href={selectedPlace.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        startIcon={<LanguageIcon sx={{ fontSize: 16 }} />}
+                        sx={{ textTransform: 'none', fontSize: 12, py: 0.4, px: 1 }}
+                      >
+                        Más info
+                      </Button>
+                    )}
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<DirectionsIcon sx={{ fontSize: 16 }} />}
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.coordinates.lat},${selectedPlace.coordinates.lng}&travelmode=transit`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ ml: 'auto', textTransform: 'none', fontSize: 12, py: 0.4, px: 1, borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.92)' }}
+                    >
+                      Cómo llegar
+                    </Button>
+                  </CardActions>
+                </Card>
+              </Box>
+            </Popup>
+          </Marker>
+        )}
 
-        {userPosition && (
+
+  {!markersOnly && userPosition && (
             <Marker 
               position={userPosition}
               icon={L.icon({
@@ -679,10 +762,10 @@ export default function InteractiveMap({ selectedPlace }: { selectedPlace?: Plac
         )}
 
   <MapController setMap={setMap} setIsMapReady={setIsMapReady} />
-  <LocationButton setUserPosition={setUserPosition} />
+  {!markersOnly && <LocationButton setUserPosition={setUserPosition} />}
   <MapResizer />
   {/* Capa de heatmap */}
-  <HeatmapLayer points={getHeatmapPointsFromClicks(placesData)} visible={showHeatmap} key={heatmapVersion} />
+  {!markersOnly && <HeatmapLayer points={getHeatmapPointsFromClicks(placesData)} visible={showHeatmap} key={heatmapVersion} />}
   </MapContainer>
   </Box>
 

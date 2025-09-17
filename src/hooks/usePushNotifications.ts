@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import loggerClient from '@/lib/loggerClient';
 
 interface PushSubscriptionData {
   endpoint: string;
@@ -45,7 +46,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       const subscription = await registration.pushManager.getSubscription();
       setIsSubscribed(!!subscription);
     } catch (err) {
-      console.error('Error checking subscription status:', err);
+      loggerClient.error('Error checking subscription status:', err);
     }
   }, []);
 
@@ -67,7 +68,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       }
     } catch (err) {
       setError('Error requesting notification permission');
-      console.error('Error requesting permission:', err);
+        loggerClient.error('Error requesting permission:', err);
       return false;
     }
   }, [isSupported]);
@@ -102,20 +103,20 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
       // Send subscription to server
       const userIdRaw = localStorage.getItem('userId');
-      console.log('🔍 usePushNotifications: userIdRaw:', userIdRaw);
-      console.log('🔍 usePushNotifications: user from context:', user);
+          loggerClient.debug('🔍 usePushNotifications: userIdRaw:', userIdRaw);
+          loggerClient.debug('🔍 usePushNotifications: user from context:', user);
       let userId = userIdRaw ? Number(userIdRaw) : null;
       
       // Fallback: intentar obtener el userId del contexto de autenticación
       if (!userId && user?.id) {
         userId = user.id;
-        console.log('🔍 usePushNotifications: usando userId del contexto:', userId);
+            loggerClient.debug('🔍 usePushNotifications: usando userId del contexto:', userId);
         localStorage.setItem('userId', userId.toString());
       }
       
-      console.log('🔍 usePushNotifications: userId final:', userId);
-      if (!userId || isNaN(userId)) {
-        console.error('❌ usePushNotifications: userId no válido:', { userIdRaw, userId, userFromContext: user });
+          loggerClient.debug('🔍 usePushNotifications: userId final:', userId);
+          if (!userId || isNaN(userId)) {
+            loggerClient.error('❌ usePushNotifications: userId no válido:', { userIdRaw, userId, userFromContext: user });
         setError('No se encontró el userId del usuario. Debes iniciar sesión.');
         setIsLoading(false);
         return;
@@ -137,7 +138,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
       setIsSubscribed(true);
     } catch (err) {
-      console.error('Error subscribing to push notifications:', err);
+      loggerClient.error('Error subscribing to push notifications:', err);
       setError('Failed to subscribe to push notifications');
     } finally {
       setIsLoading(false);
@@ -178,7 +179,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
       setIsSubscribed(false);
     } catch (err) {
-      console.error('Error unsubscribing from push notifications:', err);
+      loggerClient.error('Error unsubscribing from push notifications:', err);
       setError('Failed to unsubscribe from push notifications');
     } finally {
       setIsLoading(false);
@@ -187,7 +188,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
   const sendNotification = useCallback(async (title: string, body: string, icon?: string) => {
     if (!isSupported || !isSubscribed) {
-      console.warn('Push notifications not supported or not subscribed');
+      loggerClient.warn('Push notifications not supported or not subscribed');
       return;
     }
 
@@ -202,7 +203,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         requireInteraction: true
       });
     } catch (err) {
-      console.error('Error sending notification:', err);
+      loggerClient.error('Error sending notification:', err);
     }
   }, [isSupported, isSubscribed]);
 
@@ -217,7 +218,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       const existingRegistrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(
         existingRegistrations.map(registration => {
-          console.log('Unregistering existing service worker:', registration.scope);
+          loggerClient.debug('Unregistering existing service worker:', registration.scope);
           return registration.unregister();
         })
       );
@@ -228,9 +229,9 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       // Registrar el nuevo service worker
       const registration = await navigator.serviceWorker.register('/service-worker.js');
       await navigator.serviceWorker.ready;
-      console.log('Service worker registered successfully after cleanup');
+      loggerClient.info('Service worker registered successfully after cleanup');
     } catch (err) {
-      console.error('Error registering service worker:', err);
+        loggerClient.error('Error registering service worker:', err);
       setError('Error registering service worker');
     }
   }, [isSupported]);

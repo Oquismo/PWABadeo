@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Snackbar, Alert, CircularProgress, Slide } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import loggerClient from '@/lib/loggerClient';
 
 export default function AnnouncementBanner() {
   const [announcement, setAnnouncement] = useState<string | null>(null);
@@ -34,14 +35,14 @@ export default function AnnouncementBanner() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Notificación push enviada:', result);
+        loggerClient.info('Notificación push enviada:', result);
         return true;
       } else {
-        console.error('Error enviando notificación push:', response.statusText);
+        loggerClient.error('Error enviando notificación push:', response.statusText);
         return false;
       }
     } catch (error) {
-      console.error('Error enviando notificación push:', error);
+      loggerClient.error('Error enviando notificación push:', error);
       return false;
     }
   };
@@ -54,7 +55,7 @@ export default function AnnouncementBanner() {
         const parsed = JSON.parse(saved);
         setSeenAnnouncements(new Set(parsed));
       } catch (error) {
-        console.error('Error parsing seenAnnouncements:', error);
+        loggerClient.error('Error parsing seenAnnouncements:', error);
         setSeenAnnouncements(new Set());
       }
     }
@@ -65,7 +66,7 @@ export default function AnnouncementBanner() {
         const parsed = JSON.parse(hidden);
         setHiddenAnnouncements(new Set(parsed));
       } catch (error) {
-        console.error('Error parsing hiddenAnnouncements:', error);
+        loggerClient.error('Error parsing hiddenAnnouncements:', error);
         setHiddenAnnouncements(new Set());
       }
     }
@@ -103,24 +104,24 @@ export default function AnnouncementBanner() {
           );
 
           if (pushSent) {
-            console.log('Notificación push enviada:', trimmedMessage);
+            loggerClient.info('Notificación push enviada:', trimmedMessage);
             // Marcar como visto inmediatamente después de enviar push
             setSeenAnnouncements(prev => new Set([...prev, trimmedMessage]));
           } else {
             // Fallback: mostrar banner si no se pudo enviar push
-            console.log('Fallback: mostrando banner para:', trimmedMessage);
+            loggerClient.debug('Fallback: mostrando banner para:', trimmedMessage);
             setAnnouncement(trimmedMessage);
             setOpen(true);
           }
         } else if (message) {
-          console.log('Anuncio ya visto u oculto:', message);
+          loggerClient.debug('Anuncio ya visto u oculto:', message);
         }
       } catch (error) {
-        console.error('Error parsing announcement:', error);
+        loggerClient.error('Error parsing announcement:', error);
       }
     };
     eventSource.onerror = (error) => {
-      console.error('EventSource error:', error);
+      loggerClient.error('EventSource error:', error);
       eventSource?.close();
     };
     return () => {
@@ -146,7 +147,7 @@ export default function AnnouncementBanner() {
     // Marcar como visto cuando se cierra
     if (announcement) {
       const trimmedMessage = announcement.trim();
-      console.log('Marcando como visto:', trimmedMessage);
+      loggerClient.debug('Marcando como visto:', trimmedMessage);
       setSeenAnnouncements(prev => new Set([...prev, trimmedMessage]));
     }
   };
@@ -163,12 +164,12 @@ export default function AnnouncementBanner() {
   const clearSeenAnnouncements = () => {
     setSeenAnnouncements(new Set());
     localStorage.removeItem('seenAnnouncements');
-    console.log('Historial de anuncios vistos limpiado');
+    loggerClient.info('Historial de anuncios vistos limpiado');
   };
 
   // Debug: mostrar en consola
   useEffect(() => {
-    console.log('Anuncios vistos actualmente:', [...seenAnnouncements]);
+    loggerClient.debug('Anuncios vistos actualmente:', [...seenAnnouncements]);
   }, [seenAnnouncements]);
 
   if (!announcement) return null;

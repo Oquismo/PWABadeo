@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import loggerClient from '@/lib/loggerClient';
 
 interface UseRetryOptions {
   maxRetries?: number;
@@ -55,7 +56,7 @@ export function useRetry<T>(
         // Calcular delay con backoff exponencial
         const delay = retryDelay * Math.pow(backoffMultiplier, attempt);
         
-        console.warn(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`, error);
+  loggerClient.warn(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`, error);
         
         setState(prev => ({ 
           ...prev, 

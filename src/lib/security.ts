@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import loggerClient from '@/lib/loggerClient';
 
 /**
  * Verifica si el usuario actual tiene permisos de administrador
@@ -17,7 +18,7 @@ export async function verifyAdminAccess(request: NextRequest | Request): Promise
     const userAgent = request.headers.get('user-agent');
     
     // LOG de seguridad
-    console.log('🔒 [SECURITY CHECK]', {
+      loggerClient.info('🔒 [SECURITY CHECK]', {
       referer,
       origin,
       userAgent: userAgent?.substring(0, 50),
@@ -26,8 +27,8 @@ export async function verifyAdminAccess(request: NextRequest | Request): Promise
     
     // REGLA 1: DEBE venir del panel de admin
     if (!referer || (!referer.includes('/admin') && !referer.includes('/debug'))) {
-      console.warn('🚨 ACCESO DENEGADO - No viene del panel de admin');
-      console.warn('🚨 Referer recibido:', referer);
+        loggerClient.warn('🚨 ACCESO DENEGADO - No viene del panel de admin');
+        loggerClient.warn('🚨 Referer recibido:', referer);
       return false;
     }
     
@@ -37,7 +38,7 @@ export async function verifyAdminAccess(request: NextRequest | Request): Promise
                          (origin && (origin.includes('localhost') || origin.includes('127.0.0.1')));
       
       if (!isLocalhost) {
-        console.warn('🚨 ACCESO DENEGADO - No es localhost en desarrollo');
+          loggerClient.warn('🚨 ACCESO DENEGADO - No es localhost en desarrollo');
         return false;
       }
     }
@@ -48,9 +49,9 @@ export async function verifyAdminAccess(request: NextRequest | Request): Promise
     
     // DEBE tener headers de autorización de admin
     if (!authHeader?.includes('admin') || adminAccess !== 'true') {
-      console.warn('🚨 ACCESO DENEGADO - Headers de admin faltantes');
-      console.warn('🚨 Auth header:', authHeader);
-      console.warn('🚨 Admin access header:', adminAccess);
+        loggerClient.warn('🚨 ACCESO DENEGADO - Headers de admin faltantes');
+        loggerClient.warn('🚨 Auth header:', authHeader);
+        loggerClient.warn('🚨 Admin access header:', adminAccess);
       return false;
     }
     
@@ -59,16 +60,16 @@ export async function verifyAdminAccess(request: NextRequest | Request): Promise
       // Aquí añadirías verificaciones JWT reales, etc.
       // Por ahora, solo verificar que tiene los headers correctos
       if (!referer.includes('/admin')) {
-        console.warn('🚨 ACCESO DENEGADO - Producción requiere acceso desde /admin');
+          loggerClient.warn('🚨 ACCESO DENEGADO - Producción requiere acceso desde /admin');
         return false;
       }
     }
     
-    console.log('✅ [SECURITY] Acceso de admin verificado correctamente');
+      loggerClient.info('✅ [SECURITY] Acceso de admin verificado correctamente');
     return true;
     
   } catch (error) {
-    console.error('❌ [SECURITY] Error verificando acceso de admin:', error);
+      loggerClient.error('❌ [SECURITY] Error verificando acceso de admin:', error);
     return false;
   }
 }

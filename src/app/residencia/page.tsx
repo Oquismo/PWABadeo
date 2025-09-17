@@ -1,12 +1,14 @@
-import { notFound } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import React from 'react';
 
 export const metadata = {
   title: 'Residencia',
   description: 'Información sobre la residencia',
 };
 
+// Import dinámico del componente cliente para evitar problemas con SSR
+const ResidenciaClient = dynamic(() => import('./ResidenciaClient'), { ssr: false });
+
 export default function ResidenciaPage() {
-  // Ocultar la página devolviendo 404 para que no sea accesible públicamente
-  notFound();
-  return null;
+  return <ResidenciaClient />;
 }

@@ -101,10 +101,17 @@ export const translations = {
       phones: {
         title: "Teléfonos Importantes",
         emergency: "Emergencias",
+        neighborhoodEmergency: "Emergencias (barrio)",
         police: "Policía",
         hospital: "Hospital",
         municipal: "Municipal",
         utilities: "Servicios Públicos"
+      }
+      ,residencia: {
+        construction: {
+          title: "En construcción",
+          body: "Esta sección de Residencia está actualmente en construcción. Volveremos pronto con más contenido."
+        }
       }
     },
     // Sitos turísticos
@@ -237,6 +244,7 @@ export const translations = {
       phones: {
         title: "Important Phone Numbers",
         emergency: "Emergency",
+        neighborhoodEmergency: "Neighborhood Emergency",
         police: "Police",
         hospital: "Hospital",
         municipal: "Municipal",

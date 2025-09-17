@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import loggerClient from '@/lib/loggerClient';
 import {
   Autocomplete,
   TextField,
   Box,
   Typography,
-  Chip,
   CircularProgress,
   Alert,
   FormControl,
@@ -15,11 +15,7 @@ import {
   MenuItem,
   Stack
 } from '@mui/material';
-import {
-  School as SchoolIcon,
-  LocationOn as LocationIcon,
-  Category as CategoryIcon
-} from '@mui/icons-material';
+import { School as SchoolIcon, LocationOn as LocationIcon } from '@mui/icons-material';
 
 interface School {
   id: number;
@@ -54,8 +50,6 @@ export default function SchoolSelector({
   const [filters, setFilters] = useState({
     country: 'Italia',
     city: '',
-    type: '',
-    level: '',
     town: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -130,11 +124,9 @@ export default function SchoolSelector({
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
-      if (filters.country) params.append('country', filters.country);
-      if (filters.city) params.append('city', filters.city);
-      if (filters.type) params.append('type', filters.type);
-      if (filters.level) params.append('level', filters.level);
-      if (filters.town) params.append('town', filters.town);
+    if (filters.country) params.append('country', filters.country);
+    if (filters.city) params.append('city', filters.city);
+    if (filters.town) params.append('town', filters.town);
 
       const response = await fetch(`/api/schools?${params.toString()}`);
       const data = await response.json();
@@ -142,10 +134,10 @@ export default function SchoolSelector({
       if (data.success) {
         setSchools(data.schools);
       } else {
-        console.error('Error cargando escuelas:', data.error);
+        loggerClient.error('Error cargando escuelas:', data.error);
       }
     } catch (error) {
-      console.error('Error cargando escuelas:', error);
+      loggerClient.error('Error cargando escuelas:', error);
     } finally {
       setLoading(false);
     }
@@ -165,15 +157,6 @@ export default function SchoolSelector({
       option.city?.toLowerCase().includes(inputValue.toLowerCase()) ||
       option.province?.toLowerCase().includes(inputValue.toLowerCase())
     );
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'pública': return 'primary';
-      case 'privada': return 'secondary';
-      case 'concertada': return 'success';
-      default: return 'default';
-    }
   };
 
   const getLevelColor = (level: string) => {
@@ -203,6 +186,8 @@ export default function SchoolSelector({
           </Select>
         </FormControl>
 
+        {/* Ciudad: ocultado porque la ubicación se selecciona por la escuela. Mantener el state para compatibilidad. */}
+        {/*
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Ciudad</InputLabel>
           <Select
@@ -216,36 +201,14 @@ export default function SchoolSelector({
             ))}
           </Select>
         </FormControl>
+        */}
 
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Tipo</InputLabel>
-          <Select
-            value={filters.type}
-            label="Tipo"
-            onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-          >
-            <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="pública">Pública</MenuItem>
-            <MenuItem value="privada">Privada</MenuItem>
-            <MenuItem value="concertada">Concertada</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Eliminado filtro 'Tipo' en selector de usuario */}
 
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Livello</InputLabel>
-          <Select
-            value={filters.level}
-            label="Livello"
-            onChange={(e) => setFilters(prev => ({ ...prev, level: e.target.value }))}
-          >
-            <MenuItem value="">Tutte</MenuItem>
-            <MenuItem value="scuola_primaria">Scuola Primaria</MenuItem>
-            <MenuItem value="secondaria_primo">Secondaria di Primo Grado</MenuItem>
-            <MenuItem value="secondaria_secondo">Secondaria di Secondo Grado</MenuItem>
-            <MenuItem value="universita">Università</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Eliminado selector de nivel: la escuela se selecciona por nombre sólo */}
 
+        {/* Comune: ocultado porque la ubicación se selecciona por la escuela. Mantener el state para compatibilidad. */}
+        {/*
         <FormControl size="small" sx={{ minWidth: 140 }} disabled={!filters.city || availableTowns.length === 0}>
           <InputLabel>Comune</InputLabel>
           <Select
@@ -259,6 +222,7 @@ export default function SchoolSelector({
             ))}
           </Select>
         </FormControl>
+        */}
       </Stack>
 
       {/* Selector de escuela */}
@@ -305,20 +269,7 @@ export default function SchoolSelector({
                     </Box>
                   )}
                 </Box>
-                <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
-                  <Chip 
-                    label={option.type} 
-                    size="small" 
-                    color={getTypeColor(option.type) as any}
-                    variant="outlined"
-                  />
-                  <Chip 
-                    label={option.level} 
-                    size="small" 
-                    color={getLevelColor(option.level) as any}
-                    variant="outlined"
-                  />
-                </Box>
+                {/* No mostrar tipo en el selector de usuario */}
               </Box>
             </Box>
           </Box>
@@ -339,7 +290,7 @@ export default function SchoolSelector({
                 <br />
               </>
             )}
-            <strong>Tipo:</strong> {value.type} | <strong>Nivel:</strong> {value.level}
+            {/* Tipo eliminado de la vista de registro */}
             {value.description && (
               <>
                 <br />

@@ -41,6 +41,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import Link from 'next/link';
+import loggerClient from '@/lib/loggerClient';
 import TaskManager from '@/components/admin/TaskManager';
 import HotelIcon from '@mui/icons-material/Hotel';
 
@@ -87,7 +88,7 @@ export default function PerfilPage() {
         try {
           await refreshAvatar();
         } catch (error) {
-          console.error('Error al cargar avatar:', error);
+            loggerClient.error('Error al cargar avatar:', error);
         }
       }
     };
@@ -265,7 +266,6 @@ export default function PerfilPage() {
             </Typography>
 
             {/* Mostrar la residencia si existe; si no, mostrar el rol como fallback */}
-            {/* RESIDENCE TEMPORARILY DISABLED - field not in DB
             {user?.residence ? (
               <Chip
                 icon={<HotelIcon />}
@@ -274,16 +274,15 @@ export default function PerfilPage() {
                 variant="filled"
                 sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
               />
-            ) : ( */}
-            {/* Show role as fallback since residence is disabled */}
-            <Chip
-              icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
-              label={isAdmin ? 'Administrador' : 'Usuario'}
-              color={isAdmin ? 'secondary' : 'primary'}
-              variant="filled"
-              sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
-            />
-            {/* )} */}
+            ) : (
+              <Chip
+                icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+                label={isAdmin ? 'Administrador' : 'Usuario'}
+                color={isAdmin ? 'secondary' : 'primary'}
+                variant="filled"
+                sx={{ mb: 2, fontWeight: 'medium', px: 1.5 }}
+              />
+            )}
 
             {/* Información de contacto */}
             <Grid container spacing={2} sx={{ mt: 1 }}>

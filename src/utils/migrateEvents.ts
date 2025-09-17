@@ -8,6 +8,8 @@ interface LocalStorageEvent {
   type: 'personal' | 'program' | 'holiday';
 }
 
+import loggerClient from '@/lib/loggerClient';
+
 export const migrateLocalStorageEvents = async (userEmail: string, userId: number) => {
   try {
     const localStorageKey = `userCustomEvents_${userEmail}`;
@@ -45,7 +47,7 @@ export const migrateLocalStorageEvents = async (userEmail: string, userId: numbe
           migratedCount++;
         }
       } catch (error) {
-        console.error('Error migrando evento:', event.title, error);
+        loggerClient.error('Error migrando evento:', event.title, error);
       }
     }
 
@@ -55,7 +57,7 @@ export const migrateLocalStorageEvents = async (userEmail: string, userId: numbe
     return { success: true, migrated: migratedCount };
     
   } catch (error) {
-    console.error('Error en migración de eventos:', error);
+    loggerClient.error('Error en migración de eventos:', error);
     return { success: false, migrated: 0 };
   }
 };

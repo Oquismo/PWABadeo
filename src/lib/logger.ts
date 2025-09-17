@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import loggerClient from './loggerClient';
 
 interface LogOptions {
   userId?: number;
@@ -19,9 +20,9 @@ export async function logActionServer({ userId, action, meta, updateLastSeen = f
           userId 
         } 
       });
-      console.log(`📝 Log creado: ${action} para usuario ${userId}`);
+      loggerClient.info(`📝 Log creado: ${action} para usuario ${userId}`);
     } catch (e: any) {
-      console.warn('[logger] Error creando log:', e?.message);
+  loggerClient.warn('[logger] Error creando log:', e?.message);
       // No interrumpir el flujo si falla el log
     }
 
@@ -32,15 +33,15 @@ export async function logActionServer({ userId, action, meta, updateLastSeen = f
           where: { id: userId }, 
           data: { lastSeen: new Date() } 
         });
-        console.log(`⏰ LastSeen actualizado para usuario ${userId}`);
+        loggerClient.info(`⏰ LastSeen actualizado para usuario ${userId}`);
       } catch (e: any) {
-        console.warn('[logger] Error actualizando lastSeen:', e?.message);
+  loggerClient.warn('[logger] Error actualizando lastSeen:', e?.message);
       }
     }
 
     return created;
   } catch (e: any) {
-    console.error('[logger] Error general en logActionServer:', e?.message);
+  loggerClient.error('[logger] Error general en logActionServer:', e?.message);
     // No relanzar error para no interrumpir el flujo principal
     return null;
   }
