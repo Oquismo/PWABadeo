@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
+import loggerClient from '@/lib/loggerClient';
 import { Box, Button, Typography, CircularProgress, Alert } from '@mui/material';
 import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
 import Material3Dialog from '@/components/ui/Material3Dialog';
@@ -66,9 +67,9 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
 
   // Iniciar sesión con Spotify
   const login = async () => {
-    console.log('🎵 Iniciando login con Spotify...');
-    console.log('Client ID:', SPOTIFY_CLIENT_ID ? 'Configurado' : 'NO CONFIGURADO');
-    console.log('Redirect URI:', SPOTIFY_REDIRECT_URI ? 'Configurado' : 'NO CONFIGURADO');
+      loggerClient.info('🎵 Iniciando login con Spotify...');
+      loggerClient.debug('Client ID:', SPOTIFY_CLIENT_ID ? 'Configurado' : 'NO CONFIGURADO');
+      loggerClient.debug('Redirect URI:', SPOTIFY_REDIRECT_URI ? 'Configurado' : 'NO CONFIGURADO');
 
     if (!SPOTIFY_CLIENT_ID || !SPOTIFY_REDIRECT_URI) {
       const errorMsg = 'Configuración de Spotify incompleta. Revisa las variables de entorno.';
@@ -78,13 +79,13 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
     }
 
     try {
-      console.log('🔄 Generando code verifier y challenge...');
+        loggerClient.debug('🔄 Generando code verifier y challenge...');
       const codeVerifier = generateRandomString(64);
       const codeChallenge = await generateCodeChallenge(codeVerifier);
 
       // Guardar codeVerifier en sessionStorage
       sessionStorage.setItem('spotify_code_verifier', codeVerifier);
-      console.log('💾 Code verifier guardado en sessionStorage');
+        loggerClient.debug('💾 Code verifier guardado en sessionStorage');
 
       const scope = [
         'user-read-private',
@@ -96,7 +97,7 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
         'user-modify-playback-state' // Requerido para controlar la reproducción
       ].join(' ');
 
-      console.log('🔒 Scopes solicitados:', scope);
+        loggerClient.debug('🔒 Scopes solicitados:', scope);
 
       const authUrl = new URL("https://accounts.spotify.com/authorize");
 
@@ -110,24 +111,24 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
       };
 
       authUrl.search = new URLSearchParams(params).toString();
-      console.log('🔗 URL de autenticación generada:', authUrl.toString());
+        loggerClient.debug('🔗 URL de autenticación generada:', authUrl.toString());
       window.location.href = authUrl.toString();
     } catch (error) {
-      console.error('❌ Error iniciando login:', error);
+        loggerClient.error('❌ Error iniciando login:', error);
       setLoginError('Error al iniciar sesión con Spotify');
     }
   };
 
   // Cerrar sesión
   const logout = () => {
-    console.log('🚪 Cerrando sesión de Spotify...');
+      loggerClient.info('🚪 Cerrando sesión de Spotify...');
     setUser(null);
     setAccessToken(null);
     localStorage.removeItem('spotify_access_token');
     localStorage.removeItem('spotify_refresh_token');
     localStorage.removeItem('spotify_token_expires');
     localStorage.removeItem('spotify_user');
-    console.log('✅ Sesión cerrada');
+      loggerClient.info('✅ Sesión cerrada');
   };
 
   // Obtener token de acceso
@@ -137,16 +138,16 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
 
   // Intercambiar código por token
   const exchangeCodeForToken = async (code: string) => {
-    console.log('🔄 Intercambiando código por token...');
+      loggerClient.debug('🔄 Intercambiando código por token...');
     try {
       const codeVerifier = sessionStorage.getItem('spotify_code_verifier');
-      console.log('🔑 Code verifier encontrado:', codeVerifier ? 'SÍ' : 'NO');
+        loggerClient.debug('🔑 Code verifier encontrado:', codeVerifier ? 'SÍ' : 'NO');
 
       if (!codeVerifier) {
         throw new Error('Code verifier no encontrado');
       }
 
-      console.log('📡 Enviando solicitud a /api/spotify/auth...');
+        loggerClient.debug('📡 Enviando solicitud a /api/spotify/auth...');
       const response = await fetch('/api/spotify/auth', {
         method: 'POST',
         headers: {
@@ -159,7 +160,7 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
         }),
       });
 
-      console.log('📥 Respuesta del servidor:', response.status, response.statusText);
+        loggerClient.debug('📥 Respuesta del servidor:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -168,7 +169,7 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
       }
 
       const tokenData = await response.json();
-      console.log('✅ Token recibido:', { access_token: tokenData.access_token ? 'PRESENTE' : 'NO PRESENTE' });
+        loggerClient.info('✅ Token recibido:', { access_token: tokenData.access_token ? 'PRESENTE' : 'NO PRESENTE' });
 
       setAccessToken(tokenData.access_token);
       localStorage.setItem('spotify_access_token', tokenData.access_token);
@@ -176,15 +177,15 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
       localStorage.setItem('spotify_token_expires', (Date.now() + (tokenData.expires_in * 1000)).toString());
 
       // Obtener datos del usuario
-      console.log('👤 Obteniendo perfil de usuario...');
+        loggerClient.debug('👤 Obteniendo perfil de usuario...');
       await fetchUserProfile(tokenData.access_token);
 
       // Limpiar code verifier
       sessionStorage.removeItem('spotify_code_verifier');
-      console.log('🧹 Code verifier limpiado');
+        loggerClient.debug('🧹 Code verifier limpiado');
 
     } catch (error) {
-      console.error('❌ Error intercambiando código:', error);
+        loggerClient.error('❌ Error intercambiando código:', error);
       setLoginError('Error al completar la autenticación');
     }
   };
@@ -206,7 +207,7 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
       setUser(userData);
       localStorage.setItem('spotify_user', JSON.stringify(userData));
     } catch (error) {
-      console.error('Error obteniendo perfil:', error);
+        loggerClient.error('Error obteniendo perfil:', error);
     }
   };
 
@@ -235,7 +236,7 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
 
       return true;
     } catch (error) {
-      console.error('Error refrescando token:', error);
+        loggerClient.error('Error refrescando token:', error);
       return false;
     }
   };
@@ -243,9 +244,9 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
   // Verificar autenticación al cargar
   useEffect(() => {
     const initAuth = async () => {
-      console.log('🔄 Inicializando autenticación de Spotify...');
-      console.log('🌐 URL actual:', window.location.href);
-      console.log('🔍 Parámetros de búsqueda:', window.location.search);
+        loggerClient.debug('🔄 Inicializando autenticación de Spotify...');
+        loggerClient.debug('🌐 URL actual:', window.location.href);
+        loggerClient.debug('🔍 Parámetros de búsqueda:', window.location.search);
       setIsLoading(true);
 
       // Verificar si hay código en la URL (callback de Spotify)
@@ -254,7 +255,7 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
       const error = urlParams.get('error');
       const spotifyCode = urlParams.get('spotify_code');
 
-      console.log('📋 Parámetros de URL detectados:', {
+        loggerClient.debug('📋 Parámetros de URL detectados:', {
         code: code ? 'PRESENTE' : 'NO PRESENTE',
         spotify_code: spotifyCode ? 'PRESENTE' : 'NO PRESENTE',
         error,
@@ -263,20 +264,20 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
 
       if (code || spotifyCode) {
         const authCode = code || spotifyCode;
-        console.log('✅ Código de autorización encontrado:', authCode?.substring(0, 20) + '...');
-        console.log('🔄 Iniciando intercambio de código por token...');
+          loggerClient.info('✅ Código de autorización encontrado:', authCode?.substring(0, 20) + '...');
+          loggerClient.debug('🔄 Iniciando intercambio de código por token...');
 
         // Limpiar la URL antes de procesar
         const cleanUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({}, document.title, cleanUrl);
-        console.log('🧹 URL limpiada, procesando código...');
+          loggerClient.debug('🧹 URL limpiada, procesando código...');
 
         await exchangeCodeForToken(authCode!);
       } else if (error) {
-        console.log('❌ Error en la autenticación:', error);
+          loggerClient.error('❌ Error en la autenticación:', error);
         setLoginError('Error en la autenticación con Spotify');
       } else {
-        console.log('🔍 No se encontró código de auth, verificando tokens guardados...');
+          loggerClient.debug('🔍 No se encontró código de auth, verificando tokens guardados...');
         // Verificar si hay tokens guardados
         const savedToken = localStorage.getItem('spotify_access_token');
         const savedUser = localStorage.getItem('spotify_user');
@@ -286,11 +287,11 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
           const expiresAt = parseInt(tokenExpires);
 
           if (Date.now() < expiresAt) {
-            console.log('✅ Token válido encontrado, restaurando sesión...');
+              loggerClient.info('✅ Token válido encontrado, restaurando sesión...');
             setAccessToken(savedToken);
             setUser(JSON.parse(savedUser));
           } else {
-            console.log('⏰ Token expirado, intentando refrescar...');
+              loggerClient.warn('⏰ Token expirado, intentando refrescar...');
             // Token expirado, intentar refrescar
             const refreshed = await refreshToken();
             if (refreshed && savedUser) {
@@ -298,13 +299,13 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
             }
           }
         } else {
-          console.log('ℹ️ No hay tokens guardados');
+            loggerClient.debug('ℹ️ No hay tokens guardados');
         }
       }
 
       setIsLoading(false);
-      console.log('🏁 Inicialización de autenticación completada');
-      console.log('📊 Estado final:', {
+        loggerClient.info('🏁 Inicialización de autenticación completada');
+        loggerClient.debug('📊 Estado final:', {
         isAuthenticated: !!user,
         user: user ? user.display_name : 'NO USER',
         hasAccessToken: !!accessToken

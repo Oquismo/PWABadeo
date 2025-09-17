@@ -6,8 +6,10 @@ import { Button, Typography } from "@mui/material";
 import MaterialTextField from '@/components/ui/MaterialTextField';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import { FeedbackOutlined as FeedbackIcon } from '@mui/icons-material';
+import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage } from '@/hooks/useLanguage';
+import loggerClient from '@/lib/loggerClient';
 
 // Importamos los componentes críticos de forma normal
 import HeroSection from "@/components/home/HeroSection";
@@ -16,6 +18,7 @@ import AnnouncementBanner from "@/components/home/AnnouncementBanner";
 import ProjectsDashboard from "@/components/home/ProjectsDashboard";
 import CalendarSection from "@/components/home/CalendarSection/CalendarSection";
 import ExternalInfoPanel from "@/components/home/ExternalInfoPanel";
+import AnimatedEntrance from '@/components/AnimatedEntrance';
 // import SpotifyPlayer from "@/components/SpotifyPlayer";
 
 export default function Home() {
@@ -38,7 +41,7 @@ export default function Home() {
   const handleSendFeedback = async () => {
     if (!feedback.trim()) return;
 
-    console.log('📤 Enviando feedback:', { message: feedback, language });
+    loggerClient.info('📤 Enviando feedback', { message: feedback, language });
 
     try {
       const response = await fetch('/api/feedback', {
@@ -52,11 +55,11 @@ export default function Home() {
         }),
       });
 
-      console.log('📥 Respuesta del servidor:', response.status);
+  loggerClient.debug('📥 Respuesta del servidor:', { status: response.status });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Feedback enviado exitosamente:', data);
+  const data = await response.json();
+  loggerClient.info('✅ Feedback enviado exitosamente', data);
         setFeedbackSent(true);
         setTimeout(() => {
           setFeedbackOpen(false);
@@ -65,10 +68,10 @@ export default function Home() {
         }, 2000);
       } else {
         const errorData = await response.json();
-        console.error('❌ Error del servidor:', errorData);
+        loggerClient.error('❌ Error del servidor:', errorData);
       }
     } catch (error) {
-      console.error('💥 Error de red:', error);
+      loggerClient.error('💥 Error de red:', error);
     }
   };
 
@@ -78,11 +81,13 @@ export default function Home() {
       <Container>
         <Fade in={fadeIn} timeout={1000}>
           <Box sx={{ pt: 2, pb: 2 }}>
-            <HeroSection />
-            {/* <SpotifyPlayer compact /> */}
-            <ExternalInfoPanel />
-            <ProjectsDashboard />
-            <CalendarSection />
+            <AnimatedEntrance>
+              <HeroSection />
+              {/* <SpotifyPlayer compact /> */}
+              <ExternalInfoPanel />
+              <ProjectsDashboard />
+              <CalendarSection />
+            </AnimatedEntrance>
           </Box>
         </Fade>
       </Container>
@@ -154,5 +159,7 @@ export default function Home() {
       >
         <FeedbackIcon />
       </Fab>
+      {/* Botón flotante de WhatsApp para emergencias del barrio */}
+      <FloatingWhatsAppButton phone={'+34649347760'} message={t('pages.home.welcomeMessage')} />
   </>)
 }

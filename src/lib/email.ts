@@ -1,8 +1,9 @@
 import nodemailer from 'nodemailer';
+import loggerClient from '@/lib/loggerClient';
 
 // Configuración del transportador de email
 const createTransporter = () => {
-  console.log('🔧 Configurando transportador de email:', {
+  loggerClient.info('🔧 Configurando transportador de email:', {
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || 'not set',
     EMAIL_USER: process.env.EMAIL_USER ? 'SET' : 'NOT SET',
     EMAIL_PASSWORD: process.env.EMAIL_PASSWORD ? 'SET' : 'NOT SET',
@@ -12,7 +13,7 @@ const createTransporter = () => {
 
   // Configuración para Gmail (puedes cambiar por otro proveedor)
   if (process.env.EMAIL_PROVIDER === 'gmail') {
-    console.log('📧 Usando configuración Gmail');
+    loggerClient.info('📧 Usando configuración Gmail');
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -23,7 +24,7 @@ const createTransporter = () => {
   }
 
   // Configuración para otros proveedores SMTP
-  console.log('📧 Usando configuración SMTP genérica');
+  loggerClient.info('📧 Usando configuración SMTP genérica');
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -37,7 +38,7 @@ const createTransporter = () => {
 
 export async function sendPasswordResetEmail(email: string, resetToken: string) {
   try {
-    console.log('📧 Iniciando envío de email de recuperación:', {
+    loggerClient.info('📧 Iniciando envío de email de recuperación:', {
       to: email,
       hasToken: !!resetToken,
       NODE_ENV: process.env.NODE_ENV,
@@ -58,9 +59,9 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
     
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
     
-    console.log('🔗 URL de reset generada:', resetUrl);
-    console.log('🌍 Entorno:', process.env.NODE_ENV);
-    console.log('🌍 Base URL:', baseUrl);
+  loggerClient.debug('🔗 URL de reset generada:', resetUrl);
+  loggerClient.debug('🌍 Entorno:', process.env.NODE_ENV);
+  loggerClient.debug('🌍 Base URL:', baseUrl);
     
     const mailOptions = {
       from: {
@@ -153,7 +154,7 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
 
     const result = await transporter.sendMail(mailOptions);
     
-    console.log('✅ Email de recuperación enviado:', {
+    loggerClient.info('✅ Email de recuperación enviado:', {
       messageId: result.messageId,
       to: email,
       subject: mailOptions.subject
@@ -166,11 +167,11 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
     };
     
   } catch (error) {
-    console.error('❌ Error enviando email de recuperación:', error);
+  loggerClient.error('❌ Error enviando email de recuperación:', error);
     
     // Información más detallada del error para debugging
     if (error instanceof Error) {
-      console.error('Error details:', {
+      loggerClient.error('Error details:', {
         message: error.message,
         stack: error.stack,
         name: error.name
@@ -193,14 +194,14 @@ export async function testEmailConnection() {
     // Verificar la conexión
     await transporter.verify();
     
-    console.log('✅ Conexión de email configurada correctamente');
+  loggerClient.info('✅ Conexión de email configurada correctamente');
     return {
       success: true,
       message: 'Conexión de email configurada correctamente'
     };
     
   } catch (error) {
-    console.error('❌ Error en la configuración de email:', error);
+  loggerClient.error('❌ Error en la configuración de email:', error);
     
     return {
       success: false,
@@ -265,7 +266,7 @@ export async function sendTestEmail(toEmail: string) {
 
     const result = await transporter.sendMail(mailOptions);
     
-    console.log('✅ Email de prueba enviado:', {
+    loggerClient.info('✅ Email de prueba enviado:', {
       messageId: result.messageId,
       to: toEmail,
       subject: mailOptions.subject
@@ -278,7 +279,7 @@ export async function sendTestEmail(toEmail: string) {
     };
     
   } catch (error) {
-    console.error('❌ Error enviando email de prueba:', error);
+  loggerClient.error('❌ Error enviando email de prueba:', error);
     
     return {
       success: false,

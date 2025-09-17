@@ -32,6 +32,7 @@ import Material3Dialog from '@/components/ui/Material3Dialog';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { PhotoCamera as PhotoCameraIcon, Face as FaceIcon, Person as PersonIcon, Save as SaveIcon, Edit as EditIcon } from '@mui/icons-material';
+import loggerClient from '@/lib/loggerClient';
 
 export default function EditarPerfilPage() {
   // 1. Traemos las funciones del contexto incluyendo las nuevas de avatar
@@ -47,7 +48,7 @@ export default function EditarPerfilPage() {
     country: '',
     city: '',
     town: '',
-    // residence: '', // TEMPORARILY DISABLED - field not in DB
+    residence: '',
   });
 
   const [profileImage, setProfileImage] = useState<string>('');
@@ -155,7 +156,7 @@ export default function EditarPerfilPage() {
         country: user.country || 'Italia',
         city: user.city || '',
         town: user.town || '',
-        // residence: user.residence || '', // TEMPORARILY DISABLED - field not in DB
+        residence: user.residence || '',
       });
 
       // Si el usuario no es admin y tiene una escuela, actualizar ubicación con datos de la escuela
@@ -195,7 +196,7 @@ export default function EditarPerfilPage() {
             setProfileImage(user.avatarUrl);
           }
         } catch (error) {
-          console.error('Error al cargar avatar:', error);
+          loggerClient.error('Error al cargar avatar:', error);
         }
       }
     };
@@ -235,7 +236,7 @@ export default function EditarPerfilPage() {
         country: formData.country,
         city: formData.city,
         town: formData.town,
-        // residence: formData.residence || null, // TEMPORARILY DISABLED - field not in DB
+        residence: formData.residence || null,
       };
 
       // Solo agregar campos específicos para usuarios no-admin
@@ -253,7 +254,8 @@ export default function EditarPerfilPage() {
         router.push('/perfil'); // Volvemos al perfil para ver los cambios
       }, 1500);
     } catch (error) {
-      console.error('Error al actualizar perfil:', error);
+      loggerClient.error('Error al actualizar perfil:', error);
+      // Mostrar alerta al usuario pero con mensaje genérico
       alert('Error al actualizar el perfil');
     } finally {
       setIsSubmitting(false);
@@ -275,7 +277,7 @@ export default function EditarPerfilPage() {
           // Disparar evento para sincronizar con otras páginas
           window.dispatchEvent(new Event('profileImageChanged'));
         } catch (error) {
-          console.error('Error al guardar avatar:', error);
+          loggerClient.error('Error al guardar avatar:', error);
           setSuccessMessage('Error al guardar la imagen');
         }
 
@@ -295,7 +297,7 @@ export default function EditarPerfilPage() {
       // Disparar evento para sincronizar con otras páginas
       window.dispatchEvent(new Event('profileImageChanged'));
     } catch (error) {
-      console.error('Error al eliminar avatar:', error);
+      loggerClient.error('Error al eliminar avatar:', error);
       setSuccessMessage('Error al restablecer la imagen');
     }
 
@@ -312,7 +314,7 @@ export default function EditarPerfilPage() {
       // Disparar evento para sincronizar con otras páginas
       window.dispatchEvent(new Event('profileImageChanged'));
     } catch (error) {
-      console.error('Error al guardar avatar:', error);
+      loggerClient.error('Error al guardar avatar:', error);
       setSuccessMessage('Error al guardar el avatar');
     }
 
@@ -472,6 +474,37 @@ export default function EditarPerfilPage() {
                     </Stack>
                   </Card>
                 </Grid>
+                <Grid item xs={12} md={8}>
+                  {/* Mostrar chip de residencia actual */}
+                  {user && (user as any).residence && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2">Residencia seleccionada</Typography>
+                      <Chip label={(user as any).residence} color="primary" />
+                    </Box>
+                  )}
+                </Grid>
+
+                {/* Campo para editar la residencia */}
+                {!isAdmin && (
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth>
+                      <InputLabel id="edit-residence-label">Residencia</InputLabel>
+                      <Select
+                        labelId="edit-residence-label"
+                        name="residence"
+                        value={formData.residence}
+                        label="Residencia"
+                        onChange={handleSelectChange}
+                      >
+                        <MenuItem value="">Ninguna</MenuItem>
+                        <MenuItem value="ONE">ONE (Residencia ONE)</MenuItem>
+                        <MenuItem value="AMBRO">AMBRO (Residencia AMRO)</MenuItem>
+                        <MenuItem value="ESTANISLAO">Estanislao</MenuItem>
+                        <MenuItem value="ARMENDARIZ">Armendáriz</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                )}
 
                 {/* Campos del formulario */}
                 <Grid item xs={12} md={8}>
@@ -513,6 +546,10 @@ export default function EditarPerfilPage() {
 
                     {!isAdmin && (
                       <>
+                        {/* Campo 'Escuela' ocultado por petición: mantenemos el estado `formData.school` y
+                            la lógica de envío (updateData.school) para compatibilidad, pero retiramos el
+                            input de la UI de forma conservadora. */}
+                        {/*
                         <Grid item xs={12} sm={6}>
                           <TextField
                             name="school"
@@ -529,6 +566,7 @@ export default function EditarPerfilPage() {
                             }}
                           />
                         </Grid>
+                        */}
 
                         <Grid item xs={12} sm={6}>
                           <TextField
@@ -592,7 +630,11 @@ export default function EditarPerfilPage() {
                       </>
                     )}
 
-                    {/* Campos de ubicación */}
+                    {/* Campos de ubicación ocultados: la ubicación seguirá derivándose desde la escuela
+                        o desde el estado interno, pero la UI para País/Ciudad/Localidad está oculta
+                        por petición del product owner. Se mantiene la lógica y los efectos que actualizan
+                        `formData.country`, `formData.city` y `formData.town`. */}
+                    {/*
                     <Grid item xs={12}>
                       <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 'bold' }}>
                         Ubicación
@@ -679,6 +721,7 @@ export default function EditarPerfilPage() {
                         </Select>
                       </FormControl>
                     </Grid>
+                    */}
                   </Grid>
                 </Grid>
               </Grid>

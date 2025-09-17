@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import loggerClient from '@/lib/loggerClient';
 
 // Configuración específica para Vercel con optimizaciones para cold starts
 const globalForPrisma = globalThis as unknown as {
@@ -27,10 +28,10 @@ export async function initPrisma(retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       await prisma.$connect();
-      console.log('✅ Prisma connected successfully');
+      loggerClient.info('✅ Prisma connected successfully');
       return prisma;
     } catch (error) {
-      console.error(`❌ Prisma connection attempt ${i + 1} failed:`, error);
+      loggerClient.error(`❌ Prisma connection attempt ${i + 1} failed:`, error);
       if (i === retries - 1) throw error;
       
       // Esperar antes del siguiente intento
@@ -45,7 +46,7 @@ export async function keepAlive() {
     await prisma.$queryRaw`SELECT 1`;
     return true;
   } catch (error) {
-    console.warn('Keep-alive ping failed:', error);
+    loggerClient.warn('Keep-alive ping failed:', error);
     return false;
   }
 }

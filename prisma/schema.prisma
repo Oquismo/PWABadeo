@@ -169,3 +169,16 @@ model Feedback {
   @@index([createdAt])
   @@index([isRead])
 }
+
+// Tabla para almacenar eventos de telemetría (ADD-ONLY)
+model TelemetryEvent {
+  id        Int      @id @default(autoincrement())
+  type      String
+  userEmail String?  @db.VarChar(255)
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+  @@index([userEmail])
+}

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { TaskData, carouselTasks as defaultTasks } from '@/data/tasks';
 import { barrioDeTasks } from '@/data/barrioTasks';
 import { useAuth } from './AuthContext';
+import loggerClient from '@/lib/loggerClient';
 
 interface TasksContextType {
   tasks: TaskData[];               // Tareas visibles para el usuario actual (filtradas por escuela)
@@ -81,6 +82,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
         setAllTasks([]);
       }
     } catch (e: any) {
+      loggerClient.error('Error fetching tasks:', e);
       setError(e.message || 'Error de red');
       setAllTasks([]);
     } finally {
@@ -119,7 +121,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
     const role: TaskData['role'] = taskData.role || 'user';
     // Prevent non-admin users from creating admin tasks
     if (role === 'admin' && !canManageAdminTasks) {
-      console.warn('Intento no autorizado de crear tarea admin');
+      loggerClient.warn('Intento no autorizado de crear tarea admin');
       return null;
     }
 
@@ -144,7 +146,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
 
       const d = await res.json();
       if (!res.ok) {
-        console.error('Error creando tarea', d);
+        loggerClient.error('Error creando tarea', d);
         setError(d?.error || 'Error creando tarea');
         return null;
       }
@@ -163,7 +165,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
   await fetchTasks(currentSchoolId || user?.schoolId);
   return created;
   } catch (e: any) {
-      console.error('Error de red creando tarea', e);
+      loggerClient.error('Error de red creando tarea', e);
       setError(e?.message || 'Error de red');
     } finally {
       setLoading(false);
@@ -192,7 +194,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       if (user && user.role !== 'admin') {
         const existing = allTasks.find(t => String(t.id) === String(id));
         if (existing && existing.user && Number(existing.user.id) !== Number(user.id)) {
-          console.warn('Usuario no autorizado para actualizar tarea ajena');
+          loggerClient.warn('Usuario no autorizado para actualizar tarea ajena');
           setError('No autorizado');
           setLoading(false);
           return null;
@@ -201,7 +203,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
 
       // Prevent non-admins from changing role to 'admin'
       if ((updates as any).role === 'admin' && !canManageAdminTasks) {
-        console.warn('Intento no autorizado de elevar role a admin');
+        loggerClient.warn('Intento no autorizado de elevar role a admin');
         return null;
       }
 
@@ -228,7 +230,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       });
       const d = await res.json();
       if (!res.ok) {
-        console.error('Error actualizando tarea', d);
+        loggerClient.error('Error actualizando tarea', d);
         setError(d?.error || 'Error actualizando tarea');
         return null;
       }
@@ -266,7 +268,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       await fetchTasks(currentSchoolId || user?.schoolId);
   return updatedTask;
   } catch (e: any) {
-      console.error('Error de red actualizando tarea', e);
+      loggerClient.error('Error de red actualizando tarea', e);
       setError(e?.message || 'Error de red');
     } finally {
       setLoading(false);
@@ -282,7 +284,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       if (user && user.role !== 'admin') {
         const existing = allTasks.find(t => String(t.id) === String(id));
         if (existing && existing.user && Number(existing.user.id) !== Number(user.id)) {
-          console.warn('Usuario no autorizado para eliminar tarea ajena');
+          loggerClient.warn('Usuario no autorizado para eliminar tarea ajena');
           setError('No autorizado');
           setLoading(false);
           return false;
@@ -294,7 +296,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       });
       const d = await res.json();
       if (!res.ok) {
-        console.error('Error eliminando tarea', d);
+        loggerClient.error('Error eliminando tarea', d);
         setError(d?.error || 'Error eliminando tarea');
         return false;
       }
@@ -303,7 +305,7 @@ export function TasksProvider({ children }: TasksProviderProps) {
       await fetchTasks(currentSchoolId || user?.schoolId);
       return true;
     } catch (e: any) {
-      console.error('Error de red eliminando tarea', e);
+      loggerClient.error('Error de red eliminando tarea', e);
       setError(e?.message || 'Error de red');
     } finally {
       setLoading(false);

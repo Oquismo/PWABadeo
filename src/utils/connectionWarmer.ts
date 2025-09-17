@@ -1,3 +1,4 @@
+import loggerClient from '@/lib/loggerClient';
 /**
  * Utilidades para precalentar conexiones y reducir cold starts
  */
@@ -30,7 +31,7 @@ class ConnectionWarmer {
     this.isWarming = true;
     this.lastWarmup = Date.now();
 
-    console.log('🔥 Warming up connections...');
+      loggerClient.info('🔥 Warming up connections...');
 
     const promises = this.options.endpoints!.map(endpoint => 
       this.warmupEndpoint(endpoint)
@@ -38,9 +39,9 @@ class ConnectionWarmer {
 
     try {
       await Promise.allSettled(promises);
-      console.log('✅ Warmup completed');
+        loggerClient.info('✅ Warmup completed');
     } catch (error) {
-      console.warn('⚠️ Some warmup requests failed:', error);
+        loggerClient.warn('⚠️ Some warmup requests failed:', error);
     } finally {
       this.isWarming = false;
     }
@@ -58,12 +59,12 @@ class ConnectionWarmer {
         });
 
         if (response.ok) {
-          console.log(`✅ Warmed up: ${endpoint}`);
+            loggerClient.info(`✅ Warmed up: ${endpoint}`);
           return;
         }
       } catch (error) {
         if (attempt === this.options.maxRetries! - 1) {
-          console.warn(`❌ Failed to warmup ${endpoint}:`, error);
+            loggerClient.warn(`❌ Failed to warmup ${endpoint}:`, error);
         }
       }
 
@@ -85,14 +86,14 @@ class ConnectionWarmer {
       this.warmup();
     }, this.options.interval);
 
-    console.log(`🔥 Periodic warmup started (every ${this.options.interval! / 1000}s)`);
+      loggerClient.info(`🔥 Periodic warmup started (every ${this.options.interval! / 1000}s)`);
   }
 
   stopPeriodicWarmup(): void {
     if (this.warmupInterval) {
       clearInterval(this.warmupInterval);
       this.warmupInterval = null;
-      console.log('🛑 Periodic warmup stopped');
+        loggerClient.info('🛑 Periodic warmup stopped');
     }
   }
 }

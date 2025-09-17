@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import telemetry from '@/lib/telemetry';
+import loggerClient from '@/lib/loggerClient';
 
 export interface User {
   id: number;
@@ -10,7 +12,7 @@ export interface User {
   email: string;
   role: 'admin' | 'user' | 'USER' | 'ADMIN';
   age?: number | null;
-  // residence?: string | null; // FIELD TEMPORARILY DISABLED - not in production DB
+  residence?: string | null;
   school?: {
     id: number;
     name: string;
@@ -65,7 +67,7 @@ const getSafeUserForStorageTop = (u: User | null) => {
     schoolId,
     avatarUrl,
     country: u.country ?? null,
-    // residence: u.residence ?? null, // FIELD TEMPORARILY DISABLED
+    residence: u.residence ?? null,
     city: u.city ?? null,
     town: u.town ?? null
   } as any;
@@ -77,10 +79,9 @@ const saveUserToLocalTop = (u: User | null) => {
     if (safe) localStorage.setItem('user', JSON.stringify(safe));
     else localStorage.removeItem('user');
   } catch (e) {
-    console.error('Error guardando user en localStorage (saveUserToLocalTop):', e);
+    loggerClient.error('Error guardando user en localStorage (saveUserToLocalTop):', e);
   }
 };
-
 // --- NUEVA FUNCIÓN PARA REGISTRAR ACCIONES ---
 const logAction = (action: string, userEmail: string) => {
   try {
@@ -95,7 +96,7 @@ const logAction = (action: string, userEmail: string) => {
     const updatedLogs = [newLog, ...logs].slice(0, 100);
     localStorage.setItem('appLogs', JSON.stringify(updatedLogs));
   } catch (error) {
-    console.error("Error al guardar el log:", error);
+    loggerClient.error("Error al guardar el log:", error);
   }
 };
 
@@ -116,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       schoolId,
       avatarUrl,
       country: u.country ?? null,
-      // residence: u.residence ?? null, // FIELD TEMPORARILY DISABLED
+      residence: u.residence ?? null,
       city: u.city ?? null,
       town: u.town ?? null
     } as any;
@@ -131,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user');
       }
     } catch (e) {
-      console.error('Error guardando user en localStorage (saveUserToLocal):', e);
+      loggerClient.error('Error guardando user en localStorage (saveUserToLocal):', e);
     }
   };
   const [user, setUser] = useState<User | null>(null);
@@ -167,9 +168,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   useEffect(() => {
-    console.log('🔄 AuthContext: Inicializando...');
+    loggerClient.debug('🔄 AuthContext: Inicializando...');
     const storedUser = localStorage.getItem('user');
-    console.log('📦 AuthContext: Usuario en localStorage:', storedUser ? 'Existe' : 'No existe');
+    loggerClient.debug('📦 AuthContext: Usuario en localStorage:', storedUser ? 'Existe' : 'No existe');
 
     async function fetchUserFromBackend(email: string) {
       try {
@@ -181,7 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         if (response.ok) {
           const { user } = await response.json();
-          if (user) {
+            if (user) {
             // Si localStorage guarda una residencia (cliente-only), preservarla si el backend no la devuelve
             try {
               const storedRaw = localStorage.getItem('user');
@@ -192,12 +193,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
               }
             } catch (e) {
-              // ignore JSON parse errors
+                    // ignore JSON parse errors
             }
             setUser(user);
             // Use safe storage helper to avoid storing large base64 avatars
             saveUserToLocal(user);
-            console.log('✅ AuthContext: Usuario actualizado desde backend:', user);
+                  loggerClient.info('✅ AuthContext: Usuario actualizado desde backend:', user);
           }
         } else {
           setUser(null);
@@ -206,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         setUser(null);
         localStorage.removeItem('user');
-        console.error('❌ AuthContext: Error actualizando usuario desde backend:', e);
+        loggerClient.error('❌ AuthContext: Error actualizando usuario desde backend:', e);
       }
     }
 
@@ -214,7 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (storedUser) {
         try {
           const parsed: User = JSON.parse(storedUser);
-          console.log('👤 AuthContext: Usuario parseado:', {
+          loggerClient.debug('👤 AuthContext: Usuario parseado:', {
             id: parsed.id,
             email: parsed.email,
             role: parsed.role,
@@ -225,40 +226,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Siempre refrescar desde backend para cualquier usuario (admin o no)
           await fetchUserFromBackend(parsed.email);
         } catch (e) {
-          console.error('❌ AuthContext: Error parseando usuario almacenado, limpiando.', e);
+          loggerClient.error('❌ AuthContext: Error parseando usuario almacenado, limpiando.', e);
           localStorage.removeItem('user');
         }
       }
       setIsLoading(false);
-      console.log('✅ AuthContext: Carga completada');
+      loggerClient.info('✅ AuthContext: Carga completada');
+      // Inicializar telemetría con el usuario si existe
+      try {
+        const parsedUserRaw = localStorage.getItem('user');
+        const parsedUser = parsedUserRaw ? JSON.parse(parsedUserRaw) : null;
+        telemetry.initTelemetry({ userEmail: parsedUser?.email ?? null, endpoint: '/api/telemetry' });
+      } catch (e) {
+        loggerClient.error('Error inicializando telemetría:', e);
+      }
     };
     init();
   }, []);
 
   const login = async (userData: User) => {
-    console.log('🔐 AuthContext: Login iniciado para:', userData.email);
-    console.log('👤 AuthContext: Datos completos de usuario:', userData);
+    loggerClient.debug('🔐 AuthContext: Login iniciado para:', userData.email);
+    loggerClient.debug('👤 AuthContext: Datos completos de usuario:', userData);
     if (userData.school) {
-      console.log('🏫 AuthContext: userData.school:', userData.school, 'typeof:', typeof userData.school);
+      loggerClient.debug('🏫 AuthContext: userData.school:', userData.school, 'typeof:', typeof userData.school);
     } else {
-      console.log('🏫 AuthContext: userData.school está vacío:', userData.school);
+      loggerClient.debug('🏫 AuthContext: userData.school está vacío:', userData.school);
     }
     
     if (onlyAdmins && userData.role !== 'admin') {
-      console.warn('⚠️ AuthContext: Intento de login bloqueado por modo solo admins.');
+      loggerClient.warn('⚠️ AuthContext: Intento de login bloqueado por modo solo admins.');
       return;
     }
   // Guardar datos iniciales (safe)
   saveUserToLocal(userData);
     if (userData.id) {
-      console.log('🔍 AuthContext: Guardando userId en localStorage:', userData.id);
+      loggerClient.debug('🔍 AuthContext: Guardando userId en localStorage:', userData.id);
       localStorage.setItem('userId', userData.id.toString());
-      console.log('✅ AuthContext: userId guardado:', localStorage.getItem('userId'));
+      loggerClient.info('✅ AuthContext: userId guardado:', localStorage.getItem('userId'));
     } else {
-      console.error('❌ AuthContext: userData.id no está presente:', userData);
+      loggerClient.error('❌ AuthContext: userData.id no está presente:', userData);
     }
     setUser(userData);
     logAction('login', userData.email);
+  try { telemetry.sendTelemetryEvent('login', { email: userData.email }); } catch (e) {}
     // Refrescar inmediatamente desde backend para asegurar datos completos
     try {
       const response = await fetch('/api/user/by-email', {
@@ -277,17 +287,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(user);
           saveUserToLocal(user);
           if (user.id) {
-            console.log('🔍 AuthContext: Actualizando userId tras refresco:', user.id);
+            loggerClient.debug('🔍 AuthContext: Actualizando userId tras refresco:', user.id);
             localStorage.setItem('userId', user.id.toString());
-            console.log('✅ AuthContext: userId actualizado:', localStorage.getItem('userId'));
+            loggerClient.info('✅ AuthContext: userId actualizado:', localStorage.getItem('userId'));
           }
-          console.log('✅ AuthContext: Usuario actualizado tras login desde backend:', user);
+          loggerClient.info('✅ AuthContext: Usuario actualizado tras login desde backend:', user);
         }
       }
     } catch (e) {
-      console.error('❌ AuthContext: Error refrescando usuario tras login:', e);
+      loggerClient.error('❌ AuthContext: Error refrescando usuario tras login:', e);
     }
-    console.log('✅ AuthContext: Login completado exitosamente');
+    loggerClient.info('✅ AuthContext: Login completado exitosamente');
   };
 
   const logout = () => {
@@ -301,6 +311,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ userId: currentUser.id })
       }).catch(() => {});
     }
+    try { telemetry.sendTelemetryEvent('logout', { email: currentUser?.email ?? null }); } catch (e) {}
   // ensure safe remove
   saveUserToLocal(null);
     setUser(null);
@@ -310,33 +321,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     try {
-      // Llamar al API para actualizar en el servidor
+      // No enviamos 'residence' al backend; lo guardamos sólo en caché local
+      const { residence: residenceToCache, ...serverData } = data as any;
+
+      // Llamada al servidor con los campos permitidos (sin residence)
       const response = await fetch('/api/user/update', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          ...data
-        }),
+        body: JSON.stringify({ userId: user.id, ...serverData }),
         credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error('Error al actualizar usuario');
+        // Si falla el backend, igualmente aplicamos el cambio en caché para que el usuario pueda modificar su residencia localmente
+        loggerClient.warn('Warning: falló la actualización en servidor, aplicando cambios en caché localmente');
       }
 
-      const result = await response.json();
-
-      // Actualizar el estado local
+      // Actualizar el estado local siempre, incluyendo residence en caché
       setUser(prevUser => {
         if (!prevUser) return null;
-        const updatedUser = { ...prevUser, ...data };
+        const updatedUser = { ...prevUser, ...data } as User;
         saveUserToLocal(updatedUser as User);
         return updatedUser;
       });
 
     } catch (error) {
-      console.error('Error actualizando usuario:', error);
+      loggerClient.error('Error actualizando usuario:', error);
       throw error;
     }
   };
@@ -367,7 +377,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
     } catch (error) {
-      console.error('Error updating avatar:', error);
+      loggerClient.error('Error updating avatar:', error);
       throw error;
     }
   }, [user]);
@@ -394,7 +404,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
     } catch (error) {
-      console.error('Error deleting avatar:', error);
+      loggerClient.error('Error deleting avatar:', error);
       throw error;
     }
   }, [user]);
@@ -422,7 +432,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
     } catch (error) {
-      console.error('Error refreshing avatar:', error);
+      loggerClient.error('Error refreshing avatar:', error);
       throw error;
     }
   }, [user]);
@@ -464,7 +474,7 @@ try {
         if (safe) localStorage.setItem('user', JSON.stringify(safe));
         else localStorage.removeItem('user');
       } catch (e) {
-        console.error('window.saveUserToLocal error:', e);
+        loggerClient.error('window.saveUserToLocal error:', e);
       }
     };
   }

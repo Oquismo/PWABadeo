@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Link as MuiLink, Grid, Tooltip, FormControl, InputLabel, Select, MenuItem, CircularProgress } from '@mui/material';
+import { Container, Box, Typography, Button, Link as MuiLink, Grid, Tooltip, FormControl, InputLabel, Select, MenuItem, CircularProgress, Paper, Divider, InputAdornment, IconButton } from '@mui/material';
+import loggerClient from '@/lib/loggerClient';
 import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
 import MaterialTextField from '@/components/ui/MaterialTextField';
 import Link from 'next/link';
@@ -37,7 +38,7 @@ export default function RegistroPage() {
     arrivalDate: '',
     departureDate: '',
     country: 'Italia',
-    // residence: '', // TEMPORARILY DISABLED - field not in DB
+    residence: '',
     city: '',
     town: '',
     adminCode: '',
@@ -56,23 +57,23 @@ export default function RegistroPage() {
   };
 
   // Pueblos/localidades por ciudad
-  const cityTowns: Record<string, string[]> = {
-    // Italia
-    'Roma': ['Albano Laziale', 'Anzio', 'Bracciano', 'Castel Gandolfo', 'Ciampino', 'Frascati', 'Genzano di Roma', 'Guidonia Montecelio', 'Ladispoli', 'Marino', 'Nettuno', 'Ostia', 'Palestrina', 'Pomezia', 'Tivoli', 'Velletri', 'Viterbo'],
-    'Milano': ['Abbiategrasso', 'Arese', 'Assago', 'Bergamo', 'Bollate', 'Brescia', 'Busto Arsizio', 'Cinisello Balsamo', 'Como', 'Corsico', 'Cremona', 'Gallarate', 'Legnano', 'Lodi', 'Magenta', 'Mantova', 'Monza', 'Novara', 'Pavia', 'Rho', 'Saronno', 'Sesto San Giovanni', 'Varese'],
-    'Napoli': ['Acerra', 'Afragola', 'Aversa', 'Bacoli', 'Baiano', 'Calvizzano', 'Capri', 'Casalnuovo di Napoli', 'Caserta', 'Castellammare di Stabia', 'Ercolano', 'Giugliano in Campania', 'Ischia', 'Marano di Napoli', 'Nola', 'Pompei', 'Portici', 'Pozzuoli', 'Procida', 'San Giorgio a Cremano', 'Sorrento', 'Torre del Greco', 'Torre Annunziata'],
-    'Torino': ['Alba', 'Alessandria', 'Asti', 'Avigliana', 'Beinasco', 'Biella', 'Borgaro Torinese', 'Chieri', 'Chivasso', 'Collegno', 'Cuneo', 'Grugliasco', 'Ivrea', 'Moncalieri', 'Nichelino', 'Novara', 'Orbassano', 'Pinerolo', 'Rivoli', 'Settimo Torinese', 'Venaria Reale', 'Verbania', 'Vercelli'],
-    'Palermo': ['Bagheria', 'Balestrate', 'Carini', 'Castelvetrano', 'Cefalù', 'Corleone', 'Ficarazzi', 'Gangi', 'Lercara Friddi', 'Marsala', 'Mazara del Vallo', 'Misilmeri', 'Monreale', 'Partinico', 'Petralia Soprana', 'Pollina', 'San Giuseppe Jato', 'Termini Imerese', 'Trabia', 'Trapani'],
-    'Genova': ['Arenzano', 'Bogliasco', 'Camogli', 'Chiavari', 'Cogoleto', 'La Spezia', 'Lavagna', 'Nervi', 'Pegli', 'Portofino', 'Rapallo', 'Recco', 'Santa Margherita Ligure', 'Savona', 'Sestri Levante', 'Sori', 'Varazze', 'Voltri'],
-    'Bologna': ['Anzola dell\'Emilia', 'Budrio', 'Calderara di Reno', 'Casalecchio di Reno', 'Castel Maggiore', 'Castenaso', 'Cento', 'Crevalcore', 'Faenza', 'Ferrara', 'Imola', 'Medicina', 'Modena', 'Molinella', 'Ozzano dell\'Emilia', 'Parma', 'Pianoro', 'Ravenna', 'Reggio Emilia', 'Rimini', 'San Giovanni in Persiceto', 'San Lazzaro di Savena', 'Zola Predosa'],
-    'Firenze': ['Bagno a Ripoli', 'Borgo San Lorenzo', 'Calenzano', 'Campi Bisenzio', 'Empoli', 'Fiesole', 'Figline e Incisa Valdarno', 'Impruneta', 'Lastra a Signa', 'Pontassieve', 'Prato', 'Reggello', 'Rignano sull\'Arno', 'San Casciano in Val di Pesa', 'Scandicci', 'Sesto Fiorentino', 'Signa', 'Vaglia'],
-    'Venezia': ['Caorle', 'Cavallino-Treporti', 'Chioggia', 'Dolo', 'Eraclea', 'Jesolo', 'Marcon', 'Martellago', 'Mira', 'Mirano', 'Musile di Piave', 'Noale', 'Padova', 'Portogruaro', 'Quarto d\'Altino', 'San Donà di Piave', 'Spinea', 'Treviso', 'Verona', 'Vicenza'],
-    'Bari': ['Acquaviva delle Fonti', 'Alberobello', 'Altamura', 'Andria', 'Barletta', 'Bitonto', 'Brindisi', 'Canosa di Puglia', 'Casamassima', 'Castellana Grotte', 'Conversano', 'Corato', 'Foggia', 'Gravina in Puglia', 'Lecce', 'Locorotondo', 'Martina Franca', 'Molfetta', 'Monopoli', 'Polignano a Mare', 'Putignano', 'Ruvo di Puglia', 'Taranto', 'Trani'],
-    // España
-    'Madrid': ['Alcalá de Henares', 'Alcobendas', 'Alcorcón', 'Aranjuez', 'Boadilla del Monte', 'Collado Villalba', 'Coslada', 'El Escorial', 'Fuenlabrada', 'Getafe', 'Las Rozas', 'Leganés', 'Majadahonda', 'Móstoles', 'Parla', 'Pozuelo de Alarcón', 'San Lorenzo de El Escorial', 'Torrejón de Ardoz', 'Tres Cantos', 'Valdemoro'],
-    'Barcelona': ['Badalona', 'Hospitalet de Llobregat', 'Sabadell', 'Terrassa', 'Santa Coloma de Gramenet', 'Cornellà de Llobregat', 'Sant Boi de Llobregat', 'Mataró', 'Granollers', 'Manresa', 'Vic', 'Igualada', 'Vilanova i la Geltrú', 'Girona', 'Lleida', 'Tarragona', 'Reus', 'Sitges', 'Figueres', 'Blanes'],
-    'Toledo': ['Talavera de la Reina', 'Illescas', 'Seseña', 'Azuqueca de Henares', 'Guadalajara', 'Yepes', 'Ocaña', 'Quintanar de la Orden', 'Villacañas', 'Madridejos', 'Consuegra', 'Mora', 'Torrijos', 'Fuensalida', 'La Puebla de Montalbán', 'Sonseca', 'Orgaz', 'Tembleque']
-  };
+    const cityTowns: Record<string, string[]> = {
+      // Italia
+      'Roma': ['Albano Laziale', 'Anzio', 'Bracciano', 'Castel Gandolfo', 'Ciampino', 'Frascati', 'Genzano di Roma', 'Guidonia Montecelio', 'Ladispoli', 'Marino', 'Nettuno', 'Ostia', 'Palestrina', 'Pomezia', 'Tivoli', 'Velletri', 'Viterbo'],
+      'Milano': ['Abbiategrasso', 'Arese', 'Assago', 'Bergamo', 'Bollate', 'Brescia', 'Busto Arsizio', 'Cinisello Balsamo', 'Como', 'Corsico', 'Cremona', 'Gallarate', 'Legnano', 'Lodi', 'Magenta', 'Mantova', 'Monza', 'Novara', 'Pavia', 'Rho', 'Saronno', 'Sesto San Giovanni', 'Varese'],
+      'Napoli': ['Acerra', 'Afragola', 'Aversa', 'Bacoli', 'Baiano', 'Calvizzano', 'Capri', 'Casalnuovo di Napoli', 'Caserta', 'Castellammare di Stabia', 'Ercolano', 'Giugliano in Campania', 'Ischia', 'Marano di Napoli', 'Nola', 'Pompei', 'Portici', 'Pozzuoli', 'Procida', 'San Giorgio a Cremano', 'Sorrento', 'Torre del Greco', 'Torre Annunziata'],
+      'Torino': ['Alba', 'Alessandria', 'Asti', 'Avigliana', 'Beinasco', 'Biella', 'Borgaro Torinese', 'Chieri', 'Chivasso', 'Collegno', 'Cuneo', 'Grugliasco', 'Ivrea', 'Moncalieri', 'Nichelino', 'Novara', 'Orbassano', 'Pinerolo', 'Rivoli', 'Settimo Torinese', 'Venaria Reale', 'Verbania', 'Vercelli'],
+      'Palermo': ['Bagheria', 'Balestrate', 'Carini', 'Castelvetrano', 'Cefalù', 'Corleone', 'Ficarazzi', 'Gangi', 'Lercara Friddi', 'Marsala', 'Mazara del Vallo', 'Misilmeri', 'Monreale', 'Partinico', 'Petralia Soprana', 'Pollina', 'San Giuseppe Jato', 'Termini Imerese', 'Trabia', 'Trapani'],
+      'Genova': ['Arenzano', 'Bogliasco', 'Camogli', 'Chiavari', 'Cogoleto', 'La Spezia', 'Lavagna', 'Nervi', 'Pegli', 'Portofino', 'Rapallo', 'Recco', 'Santa Margherita Ligure', 'Savona', 'Sestri Levante', 'Sori', 'Varazze', 'Voltri'],
+      'Bologna': ['Anzola dell\'Emilia', 'Budrio', 'Calderara di Reno', 'Casalecchio di Reno', 'Castel Maggiore', 'Castenaso', 'Cento', 'Crevalcore', 'Faenza', 'Ferrara', 'Imola', 'Medicina', 'Modena', 'Molinella', 'Ozzano dell\'Emilia', 'Parma', 'Pianoro', 'Ravenna', 'Reggio Emilia', 'Rimini', 'San Giovanni in Persiceto', 'San Lazzaro di Savena', 'Zola Predosa'],
+      'Firenze': ['Bagno a Ripoli', 'Borgo San Lorenzo', 'Calenzano', 'Campi Bisenzio', 'Empoli', 'Fiesole', 'Figline e Incisa Valdarno', 'Impruneta', 'Lastra a Signa', 'Pontassieve', 'Prato', 'Reggello', 'Rignano sull\'Arno', 'San Casciano in Val di Pesa', 'Scandicci', 'Sesto Fiorentino', 'Signa', 'Vaglia'],
+      'Venezia': ['Caorle', 'Cavallino-Treporti', 'Chioggia', 'Dolo', 'Eraclea', 'Jesolo', 'Marcon', 'Martellago', 'Mira', 'Mirano', 'Musile di Piave', 'Noale', 'Padova', 'Portogruaro', 'Quarto d\'Altino', 'San Donà di Piave', 'Spinea', 'Treviso', 'Verona', 'Vicenza'],
+      'Bari': ['Acquaviva delle Fonti', 'Alberobello', 'Altamura', 'Andria', 'Barletta', 'Bitonto', 'Brindisi', 'Canosa di Puglia', 'Casamassima', 'Castellana Grotte', 'Conversano', 'Corato', 'Foggia', 'Gravina in Puglia', 'Lecce', 'Locorotondo', 'Martina Franca', 'Molfetta', 'Monopoli', 'Polignano a Mare', 'Putignano', 'Ruvo di Puglia', 'Taranto', 'Trani'],
+      // España
+      'Madrid': ['Alcalá de Henares', 'Alcobendas', 'Alcorcón', 'Aranjuez', 'Boadilla del Monte', 'Collado Villalba', 'Coslada', 'El Escorial', 'Fuenlabrada', 'Getafe', 'Las Rozas', 'Leganés', 'Majadahonda', 'Móstoles', 'Parla', 'Pozuelo de Alarcón', 'San Lorenzo de El Escorial', 'Torrejón de Ardoz', 'Tres Cantos', 'Valdemoro'],
+      'Barcelona': ['Badalona', 'Hospitalet de Llobregat', 'Sabadell', 'Terrassa', 'Santa Coloma de Gramenet', 'Cornellà de Llobregat', 'Sant Boi de Llobregat', 'Mataró', 'Granollers', 'Manresa', 'Vic', 'Igualada', 'Vilanova i la Geltrú', 'Girona', 'Lleida', 'Tarragona', 'Reus', 'Sitges', 'Figueres', 'Blanes'],
+      'Toledo': ['Talavera de la Reina', 'Illescas', 'Seseña', 'Azuqueca de Henares', 'Guadalajara', 'Yepes', 'Ocaña', 'Quintanar de la Orden', 'Villacañas', 'Madridejos', 'Consuegra', 'Mora', 'Torrijos', 'Fuensalida', 'La Puebla de Montalbán', 'Sonseca', 'Orgaz', 'Tembleque']
+    };
 
   // Estados disponibles
   const [availableCities, setAvailableCities] = useState<string[]>([]);
@@ -209,6 +210,16 @@ export default function RegistroPage() {
       tempErrors,
       errorsCount: Object.keys(tempErrors).length
     });
+      loggerClient.debug('🔍 Validación de formulario:', {
+        formData,
+        isAdminRegistration,
+        selectedSchool,
+        tempErrors,
+        errorsCount: Object.keys(tempErrors).length
+      });
+      loggerClient.debug('🚀 HandleSubmit llamado');
+      loggerClient.warn('❌ Validación falló, no se enviará el formulario');
+      loggerClient.info('✅ Validación pasó, enviando formulario');
     
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -216,14 +227,14 @@ export default function RegistroPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('🚀 HandleSubmit llamado');
+  loggerClient.debug('🚀 HandleSubmit llamado');
     
     if (!validate()) {
-      console.log('❌ Validación falló, no se enviará el formulario');
+    loggerClient.warn('❌ Validación falló, no se enviará el formulario');
       return;
     }
     
-    console.log('✅ Validación pasó, enviando formulario');
+  loggerClient.info('✅ Validación pasó, enviando formulario');
     setIsSubmitting(true);
     setErrors({}); // Limpiar errores previos
     
@@ -236,17 +247,17 @@ export default function RegistroPage() {
         password: formData.password,
         age: parseInt(formData.age, 10),
         schoolId: isAdminRegistration ? null : selectedSchool?.id,
-        // residence: isAdminRegistration ? undefined : (formData.residence || null), // TEMPORARILY DISABLED
         arrivalDate: formData.arrivalDate,
         departureDate: formData.departureDate,
-        country: formData.country,
-        city: formData.city,
-        town: formData.town,
+        // Derivar ubicación desde la escuela seleccionada cuando esté presente
+        country: selectedSchool?.country ?? formData.country,
+        city: selectedSchool?.city ?? formData.city,
+        town: selectedSchool?.town ?? formData.town,
         isAdmin: isAdminRegistration,
         adminCode: isAdminRegistration ? formData.adminCode : undefined,
       };
       
-      console.log('📝 Intentando registro con:', payload.email);
+  loggerClient.debug('📝 Intentando registro con:', payload.email);
       
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -255,7 +266,7 @@ export default function RegistroPage() {
       });
       
       const data = await response.json();
-      console.log('📋 Respuesta del registro:', data);
+  loggerClient.debug('📋 Respuesta del registro:', data);
       
       if (!response.ok) {
         setErrors({ api: data.error || 'Error en el registro' });
@@ -264,7 +275,7 @@ export default function RegistroPage() {
       }
       
       // Si llegamos aquí, el registro fue exitoso
-      console.log('✅ Registro exitoso, usuario:', data.user);
+  loggerClient.info('✅ Registro exitoso, usuario:', data.user);
       
       // Preparar datos del usuario para el contexto con información de la escuela
       const userData: User = {
@@ -274,18 +285,13 @@ export default function RegistroPage() {
         name: data.user.name,
         email: data.user.email,
         age: data.user.age,
-        // residence: data.user.residence || formData.residence || null, // TEMPORARILY DISABLED
+        residence: data.user.residence || formData.residence || null,
         role: data.user.role || 'USER',
         arrivalDate: data.user.arrivalDate,
         departureDate: data.user.departureDate,
         schoolId: data.user.schoolId,
-        school: selectedSchool ? {
-          id: selectedSchool.id,
-          name: selectedSchool.name,
-          city: selectedSchool.city,
-          type: selectedSchool.type,
-          level: selectedSchool.level,
-        } : undefined,
+        // Para evitar incluir 'level' en el registro, enviamos solo el nombre de la escuela como cadena.
+        school: selectedSchool ? selectedSchool.name : undefined,
       };
       
       // Usar el contexto de auth para guardar el usuario
@@ -295,7 +301,7 @@ export default function RegistroPage() {
       router.push('/');
       
     } catch (error) {
-      console.error('❌ Error en registro:', error);
+      loggerClient.error('❌ Error en registro:', error);
       setErrors({ api: 'Error de conexión. Intenta nuevamente.' });
     } finally {
       setIsSubmitting(false);
@@ -308,207 +314,203 @@ export default function RegistroPage() {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="sm">
       <Box sx={{ marginTop: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-        <Typography component="h1" variant="h4" fontWeight="bold">
+        <Typography component="h1" variant="h4" fontWeight="bold" sx={{ mb: 1 }}>
           {t('register.title')}
         </Typography>
-        <Box id="register-form" component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <MaterialTextField name="firstName" required fullWidth label={t('register.firstName')} autoFocus value={formData.firstName} onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName}/>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <MaterialTextField required fullWidth label={t('register.lastName')} name="lastName" value={formData.lastName} onChange={handleChange} error={!!errors.lastName} helperText={errors.lastName}/>
-            </Grid>
-            <Grid item xs={12}>
-              <MaterialTextField required fullWidth label={t('register.email')} name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email}/>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <MaterialTextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <MaterialTextField 
-                name="adminCode" 
-                fullWidth 
-                label="Código Admin (opcional)" 
-                value={formData.adminCode} 
-                onChange={handleChange} 
-                placeholder="ADMIN2025"
-                helperText={isAdminRegistration ? "✅ Registro como Admin activado" : "Deja vacío para registro normal"}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: isAdminRegistration ? '#e8f5e8' : 'inherit',
-                  }
-                }}
-              />
-            </Grid>
-            {!isAdminRegistration && (
+        {/* Subtítulo eliminado por petición del usuario */}
+
+        <Paper elevation={6} sx={{ width: '100%', p: { xs: 3, sm: 4 }, borderRadius: 3, bgcolor: 'background.paper' }}>
+          <Box id="register-form" component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 0 }}>
+            <Grid container spacing={2}>
+
+              {/* Sección: Datos personales */}
               <Grid item xs={12}>
-                <div id="school-select">
-                  <SchoolSelector
-                    value={selectedSchool}
-                    onChange={setSelectedSchool}
-                    error={!!errors.school}
-                    helperText={errors.school}
-                    required
-                  />
-                </div>
+                <Typography variant="subtitle1" sx={{ fontWeight: '600', mb: 1 }}>Datos personales</Typography>
               </Grid>
-            )}
-            {isAdminRegistration && (
-              <Grid item xs={12}>
-                <Typography variant="body2" color="success.main" sx={{ textAlign: 'center', p: 1, bgcolor: '#e8f5e8', borderRadius: 1 }}>
-                  🔐 Modo Administrador: La selección de escuela no es requerida
-                </Typography>
-              </Grid>
-            )}
-            {/* RESIDENCE FIELD TEMPORARILY DISABLED
-            {!isAdminRegistration && (
+
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="residence-label">Residencia</InputLabel>
-                  <Select
-                    labelId="residence-label"
-                    name="residence"
-                    value={formData.residence}
-                    label="Residencia"
-                    onChange={handleSelectChange}
-                  >
-                    <MenuItem value="">Ninguna</MenuItem>
-                    <MenuItem value="ONE">ONE</MenuItem>
-                    <MenuItem value="AMBRO">Ambro</MenuItem>
-                  </Select>
-                </FormControl>
+                <MaterialTextField 
+                  name="firstName" 
+                  required 
+                  fullWidth 
+                  label={t('register.firstName')} 
+                  autoFocus 
+                  value={formData.firstName} 
+                  onChange={handleChange} 
+                  error={!!errors.firstName} 
+                  helperText={errors.firstName}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><EngineeringIcon color="action" /></InputAdornment> }}
+                />
               </Grid>
-            )}
-            */}
-            {!isAdminRegistration && (
-              <>
-                <Grid item xs={12} sm={6}>
-                  <MaterialTextField
-                    name="arrivalDate"
-                    required
-                    fullWidth
-                    label="Fecha de Llegada"
-                    type="date"
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.arrivalDate}
-                    onChange={handleChange}
-                    error={!!errors.arrivalDate}
-                    helperText={errors.arrivalDate}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <MaterialTextField
-                    name="departureDate"
-                    required
-                    fullWidth
-                    label="Fecha de Salida"
-                    type="date"
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.departureDate}
-                    onChange={handleChange}
-                    error={!!errors.departureDate}
-                    helperText={errors.departureDate}
-                  />
-                </Grid>
-              </>
-            )}
-            
-            {/* Campos de ubicación */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
-                Ubicación
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={12} sm={4}>
-              <FormControl id="country-select" fullWidth disabled={!isAdminRegistration && selectedSchool !== null}>
-                <InputLabel>País</InputLabel>
-                <Select
-                  name="country"
-                  value={formData.country}
-                  label="País"
-                  onChange={handleSelectChange}
+
+              <Grid item xs={12} sm={6}>
+                <MaterialTextField required fullWidth label={t('register.lastName')} name="lastName" value={formData.lastName} onChange={handleChange} error={!!errors.lastName} helperText={errors.lastName}/>
+              </Grid>
+
+              <Grid item xs={12}>
+                <MaterialTextField required fullWidth label={t('register.email')} name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} InputProps={{ startAdornment: <InputAdornment position="start">@</InputAdornment> }} />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <MaterialTextField name="age" required fullWidth label="Edad" type="number" value={formData.age} onChange={handleChange} error={!!errors.age} helperText={errors.age} />
+              </Grid>
+
+              <Grid item xs={12} sm={8}>
+                <MaterialTextField 
+                  name="password" 
+                  required 
+                  fullWidth 
+                  label={t('register.password')} 
+                  type="password" 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  error={!!errors.password} 
+                  helperText={errors.password}
+                />
+              </Grid>
+
+              {/* Sección: Escuela y residencia */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ fontWeight: '600', mb: 1 }}>Centro / Residencia</Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: 'transparent' }}>
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={8}>
+                      {!isAdminRegistration && (
+                        <div id="school-select">
+                          <SchoolSelector
+                            value={selectedSchool}
+                            onChange={setSelectedSchool}
+                            error={!!errors.school}
+                            helperText={errors.school}
+                            required
+                          />
+                        </div>
+                      )}
+                      {isAdminRegistration && (
+                        <Typography variant="body2" color="success.main" sx={{ p: 1, bgcolor: '#e8f5e8', borderRadius: 1, display: 'inline-block' }}>
+                          🔐 Modo Administrador: La selección de escuela no es requerida
+                        </Typography>
+                      )}
+                    </Grid>
+
+                    <Grid item xs={12} sm={4}>
+                      {!isAdminRegistration && (
+                        <FormControl fullWidth size="small">
+                          <InputLabel id="residence-label">Residencia</InputLabel>
+                          <Select
+                            labelId="residence-label"
+                            name="residence"
+                            value={formData.residence}
+                            label="Residencia"
+                            onChange={handleSelectChange}
+                          >
+                            <MenuItem value="">Ninguna</MenuItem>
+                            <MenuItem value="ONE">ONE (Residencia ONE)</MenuItem>
+                            <MenuItem value="AMBRO">AMBRO (Residencia AMRO)</MenuItem>
+                            <MenuItem value="ESTANISLAO">Estanislao</MenuItem>
+                            <MenuItem value="ARMENDARIZ">Armendáriz</MenuItem>
+                          </Select>
+                        </FormControl>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+
+              {/* Sección: Fechas y adminCode */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ fontWeight: '600', mb: 1 }}>Fechas</Typography>
+              </Grid>
+
+              {!isAdminRegistration && (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <MaterialTextField
+                      name="arrivalDate"
+                      required
+                      fullWidth
+                      label="Fecha de Llegada"
+                      type="date"
+                      InputLabelProps={{ shrink: true }}
+                      value={formData.arrivalDate}
+                      onChange={handleChange}
+                      error={!!errors.arrivalDate}
+                      helperText={errors.arrivalDate}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <MaterialTextField
+                      name="departureDate"
+                      required
+                      fullWidth
+                      label="Fecha de Salida"
+                      type="date"
+                      InputLabelProps={{ shrink: true }}
+                      value={formData.departureDate}
+                      onChange={handleChange}
+                      error={!!errors.departureDate}
+                      helperText={errors.departureDate}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              <Grid item xs={12} sm={6}>
+                <MaterialTextField 
+                  name="adminCode" 
+                  fullWidth 
+                  label="Código Admin (opcional)" 
+                  value={formData.adminCode} 
+                  onChange={handleChange} 
+                  type="password"
+                  autoComplete="off"
+                  helperText={isAdminRegistration ? "✅ Registro como Admin activado" : "Deja vacío para registro normal"}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Button 
+                  id="submit-register"
+                  type="submit" 
+                  fullWidth 
+                  variant="contained" 
+                  color="primary" 
+                  disabled={isSubmitting}
+                  sx={{ mt: 1, mb: 1.5, py: 1.8, fontWeight: 700, borderRadius: 2 }}
+                  startIcon={isSubmitting ? <Material3LoadingIndicator size="small" /> : undefined}
                 >
-                  <MenuItem value="Italia">Italia</MenuItem>
-                  <MenuItem value="España">España</MenuItem>
-                </Select>
-                {!isAdminRegistration && selectedSchool && (
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                    📍 Ubicación automática de la escuela seleccionada
+                  {isSubmitting ? t('common.loading') : t('register.registerButton')}
+                </Button>
+              </Grid>
+
+              {errors.api && (
+                <Grid item xs={12}>
+                  <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                    {errors.api}
                   </Typography>
-                )}
-              </FormControl>
-            </Grid>
+                </Grid>
+              )}
 
-            <Grid item xs={12} sm={4}>
-              <FormControl 
-                fullWidth 
-                disabled={(!isAdminRegistration && selectedSchool !== null) || (!formData.country || availableCities.length === 0)}
-              >
-                <InputLabel>Ciudad</InputLabel>
-                <Select
-                  name="city"
-                  value={formData.city}
-                  label="Ciudad"
-                  onChange={handleSelectChange}
-                >
-                  <MenuItem value="">Selecciona una ciudad</MenuItem>
-                  {availableCities.map((city) => (
-                    <MenuItem key={city} value={city}>{city}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <MuiLink component={Link} href="/login" variant="body2">
+                    {t('register.alreadyHaveAccount')} {t('register.loginHere')}
+                  </MuiLink>
+                </Box>
+              </Grid>
 
-            <Grid item xs={12} sm={4}>
-              <FormControl 
-                fullWidth 
-                disabled={(!isAdminRegistration && selectedSchool !== null) || (!formData.city || availableTowns.length === 0)}
-              >
-                <InputLabel>Localidad</InputLabel>
-                <Select
-                  name="town"
-                  value={formData.town}
-                  label="Localidad"
-                  onChange={handleSelectChange}
-                >
-                  <MenuItem value="">Selecciona una localidad</MenuItem>
-                  {availableTowns.map((town) => (
-                    <MenuItem key={town} value={town}>{town}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
             </Grid>
-            <Grid item xs={12}>
-              <MaterialTextField required fullWidth name="password" label={t('register.password')} type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}/>
-            </Grid>
-          </Grid>
-          <Button 
-            id="submit-register"
-            type="submit" 
-            fullWidth 
-            variant="contained" 
-            color="primary" 
-            disabled={isSubmitting}
-            sx={{ mt: 3, mb: 2, py: 1.5 }}
-            startIcon={isSubmitting ? <Material3LoadingIndicator size="small" /> : undefined}
-          >
-            {isSubmitting ? t('common.loading') : t('register.registerButton')}
-          </Button>
-          {errors.api && (
-            <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
-              {errors.api}
-            </Typography>
-          )}
-          <Box sx={{ textAlign: 'center' }}>
-            <MuiLink component={Link} href="/login" variant="body2">
-              {t('register.alreadyHaveAccount')} {t('register.loginHere')}
-            </MuiLink>
           </Box>
-        </Box>
+        </Paper>
       </Box>
     </Container>
   );

@@ -1,7 +1,7 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-
+import loggerClient from '@/lib/loggerClient';
 interface SpotifyTrack {
   id: string;
   name: string;
@@ -45,7 +45,7 @@ export function useSpotifyPlayer() {
             if (token) {
               cb(token);
             } else {
-              console.error('No hay token de acceso disponible');
+                loggerClient.error('No hay token de acceso disponible');
             }
           },
           volume: 0.5
@@ -53,13 +53,13 @@ export function useSpotifyPlayer() {
 
         // Configurar event listeners
         spotifyPlayer.addListener('ready', ({ device_id }: { device_id: string }) => {
-          console.log('🎵 Spotify Player listo con Device ID:', device_id);
+            loggerClient.info('🎵 Spotify Player listo con Device ID:', device_id);
           setDeviceId(device_id);
           setIsReady(true);
         });
 
         spotifyPlayer.addListener('not_ready', ({ device_id }: { device_id: string }) => {
-          console.log('🎵 Spotify Player no listo:', device_id);
+            loggerClient.warn('🎵 Spotify Player no listo:', device_id);
           setIsReady(false);
         });
 
@@ -88,17 +88,17 @@ export function useSpotifyPlayer() {
 
   const playPlaylist = useCallback(async (playlistId: string) => {
     if (!isReady) {
-      console.error('❌ El reproductor no está listo');
+        loggerClient.error('❌ El reproductor no está listo');
       return;
     }
 
     try {
-      console.log('🎵 Reproduciendo playlist:', playlistId);
+        loggerClient.info('🎵 Reproduciendo playlist:', playlistId);
 
       // Obtener el token de acceso desde localStorage
       const accessToken = localStorage.getItem('spotify_access_token');
       if (!accessToken) {
-        console.error('❌ No hay token de acceso disponible');
+          loggerClient.error('❌ No hay token de acceso disponible');
         throw new Error('No access token available');
       }
 
@@ -116,65 +116,65 @@ export function useSpotifyPlayer() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Error del endpoint:', errorData);
+          loggerClient.error('❌ Error del endpoint:', errorData);
         throw new Error(errorData.error || 'Failed to start playlist');
       }
 
       const result = await response.json();
-      console.log('✅ Playlist iniciada:', result);
+        loggerClient.info('✅ Playlist iniciada:', result);
 
       // Una vez que la Web API ha iniciado la reproducción,
       // el SDK del navegador debería tomar el control automáticamente
 
     } catch (error) {
-      console.error('❌ Error reproduciendo playlist:', error);
+        loggerClient.error('❌ Error reproduciendo playlist:', error);
 
       // Fallback: intentar usar solo el SDK del navegador
       try {
         if (player) {
-          console.log('🔄 Intentando fallback con SDK del navegador...');
+            loggerClient.debug('🔄 Intentando fallback con SDK del navegador...');
           await player.resume();
-          console.log('✅ Fallback exitoso');
+            loggerClient.info('✅ Fallback exitoso');
         }
       } catch (fallbackError) {
-        console.error('❌ Fallback también falló:', fallbackError);
+          loggerClient.error('❌ Fallback también falló:', fallbackError);
       }
     }
   }, [isReady, player]);
 
   const playTrack = useCallback(async (trackUri: string) => {
     if (!player || !isReady) {
-      console.error('❌ El reproductor no está listo');
+        loggerClient.error('❌ El reproductor no está listo');
       return;
     }
 
     try {
-      console.log('🎵 Reproduciendo track:', trackUri, 'en el navegador');
+        loggerClient.info('🎵 Reproduciendo track:', trackUri, 'en el navegador');
 
       // Usar el SDK del navegador para reproducir el track
       await player.resume();
-      console.log('✅ Track reproduciéndose en el navegador');
+        loggerClient.info('✅ Track reproduciéndose en el navegador');
 
     } catch (error) {
-      console.error('❌ Error reproduciendo track:', error);
+        loggerClient.error('❌ Error reproduciendo track:', error);
     }
   }, [player, isReady]);
 
   const transferPlaybackToWeb = useCallback(async () => {
     if (!deviceId) {
-      console.error('❌ No hay device ID disponible');
+        loggerClient.error('❌ No hay device ID disponible');
       return false;
     }
 
     // Obtener el token de acceso desde localStorage
     const accessToken = localStorage.getItem('spotify_access_token');
     if (!accessToken) {
-      console.error('❌ No hay token de acceso disponible');
+        loggerClient.error('❌ No hay token de acceso disponible');
       return false;
     }
 
     try {
-      console.log('🔄 Transfiriendo reproducción al dispositivo web...');
+        loggerClient.debug('🔄 Transfiriendo reproducción al dispositivo web...');
 
       // Transferir la reproducción al dispositivo web
       const response = await fetch('https://api.spotify.com/v1/me/player', {
@@ -191,34 +191,34 @@ export function useSpotifyPlayer() {
 
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('❌ Error transfiriendo reproducción:', response.status, errorData);
+          loggerClient.error('❌ Error transfiriendo reproducción:', response.status, errorData);
         return false;
       }
 
-      console.log('✅ Reproducción transferida al dispositivo web');
+        loggerClient.info('✅ Reproducción transferida al dispositivo web');
       return true;
 
     } catch (error) {
-      console.error('❌ Error transfiriendo reproducción:', error);
+        loggerClient.error('❌ Error transfiriendo reproducción:', error);
       return false;
     }
   }, [deviceId]);
 
   const activateWebPlayer = useCallback(async () => {
-    console.log('🎵 Activando reproductor web...');
+      loggerClient.debug('🎵 Activando reproductor web...');
 
     // Esperar a que el dispositivo esté listo
     let attempts = 0;
     const maxAttempts = 10;
 
     while (!isReady && attempts < maxAttempts) {
-      console.log(`⏳ Esperando dispositivo... (intento ${attempts + 1}/${maxAttempts})`);
+        loggerClient.debug(`⏳ Esperando dispositivo... (intento ${attempts + 1}/${maxAttempts})`);
       await new Promise(resolve => setTimeout(resolve, 1000));
       attempts++;
     }
 
     if (!isReady) {
-      console.error('❌ El dispositivo no se activó después de', maxAttempts, 'intentos');
+        loggerClient.error('❌ El dispositivo no se activó después de', maxAttempts, 'intentos');
       return false;
     }
 
@@ -233,7 +233,7 @@ export function useSpotifyPlayer() {
     try {
       await player.togglePlay();
     } catch (error) {
-      console.error('Error toggling play/pause:', error);
+        loggerClient.error('Error toggling play/pause:', error);
     }
   }, [player]);
 
@@ -243,7 +243,7 @@ export function useSpotifyPlayer() {
     try {
       await player.nextTrack();
     } catch (error) {
-      console.error('Error skipping to next track:', error);
+        loggerClient.error('Error skipping to next track:', error);
     }
   }, [player]);
 
@@ -253,7 +253,7 @@ export function useSpotifyPlayer() {
     try {
       await player.previousTrack();
     } catch (error) {
-      console.error('Error skipping to previous track:', error);
+        loggerClient.error('Error skipping to previous track:', error);
     }
   }, [player]);
 
@@ -264,7 +264,7 @@ export function useSpotifyPlayer() {
       await player.setVolume(volume / 100);
       setPlayerState(prev => ({ ...prev, volume }));
     } catch (error) {
-      console.error('Error setting volume:', error);
+        loggerClient.error('Error setting volume:', error);
     }
   }, [player]);
 

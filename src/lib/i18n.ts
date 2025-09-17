@@ -194,10 +194,17 @@ export const translations = {
       phones: {
         title: "Teléfonos Importantes",
         emergency: "Emergencias",
+        neighborhoodEmergency: "Emergencias (barrio)",
         police: "Policía",
         hospital: "Hospital",
         municipal: "Municipal",
         utilities: "Servicios Públicos"
+      },
+      residencia: {
+        construction: {
+          title: "En construcción",
+          body: "Esta sección de Residencia está actualmente en construcción. Volveremos pronto con más contenido."
+        }
       }
     },
     // Sitos turísticos
@@ -520,6 +527,12 @@ export const translations = {
         municipal: "Municipal",
         utilities: "Public Services"
       }
+      ,residencia: {
+        construction: {
+          title: "Under construction",
+          body: "This Residence section is currently under construction. We'll be back soon with more content."
+        }
+      }
     },
     // Tourist sites
     sites: {
@@ -839,6 +852,12 @@ export const translations = {
         hospital: "Ospedale",
         municipal: "Municipale",
         utilities: "Servizi Pubblici"
+      }
+      ,residencia: {
+        construction: {
+          title: "In costruzione",
+          body: "Questa sezione Residenza è attualmente in costruzione. Torneremo presto con più contenuti."
+        }
       }
     },
     // Siti turistici
