@@ -13,7 +13,8 @@ interface Props {
 export default function FloatingWhatsAppButton({ phone = '+34649347760', message }: Props) {
   const { t } = useTranslation();
 
-  const url = `https://wa.me/${phone.replace(/[^+0-9]/g, '')}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
+  // Open WhatsApp chat with the phone number only (no prefilled message)
+  const url = `https://wa.me/${phone.replace(/[^+0-9]/g, '')}`;
 
   const fabRef = useRef<HTMLButtonElement | null>(null);
 
