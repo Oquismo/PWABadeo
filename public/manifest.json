@@ -5,24 +5,53 @@
   "display": "standalone",
   "description": "App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.",
   "lang": "es-ES",
+  "dir": "ltr",
   "theme_color": "#18181B",
   "background_color": "#18181B",
-  "icons": [
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["education", "lifestyle", "social", "navigation", "productivity"],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "handle_links": "preferred",
+  "protocol_handlers": [
     {
-      "src": "/icons/icon_192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon_512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "protocol": "web+badeo",
+      "url": "/?url=%s"
     }
   ],
-  "categories": ["education", "lifestyle", "social"],
-  "screenshots": [],
+  "file_handlers": [
+    {
+      "action": "/import",
+      "accept": {
+        "application/json": [".json"],
+        "text/csv": [".csv"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*", "video/*", "audio/*"]
+        }
+      ]
+    }
+  },
   "shortcuts": [
     {
       "name": "Ver Proyectos",
@@ -37,6 +66,82 @@
       "description": "Ver mapa del barrio",
       "url": "/mapa",
       "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Perfil",
+      "short_name": "Perfil",
+      "description": "Ver mi perfil",
+      "url": "/perfil",
+      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calendario",
+      "short_name": "Calendario",
+      "description": "Ver eventos y calendario",
+      "url": "/calendario",
+      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Check-in",
+      "short_name": "Check-in",
+      "description": "Hacer check-in en lugares",
+      "url": "/checkin",
+      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pantalla principal de la app"
+    },
+    {
+      "src": "/screenshots/map-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vista del mapa interactivo"
+    },
+    {
+      "src": "/screenshots/home-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Vista de escritorio completa"
     }
   ]
 }

@@ -205,6 +205,37 @@ export const translations = {
           title: "En construcción",
           body: "Esta sección de Residencia está actualmente en construcción. Volveremos pronto con más contenido."
         }
+      },
+      notifications: {
+        settings: "Configuración de Notificaciones",
+        permissions: "Permisos",
+        permissionRequired: "Se requieren permisos para mostrar notificaciones",
+        permissionDenied: "Los permisos de notificación han sido denegados",
+        permissionGranted: "Permisos de notificación concedidos",
+        enableNotifications: "Habilitar Notificaciones",
+        categories: "Categorías",
+        announcements: "Anuncios",
+        reminders: "Recordatorios",
+        updates: "Actualizaciones",
+        social: "Social",
+        system: "Sistema",
+        general: "General",
+        sound: "Sonido",
+        vibration: "Vibración",
+        scheduled: "Programadas",
+        clearAll: "Limpiar Todas",
+        expired: "Expirado",
+        soon: "Pronto",
+        inDays: "En {{days}} días",
+        inHours: "En {{hours}} horas",
+        inMinutes: "En {{minutes}} minutos",
+        categoriesEnum: {
+          announcement: "Anuncio",
+          reminder: "Recordatorio",
+          update: "Actualización",
+          social: "Social",
+          system: "Sistema"
+        }
       }
     },
     // Sitos turísticos
@@ -532,6 +563,37 @@ export const translations = {
           title: "Under construction",
           body: "This Residence section is currently under construction. We'll be back soon with more content."
         }
+      },
+      notifications: {
+        settings: "Notification Settings",
+        permissions: "Permissions",
+        permissionRequired: "Notification permissions are required",
+        permissionDenied: "Notification permissions have been denied",
+        permissionGranted: "Notification permissions granted",
+        enableNotifications: "Enable Notifications",
+        categories: "Categories",
+        announcements: "Announcements",
+        reminders: "Reminders",
+        updates: "Updates",
+        social: "Social",
+        system: "System",
+        general: "General",
+        sound: "Sound",
+        vibration: "Vibration",
+        scheduled: "Scheduled",
+        clearAll: "Clear All",
+        expired: "Expired",
+        soon: "Soon",
+        inDays: "In {{days}} days",
+        inHours: "In {{hours}} hours",
+        inMinutes: "In {{minutes}} minutes",
+        categoriesEnum: {
+          announcement: "Announcement",
+          reminder: "Reminder",
+          update: "Update",
+          social: "Social",
+          system: "System"
+        }
       }
     },
     // Tourist sites
@@ -857,6 +919,37 @@ export const translations = {
         construction: {
           title: "In costruzione",
           body: "Questa sezione Residenza è attualmente in costruzione. Torneremo presto con più contenuti."
+        }
+      },
+      notifications: {
+        settings: "Impostazioni Notifiche",
+        permissions: "Permessi",
+        permissionRequired: "Sono richiesti i permessi per mostrare le notifiche",
+        permissionDenied: "I permessi di notifica sono stati negati",
+        permissionGranted: "Permessi di notifica concessi",
+        enableNotifications: "Abilita Notifiche",
+        categories: "Categorie",
+        announcements: "Annunci",
+        reminders: "Promemoria",
+        updates: "Aggiornamenti",
+        social: "Social",
+        system: "Sistema",
+        general: "Generale",
+        sound: "Suono",
+        vibration: "Vibrazione",
+        scheduled: "Programmate",
+        clearAll: "Cancella Tutto",
+        expired: "Scaduto",
+        soon: "Presto",
+        inDays: "Tra {{days}} giorni",
+        inHours: "Tra {{hours}} ore",
+        inMinutes: "Tra {{minutes}} minuti",
+        categoriesEnum: {
+          announcement: "Annuncio",
+          reminder: "Promemoria",
+          update: "Aggiornamento",
+          social: "Social",
+          system: "Sistema"
         }
       }
     },
