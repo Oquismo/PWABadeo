@@ -321,7 +321,7 @@ export default function RegistroPage() {
         </Typography>
         {/* Subtítulo eliminado por petición del usuario */}
 
-        <Paper elevation={6} sx={{ width: '100%', p: { xs: 3, sm: 4 }, borderRadius: 3, bgcolor: 'background.paper' }}>
+        <Paper elevation={errors.api ? 12 : 6} sx={{ width: '100%', p: { xs: 3, sm: 4 }, borderRadius: 4, bgcolor: 'background.paper', transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', '&:hover': { boxShadow: '0 12px 40px rgba(20,20,30,0.12)' }, '@keyframes shake': { '0%': { transform: 'translateX(0)' }, '25%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' }, '75%': { transform: 'translateX(-5px)' }, '100%': { transform: 'translateX(0)' } } }}>
           <Box id="register-form" component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 0 }}>
             <Grid container spacing={2}>
 
@@ -341,7 +341,7 @@ export default function RegistroPage() {
                   onChange={handleChange} 
                   error={!!errors.firstName} 
                   helperText={errors.firstName}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><EngineeringIcon color="action" /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><EngineeringIcon color="action" /></InputAdornment>, sx: { borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }, '&.Mui-focused': { boxShadow: '0 6px 20px rgba(0,0,0,0.15)' } } }}
                 />
               </Grid>
 
@@ -350,7 +350,7 @@ export default function RegistroPage() {
               </Grid>
 
               <Grid item xs={12}>
-                <MaterialTextField required fullWidth label={t('register.email')} name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} InputProps={{ startAdornment: <InputAdornment position="start">@</InputAdornment> }} />
+                <MaterialTextField required fullWidth label={t('register.email')} name="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} InputProps={{ startAdornment: <InputAdornment position="start">@</InputAdornment>, sx: { borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }, '&.Mui-focused': { boxShadow: '0 6px 20px rgba(0,0,0,0.15)' } } }} />
               </Grid>
 
               <Grid item xs={12} sm={4}>
@@ -368,6 +368,7 @@ export default function RegistroPage() {
                   onChange={handleChange} 
                   error={!!errors.password} 
                   helperText={errors.password}
+                  InputProps={{ sx: { borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }, '&.Mui-focused': { boxShadow: '0 6px 20px rgba(0,0,0,0.15)' } } }}
                 />
               </Grid>
 
@@ -485,7 +486,7 @@ export default function RegistroPage() {
                   variant="contained" 
                   color="primary" 
                   disabled={isSubmitting}
-                  sx={{ mt: 1, mb: 1.5, py: 1.8, fontWeight: 700, borderRadius: 2 }}
+                  sx={{ mt: 1, mb: 1.5, py: 1.8, fontWeight: 700, borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 25px rgba(98,0,238,0.3)' }, '&:active': { transform: 'translateY(0)' }, '&:disabled': { transform: 'none' } }}
                   startIcon={isSubmitting ? <Material3LoadingIndicator size="small" /> : undefined}
                 >
                   {isSubmitting ? t('common.loading') : t('register.registerButton')}
@@ -494,7 +495,7 @@ export default function RegistroPage() {
 
               {errors.api && (
                 <Grid item xs={12}>
-                  <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                  <Typography color="error" sx={{ mt: 1, textAlign: 'center', animation: 'shake 0.5s ease-in-out' }}>
                     {errors.api}
                   </Typography>
                 </Grid>

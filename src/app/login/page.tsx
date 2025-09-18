@@ -115,13 +115,13 @@ export default function LoginPage() {
   // };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth={false} disableGutters sx={{ bgcolor: 'background.paper', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
       {/* OnboardingTour solo si showTour */}
       {showTour && (
         <OnboardingTour run={showTour} onFinish={handleFinishTour} />
       )}
-      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Paper elevation={4} sx={{ width: '100%', p: 4, borderRadius: 2, position: 'relative' }}>
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', py: 6 }}>
+        <Paper elevation={errors.api ? 12 : 6} sx={{ width: '100%', maxWidth: 460, p: 5, borderRadius: 4, position: 'relative', bgcolor: 'background.default', boxShadow: '0 8px 30px rgba(20,20,30,0.06)', transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', '&:hover': { boxShadow: '0 12px 40px rgba(20,20,30,0.12)' }, '@keyframes shake': { '0%': { transform: 'translateX(0)' }, '25%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' }, '75%': { transform: 'translateX(-5px)' }, '100%': { transform: 'translateX(0)' } } }}>
           <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
             <GlobalLanguageSwitch />
           </Box>
@@ -149,7 +149,10 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               error={!!errors.email}
               helperText={errors.email}
+              variant="outlined"
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }, '&.Mui-focused': { boxShadow: '0 6px 20px rgba(0,0,0,0.15)' } } }}
               InputProps={{
+                sx: { borderRadius: 3 },
                 startAdornment: (
                   <InputAdornment position="start">
                     <Email color="action" />
@@ -169,7 +172,10 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               error={!!errors.password}
               helperText={errors.password}
+              variant="outlined"
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }, '&.Mui-focused': { boxShadow: '0 6px 20px rgba(0,0,0,0.15)' } } }}
               InputProps={{
+                sx: { borderRadius: 3 },
                 startAdornment: (
                   <InputAdornment position="start">
                     <LockOutlined color="action" />
@@ -182,6 +188,7 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(p => !p)}
                       edge="end"
                       size="small"
+                      sx={{ transition: 'transform 0.2s ease', '&:hover': { transform: 'scale(1.1)' } }}
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
@@ -190,9 +197,14 @@ export default function LoginPage() {
               }}
             />
 
-            <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2, py: 1.6, fontWeight: '600' }}>
-              {t('login.submit')}
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1.5, mt: 3 }}>
+              <Button type="button" fullWidth variant="outlined" color="inherit" sx={{ py: 1.4, fontWeight: 600, borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(0,0,0,0.1)' } }} onClick={() => router.push('/registro')}>
+                {t('login.createAccount') || 'Create account'}
+              </Button>
+              <Button type="submit" fullWidth variant="contained" color="primary" sx={{ py: 1.4, fontWeight: 600, borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 25px rgba(98,0,238,0.3)' }, '&:active': { transform: 'translateY(0)' } }}>
+                {t('login.submit')}
+              </Button>
+            </Box>
           {/* Botón Bypass admin oculto en producción */}
           {/*
           <Button onClick={handleBypassAdmin} fullWidth variant="outlined" color="secondary" sx={{ mb: 2, py: 1.5 }} startIcon={<AdminPanelSettingsIcon />}>
@@ -200,7 +212,7 @@ export default function LoginPage() {
           </Button>
           */}
             {errors.api && (
-              <Typography color="error" sx={{ mt: 1, textAlign: 'center' }}>
+              <Typography color="error" sx={{ mt: 1, textAlign: 'center', animation: 'shake 0.5s ease-in-out' }}>
                 {errors.api}
               </Typography>
             )}
