@@ -55,7 +55,25 @@ export function useNotifications(): UseNotificationsReturn {
 
   // Verificar soporte y permisos
   useEffect(() => {
-    if ('Notification' in window) {
+    const isSecureContext = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    const hasNotificationAPI = 'Notification' in window;
+    const hasServiceWorker = 'serviceWorker' in navigator;
+
+    console.log('🔧 useNotifications: Verificando soporte...');
+    console.log('🔧 useNotifications: Contexto seguro:', isSecureContext);
+    console.log('🔧 useNotifications: API Notification disponible:', hasNotificationAPI);
+    console.log('🔧 useNotifications: Service Worker disponible:', hasServiceWorker);
+    console.log('🔧 useNotifications: URL actual:', window.location.href);
+
+    // Para desarrollo local, permitir notificaciones incluso sin HTTPS
+    const isLocalDevelopment = window.location.hostname === 'localhost' ||
+                              window.location.hostname === '127.0.0.1' ||
+                              window.location.hostname.startsWith('192.168.') ||
+                              window.location.hostname.startsWith('10.') ||
+                              window.location.hostname.startsWith('172.');
+
+    if (hasNotificationAPI && (isSecureContext || isLocalDevelopment)) {
+      console.log('✅ useNotifications: Notificaciones soportadas');
       setIsSupported(true);
       setPermission(Notification.permission);
 
@@ -85,6 +103,17 @@ export function useNotifications(): UseNotificationsReturn {
       return () => {
         clearInterval(checkPermissionInterval);
       };
+    } else {
+      console.log('❌ useNotifications: Notificaciones NO soportadas');
+      console.log('❌ Razones:', {
+        hasNotificationAPI,
+        isSecureContext,
+        isLocalDevelopment,
+        protocol: window.location.protocol,
+        hostname: window.location.hostname
+      });
+      setIsSupported(false);
+      setPermission('denied');
     }
 
     // Cargar notificaciones programadas desde localStorage

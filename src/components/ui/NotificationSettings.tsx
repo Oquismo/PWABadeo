@@ -153,15 +153,47 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
   };
 
   if (!isSupported) {
+    const isSecureContext = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    const isLocalNetwork = window.location.hostname.startsWith('192.168.') ||
+                          window.location.hostname.startsWith('10.') ||
+                          window.location.hostname.startsWith('172.');
+
     return (
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle>{t('notifications.settings')}</DialogTitle>
         <DialogContent>
-          <Alert severity="warning">
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              🔍 Diagnóstico de Notificaciones
+            </Typography>
+            <Typography variant="body2">
+              • API Notification: {'Notification' in window ? '✅ Disponible' : '❌ No disponible'}<br/>
+              • Contexto Seguro: {isSecureContext ? '✅ HTTPS/Localhost' : '❌ HTTP'}<br/>
+              • Red Local: {isLocalNetwork ? '✅ Detectada' : '❌ No detectada'}<br/>
+              • URL Actual: {window.location.href}
+            </Typography>
+          </Alert>
+
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              💡 Soluciones:
+            </Typography>
+            <Typography variant="body2">
+              • Para desarrollo local: Las notificaciones funcionan en localhost<br/>
+              • Para móvil: Accede desde http://localhost:3000<br/>
+              • Para producción: Necesitas HTTPS<br/>
+              • Revisa la consola del navegador para más detalles
+            </Typography>
+          </Alert>
+
+          <Alert severity="error">
             {t('notifications.notSupported')}
           </Alert>
         </DialogContent>
         <DialogActions>
+          <Button onClick={refreshPermission} color="secondary" sx={{ mr: 1 }}>
+            🔄 Verificar de Nuevo
+          </Button>
           <Button onClick={onClose}>{t('common.close')}</Button>
         </DialogActions>
       </Dialog>

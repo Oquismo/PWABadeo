@@ -20,13 +20,31 @@ export default function NotificationTest() {
     addResult(`📱 Dispositivo móvil: ${isMobile ? 'Sí' : 'No'}`);
     addResult(`🌐 User Agent: ${navigator.userAgent}`);
 
-    // Verificar soporte
+    // Verificar soporte detallado
+    const isSecureContext = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    const hasNotificationAPI = 'Notification' in window;
+    const hasServiceWorker = 'serviceWorker' in navigator;
+    const isLocalNetwork = window.location.hostname.startsWith('192.168.') ||
+                          window.location.hostname.startsWith('10.') ||
+                          window.location.hostname.startsWith('172.');
+
+    addResult(`🔒 Contexto seguro: ${isSecureContext ? '✅' : '❌'} (${window.location.protocol})`);
+    addResult(`🔔 API Notification: ${hasNotificationAPI ? '✅ Disponible' : '❌ No disponible'}`);
+    addResult(`⚙️ Service Worker: ${hasServiceWorker ? '✅ Disponible' : '❌ No disponible'}`);
+    addResult(`🏠 Red local: ${isLocalNetwork ? '✅ Detectada' : '❌ No detectada'}`);
+    addResult(`🌐 Hostname: ${window.location.hostname}`);
+    addResult(`🔗 URL completa: ${window.location.href}`);
+
+    // Verificar soporte general
     if (isSupported) {
       addResult('✅ Las notificaciones están soportadas');
       addResult(`🔧 Estado del permiso: ${permission}`);
     } else {
-      addResult('❌ Las notificaciones no están soportadas');
-      return;
+      addResult('❌ Las notificaciones NO están soportadas');
+      addResult('💡 Posibles razones:');
+      if (!hasNotificationAPI) addResult('  - El navegador no soporta la API de notificaciones');
+      if (!isSecureContext && !isLocalNetwork) addResult('  - No es un contexto seguro (necesitas HTTPS o localhost)');
+      if (!hasServiceWorker) addResult('  - No hay soporte para Service Worker');
     }
 
     // Verificar localStorage
