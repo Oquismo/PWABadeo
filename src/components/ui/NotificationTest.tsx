@@ -5,7 +5,7 @@ import { Button, Typography, Box, Alert } from '@mui/material';
 import { useNotifications } from '@/hooks/useNotifications';
 
 export default function NotificationTest() {
-  const { isSupported, permission, requestPermission } = useNotifications();
+  const { isSupported, permission, requestPermission, refreshPermission } = useNotifications();
   const [testResults, setTestResults] = useState<string[]>([]);
 
   const addResult = (message: string) => {
@@ -14,6 +14,11 @@ export default function NotificationTest() {
 
   const runTests = () => {
     addResult('🔧 Iniciando pruebas de notificaciones...');
+
+    // Detectar dispositivo
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    addResult(`📱 Dispositivo móvil: ${isMobile ? 'Sí' : 'No'}`);
+    addResult(`🌐 User Agent: ${navigator.userAgent}`);
 
     // Verificar soporte
     if (isSupported) {
@@ -103,6 +108,9 @@ export default function NotificationTest() {
       <Box sx={{ mb: 2 }}>
         <Button variant="contained" onClick={runTests} sx={{ mr: 1 }}>
           Ejecutar Pruebas
+        </Button>
+        <Button variant="outlined" onClick={refreshPermission} sx={{ mr: 1 }}>
+          🔄 Refrescar Permisos
         </Button>
         <Button variant="outlined" onClick={testNotification}>
           Enviar Notificación de Prueba

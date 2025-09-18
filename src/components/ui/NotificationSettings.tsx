@@ -40,6 +40,7 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
     isSupported,
     permission,
     requestPermission,
+    refreshPermission,
     getScheduledNotifications,
     cancelScheduledNotification,
     clearAllScheduled
@@ -88,10 +89,32 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
   };
 
   const handleRequestPermission = async () => {
-    const result = await requestPermission();
-    if (result === 'granted') {
-      buttonClick();
+    try {
+      console.log('🔧 NotificationSettings: Solicitando permisos...');
+      const result = await requestPermission();
+      console.log('🔧 NotificationSettings: Resultado de permisos:', result);
+
+      if (result === 'granted') {
+        buttonClick();
+        console.log('✅ NotificationSettings: Permisos concedidos');
+      } else if (result === 'denied') {
+        console.log('❌ NotificationSettings: Permisos denegados');
+        // En móviles, mostrar instrucciones para habilitar manualmente
+        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          console.log('📱 Dispositivo móvil detectado - permisos denegados');
+        }
+      } else {
+        console.log('⚠️ NotificationSettings: Permisos por defecto');
+      }
+    } catch (error) {
+      console.error('❌ NotificationSettings: Error solicitando permisos:', error);
     }
+  };
+
+  const handleRefreshPermission = () => {
+    console.log('🔧 NotificationSettings: Refrescando permisos manualmente');
+    refreshPermission();
+    buttonClick();
   };
 
   const handleCancelScheduled = (id: string) => {
@@ -168,6 +191,9 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
           {permission === 'denied' && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {t('notifications.permissionDenied')}
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                💡 En móviles: Ve a configuración del navegador → Permisos del sitio → Notificaciones
+              </Typography>
             </Alert>
           )}
 
@@ -177,16 +203,28 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
             </Alert>
           )}
 
-          {permission !== 'granted' && (
+          <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+            {permission !== 'granted' && (
+              <Button
+                variant="contained"
+                onClick={handleRequestPermission}
+                startIcon={<NotificationsIcon />}
+                fullWidth
+              >
+                {t('notifications.enableNotifications')}
+              </Button>
+            )}
+
             <Button
-              variant="contained"
-              onClick={handleRequestPermission}
-              startIcon={<NotificationsIcon />}
+              variant="outlined"
+              onClick={handleRefreshPermission}
+              color="secondary"
               fullWidth
+              sx={{ minWidth: { sm: '140px' } }}
             >
-              {t('notifications.enableNotifications')}
+              🔄 Refrescar Estado
             </Button>
-          )}
+          </Box>
         </Box>
 
         <Divider sx={{ my: 2 }} />

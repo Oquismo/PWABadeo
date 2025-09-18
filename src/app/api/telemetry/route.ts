@@ -67,20 +67,43 @@ export async function GET(request: Request) {
         // send latest events periodically
         const encoder = new TextEncoder();
         let cancelled = false;
+
         const send = () => {
-          if (cancelled) return;
-          const data = JSON.stringify({ time: new Date().toISOString(), events: getEvents().slice(0, 20) });
-          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          if (cancelled || controller.desiredSize === null || controller.desiredSize <= 0) {
+            return;
+          }
+
+          try {
+            const data = JSON.stringify({ time: new Date().toISOString(), events: getEvents().slice(0, 20) });
+            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          } catch (error) {
+            // Stream might be closed, stop the interval
+            loggerClient.warn('Error sending telemetry data, stream might be closed:', error);
+            cancelled = true;
+            clearInterval(id);
+          }
         };
+
         // initial
         send();
         const id = setInterval(send, 2000);
+
         return () => {
           cancelled = true;
           clearInterval(id);
+          try {
+            controller.close();
+          } catch (error) {
+            // Controller might already be closed
+            loggerClient.debug('Controller already closed during cleanup');
+          }
         };
+      },
+      cancel() {
+        loggerClient.debug('Telemetry stream cancelled by client');
       }
     });
+
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
