@@ -80,7 +80,7 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
   }, [open, getScheduledNotifications]);
 
   const handleSettingChange = (key: string, value: boolean) => {
-    console.log(`🔧 NotificationSettings: Cambiando ${key} de ${settings[key]} a ${value}`);
+    console.log(`🔧 NotificationSettings: Cambiando ${key} de ${settings[key as keyof typeof settings]} a ${value}`);
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     localStorage.setItem('notification-settings', JSON.stringify(newSettings));
