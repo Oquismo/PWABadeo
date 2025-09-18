@@ -61,20 +61,26 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
 
   useEffect(() => {
     if (open) {
+      console.log('🔧 NotificationSettings: Abriendo diálogo');
       setScheduled(getScheduledNotifications());
       // Cargar configuraciones guardadas
       const saved = localStorage.getItem('notification-settings');
       if (saved) {
         try {
-          setSettings(JSON.parse(saved));
+          const parsedSettings = JSON.parse(saved);
+          console.log('🔧 NotificationSettings: Configuraciones cargadas:', parsedSettings);
+          setSettings(parsedSettings);
         } catch (error) {
-          console.error('Error loading notification settings:', error);
+          console.error('❌ NotificationSettings: Error loading settings:', error);
         }
+      } else {
+        console.log('🔧 NotificationSettings: Usando configuraciones por defecto');
       }
     }
   }, [open, getScheduledNotifications]);
 
   const handleSettingChange = (key: string, value: boolean) => {
+    console.log(`🔧 NotificationSettings: Cambiando ${key} de ${settings[key]} a ${value}`);
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     localStorage.setItem('notification-settings', JSON.stringify(newSettings));

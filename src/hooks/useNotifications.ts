@@ -59,14 +59,16 @@ export function useNotifications(): UseNotificationsReturn {
       setPermission(Notification.permission);
     }
 
-    // Cargar notificaciones programadas desde localStorage
+  // Cargar notificaciones programadas desde localStorage
     const saved = localStorage.getItem('scheduled-notifications');
+    console.log('🔧 useNotifications: Notificaciones programadas guardadas:', saved);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        console.log('🔧 useNotifications: Notificaciones programadas parseadas:', parsed);
         setScheduledNotifications(parsed);
       } catch (error) {
-        console.error('Error loading scheduled notifications:', error);
+        console.error('❌ useNotifications: Error loading scheduled notifications:', error);
       }
     }
   }, []);
