@@ -49,10 +49,29 @@ export async function POST(request: Request) {
     if (!persisted) {
       pushEvent(ev as any);
     }
-    return NextResponse.json({ ok: true, event: ev, persisted });
+    return NextResponse.json(
+      { ok: true, event: ev, persisted },
+      {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      }
+    );
   } catch (e) {
   loggerClient.error('Error en /api/telemetry POST:', e);
-    return NextResponse.json({ ok: false, error: 'invalid json' }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: 'invalid json' },
+      {
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      }
+    );
   }
 }
 
@@ -116,9 +135,29 @@ export async function GET(request: Request) {
   // default: summary
   try {
     const summary = getSummary();
-    return NextResponse.json({ ok: true, summary });
+    return NextResponse.json(
+      { ok: true, summary },
+      {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      }
+    );
   } catch (e) {
   loggerClient.error('Error en /api/telemetry GET:', e);
-    return NextResponse.json({ ok: false }, { status: 500 });
+    return NextResponse.json(
+      { ok: false },
+      {
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      }
+    );
   }
 }
