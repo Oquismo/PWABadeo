@@ -38,12 +38,7 @@ temp_*
 *.temp
 
 # test files (local testing only)
-test-*.js
-test-*.ts
-test-*.tsx
-*-test.js
-*-test.ts
-*-test.tsx
+/scripts/
 
 # backup and old files
 *.backup
@@ -102,4 +97,4 @@ cookies.txt
 /scripts/test-service-worker.bat
 /scripts/verify-dark-mode.js
 /scripts/temp/
- 
+
