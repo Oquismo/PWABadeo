@@ -6,7 +6,7 @@ import loggerClient from '@/lib/loggerClient';
 async function tryPersistToDb(ev: any) {
   try {
     // importar dinámicamente para evitar fallos si prisma client no está generado en algunos entornos
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line
     const { PrismaClient } = require('@prisma/client');
     // Reutilizar instancia global para evitar crear/destruir en cada petición
     const _global = (globalThis as any);

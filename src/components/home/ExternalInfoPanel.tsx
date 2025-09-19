@@ -325,6 +325,7 @@ export default function ExternalInfoPanel() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const theme = useTheme();
+  const { t } = useTranslation();
   const url = buildWeatherUrl(LAT, LON);
 
   // Detectar tema del sistema
@@ -475,7 +476,6 @@ export default function ExternalInfoPanel() {
   }
 
   const currentWeather = weather;
-  const { t } = useTranslation();
   const weatherInfo = currentWeather ? weatherCodeMap[currentWeather.weathercode] : null;
 
   // Header background opacity configurable vía NEXT_PUBLIC_WEATHER_HEADER_OPACITY (0..1).

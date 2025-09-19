@@ -315,7 +315,6 @@ export default function ProjectsDashboard() {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* Traducción del contador de proyectos */}
               {(() => {
-                const { t } = useTranslation();
                 // Reemplazo manual de {{count}} por el valor
                 const countText = t('pages.home.projectsCount').replace('{{count}}', orderedTasks.length.toString());
                 return (

@@ -59,24 +59,36 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
     sound: true,
     vibration: true
   });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  // Función para cargar configuraciones desde localStorage
+  const loadSettings = () => {
+    const saved = localStorage.getItem('notification-settings');
+    if (saved) {
+      try {
+        const parsedSettings = JSON.parse(saved);
+        console.log('🔧 NotificationSettings: Configuraciones cargadas:', parsedSettings);
+        setSettings(parsedSettings);
+      } catch (error) {
+        console.error('❌ NotificationSettings: Error loading settings:', error);
+      }
+    } else {
+      console.log('🔧 NotificationSettings: Usando configuraciones por defecto');
+    }
+    setSettingsLoaded(true);
+  };
+
+  // Cargar configuraciones al montar el componente
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
   useEffect(() => {
     if (open) {
       console.log('🔧 NotificationSettings: Abriendo diálogo');
       setScheduled(getScheduledNotifications());
-      // Cargar configuraciones guardadas
-      const saved = localStorage.getItem('notification-settings');
-      if (saved) {
-        try {
-          const parsedSettings = JSON.parse(saved);
-          console.log('🔧 NotificationSettings: Configuraciones cargadas:', parsedSettings);
-          setSettings(parsedSettings);
-        } catch (error) {
-          console.error('❌ NotificationSettings: Error loading settings:', error);
-        }
-      } else {
-        console.log('🔧 NotificationSettings: Usando configuraciones por defecto');
-      }
+      // Recargar configuraciones por si cambiaron mientras estaba cerrado
+      loadSettings();
     }
   }, [open, getScheduledNotifications]);
 
@@ -84,7 +96,13 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
     console.log(`🔧 NotificationSettings: Cambiando ${key} de ${settings[key as keyof typeof settings]} a ${value}`);
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
-    localStorage.setItem('notification-settings', JSON.stringify(newSettings));
+    // Guardar inmediatamente en localStorage
+    try {
+      localStorage.setItem('notification-settings', JSON.stringify(newSettings));
+      console.log('✅ NotificationSettings: Configuraciones guardadas correctamente');
+    } catch (error) {
+      console.error('❌ NotificationSettings: Error guardando configuraciones:', error);
+    }
     buttonClick();
   };
 
@@ -267,7 +285,12 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
             {t('notifications.categories')}
           </Typography>
 
-          <List>
+          {!settingsLoaded ? (
+            <Typography variant="body2" sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+              🔄 Cargando configuraciones...
+            </Typography>
+          ) : (
+            <List>
             <ListItem>
               <ListItemText primary={t('notifications.announcements')} />
               <ListItemSecondaryAction>
@@ -318,6 +341,7 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
               </ListItemSecondaryAction>
             </ListItem>
           </List>
+          )}
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -328,7 +352,12 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
             {t('notifications.general')}
           </Typography>
 
-          <List>
+          {!settingsLoaded ? (
+            <Typography variant="body2" sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+              🔄 Cargando configuraciones...
+            </Typography>
+          ) : (
+            <List>
             <ListItem>
               <ListItemText primary={t('notifications.sound')} />
               <ListItemSecondaryAction>
@@ -349,6 +378,7 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
               </ListItemSecondaryAction>
             </ListItem>
           </List>
+          )}
         </Box>
 
         {/* Notificaciones programadas */}
