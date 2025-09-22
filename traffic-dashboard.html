@@ -212,6 +212,28 @@
             background: #5a67d8;
         }
 
+        .quick-urls {
+            margin-bottom: 15px;
+        }
+
+        .quick-url-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-url-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
         .instructions {
             background: #e8f4fd;
             border: 1px solid #b3d9ff;
@@ -255,6 +277,15 @@
                 </ol>
             </div>
             <input type="text" id="api-url" class="config-input" placeholder="https://pwa-badeo.vercel.app" value="https://pwa-badeo.vercel.app">
+
+            <!-- URLs rápidas -->
+            <div class="quick-urls">
+                <p style="margin: 10px 0 5px 0; font-size: 0.9rem; color: #666;">URLs rápidas:</p>
+                <button class="quick-url-btn" onclick="setQuickUrl('https://pwa-badeo.vercel.app')">🌐 Producción</button>
+                <button class="quick-url-btn" onclick="setQuickUrl('http://localhost:3000')">🏠 Localhost</button>
+                <button class="quick-url-btn" onclick="setQuickUrl('http://127.0.0.1:3000')">🔧 127.0.0.1</button>
+            </div>
+
             <button class="config-btn" onclick="testConnection()">🔗 Probar Conexión</button>
             <button class="config-btn" onclick="saveConfig()" style="margin-left: 10px;">💾 Guardar Config</button>
         </div>
@@ -327,7 +358,21 @@
             if (saved) {
                 API_BASE = saved;
                 document.getElementById('api-url').value = saved;
+            } else {
+                // Detectar automáticamente si estamos en localhost
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    API_BASE = 'http://localhost:3000';
+                    document.getElementById('api-url').value = API_BASE;
+                }
             }
+        }
+
+        // Configurar URLs rápidas
+        function setQuickUrl(url) {
+            document.getElementById('api-url').value = url;
+            API_BASE = url;
+            localStorage.setItem('traffic-dashboard-api-url', url);
+            showSuccess(`URL configurada: ${url}`);
         }
 
         // Guardar configuración
