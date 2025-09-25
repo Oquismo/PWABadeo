@@ -16,20 +16,20 @@ export const placesData: Place[] = [
   {
     id: 'residencia-amro',
     name: 'Residencia AMRO Sevilla',
-    description: 'Residencia universitaria con excelente ubicación cerca del centro. Habitaciones individuales y zonas comunes.',
+    description: 'Residencia universitaria en Barrio de los Bermejales. Habitaciones individuales, dobles y TWODIOS. Piscina en azotea, gimnasio, lavandería a gettoni. Autobús 37 al lado, Mercadona a 8 min.',
     category: 'Residencia',
     coordinates: { lat: 37.35195144264452, lng: -5.97526460125809 }, // Coordenadas exactas de Google Maps
-    address: 'C. Elche, C. Ali Al-Gomari, 41013 Sevilla',
+    address: 'C. Elche, C. Ali Al-Gomari, 41013 Sevilla (BARRIO DE LOS BERMEJALES)',
     link: 'https://www.residenciauniversitaria.es/'
   },
   {
   
     id: 'residencia-estanislao',
     name: 'Residencia Estanislao',
-    description: 'Residencia para estudiantes con buena ubicación y servicios básicos. Ideal para quienes estudian en el centro de Sevilla.',
+    description: 'Residencia universitaria con piscina, cancha de padel y gimnasio. Habitaciones individuales, dobles y con litera. Lavandería a gettoni. Cash Fresh a 6 min.',
     category: 'Residencia',
     coordinates: { lat: 37.35645121300518, lng: -5.978122866568905 },
-    address: 'Zona Residencial, Sevilla',
+    address: 'Ctra. Su Eminencia, 2A, 41013 Sevilla',
     link: ''
   },
 

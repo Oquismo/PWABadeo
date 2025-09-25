@@ -84,3 +84,6 @@ next-env.d.ts
 .github/chatmodes/ejemplo 1.chatmode.md
 cookies.txt
  
+TRAFFIC_DASHBOARD_README.md
+*.bat
+*.md
