@@ -6,7 +6,7 @@ import loggerClient from '@/lib/loggerClient';
 async function tryPersistToDb(ev: any) {
   try {
     // importar dinámicamente para evitar fallos si prisma client no está generado en algunos entornos
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line
     const { PrismaClient } = require('@prisma/client');
     // Reutilizar instancia global para evitar crear/destruir en cada petición
     const _global = (globalThis as any);
@@ -49,10 +49,29 @@ export async function POST(request: Request) {
     if (!persisted) {
       pushEvent(ev as any);
     }
-    return NextResponse.json({ ok: true, event: ev, persisted });
+    return NextResponse.json(
+      { ok: true, event: ev, persisted },
+      {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      }
+    );
   } catch (e) {
   loggerClient.error('Error en /api/telemetry POST:', e);
-    return NextResponse.json({ ok: false, error: 'invalid json' }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: 'invalid json' },
+      {
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      }
+    );
   }
 }
 
@@ -67,20 +86,43 @@ export async function GET(request: Request) {
         // send latest events periodically
         const encoder = new TextEncoder();
         let cancelled = false;
+
         const send = () => {
-          if (cancelled) return;
-          const data = JSON.stringify({ time: new Date().toISOString(), events: getEvents().slice(0, 20) });
-          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          if (cancelled || controller.desiredSize === null || controller.desiredSize <= 0) {
+            return;
+          }
+
+          try {
+            const data = JSON.stringify({ time: new Date().toISOString(), events: getEvents().slice(0, 20) });
+            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          } catch (error) {
+            // Stream might be closed, stop the interval
+            loggerClient.warn('Error sending telemetry data, stream might be closed:', error);
+            cancelled = true;
+            clearInterval(id);
+          }
         };
+
         // initial
         send();
         const id = setInterval(send, 2000);
+
         return () => {
           cancelled = true;
           clearInterval(id);
+          try {
+            controller.close();
+          } catch (error) {
+            // Controller might already be closed
+            loggerClient.debug('Controller already closed during cleanup');
+          }
         };
+      },
+      cancel() {
+        loggerClient.debug('Telemetry stream cancelled by client');
       }
     });
+
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
@@ -93,9 +135,29 @@ export async function GET(request: Request) {
   // default: summary
   try {
     const summary = getSummary();
-    return NextResponse.json({ ok: true, summary });
+    return NextResponse.json(
+      { ok: true, summary },
+      {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      }
+    );
   } catch (e) {
   loggerClient.error('Error en /api/telemetry GET:', e);
-    return NextResponse.json({ ok: false }, { status: 500 });
+    return NextResponse.json(
+      { ok: false },
+      {
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      }
+    );
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Typography, Box, Paper, Stack, CircularProgress, IconButton } from '@mui/material';
+import { Container, Typography, Box, Paper, Stack, CircularProgress, IconButton, Button } from '@mui/material';
 import MaterialSwitch from '@/components/MaterialSwitch';
 import { useState } from 'react';
 import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
@@ -19,8 +19,11 @@ export default function AjustesPage() {
     isLoading,
     error,
     permission,
+    needsLogin,
+    serviceWorkerReady,
     subscribeToPush,
-    unsubscribeFromPush
+    unsubscribeFromPush,
+    checkPermissions
   } = usePushNotifications();
   
   const {
@@ -91,9 +94,12 @@ export default function AjustesPage() {
                   await hapticButtonClick();
                 }
               }}
-              disabled={!isSupported || isLoading}
+              disabled={!isSupported || isLoading || needsLogin || !serviceWorkerReady}
               inputProps={{ 'aria-label': 'Permitir notificaciones push' }}
             />
+            {isLoading && (
+              <CircularProgress size={20} sx={{ ml: 1 }} />
+            )}
           </Stack>
           <Typography
             variant="body2"
@@ -103,18 +109,76 @@ export default function AjustesPage() {
                 ? 'success.main'
                 : permission === 'denied'
                   ? 'error.main'
-                  : 'text.secondary'
+                  : needsLogin
+                    ? 'warning.main'
+                    : !serviceWorkerReady
+                      ? 'warning.main'
+                      : 'text.secondary'
             }}
           >
-            {isSubscribed
-              ? 'Notificaciones activadas'
-              : permission === 'denied'
-                ? 'Permiso denegado'
-                : 'Pulsa el switch para activar las notificaciones push'}
-            {error && (
-              <span style={{ color: 'red', marginLeft: 8 }}>{error}</span>
-            )}
+            {needsLogin
+              ? 'Debes iniciar sesión para activar las notificaciones'
+              : !isSupported
+                ? 'Tu navegador no soporta notificaciones push. Verifica la consola para más detalles.'
+                : !serviceWorkerReady
+                  ? 'Service Worker no está listo. Recarga la página.'
+                  : isSubscribed
+                    ? 'Notificaciones activadas'
+                    : permission === 'denied'
+                      ? 'Permiso denegado. Revisa la configuración de tu navegador.'
+                      : 'Pulsa el switch para activar las notificaciones push'}
           </Typography>
+
+          {/* Error message separado */}
+          {error && (
+            <Box sx={{ mt: 1, p: 1, bgcolor: 'error.light', borderRadius: 1 }}>
+              <Typography variant="body2" color="error.main" sx={{ fontWeight: 'medium' }}>
+                ⚠️ Error: {error}
+              </Typography>
+            </Box>
+          )}
+
+          {/* Botones de acción */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {permission === 'denied' && !needsLogin && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={checkPermissions}
+                disabled={isLoading}
+              >
+                Verificar permisos
+              </Button>
+            )}
+
+            {!isSupported && !needsLogin && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  console.log('🔍 Ejecutando diagnóstico de notificaciones...');
+                  if (typeof window !== 'undefined' && (window as any).diagnoseNotifications) {
+                    const result = (window as any).diagnoseNotifications();
+                    console.table(result);
+                  } else {
+                    console.log('Función de diagnóstico no disponible');
+                  }
+                }}
+              >
+                Diagnosticar APIs
+              </Button>
+            )}
+
+            {error && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => window.location.reload()}
+              >
+                Recargar página
+              </Button>
+            )}
+          </Box>
           
           {/* Control de vibraciones hápticas */}
           {hapticsSupported && (

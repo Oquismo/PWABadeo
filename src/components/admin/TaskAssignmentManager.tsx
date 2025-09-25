@@ -240,7 +240,7 @@ const TaskAssignmentManager: React.FC<TaskAssignmentManagerProps> = ({ userId })
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">
-              Asignar "{selectedTask.title}" a grupos
+              Asignar &quot;{selectedTask.title}&quot; a grupos
             </h3>
             
             <div className="space-y-2 max-h-60 overflow-y-auto mb-4">

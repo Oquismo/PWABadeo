@@ -40,6 +40,7 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
     isSupported,
     permission,
     requestPermission,
+    refreshPermission,
     getScheduledNotifications,
     cancelScheduledNotification,
     clearAllScheduled
@@ -58,34 +59,80 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
     sound: true,
     vibration: true
   });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  // Función para cargar configuraciones desde localStorage
+  const loadSettings = () => {
+    const saved = localStorage.getItem('notification-settings');
+    if (saved) {
+      try {
+        const parsedSettings = JSON.parse(saved);
+        console.log('🔧 NotificationSettings: Configuraciones cargadas:', parsedSettings);
+        setSettings(parsedSettings);
+      } catch (error) {
+        console.error('❌ NotificationSettings: Error loading settings:', error);
+      }
+    } else {
+      console.log('🔧 NotificationSettings: Usando configuraciones por defecto');
+    }
+    setSettingsLoaded(true);
+  };
+
+  // Cargar configuraciones al montar el componente
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
   useEffect(() => {
     if (open) {
+      console.log('🔧 NotificationSettings: Abriendo diálogo');
       setScheduled(getScheduledNotifications());
-      // Cargar configuraciones guardadas
-      const saved = localStorage.getItem('notification-settings');
-      if (saved) {
-        try {
-          setSettings(JSON.parse(saved));
-        } catch (error) {
-          console.error('Error loading notification settings:', error);
-        }
-      }
+      // Recargar configuraciones por si cambiaron mientras estaba cerrado
+      loadSettings();
     }
   }, [open, getScheduledNotifications]);
 
   const handleSettingChange = (key: string, value: boolean) => {
+    console.log(`🔧 NotificationSettings: Cambiando ${key} de ${settings[key as keyof typeof settings]} a ${value}`);
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
-    localStorage.setItem('notification-settings', JSON.stringify(newSettings));
+    // Guardar inmediatamente en localStorage
+    try {
+      localStorage.setItem('notification-settings', JSON.stringify(newSettings));
+      console.log('✅ NotificationSettings: Configuraciones guardadas correctamente');
+    } catch (error) {
+      console.error('❌ NotificationSettings: Error guardando configuraciones:', error);
+    }
     buttonClick();
   };
 
   const handleRequestPermission = async () => {
-    const result = await requestPermission();
-    if (result === 'granted') {
-      buttonClick();
+    try {
+      console.log('🔧 NotificationSettings: Solicitando permisos...');
+      const result = await requestPermission();
+      console.log('🔧 NotificationSettings: Resultado de permisos:', result);
+
+      if (result === 'granted') {
+        buttonClick();
+        console.log('✅ NotificationSettings: Permisos concedidos');
+      } else if (result === 'denied') {
+        console.log('❌ NotificationSettings: Permisos denegados');
+        // En móviles, mostrar instrucciones para habilitar manualmente
+        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          console.log('📱 Dispositivo móvil detectado - permisos denegados');
+        }
+      } else {
+        console.log('⚠️ NotificationSettings: Permisos por defecto');
+      }
+    } catch (error) {
+      console.error('❌ NotificationSettings: Error solicitando permisos:', error);
     }
+  };
+
+  const handleRefreshPermission = () => {
+    console.log('🔧 NotificationSettings: Refrescando permisos manualmente');
+    refreshPermission();
+    buttonClick();
   };
 
   const handleCancelScheduled = (id: string) => {
@@ -124,15 +171,47 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
   };
 
   if (!isSupported) {
+    const isSecureContext = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    const isLocalNetwork = window.location.hostname.startsWith('192.168.') ||
+                          window.location.hostname.startsWith('10.') ||
+                          window.location.hostname.startsWith('172.');
+
     return (
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle>{t('notifications.settings')}</DialogTitle>
         <DialogContent>
-          <Alert severity="warning">
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              🔍 Diagnóstico de Notificaciones
+            </Typography>
+            <Typography variant="body2">
+              • API Notification: {'Notification' in window ? '✅ Disponible' : '❌ No disponible'}<br/>
+              • Contexto Seguro: {isSecureContext ? '✅ HTTPS/Localhost' : '❌ HTTP'}<br/>
+              • Red Local: {isLocalNetwork ? '✅ Detectada' : '❌ No detectada'}<br/>
+              • URL Actual: {window.location.href}
+            </Typography>
+          </Alert>
+
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              💡 Soluciones:
+            </Typography>
+            <Typography variant="body2">
+              • Para desarrollo local: Las notificaciones funcionan en localhost<br/>
+              • Para móvil: Accede desde http://localhost:3000<br/>
+              • Para producción: Necesitas HTTPS<br/>
+              • Revisa la consola del navegador para más detalles
+            </Typography>
+          </Alert>
+
+          <Alert severity="error">
             {t('notifications.notSupported')}
           </Alert>
         </DialogContent>
         <DialogActions>
+          <Button onClick={refreshPermission} color="secondary" sx={{ mr: 1 }}>
+            🔄 Verificar de Nuevo
+          </Button>
           <Button onClick={onClose}>{t('common.close')}</Button>
         </DialogActions>
       </Dialog>
@@ -162,6 +241,9 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
           {permission === 'denied' && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {t('notifications.permissionDenied')}
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                💡 En móviles: Ve a configuración del navegador → Permisos del sitio → Notificaciones
+              </Typography>
             </Alert>
           )}
 
@@ -171,16 +253,28 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
             </Alert>
           )}
 
-          {permission !== 'granted' && (
+          <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+            {permission !== 'granted' && (
+              <Button
+                variant="contained"
+                onClick={handleRequestPermission}
+                startIcon={<NotificationsIcon />}
+                fullWidth
+              >
+                {t('notifications.enableNotifications')}
+              </Button>
+            )}
+
             <Button
-              variant="contained"
-              onClick={handleRequestPermission}
-              startIcon={<NotificationsIcon />}
+              variant="outlined"
+              onClick={handleRefreshPermission}
+              color="secondary"
               fullWidth
+              sx={{ minWidth: { sm: '140px' } }}
             >
-              {t('notifications.enableNotifications')}
+              🔄 Refrescar Estado
             </Button>
-          )}
+          </Box>
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -191,7 +285,12 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
             {t('notifications.categories')}
           </Typography>
 
-          <List>
+          {!settingsLoaded ? (
+            <Typography variant="body2" sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+              🔄 Cargando configuraciones...
+            </Typography>
+          ) : (
+            <List>
             <ListItem>
               <ListItemText primary={t('notifications.announcements')} />
               <ListItemSecondaryAction>
@@ -242,6 +341,7 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
               </ListItemSecondaryAction>
             </ListItem>
           </List>
+          )}
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -252,7 +352,12 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
             {t('notifications.general')}
           </Typography>
 
-          <List>
+          {!settingsLoaded ? (
+            <Typography variant="body2" sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+              🔄 Cargando configuraciones...
+            </Typography>
+          ) : (
+            <List>
             <ListItem>
               <ListItemText primary={t('notifications.sound')} />
               <ListItemSecondaryAction>
@@ -273,6 +378,7 @@ export default function NotificationSettings({ open, onClose }: NotificationSett
               </ListItemSecondaryAction>
             </ListItem>
           </List>
+          )}
         </Box>
 
         {/* Notificaciones programadas */}

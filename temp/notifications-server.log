@@ -1,0 +1,8 @@
+  ▲ Next.js 14.2.4
+  - Local:        http://localhost:3000
+  - Network:      http://[::1]:3000
+  - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 2.5s
+[?25h

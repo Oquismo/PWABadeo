@@ -40,6 +40,7 @@ interface UseNotificationsReturn {
   isSupported: boolean;
   permission: NotificationPermission;
   requestPermission: () => Promise<NotificationPermission>;
+  refreshPermission: () => void;
   sendNotification: (options: NotificationOptions) => Promise<void>;
   scheduleNotification: (notification: ScheduledNotification) => void;
   cancelScheduledNotification: (id: string) => void;
@@ -54,22 +55,80 @@ export function useNotifications(): UseNotificationsReturn {
 
   // Verificar soporte y permisos
   useEffect(() => {
-    if ('Notification' in window) {
+    const isSecureContext = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    const hasNotificationAPI = 'Notification' in window;
+    const hasServiceWorker = 'serviceWorker' in navigator;
+
+    console.log('🔧 useNotifications: Verificando soporte...');
+    console.log('🔧 useNotifications: Contexto seguro:', isSecureContext);
+    console.log('🔧 useNotifications: API Notification disponible:', hasNotificationAPI);
+    console.log('🔧 useNotifications: Service Worker disponible:', hasServiceWorker);
+    console.log('🔧 useNotifications: URL actual:', window.location.href);
+
+    // Para desarrollo local, permitir notificaciones incluso sin HTTPS
+    const isLocalDevelopment = window.location.hostname === 'localhost' ||
+                              window.location.hostname === '127.0.0.1' ||
+                              window.location.hostname.startsWith('192.168.') ||
+                              window.location.hostname.startsWith('10.') ||
+                              window.location.hostname.startsWith('172.');
+
+    if (hasNotificationAPI && (isSecureContext || isLocalDevelopment)) {
+      console.log('✅ useNotifications: Notificaciones soportadas');
       setIsSupported(true);
       setPermission(Notification.permission);
+
+      // Listener para cambios de permisos (útil en móviles)
+      const handlePermissionChange = () => {
+        console.log('🔧 useNotifications: Permiso cambió a:', Notification.permission);
+        setPermission(Notification.permission);
+      };
+
+      // Algunos navegadores soportan el evento change
+      if ('permissions' in navigator) {
+        navigator.permissions.query({ name: 'notifications' }).then(result => {
+          result.addEventListener('change', handlePermissionChange);
+        }).catch(err => {
+          console.warn('🔧 useNotifications: No se pudo agregar listener de permisos:', err);
+        });
+      }
+
+      // Fallback: verificar permisos periódicamente en móviles
+      const checkPermissionInterval = setInterval(() => {
+        if (Notification.permission !== permission) {
+          console.log('🔧 useNotifications: Permiso cambió (detectado por polling):', Notification.permission);
+          setPermission(Notification.permission);
+        }
+      }, 2000); // Verificar cada 2 segundos
+
+      return () => {
+        clearInterval(checkPermissionInterval);
+      };
+    } else {
+      console.log('❌ useNotifications: Notificaciones NO soportadas');
+      console.log('❌ Razones:', {
+        hasNotificationAPI,
+        isSecureContext,
+        isLocalDevelopment,
+        protocol: window.location.protocol,
+        hostname: window.location.hostname
+      });
+      setIsSupported(false);
+      setPermission('denied');
     }
 
     // Cargar notificaciones programadas desde localStorage
     const saved = localStorage.getItem('scheduled-notifications');
+    console.log('🔧 useNotifications: Notificaciones programadas guardadas:', saved);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        console.log('🔧 useNotifications: Notificaciones programadas parseadas:', parsed);
         setScheduledNotifications(parsed);
       } catch (error) {
-        console.error('Error loading scheduled notifications:', error);
+        console.error('❌ useNotifications: Error loading scheduled notifications:', error);
       }
     }
-  }, []);
+  }, [permission]);
 
   // Solicitar permisos
   const requestPermission = useCallback(async (): Promise<NotificationPermission> => {
@@ -174,10 +233,20 @@ export function useNotifications(): UseNotificationsReturn {
     localStorage.removeItem('scheduled-notifications');
   }, []);
 
+  // Función para refrescar permisos manualmente
+  const refreshPermission = useCallback(() => {
+    if ('Notification' in window) {
+      const currentPermission = Notification.permission;
+      console.log('🔧 useNotifications: Refrescando permisos - Actual:', currentPermission);
+      setPermission(currentPermission);
+    }
+  }, []);
+
   return {
     isSupported,
     permission,
     requestPermission,
+    refreshPermission,
     sendNotification,
     scheduleNotification,
     cancelScheduledNotification,

@@ -683,7 +683,7 @@ export default function SchoolManagement() {
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Estás seguro de que deseas eliminar la escuela "{deleteConfirmOpen?.name}"?
+            ¿Estás seguro de que deseas eliminar la escuela &quot;{deleteConfirmOpen?.name}&quot;?
           </Typography>
           {deleteConfirmOpen?.users && deleteConfirmOpen.users.length > 0 && (
             <Alert severity="warning" sx={{ mt: 2 }}>

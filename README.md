@@ -153,3 +153,46 @@ Script Node (ejemplo):
 ---
 
 Si necesitas que aplique el SQL o ejecute backups desde esta máquina, confirma explícitamente y lo haré (necesitaré autorización). En caso contrario, usa este archivo como referencia y ejecútalo desde tu entorno.
+
+---
+
+## 🔔 Notificaciones Push - Guía Rápida
+
+### ❌ Problema Común: "Tu navegador no soporta notificaciones"
+
+Si ves este error al acceder desde una IP local (ej: `192.168.1.120`), es porque las notificaciones push requieren **contexto seguro** (HTTPS o localhost).
+
+### ✅ Solución Rápida
+
+```bash
+# Ejecuta este comando:
+scripts\quick-start.bat
+
+# O manualmente:
+npm run dev
+# Accede desde: http://localhost:3000
+```
+
+### 🔍 Diagnóstico
+
+En la consola del navegador (F12), ejecuta:
+```javascript
+diagnoseNotifications()
+```
+
+Deberías ver:
+- `isSecureContext: true` ✅
+- `hasServiceWorker: true` ✅
+- `isSupported: true` ✅
+
+### 📱 Para Acceso desde Móvil
+
+1. Ejecuta en localhost
+2. Desde tu teléfono: `http://[IP_DE_TU_PC]:3000`
+3. Para notificaciones completas: configura HTTPS (ver `scripts/setup-https.bat`)
+
+### 📚 Más Información
+
+- `NOTIFICATIONS-HTTPS-README.md` - Guía completa
+- `scripts/setup-https.bat` - Configuración HTTPS
+- `scripts/check-browser-apis.bat` - Diagnóstico de APIs

@@ -38,12 +38,7 @@ temp_*
 *.temp
 
 # test files (local testing only)
-test-*.js
-test-*.ts
-test-*.tsx
-*-test.js
-*-test.ts
-*-test.tsx
+/scripts/
 
 # backup and old files
 *.backup
@@ -83,7 +78,3 @@ next-env.d.ts
 /noname
 .github/chatmodes/ejemplo 1.chatmode.md
 cookies.txt
- 
-TRAFFIC_DASHBOARD_README.md
-*.bat
-*.md
