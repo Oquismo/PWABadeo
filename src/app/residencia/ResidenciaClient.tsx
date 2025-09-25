@@ -117,7 +117,7 @@ function MapComponentWrapper({ specificKey, overrideKey }: { specificKey?: strin
 export default function ResidenciaClient() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [openConstruction, setOpenConstruction] = React.useState(true);
+  const [openConstruction, setOpenConstruction] = React.useState(false);
 
   const handleCloseConstruction = () => setOpenConstruction(false);
   
@@ -133,27 +133,45 @@ export default function ResidenciaClient() {
       website: 'https://www.livinnx.com/'
     },
     AMBRO: {
-      title: 'Residencia Ambro',
+      title: 'Residencia AMRO',
       image: '/img/AMRO.webp',
-      wifi: { ssid: 'Ambro-WiFi', password: 'ambro2025' },
-      receptionPhone: '+34 600 333 444',
-      notes: 'Edificio sur, acceso por patio. Gimnasio en planta -1.',
+      wifi: { ssid: 'AMRO-WiFi', password: '(preguntar en recepción)' },
+      receptionPhone: '+34 955 31 40 88',
+      address: 'C. Elche, C. Ali Al-Gomari, 41013 Sevilla (BARRIO DE LOS BERMEJALES)',
+      transport: 'La parada del autobús (el 37) está literalmente al lado de la residencia',
+      services: 'Mercadona a 8 min a pie',
+      roomTypes: 'Individuales, Dobles estándar (dos camas con baño compartido), TWODIOS (dos hab. individuales + dos baños privados + zona común con cocina)',
+      amenities: 'Amplias zonas comunes, piscina en la azotea, lavandería de autoservicio (a gettoni), plancha (solicitar en recepción), gimnasio',
+      meals: 'Pensión completa. Comida para llevar con 24-48h de antelación en recepción',
+      rules: 'Horarios de silencio desde las 23:00 hasta la mañana siguiente por respeto a los estudiantes universitarios',
+      notes: 'No hay secadores de pelo (solicitar en recepción). No hay jabón/champú pero encontrarán bolsa de bienvenida en las habitaciones.',
       website: '#'
     },
     ESTANISLAO: {
       title: 'Residencia Estanislao',
       image: '/img/Estanislao.jpg',
-      wifi: { ssid: 'Estanislao-WiFi', password: 'estani2025' },
-      receptionPhone: '+34 600 555 666',
-      notes: 'Residencia céntrica con zonas de estudio y servicios.',
+      wifi: { ssid: 'Estanislao-WiFi', password: '(preguntar en recepción)' },
+      receptionPhone: '(preguntar en recepción)',
+      address: 'Ctra. Su Eminencia, 2A, 41013 Sevilla',
+      services: 'Cash Fresh a 6 min a pie',
+      roomTypes: 'Individuales, Dobles estándar (dos camas con baño compartido), Doble litera',
+      amenities: 'Amplias zonas comunes, piscina, cancha de padel, lavandería de autoservicio (a gettoni), plancha (solicitar en recepción), gimnasio',
+      meals: 'Pensión completa. Comida para llevar con 24-48h de antelación en recepción',
+      rules: 'Horarios de silencio desde las 23:00 hasta la mañana siguiente por respeto a los estudiantes universitarios',
+      notes: 'No hay secadores de pelo (solicitar en recepción). No hay jabón/champú pero encontrarán bolsa de bienvenida en las habitaciones.',
       website: '#'
     },
     ARMENDARIZ: {
       title: 'Micampus Armendáriz',
       image: '/img/Armendari.jpg',
-      wifi: { ssid: 'Armendariz-WiFi', password: 'armenda2025' },
-      receptionPhone: '+34 600 777 888',
-      notes: 'Ubicada cerca de campus; entrada por C. Armendáriz.',
+      wifi: { ssid: 'Armendariz-WiFi', password: '(preguntar en recepción)' },
+      receptionPhone: '(preguntar en recepción)',
+      address: 'Ctra. Su Eminencia, 15, 41013 Sevilla',
+      services: 'Cash Fresh a 6 min a pie',
+      roomTypes: 'Individuales, Dobles estándar (dos camas con baño compartido), Doble apartamento (dos hab. individuales + dos baños privados + zona común con cocina)',
+      amenities: 'Zonas comunes, lavandería de autoservicio (a gettoni), plancha (solicitar en recepción), pequeño gimnasio',
+      meals: 'Pensión completa. Comida para llevar con 24-48h de antelación en recepción',
+      notes: 'No hay secadores de pelo (solicitar en recepción). No hay jabón/champú pero encontrarán bolsa de bienvenida en las habitaciones.',
       website: 'https://www.micampus.com/'
     }
   };
@@ -214,6 +232,16 @@ export default function ResidenciaClient() {
 
               <Divider sx={{ my: 2 }} />
 
+              {/* Dirección específica */}
+              {(residenciaKey === 'AMBRO' || residenciaKey === 'ESTANISLAO') && specific?.address && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom>Dirección</Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    {specific.address}
+                  </Typography>
+                </>
+              )}
+
               <Typography variant="subtitle1" gutterBottom>Wi‑Fi</Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 <strong>{specific?.wifi?.ssid ?? 'Residencia-Guest'}</strong>
@@ -256,47 +284,289 @@ export default function ResidenciaClient() {
             <CardContent>
               <Typography variant="h6" gutterBottom>Servicios destacados</Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Card variant="outlined" sx={{ p: 1 }}>
-                    <CardContent>
-                      <Typography variant="subtitle2">Recepción 24h</Typography>
-                      <Typography variant="body2" color="text.secondary">Atención en el hall; recogida de paquetes.</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Card variant="outlined" sx={{ p: 1 }}>
-                    <CardContent>
-                      <Typography variant="subtitle2">Lavandería</Typography>
-                      <Typography variant="body2" color="text.secondary">Máquina autoservicio en sótano.</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Card variant="outlined" sx={{ p: 1 }}>
-                    <CardContent>
-                      <Typography variant="subtitle2">Gimnasio</Typography>
-                      <Typography variant="body2" color="text.secondary">Acceso para residentes; horario 6:00 — 23:00.</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Card variant="outlined" sx={{ p: 1 }}>
-                    <CardContent>
-                      <Typography variant="subtitle2">Limpieza</Typography>
-                      <Typography variant="body2" color="text.secondary">Cambio de ropa de cama 1 vez/semana.</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                {/* Servicios específicos por residencia */}
+                {residenciaKey === 'AMBRO' ? (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Piscina en azotea</Typography>
+                          <Typography variant="body2" color="text.secondary">Acceso para residentes durante el día.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Lavandería a gettoni</Typography>
+                          <Typography variant="body2" color="text.secondary">Autoservicio con monedas/fichas.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Gimnasio</Typography>
+                          <Typography variant="body2" color="text.secondary">Acceso para residentes.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Plancha</Typography>
+                          <Typography variant="body2" color="text.secondary">Solicitar en recepción.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Transporte</Typography>
+                          <Typography variant="body2" color="text.secondary">Autobús 37 al lado de la residencia.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Mercadona</Typography>
+                          <Typography variant="body2" color="text.secondary">A 8 minutos a pie.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  </>
+                ) : residenciaKey === 'ESTANISLAO' ? (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Piscina</Typography>
+                          <Typography variant="body2" color="text.secondary">Acceso para residentes.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Cancha de Padel</Typography>
+                          <Typography variant="body2" color="text.secondary">Para residentes y invitados.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Lavandería a gettoni</Typography>
+                          <Typography variant="body2" color="text.secondary">Autoservicio con monedas/fichas.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Gimnasio</Typography>
+                          <Typography variant="body2" color="text.secondary">Acceso para residentes.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Plancha</Typography>
+                          <Typography variant="body2" color="text.secondary">Solicitar en recepción.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Cash Fresh</Typography>
+                          <Typography variant="body2" color="text.secondary">A 6 minutos a pie.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  </>
+                ) : residenciaKey === 'ARMENDARIZ' ? (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Zonas comunes</Typography>
+                          <Typography variant="body2" color="text.secondary">Espacios de convivencia para residentes.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Lavandería a gettoni</Typography>
+                          <Typography variant="body2" color="text.secondary">Autoservicio con monedas/fichas.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Pequeño gimnasio</Typography>
+                          <Typography variant="body2" color="text.secondary">Equipamiento básico para residentes.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Plancha</Typography>
+                          <Typography variant="body2" color="text.secondary">Solicitar en recepción.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Cash Fresh</Typography>
+                          <Typography variant="body2" color="text.secondary">A 6 minutos a pie.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  </>
+                ) : (
+                  <>
+                    {/* Servicios generales para otras residencias */}
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Recepción 24h</Typography>
+                          <Typography variant="body2" color="text.secondary">Atención en el hall; recogida de paquetes.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Lavandería</Typography>
+                          <Typography variant="body2" color="text.secondary">Máquina autoservicio en sótano.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Gimnasio</Typography>
+                          <Typography variant="body2" color="text.secondary">Acceso para residentes; horario 6:00 — 23:00.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 1 }}>
+                        <CardContent>
+                          <Typography variant="subtitle2">Limpieza</Typography>
+                          <Typography variant="body2" color="text.secondary">Cambio de ropa de cama 1 vez/semana.</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  </>
+                )}
               </Grid>
 
               <Divider sx={{ my: 2 }} />
 
+              {/* Información específica por residencia */}
+              {(residenciaKey === 'AMBRO' || residenciaKey === 'ESTANISLAO' || residenciaKey === 'ARMENDARIZ') && (
+                <>
+                  <Typography variant="h6" gutterBottom>Tipología de Habitaciones</Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Individuales" 
+                        secondary="Habitación individual con baño privado" 
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Dobles estándar" 
+                        secondary="Dos camas en la misma habitación con baño compartido" 
+                      />
+                    </ListItem>
+                    {residenciaKey === 'AMBRO' ? (
+                      <ListItem>
+                        <ListItemText 
+                          primary="TWODIOS" 
+                          secondary="Dos habitaciones individuales + dos baños privados + zona común con cocina" 
+                        />
+                      </ListItem>
+                    ) : residenciaKey === 'ESTANISLAO' ? (
+                      <ListItem>
+                        <ListItemText 
+                          primary="Doble litera" 
+                          secondary="Habitación con litera para dos personas" 
+                        />
+                      </ListItem>
+                    ) : residenciaKey === 'ARMENDARIZ' ? (
+                      <ListItem>
+                        <ListItemText 
+                          primary="Doble apartamento" 
+                          secondary="Dos habitaciones individuales + dos baños privados + zona común con cocina" 
+                        />
+                      </ListItem>
+                    ) : null}
+                  </List>
+
+                  <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Pensión Completa</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Se puede pedir comida para llevar con 24-48h de antelación directamente en recepción.
+                  </Typography>
+
+                  <Typography variant="h6" gutterBottom>Información Importante</Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Secadores de pelo" 
+                        secondary="No hay en las habitaciones. Se puede pedir prestado en recepción." 
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Amenities" 
+                        secondary="No hay jabón/champú, pero encontrarán bolsa de bienvenida en las habitaciones." 
+                      />
+                    </ListItem>
+                  </List>
+
+                  <Divider sx={{ my: 2 }} />
+                </>
+              )}
+
               <Typography variant="h6" gutterBottom>Normas rápidas</Typography>
               <List>
-                <ListItem><ListItemText primary="Mantener silencio" secondary="A partir de las 23:00" /></ListItem>
-                <ListItem><ListItemText primary="No fumar" secondary="Prohibido en zonas interiores" /></ListItem>
-                <ListItem><ListItemText primary="Respeto" secondary="Cuidar espacios comunes" /></ListItem>
+                {(residenciaKey === 'AMBRO' || residenciaKey === 'ESTANISLAO' || residenciaKey === 'ARMENDARIZ') ? (
+                  <>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Horarios de silencio" 
+                        secondary="Desde las 23:00 hasta la mañana siguiente por respeto a los estudiantes universitarios" 
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Residencia universitaria" 
+                        secondary="Recordamos que se trata de una residencia universitaria" 
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Respeto" 
+                        secondary="Cuidar espacios comunes y respetar a otros residentes" 
+                      />
+                    </ListItem>
+                  </>
+                ) : (
+                  <>
+                    <ListItem><ListItemText primary="Mantener silencio" secondary="A partir de las 23:00" /></ListItem>
+                    <ListItem><ListItemText primary="No fumar" secondary="Prohibido en zonas interiores" /></ListItem>
+                    <ListItem><ListItemText primary="Respeto" secondary="Cuidar espacios comunes" /></ListItem>
+                  </>
+                )}
               </List>
 
               <Divider sx={{ my: 2 }} />

@@ -78,24 +78,3 @@ next-env.d.ts
 /noname
 .github/chatmodes/ejemplo 1.chatmode.md
 cookies.txt
-
-# local scripts (development only)
-/scripts/check-*.bat
-/scripts/check-*.cmd
-/scripts/check-*.js
-/scripts/diagnose-*.bat
-/scripts/full-test-suite.bat
-/scripts/host-simple.bat
-/scripts/notifications-test.bat
-/scripts/open-browser.bat
-/scripts/quick-start.bat
-/scripts/setup-https.bat
-/scripts/start-*.bat
-/scripts/start-*.sh
-/scripts/test-*.bat
-/scripts/test-*.js
-/scripts/test-service-worker.bat
-/scripts/verify-dark-mode.js
-/scripts/temp/
-
-TRAFFIC_DASHBOARD_README.md
