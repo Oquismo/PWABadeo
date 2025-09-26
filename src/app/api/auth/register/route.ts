@@ -13,6 +13,7 @@ export async function POST(request: Request) {
       name,
       age,
       schoolId,
+      residence,
       arrivalDate,
       departureDate,
       country,
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
         if (age) userData.age = parseInt(age, 10);
         // Solo asignar schoolId si no es admin o si se proporciona
         if (schoolId && assignedRole !== 'admin') userData.schoolId = parseInt(schoolId, 10);
+        if (residence) userData.residence = residence; // Guardar residencia seleccionada
         if (arrivalDate) userData.arrivalDate = arrivalDate;
         if (departureDate) userData.departureDate = departureDate;
         if (country) userData.country = country;

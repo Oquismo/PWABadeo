@@ -53,6 +53,7 @@ export async function POST(request: Request) {
         age: user.age ?? null,
         schoolId: user.schoolId ?? null,
         school: user.school ?? null,
+        residence: (user as any).residence ?? null, // Incluir residencia desde la base de datos
         avatarUrl: user.avatarUrl ?? null,
         arrivalDate: user.arrivalDate ?? null,
         departureDate: user.departureDate ?? null,

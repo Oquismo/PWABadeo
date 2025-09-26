@@ -86,17 +86,7 @@ export async function GET(req: Request) {
       }
     });
     
-    // Seed básico si vacío
-    if (!tasks.length && !schoolId && !userId) {
-      await tasksClient.createMany({
-        data: [
-          { title: 'Proyecto Base', description: 'Ejemplo inicial', color: 'linear-gradient(135deg,#667eea,#764ba2)', role: 'user', progress: 0, comun: true },
-          { title: 'Coordinación', description: 'Card admin de ejemplo', color: 'linear-gradient(135deg,#f093fb,#f5576c)', role: 'admin', progress: 0, comun: true }
-        ]
-      });
-      const seeded = await tasksClient.findMany({ orderBy: { createdAt: 'desc' } });
-      return NextResponse.json({ tasks: seeded, seeded: true });
-    }
+    // No crear tareas de ejemplo automáticamente
     
     return NextResponse.json({ tasks });
   } catch (e: any) {

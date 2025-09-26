@@ -247,6 +247,7 @@ export default function RegistroPage() {
         password: formData.password,
         age: parseInt(formData.age, 10),
         schoolId: isAdminRegistration ? null : selectedSchool?.id,
+        residence: formData.residence || null, // Incluir residencia seleccionada
         arrivalDate: formData.arrivalDate,
         departureDate: formData.departureDate,
         // Derivar ubicación desde la escuela seleccionada cuando esté presente

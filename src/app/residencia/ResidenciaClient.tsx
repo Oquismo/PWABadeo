@@ -183,6 +183,25 @@ export default function ResidenciaClient() {
   // Fallback image
   const imageSrc = specific?.image ?? '/img/logo.png';
 
+  // Coordenadas de las residencias (desde places.ts)
+  const residenciaCoordinates: Record<string, { lat: number; lng: number }> = {
+    AMBRO: { lat: 37.35195144264452, lng: -5.97526460125809 },
+    ESTANISLAO: { lat: 37.35645121300518, lng: -5.978122866568905 },
+    ARMENDARIZ: { lat: 37.357238681403636, lng: -5.976824126984121 },
+    ONE: { lat: 37.3895687188777, lng: -5.9916432331313185 } // Coordenadas por defecto si no está definida
+  };
+
+  // Función para abrir Google Maps con ruta desde ubicación actual
+  const openGoogleMapsRoute = () => {
+    const coords = residenciaKey && residenciaCoordinates[residenciaKey] 
+      ? residenciaCoordinates[residenciaKey]
+      : residenciaCoordinates.AMBRO; // Fallback a AMBRO
+    
+    // URL de Google Maps con ruta desde ubicación actual hasta la residencia
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}&travelmode=walking`;
+    window.open(mapsUrl, '_blank');
+  };
+
   // Lista de residencias para interacción rápida
   // quick-select removed; keep content mapping only
 
@@ -578,8 +597,13 @@ export default function ResidenciaClient() {
               </Box>
 
               <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button variant="outlined" startIcon={<PlaceIcon />}>Ver en mapa grande</Button>
-                <Button variant="contained" startIcon={<LocalPhoneIcon />} href={`tel:${specific?.receptionPhone ?? '+34123456789'}`}>Llamar</Button>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<PlaceIcon />}
+                  onClick={openGoogleMapsRoute}
+                >
+                  Ver ruta en Google Maps
+                </Button>
               </Stack>
             </CardContent>
           </Card>

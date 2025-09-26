@@ -33,7 +33,7 @@ model User {
   country          String?           @default("Italia") // País del usuario
   city             String? // Ciudad del usuario
   town             String? // Pueblo/Municipio del usuario
-  // residence        String? // Residencia elegida por el usuario (p. ej. 'ONE' o 'AMBRO') - TEMPORALMENTE COMENTADO
+  residence        String? // Residencia elegida por el usuario (p. ej. 'ONE' o 'AMBRO')
   announcements    Announcement[]
   logs             Log[]
   tasks            Task[]
