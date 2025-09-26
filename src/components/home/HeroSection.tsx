@@ -1,6 +1,5 @@
 "use client";
 import { Box, Typography, Avatar, Stack, IconButton } from '@mui/material';
-import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import NotificationsPanel from '@/components/home/NotificationsPanel';
@@ -130,8 +129,6 @@ export default function HeroSection() {
 
         {/* Parte Derecha: Iconos de Acción */}
         <Stack direction="row" spacing={1}>
-          {/* Icono de cambio de idioma adaptado a Material Google, junto a ajustes */}
-          <GlobalLanguageSwitch />
           <Link href="/ajustes" passHref>
             <IconButton>
               <TuneIcon sx={{ color: 'text.secondary' }} />

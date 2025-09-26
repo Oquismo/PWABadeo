@@ -1,0 +1,2941 @@
+[
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 59,
+    "text": "Cargando panel de administración...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 70,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 71,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 72,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 73,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 74,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 75,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 76,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 77,
+    "text": ", component:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\page.tsx",
+    "line": 106,
+    "text": "Administrador",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\tasks-schools\\page.tsx",
+    "line": 51,
+    "text": "Cargando...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\tasks-schools\\page.tsx",
+    "line": 67,
+    "text": "Error de Acceso",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\admin\\tasks-schools\\page.tsx",
+    "line": 91,
+    "text": "Administración de Tasks por Escuelas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\barrio-santa-cruz\\page.tsx",
+    "line": 63,
+    "text": "Horario",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\barrio-santa-cruz\\page.tsx",
+    "line": 68,
+    "text": "Qué ver",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\barrio-santa-cruz\\page.tsx",
+    "line": 77,
+    "text": "Cómo llegar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\barrio-santa-cruz\\page.tsx",
+    "line": 79,
+    "text": "Abrir en Maps",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\barrio-santa-cruz\\page.tsx",
+    "line": 86,
+    "text": "Plaza de España",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\barrio-santa-cruz\\page.tsx",
+    "line": 89,
+    "text": "Alcázar",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\create-school\\page.tsx",
+    "line": 157,
+    "text": "ID:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\create-school\\page.tsx",
+    "line": 158,
+    "text": "Nombre:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\create-school\\page.tsx",
+    "line": 159,
+    "text": "Ciudad:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\create-school\\page.tsx",
+    "line": 160,
+    "text": "Teléfono:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\create-school\\page.tsx",
+    "line": 161,
+    "text": "Email:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\forgot-password\\page.tsx",
+    "line": 123,
+    "text": "Email",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\forgot-password\\page.tsx",
+    "line": 135,
+    "text": "tu@email.com",
+    "kind": "prop",
+    "prop": "placeholder"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 132,
+    "text": "Política de Privacidad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 134,
+    "text": "Información que recopilamos:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 136,
+    "text": "Datos de registro (nombre, correo electrónico, etc.)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 137,
+    "text": "Información de uso y actividad dentro de la app",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 138,
+    "text": "Datos de ubicación (si el usuario lo permite)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 140,
+    "text": "Uso de la información:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 142,
+    "text": "Mejorar la experiencia y los servicios ofrecidos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 143,
+    "text": "Personalizar el contenido y las notificaciones",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 144,
+    "text": "Contactar al usuario en caso necesario",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 146,
+    "text": "Protección de datos:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 146,
+    "text": "La información se almacena de forma segura y no se comparte con terceros salvo obligación legal o consentimiento explícito del usuario.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 147,
+    "text": "Contacto:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\layout.tsx",
+    "line": 159,
+    "text": "Aceptar y continuar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 328,
+    "text": "Preparando tu información para editar",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 337,
+    "text": "Verificando autenticación...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 481,
+    "text": "Residencia seleccionada",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 491,
+    "text": "Residencia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 496,
+    "text": "Residencia",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 499,
+    "text": "Ninguna",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 500,
+    "text": "ONE (Residencia ONE)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 501,
+    "text": "AMBRO (Residencia AMRO)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 502,
+    "text": "Estanislao",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 503,
+    "text": "Armendáriz",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 516,
+    "text": "Residencia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 521,
+    "text": "Residencia",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 524,
+    "text": "Ninguna",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 525,
+    "text": "ONE",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 526,
+    "text": "Ambro",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 535,
+    "text": "Nombre Completo",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 558,
+    "text": "Escuela",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 576,
+    "text": "Edad",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 598,
+    "text": "Fecha de Llegada",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 617,
+    "text": "Fecha de Salida",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 655,
+    "text": "País",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 659,
+    "text": "País",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 662,
+    "text": "Italia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 663,
+    "text": "España",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 684,
+    "text": "Ciudad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 688,
+    "text": "Ciudad",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 691,
+    "text": "Selecciona una ciudad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 710,
+    "text": "Localidad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 714,
+    "text": "Localidad",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 717,
+    "text": "Selecciona una localidad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\editar\\page.tsx",
+    "line": 765,
+    "text": "Elegir Avatar",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\page.tsx",
+    "line": 126,
+    "text": "Obteniendo información de tu cuenta",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\page.tsx",
+    "line": 137,
+    "text": "Verificando autenticación...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\page.tsx",
+    "line": 159,
+    "text": "Notificaciones",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\page.tsx",
+    "line": 182,
+    "text": "Mi Perfil",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\perfil\\page.tsx",
+    "line": 216,
+    "text": "Mantén presionado para ver notificaciones",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 253,
+    "text": "Monitoreo Activo",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 265,
+    "text": "Preloading Inteligente",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 277,
+    "text": "Modo Debug",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 299,
+    "text": "Lazy Loading",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 300,
+    "text": "Imágenes Optimizadas",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 301,
+    "text": "Preloading Inteligente",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 302,
+    "text": "Info del Dispositivo",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 318,
+    "text": "Viewport-based Loading",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 324,
+    "text": "Skeleton Fallbacks",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 330,
+    "text": "Error Boundaries",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 360,
+    "text": "Imagen optimizada 1",
+    "kind": "prop",
+    "prop": "alt"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\performance-demo\\page.tsx",
+    "line": 372,
+    "text": "Imagen optimizada 2",
+    "kind": "prop",
+    "prop": "alt"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 12,
+    "text": "Barrio de Oportunidades",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 14,
+    "text": "1. Información que recopilamos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 16,
+    "text": "Datos de registro (nombre, correo electrónico, etc.)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 17,
+    "text": "Información de uso y actividad dentro de la app",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 18,
+    "text": "Datos de ubicación (si el usuario lo permite)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 20,
+    "text": "2. Uso de la información",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 22,
+    "text": "Mejorar la experiencia y los servicios ofrecidos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 23,
+    "text": "Personalizar el contenido y las notificaciones",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 24,
+    "text": "Contactar al usuario en caso necesario",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 26,
+    "text": "3. Protección de datos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 30,
+    "text": "4. Derechos del usuario",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 32,
+    "text": "Acceder, modificar o eliminar sus datos personales",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 33,
+    "text": "Solicitar información sobre el tratamiento de sus datos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 34,
+    "text": "Retirar el consentimiento en cualquier momento",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 36,
+    "text": "5. Cambios en la política",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\privacidad\\page.tsx",
+    "line": 40,
+    "text": "Contacto",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\proyectos\\page.tsx",
+    "line": 136,
+    "text": "add to favorites",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\proyectos\\page.tsx",
+    "line": 143,
+    "text": "share",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\proyectos\\[projectId]\\page.tsx",
+    "line": 18,
+    "text": "Proyecto no encontrado",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\proyectos\\[projectId]\\page.tsx",
+    "line": 44,
+    "text": "Proyecto",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\recomendaciones\\RecomendacionesClient.tsx",
+    "line": 206,
+    "text": "Buscar restaurantes, cocina o especialidades...",
+    "kind": "prop",
+    "prop": "placeholder"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\recomendaciones\\RecomendacionesClient.tsx",
+    "line": 234,
+    "text": "Tipo de cocina",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\recomendaciones\\RecomendacionesClient.tsx",
+    "line": 237,
+    "text": "Tipo de cocina",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\recomendaciones\\RecomendacionesClient.tsx",
+    "line": 246,
+    "text": "Todos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\recomendaciones\\RecomendacionesClient.tsx",
+    "line": 254,
+    "text": "Rango de precio",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\recomendaciones\\RecomendacionesClient.tsx",
+    "line": 257,
+    "text": "Rango de precio",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\recomendaciones\\RecomendacionesClient.tsx",
+    "line": 266,
+    "text": "Todos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 332,
+    "text": "Datos personales",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 359,
+    "text": "Edad",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 379,
+    "text": "Centro / Residencia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 407,
+    "text": "Residencia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 412,
+    "text": "Residencia",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 415,
+    "text": "Ninguna",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 416,
+    "text": "ONE (Residencia ONE)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 417,
+    "text": "AMBRO (Residencia AMRO)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 418,
+    "text": "Estanislao",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 419,
+    "text": "Armendáriz",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 430,
+    "text": "Fechas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 440,
+    "text": "Fecha de Llegada",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 454,
+    "text": "Fecha de Salida",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\registro\\page.tsx",
+    "line": 470,
+    "text": "Código Admin (opcional)",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\reset-password\\page.tsx",
+    "line": 233,
+    "text": "Nueva Contraseña",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\reset-password\\page.tsx",
+    "line": 273,
+    "text": "Confirmar Contraseña",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 97,
+    "text": "Debug residencias:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 98,
+    "text": "Valor original:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 99,
+    "text": "Normalizado:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 100,
+    "text": "Fuzzy encontrado:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 215,
+    "text": "close",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 247,
+    "text": "Información y servicios principales",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 258,
+    "text": "Dirección",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 271,
+    "text": "Contacto",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 290,
+    "text": "Horarios",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 305,
+    "text": "Servicios destacados",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 313,
+    "text": "Piscina en azotea",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 314,
+    "text": "Acceso para residentes durante el día.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 321,
+    "text": "Lavandería a gettoni",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 322,
+    "text": "Autoservicio con monedas/fichas.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 329,
+    "text": "Gimnasio",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 330,
+    "text": "Acceso para residentes.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 337,
+    "text": "Plancha",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 338,
+    "text": "Solicitar en recepción.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 345,
+    "text": "Transporte",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 346,
+    "text": "Autobús 37 al lado de la residencia.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 353,
+    "text": "Mercadona",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 354,
+    "text": "A 8 minutos a pie.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 364,
+    "text": "Piscina",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 365,
+    "text": "Acceso para residentes.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 372,
+    "text": "Cancha de Padel",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 373,
+    "text": "Para residentes y invitados.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 380,
+    "text": "Lavandería a gettoni",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 381,
+    "text": "Autoservicio con monedas/fichas.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 388,
+    "text": "Gimnasio",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 389,
+    "text": "Acceso para residentes.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 396,
+    "text": "Plancha",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 397,
+    "text": "Solicitar en recepción.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 404,
+    "text": "Cash Fresh",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 405,
+    "text": "A 6 minutos a pie.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 415,
+    "text": "Zonas comunes",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 416,
+    "text": "Espacios de convivencia para residentes.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 423,
+    "text": "Lavandería a gettoni",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 424,
+    "text": "Autoservicio con monedas/fichas.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 431,
+    "text": "Pequeño gimnasio",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 432,
+    "text": "Equipamiento básico para residentes.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 439,
+    "text": "Plancha",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 440,
+    "text": "Solicitar en recepción.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 447,
+    "text": "Cash Fresh",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 448,
+    "text": "A 6 minutos a pie.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 459,
+    "text": "Recepción 24h",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 467,
+    "text": "Lavandería",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 468,
+    "text": "Máquina autoservicio en sótano.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 475,
+    "text": "Gimnasio",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 483,
+    "text": "Limpieza",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 484,
+    "text": "Cambio de ropa de cama 1 vez/semana.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 497,
+    "text": "Tipología de Habitaciones",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 535,
+    "text": "Pensión Completa",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 540,
+    "text": "Información Importante",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 560,
+    "text": "Normas rápidas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\residencia\\ResidenciaClient.tsx",
+    "line": 594,
+    "text": "¿Dónde está?",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\test-notifications\\page.tsx",
+    "line": 8,
+    "text": "Página de Pruebas de Notificaciones",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\traffic-dashboard\\page.tsx",
+    "line": 20,
+    "text": "Dashboard de Tráfico",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\app\\unauthorized\\page.tsx",
+    "line": 56,
+    "text": "Este intento de acceso ha sido registrado",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\activity\\AdminActivityPanel.tsx",
+    "line": 30,
+    "text": "Actividad (Beta)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\activity\\AdminActivityPanel.tsx",
+    "line": 31,
+    "text": "Refrescar",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\activity\\AdminActivityPanel.tsx",
+    "line": 54,
+    "text": "Sin registros.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 295,
+    "text": "DEV MODE",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 314,
+    "text": "Tareas Activas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 320,
+    "text": "Items en Storage",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 328,
+    "text": "Rol Actual",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 336,
+    "text": "Fecha",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 347,
+    "text": "Herramientas de Testing",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 423,
+    "text": "Análisis de Rendimiento",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 437,
+    "text": "Resultados:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 473,
+    "text": "Depuración y Logs",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 483,
+    "text": "Modo Debug (logs en consola)",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 535,
+    "text": "Información del Sistema",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 571,
+    "text": "Análisis de Usuarios",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 628,
+    "text": "Seguridad y Auditoría",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 686,
+    "text": "Backup y Restauración",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 734,
+    "text": "Optimización y Mantenimiento",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 757,
+    "text": "Métricas Avanzadas",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 769,
+    "text": "CPU Usage",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 773,
+    "text": "Memory",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 774,
+    "text": "1.2GB",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 777,
+    "text": "Network",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 778,
+    "text": "4G",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdminDevTools.tsx",
+    "line": 781,
+    "text": "Battery",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AdvancedDebugMetrics.tsx",
+    "line": 244,
+    "text": "🔄 Reset Contadores",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AnnouncementManager.tsx",
+    "line": 87,
+    "text": "Gestionar Anuncio Global",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AnnouncementManager.tsx",
+    "line": 92,
+    "text": "Anuncio Activo:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AnnouncementManager.tsx",
+    "line": 100,
+    "text": "Nuevo Anuncio",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AnnouncementManager.tsx",
+    "line": 101,
+    "text": "Escribe un mensaje corto...",
+    "kind": "prop",
+    "prop": "placeholder"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 186,
+    "text": "Sistema de Autenticación y Debug",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 187,
+    "text": "ACCESO RESTRINGIDO: Estas herramientas solo están disponibles desde el panel de administración. Cualquier intento de acceso directo será bloqueado y registrado.",
+    "kind": "prop",
+    "prop": "message"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 219,
+    "text": "Gestión de Usuarios",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 246,
+    "text": "bcrypt ✓",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 248,
+    "text": "Texto plano ⚠️",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 264,
+    "text": "Resetear Contraseña",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 271,
+    "text": "Email del usuario",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 281,
+    "text": "Nueva contraseña",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 307,
+    "text": "Test de Login",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 314,
+    "text": "Email",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\AuthDebugPanel.tsx",
+    "line": 322,
+    "text": "Contraseña",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 87,
+    "text": "Añadir Nuevo Evento",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 90,
+    "text": "Título del Evento",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 91,
+    "text": "Descripción Corta",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 92,
+    "text": "URL de la Imagen",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 93,
+    "text": "Escuela Asociada",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 94,
+    "text": "Fecha del Evento",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 95,
+    "text": "Añadir a la Lista",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 102,
+    "text": "Eventos Actuales",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\EventManagement.tsx",
+    "line": 108,
+    "text": "delete",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\LogViewer.tsx",
+    "line": 62,
+    "text": "Registro de Actividad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\page.tsx",
+    "line": 62,
+    "text": "Eventos",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\page.tsx",
+    "line": 63,
+    "text": "Usuarios",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\page.tsx",
+    "line": 64,
+    "text": "Logs Local",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\page.tsx",
+    "line": 65,
+    "text": "Actividad DB (Beta)",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 413,
+    "text": "Nombre",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 414,
+    "text": "Ciudad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 415,
+    "text": "Tipo",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 416,
+    "text": "Nivel",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 417,
+    "text": "Usuarios",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 418,
+    "text": "Contacto",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 419,
+    "text": "Acciones",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 480,
+    "text": "Editar",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 485,
+    "text": "Eliminar",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 511,
+    "text": "Nombre de la Escuela *",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 521,
+    "text": "Dirección",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 531,
+    "text": "Ciudad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 534,
+    "text": "Ciudad",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 537,
+    "text": "Todas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 547,
+    "text": "Provincia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 550,
+    "text": "Provincia",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 563,
+    "text": "Comune",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 566,
+    "text": "Comune",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 579,
+    "text": "País",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 582,
+    "text": "País",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 585,
+    "text": "Italia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 586,
+    "text": "España",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 594,
+    "text": "Teléfono",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 603,
+    "text": "Email",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 613,
+    "text": "Sitio Web",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 616,
+    "text": "https://...",
+    "kind": "prop",
+    "prop": "placeholder"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 622,
+    "text": "Tipo de Escuela",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 625,
+    "text": "Tipo de Escuela",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 639,
+    "text": "Nivel Educativo",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 642,
+    "text": "Nivel Educativo",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 645,
+    "text": "Scuola Primaria",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 646,
+    "text": "Secondaria di Primo Grado",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 647,
+    "text": "Secondaria di Secondo Grado",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 648,
+    "text": "Università",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 656,
+    "text": "Descripción",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 661,
+    "text": "Información adicional sobre la escuela...",
+    "kind": "prop",
+    "prop": "placeholder"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 667,
+    "text": "Cancelar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 683,
+    "text": "Confirmar Eliminación",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SchoolManagement.tsx",
+    "line": 696,
+    "text": "Cancelar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SecurityWarning.tsx",
+    "line": 14,
+    "text": "Zona de Administración",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SecurityWarning.tsx",
+    "line": 15,
+    "text": "Esta área contiene herramientas de debug y administración. Solo accesible para administradores.",
+    "kind": "prop",
+    "prop": "message"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\SecurityWarning.tsx",
+    "line": 34,
+    "text": "ADMIN ONLY",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskAssignmentManager.tsx",
+    "line": 151,
+    "text": "Cargando tasks y grupos...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskAssignmentManager.tsx",
+    "line": 157,
+    "text": "Asignación de Tasks a Grupos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskAssignmentManager.tsx",
+    "line": 183,
+    "text": "Estado:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskAssignmentManager.tsx",
+    "line": 201,
+    "text": "Grupos asignados:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskAssignmentManager.tsx",
+    "line": 218,
+    "text": "Asignar a grupos específicos",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskAssignmentManager.tsx",
+    "line": 226,
+    "text": "Hacer común para todos los grupos",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskAssignmentManager.tsx",
+    "line": 248,
+    "text": "No hay grupos disponibles.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 265,
+    "text": "Rol de la tarea",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 268,
+    "text": "Rol de la tarea",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 271,
+    "text": "Usuario",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 272,
+    "text": "Admin",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 277,
+    "text": "Título de la tarea",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 285,
+    "text": "Descripción",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 296,
+    "text": "Fecha y hora (opcional)",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 318,
+    "text": "Tarea común para todas las escuelas",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 326,
+    "text": "Escuelas asignadas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 334,
+    "text": "Escuelas asignadas",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskManager.tsx",
+    "line": 354,
+    "text": "Cancelar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskSchoolAssignmentManager.tsx",
+    "line": 152,
+    "text": "Cargando tasks y escuelas...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskSchoolAssignmentManager.tsx",
+    "line": 158,
+    "text": "Asignación de Tasks a Escuelas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskSchoolAssignmentManager.tsx",
+    "line": 184,
+    "text": "Estado:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskSchoolAssignmentManager.tsx",
+    "line": 202,
+    "text": "Escuelas asignadas:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskSchoolAssignmentManager.tsx",
+    "line": 219,
+    "text": "Asignar a escuelas específicas",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskSchoolAssignmentManager.tsx",
+    "line": 227,
+    "text": "Hacer común para todas las escuelas",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TaskSchoolAssignmentManager.tsx",
+    "line": 249,
+    "text": "No hay escuelas disponibles.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TelemetryPanel.tsx",
+    "line": 65,
+    "text": "Resumen",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TelemetryPanel.tsx",
+    "line": 76,
+    "text": "Cargando resumen...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TelemetryPanel.tsx",
+    "line": 86,
+    "text": "Eventos (en tiempo real)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\TelemetryPanel.tsx",
+    "line": 87,
+    "text": "Limpiar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\admin\\UserManagement.tsx",
+    "line": 27,
+    "text": "Usuarios Registrados",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\checklist\\ArrivalChecklist.tsx",
+    "line": 60,
+    "text": "Progreso",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 49,
+    "text": "Verificando credenciales de Spotify...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 77,
+    "text": "Client ID:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 92,
+    "text": "Client Secret:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 107,
+    "text": "Redirect URI:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 141,
+    "text": "App name:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 141,
+    "text": "Badeo PWA",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 142,
+    "text": "App description:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 142,
+    "text": "Recomendaciones musicales basadas en clima",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 143,
+    "text": "Redirect URI:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 148,
+    "text": "Client ID",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 148,
+    "text": "Client Secret",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\debug\\SpotifyCredentialsChecker.tsx",
+    "line": 148,
+    "text": "al archivo",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 67,
+    "text": "Ubicación GPS Precisa",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 72,
+    "text": "Tu dispositivo no soporta geolocalización. Podrás usar el mapa manualmente.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 79,
+    "text": "Para activar la geolocalización precisa:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 81,
+    "text": "Android:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 83,
+    "text": "iOS:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 85,
+    "text": "Chrome:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 92,
+    "text": "Geolocalización de alta precisión",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 92,
+    "text": "para encontrar lugares exactos cerca de ti en Sevilla:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 95,
+    "text": "📍 Ubicación exacta en el mapa",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 96,
+    "text": "📏 Distancias precisas",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GeolocalizacionDemo.tsx",
+    "line": 97,
+    "text": "🧭 Navegación GPS",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 170,
+    "text": "Feedback Háptico",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 180,
+    "text": "Mostrar Ayuda",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 200,
+    "text": "Long Press:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 200,
+    "text": "Mantén presionado 500ms",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 201,
+    "text": "Edge Swipe:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 201,
+    "text": "Desliza desde los bordes de la pantalla",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 202,
+    "text": "3D Touch:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 202,
+    "text": "Presiona con diferentes niveles de fuerza",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\gestures\\GestureTestPage.tsx",
+    "line": 203,
+    "text": "Pinch Zoom:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\GlobalLanguageSwitch.tsx",
+    "line": 58,
+    "text": "Cambiar idioma",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\AboutSection.tsx",
+    "line": 40,
+    "text": "Personas de la comunidad interactuando",
+    "kind": "prop",
+    "prop": "alt"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\ExternalInfoPanel.tsx",
+    "line": 560,
+    "text": "Actualizar",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\HeroSection.tsx",
+    "line": 89,
+    "text": "notificaciones",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\HeroSection.tsx",
+    "line": 101,
+    "text": "Ver notificaciones",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\HeroSection.tsx",
+    "line": 110,
+    "text": "Notificaciones",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\NotificationsPanel.tsx",
+    "line": 183,
+    "text": "Notificaciones",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\NotificationsPanel.tsx",
+    "line": 214,
+    "text": "ADMIN",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\NotificationsPanel.tsx",
+    "line": 223,
+    "text": "No hay notificaciones.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\NotificationsPanel.tsx",
+    "line": 251,
+    "text": "Vista",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\ProjectsDashboard.tsx",
+    "line": 286,
+    "text": "Cargando...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\ProjectsDashboard.tsx",
+    "line": 327,
+    "text": "💡 Desliza las tarjetas horizontalmente para reorganizar",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\ProjectsDashboard.tsx",
+    "line": 462,
+    "text": "ADMIN",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\PushNotificationTest.tsx",
+    "line": 89,
+    "text": "Título",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\PushNotificationTest.tsx",
+    "line": 95,
+    "text": "Mensaje",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\PushNotificationTest.tsx",
+    "line": 128,
+    "text": "Nota:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\PushNotificationTest.tsx",
+    "line": 131,
+    "text": "El navegador soporta notificaciones push",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\PushNotificationTest.tsx",
+    "line": 132,
+    "text": "Has concedido permisos de notificación",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\PushNotificationTest.tsx",
+    "line": 133,
+    "text": "Estás suscrito a las notificaciones",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\home\\PushNotificationTest.tsx",
+    "line": 134,
+    "text": "La aplicación está servida sobre HTTPS (en producción)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\InitialLanguageDialog.tsx",
+    "line": 76,
+    "text": "Saltar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\BottomNavBar.tsx",
+    "line": 216,
+    "text": "más",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\Footer.tsx",
+    "line": 27,
+    "text": "Fundación Alalá",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\Footer.tsx",
+    "line": 28,
+    "text": "Fundación Endesa",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\Footer.tsx",
+    "line": 43,
+    "text": "Facebook",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\Footer.tsx",
+    "line": 46,
+    "text": "Twitter",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\Footer.tsx",
+    "line": 49,
+    "text": "Instagram",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\SplashScreen.tsx",
+    "line": 63,
+    "text": "Barrio de Oportunidades",
+    "kind": "prop",
+    "prop": "alt"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\layout\\TopAppBar.tsx",
+    "line": 30,
+    "text": "Volver",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\mapa\\InteractiveMap.tsx",
+    "line": 238,
+    "text": "encontrar mi ubicación",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\mapa\\InteractiveMap.tsx",
+    "line": 281,
+    "text": "toggle heatmap",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\mapa\\InteractiveMap.tsx",
+    "line": 283,
+    "text": "heatmap",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\mapa\\RoutePlanner.tsx",
+    "line": 25,
+    "text": "Origen (o dejar en blanco para tu ubicación)",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\mapa\\RoutePlanner.tsx",
+    "line": 31,
+    "text": "Destino",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\mapa\\RoutePlanner.tsx",
+    "line": 40,
+    "text": "en lugar de un",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\performance\\IntelligentPreloading.tsx",
+    "line": 60,
+    "text": "Date.now() - p.lastVisit",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\performance\\IntelligentPreloading.tsx",
+    "line": 99,
+    "text": "Date.now() - p.lastVisit",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\performance\\LazyLoader.tsx",
+    "line": 190,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\performance\\LazyLoader.tsx",
+    "line": 224,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\performance\\OptimizedImage.tsx",
+    "line": 130,
+    "text": "skeleton",
+    "kind": "prop",
+    "prop": "placeholder"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\performance\\PerformanceMonitor.tsx",
+    "line": 350,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 178,
+    "text": "País",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 181,
+    "text": "País",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 184,
+    "text": "Italia",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 185,
+    "text": "España",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 192,
+    "text": "Ciudad",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 195,
+    "text": "Ciudad",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 198,
+    "text": "Todas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 213,
+    "text": "Comune",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 216,
+    "text": "Comune",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 285,
+    "text": "Escuela seleccionada:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 289,
+    "text": "Dirección:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\registro\\SchoolSelector.tsx",
+    "line": 297,
+    "text": "Descripción:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\SchoolSelector.tsx",
+    "line": 60,
+    "text": "Cargando escuelas...",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\SchoolSelector.tsx",
+    "line": 74,
+    "text": "Filtrar por escuela",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\SchoolSelector.tsx",
+    "line": 78,
+    "text": "Filtrar por escuela",
+    "kind": "prop",
+    "prop": "label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\SchoolSelector.tsx",
+    "line": 81,
+    "text": "Todas las escuelas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\SchoolSelector.tsx",
+    "line": 82,
+    "text": "NINGUNA (sin tareas)",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\SchoolSelector.tsx",
+    "line": 92,
+    "text": "Limpiar filtro",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\telefonos\\PhoneList.tsx",
+    "line": 120,
+    "text": "Copiar número",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\components\\ui\\ThemeSwitcher.tsx",
+    "line": 166,
+    "text": "Modo oscuro constante",
+    "kind": "prop",
+    "prop": "aria-label"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\AuthContext.tsx",
+    "line": 46,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\AuthContext.tsx",
+    "line": 48,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\AuthContext.tsx",
+    "line": 49,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\AuthContext.tsx",
+    "line": 50,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\AuthContext.tsx",
+    "line": 51,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\SpotifyAuthContext.tsx",
+    "line": 336,
+    "text": "Conectar con Spotify",
+    "kind": "prop",
+    "prop": "title"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\SpotifyAuthContext.tsx",
+    "line": 341,
+    "text": "Cancelar",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\SpotifyAuthContext.tsx",
+    "line": 342,
+    "text": "Conectar Spotify",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\TasksContext.tsx",
+    "line": 12,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\TasksContext.tsx",
+    "line": 13,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\TasksContext.tsx",
+    "line": 14,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\context\\TasksContext.tsx",
+    "line": 176,
+    "text": "): Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 12,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 13,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 14,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 15,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 16,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 17,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 18,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 19,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useHaptics.ts",
+    "line": 20,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useNotifications.ts",
+    "line": 42,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useNotifications.ts",
+    "line": 44,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\usePushNotifications.ts",
+    "line": 21,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\usePushNotifications.ts",
+    "line": 22,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\usePushNotifications.ts",
+    "line": 23,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\usePushNotifications.ts",
+    "line": 24,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\usePushNotifications.ts",
+    "line": 25,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useRetry.ts",
+    "line": 17,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\hooks\\useTheme.ts",
+    "line": 33,
+    "text": "Promise",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 79,
+    "text": "Recuperación de contraseña",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 95,
+    "text": "Barrio de Oportunidades",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 100,
+    "text": "Hola,",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 101,
+    "text": "Recibimos una solicitud para restablecer la contraseña de tu cuenta en",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 101,
+    "text": "Badeo",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 108,
+    "text": "Para crear una nueva contraseña, haz clic en el siguiente botón:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 114,
+    "text": "O copia y pega este enlace en tu navegador:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 121,
+    "text": "1 hora",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 130,
+    "text": "Usa una contraseña fuerte con al menos 8 caracteres",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 131,
+    "text": "Incluye letras mayúsculas, minúsculas, números y símbolos",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 132,
+    "text": "No compartas tu contraseña con nadie",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 133,
+    "text": "Considera usar un administrador de contraseñas",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 136,
+    "text": "Si tienes problemas para acceder a tu cuenta, no dudes en contactarnos.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 138,
+    "text": "Saludos cordiales,",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 139,
+    "text": "El equipo de Badeo",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 143,
+    "text": "Este email fue enviado desde",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 143,
+    "text": "Badeo - Barrio de Oportunidades",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 144,
+    "text": "Si no solicitaste este cambio, puedes ignorar este mensaje.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 146,
+    "text": "Visitar Badeo",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 147,
+    "text": "Contactar soporte",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 241,
+    "text": "Barrio de Oportunidades",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 252,
+    "text": "Fecha:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 253,
+    "text": "Servidor:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 254,
+    "text": "Usuario:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 255,
+    "text": "Destinatario:",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 258,
+    "text": "Tu sistema de recuperación de contraseñas está listo para funcionar.",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 260,
+    "text": "Saludos,",
+    "kind": "jsx_text"
+  },
+  {
+    "file": "C:\\Users\\BARRIO\\Documents\\Badeo\\PWABadeo\\src\\lib\\email.ts",
+    "line": 260,
+    "text": "El equipo de Badeo",
+    "kind": "jsx_text"
+  }
+]

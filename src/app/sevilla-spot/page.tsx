@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import LanguageSwitch from '@/components/LanguageSwitch';
 
 export default function SevillaSpotPage() {
   const router = useRouter();

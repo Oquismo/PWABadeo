@@ -18,7 +18,11 @@ import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 import { ConnectionMonitor } from '@/components/ConnectionMonitor';
 import WarmupInitializer from '../components/WarmupInitializer';
 import LanguageTest from '@/components/LanguageTest';
+import InitialLanguageDialog from '@/components/InitialLanguageDialog';
 import PullToRefreshPreventer from '@/components/layout/PullToRefreshPreventer';
+import SplashScreen from '@/components/layout/SplashScreen';
+import ScrollProgress from '@/components/ui/ScrollProgress';
+import ClientTopBarWrapper from '@/components/layout/ClientTopBarWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -30,16 +34,31 @@ export default function RootLayout({
   // ...existing code...
   // Diálogo de política de privacidad
   const [showPrivacy, setShowPrivacy] = useState(false);
+
+  // Splash Screen
+  const [showSplash, setShowSplash] = useState(false);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const accepted = localStorage.getItem('privacyAccepted');
       if (!accepted) setShowPrivacy(true);
+
+      // Mostrar splash screen solo en la primera carga (no cuando se reabre desde segundo plano)
+      const splashShown = sessionStorage.getItem('splashShown');
+      if (!splashShown) {
+        setShowSplash(true);
+        sessionStorage.setItem('splashShown', 'true');
+      }
     }
   }, []);
 
   const handleAcceptPrivacy = () => {
     localStorage.setItem('privacyAccepted', 'true');
     setShowPrivacy(false);
+  };
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
   };
 
   return (
@@ -64,6 +83,13 @@ export default function RootLayout({
                 <TasksProvider>
                   <SpotifyAuthProvider>
                     <CssBaseline />
+
+                    {/* Splash Screen */}
+                    {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+
+                    {/* Dialogo inicial para elegir idioma (solo la primera vez) */}
+                    <InitialLanguageDialog />
+
                     {/* <PullToRefreshPreventer /> */}
                     <DebugInitializer />
                     <WarmupInitializer />
@@ -75,6 +101,11 @@ export default function RootLayout({
                       overflow: 'hidden', // Prevenir scrollbars horizontales
                       position: 'relative' // Asegurar contexto de posicionamiento
                     }}>
+                      {/* Indicador superior de progreso de scroll */}
+                      <ScrollProgress />
+                      {/* Top app bar: mostrar en páginas distintas de la principal */}
+                      {/* Nota: usamos client side hook usePathname dentro de un componente cliente */}
+                      <ClientTopBarWrapper />
                       {/* Diálogo de privacidad */}
                       {showPrivacy && (
                         <div style={{

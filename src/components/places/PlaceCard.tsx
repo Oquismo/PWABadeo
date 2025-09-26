@@ -1,11 +1,12 @@
 // src/components/places/PlaceCard.tsx
 'use client';
 
-import { Box, CardContent, Typography, Button, CardMedia, Chip, Stack } from '@mui/material';
+import { Box, CardContent, Typography, CardMedia, Chip, Stack } from '@mui/material';
+import M3Button from '@/components/ui/M3Button';
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
-import DirectionsIcon from '@mui/icons-material/Directions';
-import LaunchIcon from '@mui/icons-material/Launch';
-import MapIcon from '@mui/icons-material/Map';
+import DirectionsRoundedIcon from '@mui/icons-material/DirectionsRounded';
+import LaunchRoundedIcon from '@mui/icons-material/LaunchRounded';
+import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import Image from 'next/image';
 import { Place } from '@/data/places'; // Importa la interfaz Place
 
@@ -59,27 +60,27 @@ export default function PlaceCard({ place }: PlaceCardProps) {
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2, pt: 0 }}>
           <Stack direction="row" spacing={1}>
             {place.link && (
-              <Button
+              <M3Button
+                m3variant="outlined"
                 size="small"
-                variant="outlined"
                 href={place.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                endIcon={<LaunchIcon />}
+                endIcon={<LaunchRoundedIcon />}
               >
                 Web
-              </Button>
+              </M3Button>
             )}
-            <Button
+            <M3Button
+              m3variant="filled"
               size="small"
-              variant="contained"
               href={directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              startIcon={<DirectionsIcon />}
+              startIcon={<DirectionsRoundedIcon />}
             >
               Cómo llegar
-            </Button>
+            </M3Button>
           </Stack>
         </Box>
       </Box>

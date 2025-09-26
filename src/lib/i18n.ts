@@ -200,6 +200,15 @@ export const translations = {
         municipal: "Municipal",
         utilities: "Servicios Públicos"
       },
+      profile: {
+        title: "Mi Perfil",
+        personalInfo: "Información Personal",
+        settings: "Configuración",
+        notifications: "Notificaciones",
+        privacy: "Privacidad",
+        logout: "Cerrar Sesión",
+        editProfile: "Editar Perfil"
+      },
       residencia: {
         construction: {
           title: "En construcción",

@@ -14,7 +14,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Button,
+  
   Avatar,
   Link as MuiLink,
   Dialog,
@@ -23,12 +23,13 @@ import {
   DialogActions,
   IconButton
 } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
-import CloseIcon from '@mui/icons-material/Close';
+import M3Button from '@/components/ui/M3Button';
+import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 // AccessTimeIcon, WifiIcon, RestaurantIcon and MapIcon removed (chips removed)
-import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
-import PlaceIcon from '@mui/icons-material/Place';
-import LanguageIcon from '@mui/icons-material/Language';
+import LocalPhoneRoundedIcon from '@mui/icons-material/LocalPhoneRounded';
+import PlaceRoundedIcon from '@mui/icons-material/PlaceRounded';
+import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import { useAuth } from '@/context/AuthContext';
 import dynamic from 'next/dynamic';
 import { placesData } from '@/data/places';
@@ -215,16 +216,16 @@ export default function ResidenciaClient() {
             onClick={handleCloseConstruction}
             sx={{ position: 'absolute', right: 8, top: 8 }}
           >
-            <CloseIcon />
+            <CloseRoundedIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent>
           <Typography>{t('pages.residencia.construction.body')}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseConstruction} autoFocus>
+          <M3Button m3variant="text" onClick={handleCloseConstruction} autoFocus>
             Cerrar
-          </Button>
+          </M3Button>
         </DialogActions>
       </Dialog>
       <Grid container spacing={3}>
@@ -237,7 +238,7 @@ export default function ResidenciaClient() {
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
                 <Avatar sx={{ bgcolor: 'primary.main' }}>
-                  <InfoIcon />
+                  <InfoRoundedIcon />
                 </Avatar>
                 <Box>
                   <Typography variant="h5" component="h1" fontWeight={700}>
@@ -269,13 +270,13 @@ export default function ResidenciaClient() {
 
               <Typography variant="subtitle1" gutterBottom>Contacto</Typography>
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                <Button variant="outlined" startIcon={<LocalPhoneIcon />} href={`tel:${specific?.receptionPhone ?? '+34123456789'}`}>
+                <M3Button m3variant="outlined" startIcon={<LocalPhoneRoundedIcon />} href={`tel:${specific?.receptionPhone ?? '+34123456789'}`}>
                   Llamar recepción
-                </Button>
+                </M3Button>
                 {specific?.website && (
-                  <Button variant="contained" startIcon={<LanguageIcon />} component={MuiLink} href={specific.website} target="_blank" rel="noreferrer">
+                  <M3Button m3variant="filled" startIcon={<LanguageRoundedIcon />} component={MuiLink} href={specific.website} target="_blank" rel="noreferrer">
                     Sitio web
-                  </Button>
+                  </M3Button>
                 )}
               </Stack>
 
@@ -597,13 +598,13 @@ export default function ResidenciaClient() {
               </Box>
 
               <Stack direction="row" spacing={2} justifyContent="flex-end">
-                <Button 
-                  variant="outlined" 
-                  startIcon={<PlaceIcon />}
+                <M3Button
+                  m3variant="outlined"
+                  startIcon={<PlaceRoundedIcon />}
                   onClick={openGoogleMapsRoute}
                 >
                   Ver ruta en Google Maps
-                </Button>
+                </M3Button>
               </Stack>
             </CardContent>
           </Card>

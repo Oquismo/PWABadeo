@@ -14,10 +14,10 @@ import {
   Typography,
   Fab
 } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import MapIcon from '@mui/icons-material/Map';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import MapRoundedIcon from '@mui/icons-material/MapRounded';
+import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import { motion } from 'framer-motion';
 
 import { GestureWrapper } from '@/components/gestures';
@@ -40,11 +40,11 @@ const BottomNavBarWithGestures: React.FC = () => {
 
   // Acciones principales de navegación
   const navActions = [
-    { value: "/", icon: <HomeIcon />, label: "Inicio" },
-    { value: "/mapa", icon: <MapIcon />, label: "Mapa" },
-    { value: "/perfil", icon: <AccountCircleIcon />, label: "Perfil" },
+    { value: "/", icon: <HomeRoundedIcon />, label: "Inicio" },
+    { value: "/mapa", icon: <MapRoundedIcon />, label: "Mapa" },
+    { value: "/perfil", icon: <AccountCircleRoundedIcon />, label: "Perfil" },
     ...(user?.role === 'admin' ? [
-      { value: "/admin", icon: <AdminPanelSettingsIcon />, label: "Admin" }
+      { value: "/admin", icon: <AdminPanelSettingsRoundedIcon />, label: "Admin" }
     ] : [])
   ];
 

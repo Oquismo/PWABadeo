@@ -7,7 +7,6 @@ import {
   Container,
   Box,
   Typography,
-  Button,
   Avatar,
   List,
   ListItem,
@@ -23,27 +22,29 @@ import {
   Fade,
   Grid
 } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
+import M3Button from '@/components/ui/M3Button';
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import ReviewDialog from '@/components/perfil/ReviewDialog';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import NotificationsPanel from '@/components/home/NotificationsPanel';
-import SchoolIcon from '@mui/icons-material/School';
-import CakeIcon from '@mui/icons-material/Cake';
-import EmailIcon from '@mui/icons-material/Email';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PublicIcon from '@mui/icons-material/Public';
-import SettingsIcon from '@mui/icons-material/Settings';
-import EditIcon from '@mui/icons-material/Edit';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import PersonIcon from '@mui/icons-material/Person';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
+import CakeRoundedIcon from '@mui/icons-material/CakeRounded';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
+import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import Link from 'next/link';
 import loggerClient from '@/lib/loggerClient';
 import TaskManager from '@/components/admin/TaskManager';
-import HotelIcon from '@mui/icons-material/Hotel';
+import HotelRoundedIcon from '@mui/icons-material/HotelRounded';
 
 export default function PerfilPage() {
   // Abrir el modal de reseña automáticamente al recibir el evento
@@ -166,40 +167,23 @@ export default function PerfilPage() {
 
       {/* Header con acciones */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" component="h1" fontWeight="bold" sx={{ letterSpacing: '-0.02em' }}>
-            Mi Perfil
-          </Typography>
-          <Typography variant="body2" color="text.secondary">Actualiza tu información y gestiona tus tareas</Typography>
+        <Box sx={{ position: 'relative' }}>
+          {/* Título removido visualmente por petición del usuario. Se mantiene una etiqueta accesible para screen readers. */}
+          <span style={{
+            position: 'absolute',
+            width: 1,
+            height: 1,
+            padding: 0,
+            margin: -1,
+            overflow: 'hidden',
+            clip: 'rect(0, 0, 0, 0)',
+            whiteSpace: 'nowrap',
+            border: 0
+          }} aria-hidden={false}>Mi Perfil</span>
         </Box>
-        <Stack direction="row" spacing={1}>
-          <Link href="/perfil/editar" passHref>
-            <IconButton
-              aria-label="editar perfil"
-              size="large"
-              sx={{
-                bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected', transform: 'translateY(-2px)' },
-                transition: 'all 200ms ease'
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-          </Link>
-          <Link href="/ajustes" passHref>
-            <IconButton
-              aria-label="ajustes"
-              size="large"
-              sx={{
-                bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected', transform: 'translateY(-2px)' },
-                transition: 'all 200ms ease'
-              }}
-            >
-              <SettingsIcon />
-            </IconButton>
-          </Link>
-          {/* logout button removed per request */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          {/* Los botones se reubican dentro de la tarjeta principal para mejor jerarquía visual. */}
+          {/* Se deja un placeholder aquí para mantener layout; los botones reales se renderizan más abajo en la tarjeta. */}
         </Stack>
       </Box>
 
@@ -253,9 +237,9 @@ export default function PerfilPage() {
                 }}
               >
                 {isAdmin ? (
-                  <AdminPanelSettingsIcon sx={{ fontSize: 16, color: 'white' }} />
+                  <AdminPanelSettingsRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
                 ) : (
-                  <PersonIcon sx={{ fontSize: 16, color: 'white' }} />
+                  <PersonRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
                 )}
               </Box>
             </Box>
@@ -268,7 +252,7 @@ export default function PerfilPage() {
             {/* Mostrar la residencia si existe; si no, mostrar el rol como fallback */}
             {user?.residence ? (
               <Chip
-                icon={<HotelIcon />}
+                icon={<HotelRoundedIcon />}
                 label={String(user.residence).toUpperCase()}
                 color="primary"
                 variant="filled"
@@ -276,7 +260,7 @@ export default function PerfilPage() {
               />
             ) : (
               <Chip
-                icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+                icon={isAdmin ? <AdminPanelSettingsRoundedIcon /> : <PersonRoundedIcon />}
                 label={isAdmin ? 'Administrador' : 'Usuario'}
                 color={isAdmin ? 'secondary' : 'primary'}
                 variant="filled"
@@ -284,11 +268,38 @@ export default function PerfilPage() {
               />
             )}
 
+            {/* Botones de acción: Editar perfil y Ajustes (reubicados y rediseñados) */}
+            <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Link href="/perfil/editar" passHref>
+                <M3Button
+                  component="a"
+                  m3variant="filled"
+                  color="primary"
+                  startIcon={<EditRoundedIcon />}
+                  sx={{ px: 2.5, py: 1.25, borderRadius: 3, fontWeight: 700 }}
+                >
+                  Editar perfil
+                </M3Button>
+              </Link>
+
+              <Link href="/ajustes" passHref>
+                <M3Button
+                  component="a"
+                  m3variant="tonal"
+                  color="primary"
+                  startIcon={<SettingsRoundedIcon />}
+                  sx={{ px: 2.5, py: 1.25, borderRadius: 3, fontWeight: 700 }}
+                >
+                  Ajustes
+                </M3Button>
+              </Link>
+            </Box>
+
             {/* Información de contacto */}
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12} sm={isAdmin ? 6 : 4}>
                 <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <EmailIcon color="action" />
+                  <EmailRoundedIcon color="action" />
                   <Box>
                     <Typography variant="caption" color="text.secondary">
                       Email
@@ -304,7 +315,7 @@ export default function PerfilPage() {
                 <>
                   <Grid item xs={12} sm={4}>
                     <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
-                      <SchoolIcon color="action" />
+                      <SchoolRoundedIcon color="action" />
                       <Box>
                         <Typography variant="caption" color="text.secondary">
                           Escuela
@@ -322,7 +333,7 @@ export default function PerfilPage() {
 
                   <Grid item xs={12} sm={4}>
                     <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
-                      <CakeIcon color="action" />
+                      <CakeRoundedIcon color="action" />
                       <Box>
                         <Typography variant="caption" color="text.secondary">
                           Edad
@@ -338,7 +349,7 @@ export default function PerfilPage() {
 
               <Grid item xs={12} sm={isAdmin ? 6 : 12}>
                 <Material3ElevatedCard sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1, transition: 'transform 180ms ease', '&:hover': { transform: 'translateY(-4px)' } }}>
-                  <LocationOnIcon color="action" />
+                  <LocationOnRoundedIcon color="action" />
                   <Box>
                     <Typography variant="caption" color="text.secondary">
                       Ubicación
@@ -391,7 +402,7 @@ export default function PerfilPage() {
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+              expandIcon={<ExpandMoreRoundedIcon />}
               sx={{
                 '& .MuiAccordionSummary-content': {
                   alignItems: 'center',
@@ -399,7 +410,7 @@ export default function PerfilPage() {
                 }
               }}
             >
-              <AssignmentIcon color="primary" />
+              <AssignmentRoundedIcon color="primary" />
               <Typography variant="h6" fontWeight="bold">
                 Mis Tareas Personalizadas
               </Typography>
@@ -431,7 +442,7 @@ export default function PerfilPage() {
               }}
             >
               <AccordionSummary
-                expandIcon={<ExpandMoreIcon sx={{ color: 'inherit' }} />}
+                expandIcon={<ExpandMoreRoundedIcon sx={{ color: 'inherit' }} />}
                 sx={{
                   '& .MuiAccordionSummary-content': {
                     alignItems: 'center',
@@ -439,7 +450,7 @@ export default function PerfilPage() {
                   }
                 }}
               >
-                <AdminPanelSettingsIcon />
+                <AdminPanelSettingsRoundedIcon />
                 <Typography variant="h6" fontWeight="bold">
                   Panel de Administración
                 </Typography>
@@ -456,16 +467,12 @@ export default function PerfilPage() {
 
       {/* Botón de reseña y cerrar sesión */}
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setReviewOpen(true)}
-        >
+        <M3Button m3variant="filled" color="primary" onClick={() => setReviewOpen(true)}>
           Escribir Reseña Google
-        </Button>
-        <Button
+        </M3Button>
+        <M3Button
+          m3variant="outlined"
           onClick={handleLogout}
-          variant="outlined"
           color="error"
           size="large"
           sx={{
@@ -480,7 +487,7 @@ export default function PerfilPage() {
           }}
         >
           Cerrar Sesión
-        </Button>
+        </M3Button>
       </Box>
 
       <ReviewDialog open={reviewOpen} onClose={() => setReviewOpen(false)} />

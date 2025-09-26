@@ -1,4 +1,5 @@
-import { Button, ButtonProps } from '@mui/material';
+import { ButtonProps } from '@mui/material';
+import M3Button from './ui/M3Button';
 import { useHaptics } from '@/hooks/useHaptics';
 import { forwardRef } from 'react';
 
@@ -37,8 +38,8 @@ export const HapticButton = forwardRef<HTMLButtonElement, HapticButtonProps>(
     };
 
     return (
-      <Button
-        ref={ref}
+      <M3Button
+        ref={ref as any}
         onClick={handleClick}
         {...props}
       />

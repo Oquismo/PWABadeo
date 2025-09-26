@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
-import { Button } from '@mui/material';
+import {  } from '@mui/material';
 import { useState } from 'react';
 import { Box, Typography, Chip, CardMedia, CardContent, Stack } from "@mui/material";
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
+import M3Button from '@/components/ui/M3Button';
 import { useHaptics } from '@/hooks/useHaptics';
 
 // Ejemplo de sitio en Sevilla
@@ -67,14 +68,14 @@ export default function CheckInCard() {
           <Chip label={site.activity} color="default" variant="filled" sx={{ bgcolor: "#22223a", color: "#fff" }} />
         </Stack>
           <Box sx={{ mt: 2, mb: 1 }}>
-            <Button
-              variant="contained"
+            <M3Button
+              m3variant="filled"
               color={notifStatus === 'granted' ? 'success' : notifStatus === 'denied' ? 'error' : 'primary'}
               onClick={handleRequestPermission}
               disabled={notifStatus === 'granted'}
             >
               {notifStatus === 'granted' ? 'Notificaciones activadas' : notifStatus === 'denied' ? 'Permiso denegado' : 'Activar notificaciones'}
-            </Button>
+            </M3Button>
           </Box>
       </CardContent>
     </Material3ElevatedCard>

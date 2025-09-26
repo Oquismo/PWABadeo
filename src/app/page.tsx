@@ -1,12 +1,12 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
-import { Container, Fab, Fade, Box } from "@mui/material";
+import { Container, Fade, Box } from "@mui/material";
 import { Button, Typography } from "@mui/material";
 import MaterialTextField from '@/components/ui/MaterialTextField';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import { FeedbackOutlined as FeedbackIcon } from '@mui/icons-material';
-import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
+import FabMenu from '@/components/ui/FabMenu';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage } from '@/hooks/useLanguage';
 import loggerClient from '@/lib/loggerClient';
@@ -145,21 +145,6 @@ export default function Home() {
         )}
       </Material3Dialog>
 
-      {/* Botón flotante de feedback. Para restaurar WhatsApp, descomenta el bloque anterior. */}
-      <Fab
-        color="primary"
-        aria-label={t('feedback.buttonLabel')}
-        sx={{
-          position: 'fixed',
-          bottom: (theme) => `calc(64px + ${theme.spacing(2)})`,
-          right: (theme) => theme.spacing(2),
-          color: 'background.default'
-        }}
-        onClick={() => setFeedbackOpen(true)}
-      >
-        <FeedbackIcon />
-      </Fab>
-      {/* Botón flotante de WhatsApp para emergencias del barrio */}
-      <FloatingWhatsAppButton phone={'+34649347760'} message={t('pages.home.welcomeMessage')} />
+      <FabMenu phone={'+34649347760'} message={t('pages.home.welcomeMessage')} onOpenFeedback={() => setFeedbackOpen(true)} />
   </>)
 }

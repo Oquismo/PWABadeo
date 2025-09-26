@@ -1,7 +1,8 @@
 'use client';
 
-import { Box, Typography, Container, ImageList, ImageListItem, Button } from '@mui/material';
+import { Box, Typography, Container, ImageList, ImageListItem } from '@mui/material';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import M3Button from '@/components/ui/M3Button';
 
 const itemData = [
   {
@@ -51,16 +52,9 @@ export default function InstagramFeed() {
 
       {/* Botón para ver más */}
       <Box sx={{ mt: 4, textAlign: 'center' }}>
-        <Button 
-          variant="outlined" 
-          color="secondary"
-          startIcon={<InstagramIcon />}
-          href="https://instagram.com" // Enlace real a Instagram
-          target="_blank"
-          rel="noopener"
-        >
+        <M3Button m3variant="outlined" color="secondary" startIcon={<InstagramIcon />} href="https://instagram.com">
           Ver más en Instagram
-        </Button>
+        </M3Button>
       </Box>
     </Container>
   );

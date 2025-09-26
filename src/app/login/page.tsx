@@ -9,7 +9,6 @@ import { useAuth, User } from '@/context/AuthContext';
 import { useHaptics } from '@/hooks/useHaptics';
 import loggerClient from '@/lib/loggerClient';
 import { Container, Box, Typography, TextField, Button, Link as MuiLink, Tooltip, Stack, IconButton, InputAdornment, Paper, Avatar, Divider } from '@mui/material';
-import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import Link from 'next/link';
 // import EngineeringIcon from '@mui/icons-material/Engineering';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -122,9 +121,7 @@ export default function LoginPage() {
       )}
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', py: 6 }}>
         <Paper elevation={errors.api ? 12 : 6} sx={{ width: '100%', maxWidth: 460, p: 5, borderRadius: 4, position: 'relative', bgcolor: 'background.default', boxShadow: '0 8px 30px rgba(20,20,30,0.06)', transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', '&:hover': { boxShadow: '0 12px 40px rgba(20,20,30,0.12)' }, '@keyframes shake': { '0%': { transform: 'translateX(0)' }, '25%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' }, '75%': { transform: 'translateX(-5px)' }, '100%': { transform: 'translateX(0)' } } }}>
-          <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
-            <GlobalLanguageSwitch />
-          </Box>
+          {/* Global language switch removed from login page; use initial dialog on first run or Ajustes to change language */}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
               <LockOutlined />

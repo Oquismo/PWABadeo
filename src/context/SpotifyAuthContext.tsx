@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import loggerClient from '@/lib/loggerClient';
-import { Box, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
+import M3Button from '@/components/ui/M3Button';
 import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import { MusicNote } from '@mui/icons-material';
@@ -337,19 +338,8 @@ export const SpotifyAuthProvider: React.FC<SpotifyAuthProviderProps> = ({ childr
         supportingText="Para obtener recomendaciones musicales personalizadas basadas en el clima, conecta tu cuenta de Spotify."
         actions={
           <>
-            <Button onClick={() => setShowLoginDialog(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                setShowLoginDialog(false);
-                login();
-              }}
-              variant="contained"
-              sx={{ bgcolor: '#1DB954', '&:hover': { bgcolor: '#1ed760' } }}
-            >
-              Conectar Spotify
-            </Button>
+            <M3Button m3variant="text" onClick={() => setShowLoginDialog(false)}>Cancelar</M3Button>
+            <M3Button m3variant="filled" onClick={() => { setShowLoginDialog(false); login(); }} sx={{ bgcolor: '#1DB954', '&:hover': { bgcolor: '#1ed760' } }}>Conectar Spotify</M3Button>
           </>
         }
       >
@@ -402,9 +392,9 @@ export const SpotifyAuthStatus: React.FC = () => {
         <Typography variant="caption">
           {user.display_name}
         </Typography>
-        <Button size="small" onClick={logout} sx={{ fontSize: '0.7rem' }}>
+        <M3Button m3variant="text" onClick={logout} sx={{ fontSize: '0.7rem' }}>
           Desconectar
-        </Button>
+        </M3Button>
       </Box>
     );
   }

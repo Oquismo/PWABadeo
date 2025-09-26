@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Stack, Paper } from '@mui/material';
+import { Box, Typography, TextField, Stack, Paper } from '@mui/material';
 import { Project, projectsData } from '@/data/projects'; // Importamos la estructura
 
 // Helper para obtener los eventos (combinando los estáticos y los dinámicos)

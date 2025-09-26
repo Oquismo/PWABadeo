@@ -1,8 +1,9 @@
 'use client';
 
-import { Box, Typography, List, ListItem, ListItemText, Divider, Paper, Stack, Button } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Divider, Paper, Stack } from '@mui/material';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import LaunchIcon from '@mui/icons-material/Launch';
+import LaunchRoundedIcon from '@mui/icons-material/LaunchRounded';
+import M3Button from '@/components/ui/M3Button';
 
 // Información estática pero muy útil de las líneas principales de TUSSAM
 const importantLines = [
@@ -41,17 +42,10 @@ export default function BusInfo() {
         {importantLines.map((bus, index) => (
           <Box key={bus.line}>
             <ListItem
-              secondaryAction={
-                <Button
-                  variant="outlined"
-                  size="small"
-                  href={bus.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  endIcon={<LaunchIcon />}
-                >
+                secondaryAction={
+                <M3Button m3variant="outlined" size="small" href={bus.url} endIcon={<LaunchRoundedIcon />}>
                   Ver
-                </Button>
+                </M3Button>
               }
             >
               <ListItemText

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, List, ListItem, ListItemText, Divider, Paper, Button } from '@mui/material';
-import ArchiveIcon from '@mui/icons-material/Archive';
+import { Box, Typography, List, ListItem, ListItemText, Divider, Paper } from '@mui/material';
+import ArchiveRoundedIcon from '@mui/icons-material/ArchiveRounded';
+import M3Button from '@/components/ui/M3Button';
 
 interface Log {
   action: 'login' | 'logout';
@@ -60,14 +61,9 @@ export default function LogViewer() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Typography variant="h6" gutterBottom>Registro de Actividad</Typography>
         {/* --- NUEVO BOTÓN --- */}
-        <Button
-          variant="outlined"
-          startIcon={<ArchiveIcon />}
-          onClick={handleArchiveAndClear}
-          disabled={logs.length === 0}
-        >
+        <M3Button m3variant="outlined" startIcon={<ArchiveRoundedIcon />} onClick={handleArchiveAndClear} disabled={logs.length === 0}>
           Archivar y Limpiar
-        </Button>
+        </M3Button>
       </Box>
       <List sx={{ maxHeight: 400, overflow: 'auto' }}>
         {logs.length > 0 ? logs.map((log, index) => (

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Box, Container, Fab, Drawer, IconButton } from '@mui/material';
-import GlobalLanguageSwitch from '@/components/GlobalLanguageSwitch';
 import { useTranslation } from '@/hooks/useTranslation';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import GeolocalizacionDemo from '@/components/GeolocalizacionDemo';
@@ -42,9 +41,7 @@ export default function MapaPage() {
 
   return (
     <Container>
-      <Box sx={{ position: 'absolute', top: 24, right: 24, zIndex: 10 }}>
-        <GlobalLanguageSwitch />
-      </Box>
+      {/* Global language switch removed from this page; language is chosen on first run and adjustable in Ajustes */}
       <GeolocalizacionDemo />
       <InteractiveMap selectedPlace={selectedPlace} />
       <Box sx={{ mt: 4 }}>

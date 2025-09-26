@@ -140,6 +140,15 @@ export const translations = {
       historic: "Histórico",
       picturesque: "Pintoresco"
     }
+    ,settings: {
+      language: "Idioma de la aplicación",
+      languageDescription: "Puedes cambiar el idioma de la aplicación aquí. La selección se guardará y se aplicará en toda la app."
+    },
+    notifications: {
+      vibrationEnabled: "Vibraciones activadas para mejorar la experiencia",
+      vibrationDisabled: "Activa las vibraciones para feedback háptico",
+      vibration: "Vibraciones hápticas"
+    }
   },
   en: {
     // General navigation
@@ -275,6 +284,15 @@ export const translations = {
       historic: "Historic",
       picturesque: "Picturesque"
     }
+    ,settings: {
+      language: "App language",
+      languageDescription: "You can change the app language here. The selection will be saved and applied across the app."
+    },
+    notifications: {
+      vibrationEnabled: "Haptic vibrations enabled to improve experience",
+      vibrationDisabled: "Enable vibrations for haptic feedback",
+      vibration: "Haptic vibrations"
+    }
   },
   it: {
     // Navigazione generale
@@ -409,6 +427,15 @@ export const translations = {
       tourist: "Turistico",
       historic: "Storico",
       picturesque: "Pittoresco"
+    }
+    ,settings: {
+      language: "Lingua dell'app",
+      languageDescription: "Puoi cambiare la lingua dell'app qui. La selezione verrà salvata e applicata in tutta l'app."
+    },
+    notifications: {
+      vibrationEnabled: "Vibrazioni attivate per migliorare l'esperienza",
+      vibrationDisabled: "Attiva le vibrazioni per il feedback aptico",
+      vibration: "Vibrazioni aptiche"
     }
   }
 };

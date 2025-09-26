@@ -1,11 +1,13 @@
 "use client";
-import { IconButton, Menu, MenuItem } from "@mui/material";
+import { IconButton, Menu, MenuItem, Snackbar } from "@mui/material";
 import TranslateIcon from '@mui/icons-material/Translate';
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useRouter } from 'next/navigation';
 
 export default function LanguageSwitch() {
   const { language, setLanguage } = useLanguage();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -20,6 +22,30 @@ export default function LanguageSwitch() {
   const changeLanguage = (lng: 'es' | 'en' | 'it') => {
     setLanguage(lng);
     handleClose();
+    setSnackbarMessage(getLabel(lng));
+    setSnackbarOpen(true);
+    try {
+      router.refresh();
+    } catch (err) {
+      console.warn('No se pudo forzar refresh del router:', err);
+    }
+    // Rely on router.refresh() to update server components; no hard reload.
+  };
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const getLabel = (lng: string) => {
+    switch (lng) {
+      case 'es':
+        return 'Idioma: Español';
+      case 'en':
+        return 'Language: English';
+      case 'it':
+        return 'Lingua: Italiano';
+      default:
+        return '';
+    }
   };
 
   return (
@@ -65,6 +91,12 @@ export default function LanguageSwitch() {
           🇮🇹 Italiano
         </MenuItem>
       </Menu>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={500}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </>
   );
 }

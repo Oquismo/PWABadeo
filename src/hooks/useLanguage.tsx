@@ -15,11 +15,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Cargar idioma guardado o detectar del navegador
-    const savedLanguage = localStorage.getItem('language') as Language;
+    const savedLanguage = localStorage.getItem('language') as Language | null;
     if (savedLanguage && ['es', 'en', 'it'].includes(savedLanguage)) {
       setLanguageState(savedLanguage);
       loggerClient.debug(`Idioma cargado desde localStorage: ${savedLanguage}`); // Debug
     } else {
+      // Fallback: comprobar cookie 'language' (útil para SSR)
+      try {
+        const cookieMatch = document.cookie.match(/(?:^|; )language=([^;]+)/);
+        const cookieLang = cookieMatch ? decodeURIComponent(cookieMatch[1]) as Language : null;
+        if (cookieLang && ['es', 'en', 'it'].includes(cookieLang)) {
+          setLanguageState(cookieLang);
+          loggerClient.debug(`Idioma cargado desde cookie: ${cookieLang}`);
+          return;
+        }
+      } catch (err) {
+        // ignore if document is not available
+      }
+
       // Detectar idioma del navegador
       const browserLang = navigator.language.split('-')[0];
       if (['es', 'en', 'it'].includes(browserLang)) {
@@ -33,6 +46,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     loggerClient.debug(`Cambiando idioma a: ${lang}`); // Debug
     setLanguageState(lang);
     localStorage.setItem('language', lang);
+    // Also persist to a cookie so server-side renders can read it
+    try {
+      if (typeof document !== 'undefined') {
+        const maxAge = 60 * 60 * 24 * 365; // 1 year
+        document.cookie = `language=${encodeURIComponent(lang)}; path=/; max-age=${maxAge}; samesite=lax`;
+      }
+    } catch (err) {
+      // ignore cookie set errors
+    }
   };
 
   const value = { language, setLanguage };

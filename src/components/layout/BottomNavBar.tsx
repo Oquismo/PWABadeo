@@ -5,17 +5,18 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useHaptics } from '@/hooks/useHaptics';
 import { Paper, BottomNavigation, BottomNavigationAction, Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import MapIcon from '@mui/icons-material/Map';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import MapRoundedIcon from '@mui/icons-material/MapRounded';
+import ExploreRoundedIcon from '@mui/icons-material/ExploreRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import LoginIcon from '@mui/icons-material/Login';
-import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
-import BugReportIcon from '@mui/icons-material/BugReport';
+import CallRoundedIcon from '@mui/icons-material/CallRounded';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
+import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
+import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import HotelIcon from '@mui/icons-material/Hotel';
+import HotelRoundedIcon from '@mui/icons-material/HotelRounded';
+import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, LayoutGroup } from 'framer-motion'; // 1. Importar de Framer Motion
@@ -42,26 +43,27 @@ export default function BottomNavBar() {
   }
 
   const navActions = [
-    { value: "/", icon: <HomeIcon />, label: t('nav.home') },
-    { value: "/mapa", icon: <MapIcon />, label: t('nav.map') },
+    { value: "/", icon: <HomeRoundedIcon />, label: t('nav.home') },
+    { value: "/mapa", icon: <MapRoundedIcon />, label: t('nav.map') },
     // Actions principales (mostrar directamente)
     ...(user?.role === 'admin'
       ? [
-          { value: "/admin", icon: <AdminPanelSettingsIcon />, label: "Admin" }
+          { value: "/admin", icon: <AdminPanelSettingsRoundedIcon />, label: "Admin" }
         ]
       : []),
-    { value: "/telefonos", icon: <PhoneInTalkIcon />, label: "Teléfonos" },
+    { value: "/telefonos", icon: <CallRoundedIcon />, label: "Teléfonos" },
     ...(isAuthenticated
-      ? [{ value: "/perfil", icon: <AccountCircleIcon />, label: t('nav.profile') }]
+      ? [{ value: "/perfil", icon: <PersonRoundedIcon />, label: t('nav.profile') }]
       : [{ value: "/login", icon: <LoginIcon />, label: "Login" }]),
   ];
 
   // Acciones que van al overflow (Menú "Más") — diseño expresivo tipo Material
   const overflowActions = [
-    { value: "/sevilla-spot", icon: <LocationOnIcon />, label: 'Tour' },
-    { value: "/residencia", icon: <HotelIcon />, label: "Residencia" },
+    { value: "/sevilla-spot", icon: <ExploreRoundedIcon />, label: 'Tour' },
+    { value: "/recomendaciones", icon: <RestaurantRoundedIcon />, label: "Recomendaciones" },
+    { value: "/residencia", icon: <HotelRoundedIcon />, label: "Residencia" },
     // opciones adicionales temporales
-    // { value: "/spotify", icon: <MusicNoteIcon />, label: "Spotify" },
+    // { value: "/spotify", icon: <MusicNoteRoundedIcon />, label: "Spotify" },
   ];
 
   return (
@@ -81,11 +83,11 @@ export default function BottomNavBar() {
           transform: 'translateX(-50%)',
           width: 'auto',
           zIndex: 100,
-          borderRadius: '9999px',
-          backgroundColor: 'rgba(40, 40, 42, 0.75)',
-          backdropFilter: 'blur(18px)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)',
+          borderRadius: '50px', // Fully rounded como en M3 Floating Toolbar
+          backgroundColor: theme => theme.palette.mode === 'dark' 
+            ? '#2D2D30' // Surface container color M3
+            : '#F3EDF7', // Surface container color M3
+          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08)', // Elevation 3 M3
           // Deshabilitar selección de texto y arrastre en todo el navbar
           userSelect: 'none',
           WebkitUserSelect: 'none',
@@ -102,8 +104,9 @@ export default function BottomNavBar() {
             value={pathname}
             sx={{ 
               backgroundColor: 'transparent',
-              padding: '6px', // Espacio interior
+              padding: '8px', // Padding interno M3 Floating Toolbar aumentado para más separación
               position: 'relative',
+              minHeight: 48, // Altura compacta M3
             }}
           >
             {navActions.map((action) => {
@@ -138,12 +141,26 @@ export default function BottomNavBar() {
                   }}
                   sx={{
                     position: 'relative',
-                    color: isActive ? 'primary.main' : 'text.secondary',
-                    transition: 'color 0.3s',
+                    color: theme => isActive 
+                      ? theme.palette.mode === 'dark' ? '#E8DEF8' : '#5A4570'
+                      : theme.palette.mode === 'dark' ? '#CAC4D0' : '#49454F',
+                    transition: 'all 0.15s cubic-bezier(0.2, 0, 0, 1)',
                     zIndex: 2,
-                    minWidth: '48px',
+                    minWidth: '40px',
+                    height: '40px',
                     padding: '8px',
-                    borderRadius: '9999px',
+                    borderRadius: '50%', // Completamente redondo como IconButton M3
+                    margin: '0 6px',
+                    '&:hover': {
+                      backgroundColor: theme => theme.palette.mode === 'dark' 
+                        ? 'rgba(232, 222, 248, 0.08)' 
+                        : 'rgba(90, 69, 112, 0.08)',
+                    },
+                    '&:active': {
+                      backgroundColor: theme => theme.palette.mode === 'dark' 
+                        ? 'rgba(232, 222, 248, 0.12)' 
+                        : 'rgba(90, 69, 112, 0.12)',
+                    },
                     // Deshabilitar selección de texto y arrastre
                     userSelect: 'none',
                     WebkitUserSelect: 'none',
@@ -153,18 +170,18 @@ export default function BottomNavBar() {
                     WebkitTapHighlightColor: 'transparent',
                   }}
                 >
-                  {/* 3. La "burbuja" animada */}
+                  {/* 3. Badge M3 Floating Toolbar - Estado activo */}
                   {isActive && (
                     <motion.div
                       layoutId="bubble"
                       style={{
                         position: 'absolute',
                         zIndex: 1,
-                        backgroundColor: 'rgba(190, 242, 100, 0.2)',
-                        borderRadius: '9999px',
+                        backgroundColor: '#E8DEF8', // M3 Secondary Container
+                        borderRadius: '50%',
                         inset: 0,
                       }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                     />
                   )}
                 </BottomNavigationAction>
@@ -172,7 +189,7 @@ export default function BottomNavBar() {
             })}
 
             {/* Botón 'Más' para overflow */}
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
               <MoreMenu overflowActions={overflowActions} tap={tap} pathname={pathname} />
             </Box>
           </BottomNavigation>
@@ -211,13 +228,31 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
             e.preventDefault();
           }
         }}
-        size="large"
+        size="medium"
         sx={{
-          color: open ? 'primary.main' : 'text.secondary',
+          color: theme => open 
+            ? theme.palette.mode === 'dark' ? '#E8DEF8' : '#5A4570'
+            : theme.palette.mode === 'dark' ? '#CAC4D0' : '#49454F',
           zIndex: 2,
-          backgroundColor: open ? 'rgba(25,118,210,0.08)' : 'transparent',
-          borderRadius: 2,
-          '&:hover': { backgroundColor: open ? 'rgba(25,118,210,0.12)' : 'rgba(255,255,255,0.04)' },
+          backgroundColor: open 
+            ? '#E8DEF8' 
+            : 'transparent',
+          borderRadius: '50%',
+          margin: '0 1px',
+          padding: '8px',
+          minWidth: '40px',
+          height: '40px',
+          transition: 'all 0.15s cubic-bezier(0.2, 0, 0, 1)',
+          '&:hover': { 
+            backgroundColor: theme => theme.palette.mode === 'dark' 
+              ? 'rgba(232, 222, 248, 0.08)' 
+              : 'rgba(90, 69, 112, 0.08)',
+          },
+          '&:active': {
+            backgroundColor: theme => theme.palette.mode === 'dark' 
+              ? 'rgba(232, 222, 248, 0.12)' 
+              : 'rgba(90, 69, 112, 0.12)',
+          },
           // Deshabilitar selección de texto y arrastre
           userSelect: 'none',
           WebkitUserSelect: 'none',

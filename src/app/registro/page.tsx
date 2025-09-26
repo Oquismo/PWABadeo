@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Container, Box, Typography, Button, Link as MuiLink, Grid, Tooltip, FormControl, InputLabel, Select, MenuItem, CircularProgress, Paper, Divider, InputAdornment, IconButton } from '@mui/material';
+import { Container, Box, Typography, Link as MuiLink, Grid, Tooltip, FormControl, InputLabel, Select, MenuItem, CircularProgress, Paper, Divider, InputAdornment, IconButton } from '@mui/material';
+import M3Button from '@/components/ui/M3Button';
 import loggerClient from '@/lib/loggerClient';
 import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
 import MaterialTextField from '@/components/ui/MaterialTextField';
@@ -480,18 +481,17 @@ export default function RegistroPage() {
               </Grid>
 
               <Grid item xs={12}>
-                <Button 
+                <M3Button
                   id="submit-register"
-                  type="submit" 
-                  fullWidth 
-                  variant="contained" 
-                  color="primary" 
+                  type="submit"
+                  fullWidth
+                  m3variant="filled"
                   disabled={isSubmitting}
                   sx={{ mt: 1, mb: 1.5, py: 1.8, fontWeight: 700, borderRadius: 3, transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 25px rgba(98,0,238,0.3)' }, '&:active': { transform: 'translateY(0)' }, '&:disabled': { transform: 'none' } }}
                   startIcon={isSubmitting ? <Material3LoadingIndicator size="small" /> : undefined}
                 >
                   {isSubmitting ? t('common.loading') : t('register.registerButton')}
-                </Button>
+                </M3Button>
               </Grid>
 
               {errors.api && (
