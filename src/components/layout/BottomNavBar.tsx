@@ -70,6 +70,10 @@ export default function BottomNavBar() {
       </Box>
       <Paper 
         elevation={0}
+        onContextMenu={(e) => {
+          e.preventDefault(); // Prevenir menú contextual del navegador en todo el navbar
+          e.stopPropagation();
+        }}
         sx={{ 
           position: 'fixed', 
           bottom: 16, 
@@ -82,6 +86,13 @@ export default function BottomNavBar() {
           backdropFilter: 'blur(18px)',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)',
+          // Deshabilitar selección de texto y arrastre en todo el navbar
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          WebkitTapHighlightColor: 'transparent',
         }}
       >
         {/* 2. Usamos LayoutGroup para que Framer Motion pueda seguir la "burbuja" */}
@@ -109,6 +120,22 @@ export default function BottomNavBar() {
                   value={action.value}
                   icon={action.icon}
                   onClick={() => tap()} // Vibración al hacer tap en navegación
+                  onContextMenu={(e) => {
+                    e.preventDefault(); // Prevenir menú contextual del navegador
+                    e.stopPropagation();
+                  }}
+                  onTouchStart={(e) => {
+                    // Prevenir comportamientos no deseados en dispositivos táctiles
+                    if (e.touches.length > 1) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onTouchMove={(e) => {
+                    // Evitar scroll accidental durante navegación
+                    if (e.touches.length > 1) {
+                      e.preventDefault();
+                    }
+                  }}
                   sx={{
                     position: 'relative',
                     color: isActive ? 'primary.main' : 'text.secondary',
@@ -117,6 +144,13 @@ export default function BottomNavBar() {
                     minWidth: '48px',
                     padding: '8px',
                     borderRadius: '9999px',
+                    // Deshabilitar selección de texto y arrastre
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none',
+                    WebkitTouchCallout: 'none',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
                   {/* 3. La "burbuja" animada */}
@@ -167,13 +201,30 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleOpen}
+        onContextMenu={(e) => {
+          e.preventDefault(); // Prevenir menú contextual del navegador
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          // Prevenir comportamientos no deseados en dispositivos táctiles
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        }}
         size="large"
         sx={{
           color: open ? 'primary.main' : 'text.secondary',
           zIndex: 2,
           backgroundColor: open ? 'rgba(25,118,210,0.08)' : 'transparent',
           borderRadius: 2,
-          '&:hover': { backgroundColor: open ? 'rgba(25,118,210,0.12)' : 'rgba(255,255,255,0.04)' }
+          '&:hover': { backgroundColor: open ? 'rgba(25,118,210,0.12)' : 'rgba(255,255,255,0.04)' },
+          // Deshabilitar selección de texto y arrastre
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          WebkitTapHighlightColor: 'transparent',
         }}
       >
         <MoreVertIcon />
@@ -206,13 +257,30 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
               tap();
               handleClose();
             }}
+            onContextMenu={(e) => {
+              e.preventDefault(); // Prevenir menú contextual del navegador
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              // Prevenir comportamientos no deseados en dispositivos táctiles
+              if (e.touches.length > 1) {
+                e.preventDefault();
+              }
+            }}
             selected={pathname === item.value}
             sx={{
               borderRadius: 2,
               mx: 0.5,
               my: 0.25,
               '&.Mui-selected': { backgroundColor: 'rgba(25,118,210,0.12)' },
-              '&:hover': { backgroundColor: 'rgba(25,118,210,0.08)' }
+              '&:hover': { backgroundColor: 'rgba(25,118,210,0.08)' },
+              // Deshabilitar selección de texto y arrastre
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+              WebkitTouchCallout: 'none',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>

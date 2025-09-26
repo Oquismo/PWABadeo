@@ -227,12 +227,23 @@ const BottomNavBarWithGestures: React.FC = () => {
       >
         <Paper
           elevation={8}
+          onContextMenu={(e) => {
+            e.preventDefault(); // Prevenir menú contextual del navegador en todo el navbar
+            e.stopPropagation();
+          }}
           sx={{
             background: 'rgba(18, 18, 27, 0.95)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: '24px 24px 0 0',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            // Deshabilitar selección de texto y arrastre
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+            WebkitTouchCallout: 'none',
+            WebkitTapHighlightColor: 'transparent',
           }}
         >
           {/* Indicador de arrastre */}
@@ -271,6 +282,15 @@ const BottomNavBarWithGestures: React.FC = () => {
                 longPressItems={getTabContextMenu(action)}
                 force3DEnabled
                 pressureLevels={getNavigation3DTouch(action)}
+                enableHaptics={true}
+                style={{
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
               >
                 <BottomNavigationAction
                   value={action.value}
@@ -278,7 +298,14 @@ const BottomNavBarWithGestures: React.FC = () => {
                   label={action.label}
                   sx={{
                     minWidth: 'auto',
-                    px: 1
+                    px: 1,
+                    // Deshabilitar selección de texto y arrastre
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none',
+                    WebkitTouchCallout: 'none',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 />
               </GestureWrapper>
