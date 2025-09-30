@@ -3,6 +3,7 @@ import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
 import { Box, FormControl, InputLabel, Select, MenuItem, CircularProgress, IconButton, Typography } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface School {
   id: number;
@@ -16,6 +17,7 @@ interface School {
 const SchoolSelector: React.FC = () => {
   const { currentSchoolId, setCurrentSchoolId, refreshTasks } = useTasks();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -57,7 +59,7 @@ const SchoolSelector: React.FC = () => {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <CircularProgress size={18} />
-        <Typography variant="body2" color="text.secondary">Cargando escuelas...</Typography>
+        <Typography variant="body2" color="text.secondary">{t('schools.loading')}</Typography>
       </Box>
     );
   }
@@ -71,15 +73,15 @@ const SchoolSelector: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <FormControl size="small" sx={{ minWidth: 260 }}>
-        <InputLabel id="school-filter-label">Filtrar por escuela</InputLabel>
+        <InputLabel id="school-filter-label">{t('schools.filterLabel')}</InputLabel>
         <Select
           labelId="school-filter-label"
           value={currentSchoolId ?? ''}
-          label="Filtrar por escuela"
+          label={t('schools.filterLabel')}
           onChange={(e) => handleSchoolChange(e.target.value === '' ? null : Number(e.target.value))}
         >
-          <MenuItem value="">Todas las escuelas</MenuItem>
-          <MenuItem value={-1}>NINGUNA (sin tareas)</MenuItem>
+          <MenuItem value="">{t('schools.allSchools')}</MenuItem>
+          <MenuItem value={-1}>{t('schools.noSchool')}</MenuItem>
           {schools.map((school) => (
             <MenuItem key={school.id} value={school.id} sx={{ whiteSpace: 'normal' }}>
               {school.name} — {school.city} ({school.type})
@@ -89,7 +91,7 @@ const SchoolSelector: React.FC = () => {
       </FormControl>
 
       {currentSchoolId && (
-        <IconButton aria-label="Limpiar filtro" size="small" onClick={() => handleSchoolChange(null)}>
+        <IconButton aria-label={t('schools.clearFilter')} size="small" onClick={() => handleSchoolChange(null)}>
           <ClearIcon fontSize="small" />
         </IconButton>
       )}

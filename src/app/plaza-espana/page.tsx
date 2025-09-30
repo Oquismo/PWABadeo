@@ -8,31 +8,58 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useYelpPlace } from '@/hooks/useYelpPlace';
 
 export default function PlazaEspanaPage() {
   const router = useRouter();
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
   const { t } = useTranslation();
 
-  // Datos dinámicos del sitio
+  // Obtener datos dinámicos de Yelp para Plaza de España
+  const { place: yelpPlace, loading, error } = useYelpPlace('Plaza de España Sevilla');
+
+  // Datos dinámicos del sitio - usar Yelp si está disponible, sino fallback
   const spot = {
-    name: t('sites.plazaEspana.name'),
-    trainer: t('sites.plazaEspana.guide'),
+    name: yelpPlace?.name || t('sites.plazaEspana.name'),
+    trainer: t('sites.plazaEspana.guide'), // Esto queda hardcodeado ya que no viene de Yelp
     nextSpots: "2 " + t('nav.of') + " 6",
-    coordinates: "37.3769,-5.9875", // Coordenadas de Plaza de España
+    coordinates: yelpPlace ? `${yelpPlace.coordinates.lat},${yelpPlace.coordinates.lng}` : "37.3769,-5.9875",
     currentSpot: {
       name: t('sites.alcazar.name'),
       time: "25 min",
       distance: "800 m",
       difficulty: t('difficulty.historic')
     },
-    description: t('sites.plazaEspana.description')
+    description: yelpPlace?.description || t('sites.plazaEspana.description')
   };
 
   const openMaps = () => {
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates}`;
     window.open(mapsUrl, '_blank');
   };
+
+  // Mostrar loading mientras se cargan datos de Yelp
+  if (loading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh', 
+        bgcolor: '#1a1a1a', 
+        width: '100vw', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}>
+        <Typography variant="h6" sx={{ color: '#fff' }}>
+          Cargando información del lugar...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Mostrar error si falla la carga
+  if (error) {
+    console.warn('Error loading Yelp data, using fallback:', error);
+  }
   
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#1a1a1a', width: '100vw', position: 'relative', overflow: 'hidden' }}>
@@ -43,7 +70,9 @@ export default function PlazaEspanaPage() {
         position: 'fixed',
         top: 0,
         left: 0,
-        backgroundImage: 'url("/img/plaza de españa.jpg"), linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
+        backgroundImage: yelpPlace?.image 
+          ? `url(${yelpPlace.image}), linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)`
+          : 'url("/img/plaza de españa.jpg"), linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundBlendMode: 'overlay'

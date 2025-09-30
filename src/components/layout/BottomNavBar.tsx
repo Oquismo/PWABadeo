@@ -15,8 +15,9 @@ import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSetting
 import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
 import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import HotelRoundedIcon from '@mui/icons-material/HotelRounded';
+import EventRoundedIcon from '@mui/icons-material/EventRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
+import HotelRoundedIcon from '@mui/icons-material/HotelRounded';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, LayoutGroup } from 'framer-motion'; // 1. Importar de Framer Motion
@@ -48,20 +49,21 @@ export default function BottomNavBar() {
     // Actions principales (mostrar directamente)
     ...(user?.role === 'admin'
       ? [
-          { value: "/admin", icon: <AdminPanelSettingsRoundedIcon />, label: "Admin" }
+          { value: "/admin", icon: <AdminPanelSettingsRoundedIcon />, label: t('nav.admin') }
         ]
       : []),
-    { value: "/telefonos", icon: <CallRoundedIcon />, label: "Teléfonos" },
+    { value: "/telefonos", icon: <CallRoundedIcon />, label: t('nav.phones') },
     ...(isAuthenticated
       ? [{ value: "/perfil", icon: <PersonRoundedIcon />, label: t('nav.profile') }]
-      : [{ value: "/login", icon: <LoginIcon />, label: "Login" }]),
+      : [{ value: "/login", icon: <LoginIcon />, label: t('nav.login') }]),
   ];
 
   // Acciones que van al overflow (Menú "Más") — diseño expresivo tipo Material
   const overflowActions = [
-    { value: "/sevilla-spot", icon: <ExploreRoundedIcon />, label: 'Tour' },
-    { value: "/recomendaciones", icon: <RestaurantRoundedIcon />, label: "Recomendaciones" },
-    { value: "/residencia", icon: <HotelRoundedIcon />, label: "Residencia" },
+    { value: "/sevilla-spot", icon: <ExploreRoundedIcon />, label: t('nav.tour') },
+    { value: "/recomendaciones", icon: <RestaurantRoundedIcon />, label: t('nav.recommendations') },
+    // { value: "/eventos", icon: <EventRoundedIcon />, label: t('nav.events') }, // Ocultado temporalmente
+    { value: "/residencia", icon: <HotelRoundedIcon />, label: t('nav.residence') },
     // opciones adicionales temporales
     // { value: "/spotify", icon: <MusicNoteRoundedIcon />, label: "Spotify" },
   ];
@@ -203,6 +205,7 @@ export default function BottomNavBar() {
 function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; tap: () => void; pathname: string }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const { t } = useTranslation();
 
   const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
@@ -213,7 +216,7 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
   return (
     <>
       <IconButton
-        aria-label="más"
+        aria-label={t('nav.more')}
         aria-controls={open ? 'more-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}

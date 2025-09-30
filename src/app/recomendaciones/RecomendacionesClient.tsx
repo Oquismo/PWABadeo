@@ -41,17 +41,28 @@ import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded
 import LocalOfferRoundedIcon from '@mui/icons-material/LocalOfferRounded';
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import { useRouter } from 'next/navigation';
 import { sevillaRestaurants, Restaurant, cuisineTypes, calculateDistance, calculateWalkingTime } from '@/data/restaurants';
 
-export default function RecomendacionesClient() {
+type RecomendacionesClientProps = {
+  mode?: 'recomendaciones' | 'tour';
+  defaultQuery?: string;
+  initialRemoteRestaurants?: Restaurant[];
+}
+
+export default function RecomendacionesClient({ mode = 'recomendaciones', defaultQuery, initialRemoteRestaurants }: RecomendacionesClientProps) {
   const router = useRouter();
   const theme = useTheme();
   const [selectedCuisine, setSelectedCuisine] = useState<string>('');
   const [selectedPrice, setSelectedPrice] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'distance' | 'rating' | 'relevance'>('distance');
+  const [searchTerm, setSearchTerm] = useState<string>(defaultQuery || '');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [remoteRestaurants, setRemoteRestaurants] = useState<Restaurant[] | null>(null);
+  const [isLoadingRemote, setIsLoadingRemote] = useState(false);
+  const [remoteError, setRemoteError] = useState<string | null>(null);
 
   // Efecto para obtener ubicación del usuario
   React.useEffect(() => {
@@ -83,9 +94,145 @@ export default function RecomendacionesClient() {
     localStorage.setItem('restaurant-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  // Inicializar remoteRestaurants desde prop si viene (uso por Tour)
+  React.useEffect(() => {
+    if (initialRemoteRestaurants && Array.isArray(initialRemoteRestaurants)) {
+      setRemoteRestaurants(initialRemoteRestaurants);
+    }
+  }, [initialRemoteRestaurants]);
+
+  // Obtener recomendaciones desde la API del servidor (Yelp) con fallback a datos locales
+  React.useEffect(() => {
+    // Si el componente fue inicializado con datos remotos (por ejemplo desde /tour),
+    // no debemos reconsultar automáticamente aquí para no sobrescribir lo recibido.
+    if (initialRemoteRestaurants && Array.isArray(initialRemoteRestaurants) && initialRemoteRestaurants.length > 0) {
+      // ya están en remoteRestaurants gracias al efecto que copia la prop
+      return;
+    }
+
+    let aborted = false;
+    async function fetchRecommendations() {
+      if (!userLocation) return;
+      setIsLoadingRemote(true);
+      setRemoteError(null);
+      try {
+        const params = new URLSearchParams();
+        params.set('lat', String(userLocation.lat));
+        params.set('lng', String(userLocation.lng));
+  params.set('limit', '30');
+  if (selectedPrice) params.set('price', selectedPrice);
+  if (selectedCuisine) params.set('category', selectedCuisine);
+  if (searchTerm) params.set('query', searchTerm);
+  if (sortBy) params.set('sort', sortBy);
+
+        const res = await fetch(`/api/recommendations?${params.toString()}`);
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || `HTTP ${res.status}`);
+        }
+        const json = await res.json();
+        if (aborted) return;
+
+        // Mapear el formato de la API a nuestro tipo Restaurant
+        let mapped: Restaurant[] = (json.items || []).map((it: any) => ({
+          id: it.id,
+          name: it.name,
+          cuisine: (it.categories && it.categories[0]) || 'Restaurante',
+          priceRange: it.price || '€',
+          rating: it.rating || 0,
+          reviewCount: it.raw?.review_count || 0,
+          address: it.address || (it.raw?.location?.display_address || []).join(', '),
+          coordinates: { lat: it.lat || it.raw?.coordinates?.latitude || 0, lng: it.lng || it.raw?.coordinates?.longitude || 0 },
+          image: (it.photos && it.photos[0]?.url) || it.raw?.image_url || '',
+          openNow: Boolean(it.raw?.is_closed === false || it.raw?.hours?.[0]?.is_open_now === true || it.raw?.business_hours?.[0]?.hours_type),
+          description: it.raw?.description || '',
+          specialties: it.raw?.specialties || [],
+          openingHours: (function() {
+            // Normalize Yelp hours/business_hours to { dayName: "HH:MM-HH:MM" , status: 'Abierto ahora' }
+            try {
+              const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+              const oh: Record<string,string> = {};
+              const rawHours = it.raw?.hours || it.raw?.business_hours;
+              if (rawHours && Array.isArray(rawHours) && rawHours.length > 0) {
+                const entry = rawHours[0];
+                const openArr = entry.open || entry.hours || [];
+                if (Array.isArray(openArr)) {
+                  openArr.forEach((o: any) => {
+                    const dayName = days[o.day] || String(o.day);
+                    const fmt = (s: string) => s?.replace(/(\d{2})(\d{2})/, '$1:$2');
+                    const start = fmt(o.start || o.open || '') || '';
+                    const end = fmt(o.end || o.close || '') || '';
+                    const range = start && end ? `${start}-${end}` : start || end || '';
+                    if (range) {
+                      if (oh[dayName]) oh[dayName] += `, ${range}`;
+                      else oh[dayName] = range;
+                    }
+                  });
+                }
+                if (entry?.is_open_now !== undefined) {
+                  oh['status'] = entry.is_open_now ? 'Abierto ahora' : 'Cerrado';
+                }
+              } else if (it.raw?.is_closed !== undefined) {
+                oh['status'] = it.raw?.is_closed === false ? 'Abierto ahora' : 'Cerrado';
+              }
+              return Object.keys(oh).length ? oh : undefined;
+            } catch (e) {
+              return undefined;
+            }
+          })(),
+          phoneNumber: it.raw?.phone || it.raw?.display_phone || undefined,
+          website: it.url || it.raw?.url || undefined
+        }));
+
+        // No filtramos por radio en cliente (filtro eliminado)
+
+        // Aplicar orden simple en cliente si la API no lo soporta
+        if (sortBy === 'distance' && userLocation) {
+          mapped.sort((a, b) => {
+            const da = calculateDistance(userLocation.lat, userLocation.lng, a.coordinates.lat, a.coordinates.lng);
+            const db = calculateDistance(userLocation.lat, userLocation.lng, b.coordinates.lat, b.coordinates.lng);
+            return da - db;
+          });
+        } else if (sortBy === 'rating') {
+          mapped.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        }
+
+        setRemoteRestaurants(mapped);
+      } catch (err: any) {
+        console.error('Error fetching recommendations:', err);
+        setRemoteError(String(err?.message || err));
+        setRemoteRestaurants(null);
+      } finally {
+        setIsLoadingRemote(false);
+      }
+    }
+
+    fetchRecommendations();
+    return () => { aborted = true; };
+  }, [userLocation, initialRemoteRestaurants, selectedPrice, selectedCuisine, searchTerm, sortBy]);
+
   // Filtrar restaurantes
+  // Combinar resultados remotos (si hay) con el fallback local
+  const sourceList = remoteRestaurants || sevillaRestaurants;
+
+  // Enriquecer cada restaurante con distancia y tiempo a pie (si disponemos de userLocation)
+  const enrichedList = React.useMemo(() => {
+    return sourceList.map(r => {
+      try {
+        if (userLocation && r.coordinates) {
+          const d = calculateDistance(userLocation.lat, userLocation.lng, r.coordinates.lat, r.coordinates.lng);
+          return { ...r, distance: d, walkingTime: calculateWalkingTime(d) } as Restaurant;
+        }
+        return r;
+      } catch (e) {
+        return r;
+      }
+    });
+  }, [sourceList, userLocation]);
+
+  // Aplicar filtros sobre la lista enriquecida
   const filteredRestaurants = React.useMemo(() => {
-    return sevillaRestaurants.filter(restaurant => {
+    return enrichedList.filter(restaurant => {
       const matchesCuisine = !selectedCuisine || restaurant.cuisine === selectedCuisine;
       const matchesPrice = !selectedPrice || restaurant.priceRange === selectedPrice;
       const matchesSearch = !searchTerm || 
@@ -95,7 +242,7 @@ export default function RecomendacionesClient() {
 
       return matchesCuisine && matchesPrice && matchesSearch;
     });
-  }, [selectedCuisine, selectedPrice, searchTerm]);
+  }, [enrichedList, selectedCuisine, selectedPrice, searchTerm]);
 
   // Añadir/quitar favoritos
   const toggleFavorite = (restaurantId: string) => {
@@ -269,6 +416,20 @@ export default function RecomendacionesClient() {
                     <MenuItem value="€€€">€€€ - Premium</MenuItem>
                   </Select>
                 </FormControl>
+
+                <FormControl sx={{ minWidth: 160 }}>
+                  <InputLabel id="sort-label">Ordenar</InputLabel>
+                  <Select
+                    labelId="sort-label"
+                    value={sortBy}
+                    label="Ordenar"
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                  >
+                    <MenuItem value={'distance'}>Distancia</MenuItem>
+                    <MenuItem value={'rating'}>Valoración</MenuItem>
+                    <MenuItem value={'relevance'}>Relevancia</MenuItem>
+                  </Select>
+                </FormControl>
               </Stack>
             </Stack>
           </Paper>
@@ -404,6 +565,37 @@ export default function RecomendacionesClient() {
                         {restaurant.name}
                       </Typography>
 
+                      {/* Fila con rating, reviews, precio y distancia (solo datos reales) */}
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        {typeof restaurant.rating === 'number' && (
+                          <Chip
+                            icon={<StarRoundedIcon sx={{ color: '#ffd700' }} />}
+                            label={`${restaurant.rating}`}
+                            size="small"
+                            sx={{ fontWeight: 700 }}
+                          />
+                        )}
+
+                        {typeof restaurant.reviewCount === 'number' && (
+                          <Typography variant="caption" color="text.secondary">{`${restaurant.reviewCount} reseñas`}</Typography>
+                        )}
+
+                        {restaurant.priceRange && (
+                          <Chip label={restaurant.priceRange} size="small" color={getPriceColor(restaurant.priceRange) as any} sx={{ ml: 1 }} />
+                        )}
+
+                        {restaurant.walkingTime && (
+                          <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>{restaurant.walkingTime}</Typography>
+                        )}
+                      </Stack>
+
+                      {/* Categoría / etiquetas (solo si existen) */}
+                      {restaurant.cuisine && (
+                        <Box sx={{ mb: 1 }}>
+                          <Chip label={restaurant.cuisine} size="small" sx={{ fontWeight: 600 }} />
+                        </Box>
+                      )}
+
                       {/* Información básica */}
                       <Stack spacing={2} sx={{ mb: 2 }}>
                         {/* Precio y tiempo */}
@@ -441,7 +633,17 @@ export default function RecomendacionesClient() {
                         <Stack direction="row" alignItems="center" spacing={1}>
                           <AccessTimeRoundedIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                            {restaurant.openingHours ? Object.values(restaurant.openingHours).slice(0,3).join(' • ') : 'Horario no disponible'}
+                            {restaurant.openingHours ? (
+                              restaurant.openingHours.status ? (
+                                restaurant.openingHours.status
+                              ) : Object.keys(restaurant.openingHours).length ? (
+                                // Mostrar hasta 2 días de ejemplo
+                                Object.entries(restaurant.openingHours)
+                                  .filter(([k]) => k !== 'status')
+                                  .slice(0,2)
+                                  .map(([k,v]) => `${k.charAt(0).toUpperCase()+k.slice(1)}: ${v}`).join(' • ')
+                              ) : 'Horario no disponible'
+                            ) : 'Horario no disponible'}
                           </Typography>
                         </Stack>
                       </Stack>
@@ -478,6 +680,22 @@ export default function RecomendacionesClient() {
                             }}
                           >
                             <PhoneRoundedIcon fontSize="small" />
+                          </M3Button>
+                        )}
+
+                        {restaurant.website && (
+                          <M3Button
+                            m3variant="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(restaurant.website, '_blank');
+                            }}
+                            sx={{
+                              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                              color: 'white'
+                            }}
+                          >
+                            <OpenInNewRoundedIcon fontSize="small" />
                           </M3Button>
                         )}
                       </Stack>

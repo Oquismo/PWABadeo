@@ -9,12 +9,14 @@ import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type Variant = 'regular' | 'small';
 
 export default function TopAppBar({ title = '', variant = 'regular' as Variant }: { title?: string; variant?: Variant }) {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const height = variant === 'small' ? 56 : 72; // ligeramente más grande
   const titleVariant = variant === 'small' ? 'subtitle1' : 'h6';
@@ -27,7 +29,7 @@ export default function TopAppBar({ title = '', variant = 'regular' as Variant }
             edge="start"
             color="inherit"
             onClick={() => router.back()}
-            aria-label="Volver"
+            aria-label={t('nav.back')}
             sx={{ mr: 1, bgcolor: 'transparent', boxShadow: 'none', border: 'none' }}
           >
             <ArrowBackRoundedIcon sx={{ fontSize: 28 }} />

@@ -130,8 +130,31 @@ export const translations = {
       map: "Mapa",
       profile: "Perfil",
       phones: "Teléfonos",
-      admin: "Admin",
-      logout: "Cerrar Sesión"
+      admin: "Administrador",
+      logout: "Cerrar Sesión",
+      of: "de",
+      nextSites: "Próximos lugares",
+      tour: "Tour",
+      recommendations: "Recomendaciones",
+      events: "Eventos",
+      residence: "Residencia",
+      more: "Más",
+      moreMenu: "Menú más",
+      back: "Volver"
+    },
+    schools: {
+      loading: "Cargando escuelas...",
+      filterLabel: "Filtrar por escuela",
+      allSchools: "Todas las escuelas",
+      noSchool: "NINGUNA (sin tareas)",
+      clearFilter: "Limpiar filtro"
+    },
+    events: {
+      loading: "Cargando Eventos",
+      errorLoading: "Error al cargar eventos",
+      searchPlaceholder: "Buscar eventos por nombre, artista o venue...",
+      viewEvent: "Ver Evento",
+      free: "GRATIS"
     },
     // Textos comunes
     common: {
@@ -251,6 +274,7 @@ export const translations = {
     sites: {
       giralda: {
         name: "La Giralda",
+        guide: "Guía turística disponible",
         description: "La Giralda es el campanario de la Catedral de Sevilla y uno de los monumentos más emblemáticos de la ciudad. Con sus 104 metros de altura, ofrece vistas espectaculares de toda Sevilla. Su construcción combina el arte almohade con elementos renacentistas, creando una arquitectura única que la convierte en Patrimonio de la Humanidad."
       },
       plazaEspana: {
@@ -259,6 +283,7 @@ export const translations = {
       },
       alcazar: {
         name: "Alcázar de Sevilla",
+        guide: "Guía turística disponible",
         description: "El Real Alcázar de Sevilla es un conjunto de palacios amurallados construido en diferentes etapas históricas. Destaca el palacio mudéjar del siglo XIV y los jardines del Alcázar, considerados entre los más bellos de España."
       },
       barrioSantaCruz: {

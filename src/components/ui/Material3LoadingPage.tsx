@@ -1,14 +1,15 @@
 'use client';
 
 import React from 'react';
-import { 
-  Box, 
+import {
+  Box,
   Container,
   Typography,
   Fade,
   useTheme
 } from '@mui/material';
 import Material3LoadingIndicator from './Material3LoadingIndicator';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export interface Material3LoadingPageProps {
   /** Text to display below the loading indicator */
@@ -29,12 +30,12 @@ export interface Material3LoadingPageProps {
 
 /**
  * Material 3 Loading Page Component
- * 
+ *
  * A full-page loading component following Material 3 design principles.
  * Useful for page transitions, data loading, and async operations.
  */
 export default function Material3LoadingPage({
-  text = 'Cargando...',
+  text,
   subtitle,
   fullScreen = false,
   maxWidth = 'sm',
@@ -43,7 +44,11 @@ export default function Material3LoadingPage({
   size = 'large',
 }: Material3LoadingPageProps) {
   const theme = useTheme();
-  
+  const { t } = useTranslation();
+
+  // Default text if not provided
+  text = text || t('common.loading');
+
   const content = (
     <Box
       sx={{
@@ -62,21 +67,21 @@ export default function Material3LoadingPage({
         contained
         sx={{ mb: 3 }}
       />
-      
-      <Typography 
-        variant="h6" 
+
+      <Typography
+        variant="h6"
         color="text.primary"
-        sx={{ 
+        sx={{
           mb: subtitle ? 1 : 0,
           fontWeight: 500,
         }}
       >
         {text}
       </Typography>
-      
+
       {subtitle && (
-        <Typography 
-          variant="body2" 
+        <Typography
+          variant="body2"
           color="text.secondary"
           sx={{ maxWidth: 400 }}
         >
@@ -85,9 +90,9 @@ export default function Material3LoadingPage({
       )}
     </Box>
   );
-  
+
   if (!visible) return null;
-  
+
   const loadingContent = fullScreen ? (
     <Box
       sx={{
@@ -107,7 +112,7 @@ export default function Material3LoadingPage({
       {content}
     </Container>
   );
-  
+
   return fade ? (
     <Fade in={visible} timeout={300}>
       <div>{loadingContent}</div>

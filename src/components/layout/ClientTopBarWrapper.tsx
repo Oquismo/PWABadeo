@@ -3,9 +3,11 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import TopAppBar from './TopAppBar';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ClientTopBarWrapper() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   if (!pathname) return null;
 
@@ -19,5 +21,5 @@ export default function ClientTopBarWrapper() {
   // Si la ruta tiene más de 1 segmento, usar 'regular' para dar más espacio
   const variant = segments.length > 1 ? 'regular' : 'small';
 
-  return <TopAppBar title={title ? (title.charAt(0).toUpperCase() + title.slice(1)) : 'Volver'} variant={variant as any} />;
+  return <TopAppBar title={title ? (title.charAt(0).toUpperCase() + title.slice(1)) : t('nav.back')} variant={variant as any} />;
 }

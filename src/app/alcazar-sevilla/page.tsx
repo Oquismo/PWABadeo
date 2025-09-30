@@ -8,31 +8,58 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useYelpPlace } from '@/hooks/useYelpPlace';
 
 export default function AlcazarSevillaPage() {
   const router = useRouter();
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
   const { t } = useTranslation();
 
-  // Datos dinámicos del sitio
+  // Obtener datos dinámicos de Yelp para Alcázar de Sevilla
+  const { place: yelpPlace, loading, error } = useYelpPlace('Alcázar de Sevilla');
+
+  // Datos dinámicos del sitio - usar Yelp si está disponible, sino fallback
   const spot = {
-    name: t('sites.alcazar.name'),
-    trainer: t('sites.alcazar.guide'),
+    name: yelpPlace?.name || t('sites.alcazar.name'),
+    trainer: t('sites.alcazar.guide'), // Esto queda hardcodeado ya que no viene de Yelp
     nextSpots: "3 " + t('nav.of') + " 6",
-    coordinates: "37.3829,-5.9901", // Coordenadas del Alcázar
+    coordinates: yelpPlace ? `${yelpPlace.coordinates.lat},${yelpPlace.coordinates.lng}` : "37.3829,-5.9901",
     currentSpot: {
       name: t('sites.barrioSantaCruz.name'),
       time: "20 min",
       distance: "400 m",
       difficulty: t('difficulty.picturesque')
     },
-    description: t('sites.alcazar.description')
+    description: yelpPlace?.description || t('sites.alcazar.description')
   };
 
   const openMaps = () => {
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.coordinates}`;
     window.open(mapsUrl, '_blank');
   };
+
+  // Mostrar loading mientras se cargan datos de Yelp
+  if (loading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh', 
+        bgcolor: '#1a1a1a', 
+        width: '100vw', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}>
+        <Typography variant="h6" sx={{ color: '#fff' }}>
+          Cargando información del lugar...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Mostrar error si falla la carga
+  if (error) {
+    console.warn('Error loading Yelp data, using fallback:', error);
+  }
   
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#1a1a1a', width: '100vw', position: 'relative', overflow: 'hidden' }}>
@@ -43,7 +70,9 @@ export default function AlcazarSevillaPage() {
         position: 'fixed',
         top: 0,
         left: 0,
-        backgroundImage: 'url("/img/alcazar de sevilla.jpg"), linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
+        backgroundImage: yelpPlace?.image 
+          ? `url(${yelpPlace.image}), linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)`
+          : 'url("/img/alcazar de sevilla.jpg"), linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundBlendMode: 'overlay'

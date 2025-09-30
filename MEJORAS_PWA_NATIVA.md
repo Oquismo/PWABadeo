@@ -83,6 +83,71 @@ Se han implementado múltiples mejoras avanzadas para hacer que la experiencia d
 {
   "orientation": "portrait-primary",
   "shortcuts": [...],
+## 🗺️ Plan de mejoras — Recomendaciones (priorizado)
+
+Esta sección recoge un roadmap práctico para enriquecer la página `/recomendaciones` usando únicamente datos reales obtenidos de la API externa (Yelp/Google/etc.) y los datos locales de `src/data/restaurants`. Cada entrada indica el esfuerzo estimado, datos necesarios y archivos a tocar.
+
+1) Mostrar horario completo en modal/drawer (Low)
++ Qué: al pulsar "Horario" en la tarjeta se abre un modal con el `openingHours` completo y un mini-mapa con la dirección.
++ Datos: `raw.hours` / `raw.business_hours` ya mapeados a `openingHours`.
++ Archivos: `src/app/recomendaciones/RecomendacionesClient.tsx`, nuevo `components/HoursModal.tsx`.
+
+2) Mostrar reseñas (excerpt) y enlace a Yelp (Low)
++ Qué: mostrar 1-2 líneas de reseña y enlace a la ficha completa en Yelp.
++ Datos: `raw.reviews` (si la API las incluye) o enlace `url` a Yelp.
++ Archivos: `RecomendacionesClient.tsx`.
+
+3) Galería de fotos y lightbox (Low)
++ Qué: carrusel de imágenes reales de `photos` / `image_url` y lightbox al tocar.
++ Datos: `photos`, `image_url`.
++ Archivos: `RecomendacionesClient.tsx` (+ dependencia opcional `react-image-lightbox` o similar).
+
+4) Chips de atributos (Low)
++ Qué: mostrar etiquetas reales: "Abierto ahora", "Reserva", "Terraza", "Pet-friendly" si aparecen en `raw.attributes` o `raw.transactions`.
++ Datos: `raw.attributes`, `raw.transactions`.
++ Archivos: `RecomendacionesClient.tsx`.
+
+5) Mapa + lista sincronizada (Med)
++ Qué: vista con mapa y markers; clic en marker centra la tarjeta; clic en tarjeta centra mapa.
++ Datos: lat/lng de cada item.
++ Archivos: nuevo `components/RecommendationsMap.tsx`, `RecomendacionesClient.tsx`.
+
+6) Filtrado avanzado server-side + cache TTL (Med)
++ Qué: que `/api/recommendations` aplique `price`, `category`, `open_now`, `sort` y `limit` en servidor; cachear respuestas por 30s por combinación de params.
++ Datos: usar query params y aplicar filtros antes de devolver; opcionalmente usar Redis para cache.
++ Archivos: `src/app/api/recommendations/route.ts`.
+
+7) Guardar favoritos por usuario (Med)
++ Qué: persistir favoritos en backend para usuarios autenticados, con endpoints `api/user/favorites`.
++ Datos: userId + lista de business ids.
++ Archivos: endpoints API + UI favoritos.
+
+8) Integración de reservas (High)
++ Qué: habilitar botón "Reservar" usando `raw.reservations` o enlaces externos (OpenTable/Bookatable) si están presentes.
++ Datos: `raw` puede incluir reservas o `url` hacia sistemas externos.
++ Archivos: `RecomendacionesClient.tsx`, nuevos endpoints o redirecciones.
+
+9) Personalización y recomendación persistente (High)
++ Qué: personalizar ranking por historial de uso y favoritos (reglas heurísticas o ML simple).
++ Datos: eventos de usuario (clics, favoritos, búsquedas) + modelo simple en server.
++ Archivos: backend para events, job de entrenamiento y endpoint de recomendaciones personalizadas.
+
+10) Offline-first y PWA caching (Med)
++ Qué: cachear últimas búsquedas y assets para mostrar recomendaciones incluso offline.
++ Datos: cache dinámico en service worker; política de expiración.
++ Archivos: service-worker.js, lógica de cache en servidor/cliente.
+
+11) Analytics / A/B testing (Low→Med)
++ Qué: medir clics en acciones clave y probar distintas presentaciones (card compacta vs detallada).
++ Datos: eventos telemetry (ya existe `telemetry` lib).
++ Archivos: puntos de instrumentación en `RecomendacionesClient.tsx` y backend de telemetry.
+
+### Recomendación inmediata
+- Priorizar: 1 (modal horario), 3 (galería fotos), 4 (chips atributos) y 2 (reseñas excerpt). Son cambios de bajo esfuerzo que aumentan mucho la usabilidad.
+- Después: 5 (mapa) y 6 (filters server-side + cache) para mejorar experiencia y costes.
+
+Si quieres, implemento la primera entrega (modal horario + traducción de días a español + lightbox de fotos) ahora.
+
   "share_target": {...},
   "protocol_handlers": [...],
   "file_handlers": [...]

@@ -25,6 +25,7 @@ import { ContextMenuItem } from '@/hooks/useLongPressMenu';
 import { EdgeSwipePresets } from '@/hooks/useEdgeSwipeNavigation';
 import { PressureLevelPresets } from '@/hooks/use3DTouchSimulation';
 import { useHaptics } from '@/hooks/useHaptics';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const BottomNavBarWithGestures: React.FC = () => {
   const pathname = usePathname();
@@ -32,6 +33,7 @@ const BottomNavBarWithGestures: React.FC = () => {
   const { tap, buttonClick } = useHaptics();
   const router = useRouter();
   const [showQuickActions, setShowQuickActions] = useState(false);
+  const { t } = useTranslation();
 
   // Ocultar en páginas de login
   if (pathname === '/login' || pathname === '/login-simple' || pathname === '/registro') {
@@ -40,11 +42,11 @@ const BottomNavBarWithGestures: React.FC = () => {
 
   // Acciones principales de navegación
   const navActions = [
-    { value: "/", icon: <HomeRoundedIcon />, label: "Inicio" },
-    { value: "/mapa", icon: <MapRoundedIcon />, label: "Mapa" },
-    { value: "/perfil", icon: <AccountCircleRoundedIcon />, label: "Perfil" },
+    { value: "/", icon: <HomeRoundedIcon />, label: t('nav.home') },
+    { value: "/mapa", icon: <MapRoundedIcon />, label: t('nav.map') },
+    { value: "/perfil", icon: <AccountCircleRoundedIcon />, label: t('nav.profile') },
     ...(user?.role === 'admin' ? [
-      { value: "/admin", icon: <AdminPanelSettingsRoundedIcon />, label: "Admin" }
+      { value: "/admin", icon: <AdminPanelSettingsRoundedIcon />, label: t('nav.admin') }
     ] : [])
   ];
 
