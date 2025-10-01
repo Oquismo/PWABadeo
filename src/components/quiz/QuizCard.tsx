@@ -133,7 +133,7 @@ export default function QuizCard({ quiz, onComplete, onExit }: QuizCardProps) {
   } = useQuiz(quiz, {
     autoNext: false,
     allowReview: false,
-    shuffleAnswers: false,
+    shuffleAnswers: true,
   });
 
   // Llamar a onComplete cuando se complete el quiz

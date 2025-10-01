@@ -498,7 +498,7 @@ export default function EditarPerfilPage() {
                       >
                         <MenuItem value="">Ninguna</MenuItem>
                         <MenuItem value="ONE">ONE (Residencia ONE)</MenuItem>
-                        <MenuItem value="AMBRO">AMBRO (Residencia AMRO)</MenuItem>
+                        <MenuItem value="AMRO">AMRO (Residencia AMRO)</MenuItem>
                         <MenuItem value="ESTANISLAO">Estanislao</MenuItem>
                         <MenuItem value="ARMENDARIZ">Armendáriz</MenuItem>
                       </Select>
@@ -523,7 +523,7 @@ export default function EditarPerfilPage() {
                       >
                         <MenuItem value="">Ninguna</MenuItem>
                         <MenuItem value="ONE">ONE</MenuItem>
-                        <MenuItem value="AMBRO">Ambro</MenuItem>
+                        <MenuItem value="AMRO">Amro</MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>

@@ -58,7 +58,6 @@ function MapComponentWrapper({ specificKey, overrideKey }: { specificKey?: strin
   const keyNorm = normalize(keyToUse);
   // Mapeo explícito entre claves usadas en `residenciaContent` y los ids de `placesData`
   const residenciaToPlaceId: Record<string, string> = {
-    'AMBRO': 'residencia-amro',
     'AMRO': 'residencia-amro',
     'ESTANISLAO': 'residencia-estanislao',
     'ARMENDARIZ': 'micampus-armendariz',
@@ -123,7 +122,7 @@ export default function ResidenciaClient() {
   const handleCloseConstruction = () => setOpenConstruction(false);
   
 
-  // Contenido por residencia (claves normalizadas: ONE y AMBRO)
+  // Contenido por residencia (claves normalizadas: ONE y AMRO)
   const residenciaContent: Record<string, any> = {
     ONE: {
       title: 'Residencia ONE',
@@ -133,7 +132,7 @@ export default function ResidenciaClient() {
       notes: 'Entrada principal c/ Mayor 12. Sala de estudio abierta 24h.',
       website: 'https://www.livinnx.com/'
     },
-    AMBRO: {
+    AMRO: {
       title: 'Residencia AMRO',
       image: '/img/AMRO.webp',
       wifi: { ssid: 'AMRO-WiFi', password: '(preguntar en recepción)' },
@@ -186,7 +185,7 @@ export default function ResidenciaClient() {
 
   // Coordenadas de las residencias (desde places.ts)
   const residenciaCoordinates: Record<string, { lat: number; lng: number }> = {
-    AMBRO: { lat: 37.35195144264452, lng: -5.97526460125809 },
+    AMRO: { lat: 37.35195144264452, lng: -5.97526460125809 },
     ESTANISLAO: { lat: 37.35645121300518, lng: -5.978122866568905 },
     ARMENDARIZ: { lat: 37.357238681403636, lng: -5.976824126984121 },
     ONE: { lat: 37.3895687188777, lng: -5.9916432331313185 } // Coordenadas por defecto si no está definida
@@ -196,7 +195,7 @@ export default function ResidenciaClient() {
   const openGoogleMapsRoute = () => {
     const coords = residenciaKey && residenciaCoordinates[residenciaKey] 
       ? residenciaCoordinates[residenciaKey]
-      : residenciaCoordinates.AMBRO; // Fallback a AMBRO
+      : residenciaCoordinates.AMRO; // Fallback a AMRO
     
     // URL de Google Maps con ruta desde ubicación actual hasta la residencia
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}&travelmode=walking`;
@@ -253,7 +252,7 @@ export default function ResidenciaClient() {
               <Divider sx={{ my: 2 }} />
 
               {/* Dirección específica */}
-              {(residenciaKey === 'AMBRO' || residenciaKey === 'ESTANISLAO') && specific?.address && (
+              {(residenciaKey === 'AMRO' || residenciaKey === 'ESTANISLAO') && specific?.address && (
                 <>
                   <Typography variant="subtitle1" gutterBottom>Dirección</Typography>
                   <Typography variant="body2" sx={{ mb: 2 }}>
@@ -305,7 +304,7 @@ export default function ResidenciaClient() {
               <Typography variant="h6" gutterBottom>Servicios destacados</Typography>
               <Grid container spacing={2}>
                 {/* Servicios específicos por residencia */}
-                {residenciaKey === 'AMBRO' ? (
+                {residenciaKey === 'AMRO' ? (
                   <>
                     <Grid item xs={12} sm={6}>
                       <Card variant="outlined" sx={{ p: 1 }}>
@@ -492,7 +491,7 @@ export default function ResidenciaClient() {
               <Divider sx={{ my: 2 }} />
 
               {/* Información específica por residencia */}
-              {(residenciaKey === 'AMBRO' || residenciaKey === 'ESTANISLAO' || residenciaKey === 'ARMENDARIZ') && (
+              {(residenciaKey === 'AMRO' || residenciaKey === 'ESTANISLAO' || residenciaKey === 'ARMENDARIZ') && (
                 <>
                   <Typography variant="h6" gutterBottom>Tipología de Habitaciones</Typography>
                   <List dense>
@@ -508,7 +507,7 @@ export default function ResidenciaClient() {
                         secondary="Dos camas en la misma habitación con baño compartido" 
                       />
                     </ListItem>
-                    {residenciaKey === 'AMBRO' ? (
+                    {residenciaKey === 'AMRO' ? (
                       <ListItem>
                         <ListItemText 
                           primary="TWODIOS" 
@@ -559,7 +558,7 @@ export default function ResidenciaClient() {
 
               <Typography variant="h6" gutterBottom>Normas rápidas</Typography>
               <List>
-                {(residenciaKey === 'AMBRO' || residenciaKey === 'ESTANISLAO' || residenciaKey === 'ARMENDARIZ') ? (
+                {(residenciaKey === 'AMRO' || residenciaKey === 'ESTANISLAO' || residenciaKey === 'ARMENDARIZ') ? (
                   <>
                     <ListItem>
                       <ListItemText 

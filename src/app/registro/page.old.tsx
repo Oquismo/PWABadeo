@@ -414,7 +414,7 @@ export default function RegistroPage() {
                           >
                             <MenuItem value="">Ninguna</MenuItem>
                             <MenuItem value="ONE">ONE (Residencia ONE)</MenuItem>
-                            <MenuItem value="AMBRO">AMBRO (Residencia AMRO)</MenuItem>
+                            <MenuItem value="AMRO">AMRO (Residencia AMRO)</MenuItem>
                             <MenuItem value="ESTANISLAO">Estanislao</MenuItem>
                             <MenuItem value="ARMENDARIZ">Armendáriz</MenuItem>
                           </Select>

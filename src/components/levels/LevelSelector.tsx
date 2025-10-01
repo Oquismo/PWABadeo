@@ -14,6 +14,14 @@ import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import SchoolIcon from '@mui/icons-material/School';
+import BookIcon from '@mui/icons-material/Book';
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
+import ExploreIcon from '@mui/icons-material/Explore';
+import PublicIcon from '@mui/icons-material/Public';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
+import DiamondIcon from '@mui/icons-material/Diamond';
+import CastleIcon from '@mui/icons-material/Castle';
 import '@/styles/levels-expressive.css';
 
 interface LevelSelectorProps {
@@ -170,9 +178,28 @@ const LevelCard: React.FC<{
         )}
       </div>
 
-      {/* Icono del nivel */}
+      {/* Icono del nivel: usar SVG MUI cuando haya mapping, sino fallback emoji */}
       <div className="level-icon" style={{ fontSize: '3rem' }}>
-        {level.icon}
+        {(() => {
+          const mapIcon = (id: number) => {
+            switch (id) {
+              case 1: return <BookIcon fontSize="inherit" />; // Fundamentos
+              case 2: return <ExploreIcon fontSize="inherit" />; // Rutinas
+              case 3: return <HistoryEduIcon fontSize="inherit" />; // Pasado
+              case 4: return <PublicIcon fontSize="inherit" />; // Futuro
+              case 5: return <CastleIcon fontSize="inherit" />; // Subjuntivo (montaña/alturas)
+              case 6: return <WhatshotIcon fontSize="inherit" />; // Condicional (energía)
+              case 7: return <EmojiObjectsIcon fontSize="inherit" />; // Expresiones (ideas)
+              case 8: return <WhatshotIcon fontSize="inherit" />; // Subjuntivo II - mantener fuego
+              case 9: return <DiamondIcon fontSize="inherit" />; // Preposiciones (precisión)
+              case 10: return <CastleIcon fontSize="inherit" />; // Maestría (corona / logro)
+              default: return null;
+            }
+          };
+
+          const svg = mapIcon(level.id);
+          return svg ? svg : <span>{level.icon}</span>;
+        })()}
       </div>
 
       {/* Contenido */}

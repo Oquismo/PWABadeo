@@ -75,7 +75,7 @@ const CITY_TOWNS: Record<string, string[]> = {
 const RESIDENCES = [
   { value: '', label: 'Ninguna' },
   { value: 'ONE', label: 'ONE (Residencia ONE)' },
-  { value: 'AMBRO', label: 'AMBRO (Residencia AMRO)' },
+  { value: 'AMRO', label: 'AMRO (Residencia AMRO)' },
   { value: 'ESTANISLAO', label: 'Estanislao' },
   { value: 'ARMENDARIZ', label: 'Armendáriz' },
 ];

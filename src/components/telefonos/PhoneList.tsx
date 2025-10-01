@@ -22,7 +22,7 @@ const basePhoneNumbers = [
 // Mapping simple entre claves de residencia y números asociados
 const residencePhoneMap: Record<string, { nameKey: string; number: string }> = {
     'ONE': { nameKey: 'residenciaOne', number: '+34 955 11 22 33' },
-    'AMBRO': { nameKey: 'residenciaAmro', number: '+34 644 93 47 760' },
+    'AMRO': { nameKey: 'residenciaAmro', number: '+34 644 93 47 760' },
     'ESTANISLAO': { nameKey: 'residenciaEstanislao', number: '+34 955 22 33 44' }
 };
 

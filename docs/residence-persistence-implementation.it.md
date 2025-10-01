@@ -13,7 +13,7 @@ La residenza selezionata dall'utente durante la registrazione veniva salvata sol
 ```prisma
 model User {
   // ... altri campi
-  residence        String? // Residenza scelta dall'utente (es. 'ONE' o 'AMBRO')
+  residence        String? // Residenza scelta dall'utente (es. 'ONE' o 'AMRO')
   // ... altri campi
 }
 ```

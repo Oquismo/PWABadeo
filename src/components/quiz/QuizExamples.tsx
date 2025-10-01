@@ -121,6 +121,7 @@ export function CustomUIQuizExample() {
   } = useQuiz(spanishQuizB1B2, {
     autoNext: false,
     allowReview: false,
+    shuffleAnswers: true,
   });
 
   if (isCompleted && result) {
@@ -372,7 +373,9 @@ export function TimedQuizExample() {
   const [timeLimit] = React.useState(300); // 5 minutos en segundos
   const [timeUp, setTimeUp] = React.useState(false);
 
-  const quiz = useQuiz(spanishQuizB1B2);
+  const quiz = useQuiz(spanishQuizB1B2, {
+    shuffleAnswers: true,
+  });
 
   React.useEffect(() => {
     if (quiz.timeElapsed >= timeLimit && !quiz.isCompleted) {
