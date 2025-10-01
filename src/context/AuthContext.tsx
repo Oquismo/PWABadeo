@@ -1,43 +1,19 @@
+/**
+ * AuthContext refactorizado - Versión mejorada con mejor separación de responsabilidades
+ */
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import telemetry from '@/lib/telemetry';
 import loggerClient from '@/lib/loggerClient';
+import { UserBase, UserUpdateData, UserStorageData } from '@/types/api.types';
+import { LocalStorage, saveUserToStorage, getUserFromStorage, logUserAction } from '@/utils/storage.utils';
+import { apiClient } from '@/utils/api-client.utils';
 
-export interface User {
-  id: number;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  email: string;
-  role: 'admin' | 'user' | 'USER' | 'ADMIN';
-  age?: number | null;
-  residence?: string | null;
-  school?: {
-    id: number;
-    name: string;
-    city?: string;
-    country?: string;
-    town?: string;
-    type: string;
-    level: string;
-  } | string | null;
-  schoolId?: number | null;
-  avatarUrl?: string | null;
-  arrivalDate?: string | null;
-  departureDate?: string | null;
-  // Campos de ubicación del usuario
-  country?: string | null;
-  city?: string | null;
-  town?: string | null;
-}
+// ===== Types =====
 
-type UserUpdateData = Partial<Omit<User, 'id' | 'email' | 'role' | 'school'>> & {
-  school?: string | null; // Para edición de perfil solo permitimos string
-  country?: string | null;
-  city?: string | null;
-  town?: string | null;
-};
+export type User = UserBase;
 
 interface AuthContextType {
   user: User | null;
@@ -49,410 +25,393 @@ interface AuthContextType {
   updateAvatar: (avatarUrl: string) => Promise<void>;
   deleteAvatar: () => Promise<void>;
   refreshAvatar: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Top-level helpers so they can be reused outside the provider (and exposed to window)
-const getSafeUserForStorageTop = (u: User | null) => {
-  if (!u) return null;
-  const schoolId = typeof u.school === 'object' && (u.school as any)?.id ? (u.school as any).id : (u.schoolId ?? null);
-  const name = (u.name ?? (`${u.firstName ?? ''}${u.lastName ? ' ' + u.lastName : ''}`.trim())) || undefined;
-  const avatarUrl = u.avatarUrl && typeof u.avatarUrl === 'string' && !u.avatarUrl.startsWith('data:') ? u.avatarUrl : null;
+// ===== Helper Functions =====
+
+/**
+ * Convierte un User a UserStorageData seguro para localStorage
+ */
+function userToStorageData(user: User | null): UserStorageData | null {
+  if (!user) return null;
+
+  const schoolId =
+    typeof user.school === 'object' && user.school?.id
+      ? user.school.id
+      : user.schoolId ?? null;
+
+  const name =
+    user.name ||
+    `${user.firstName ?? ''}${user.lastName ? ' ' + user.lastName : ''}`.trim() ||
+    undefined;
+
+  // No almacenar avatares en base64
+  const avatarUrl =
+    user.avatarUrl && !user.avatarUrl.startsWith('data:') ? user.avatarUrl : null;
+
   return {
-    id: u.id,
+    id: user.id,
     name,
-    email: u.email,
-    role: u.role,
+    email: user.email,
+    role: user.role,
     schoolId,
     avatarUrl,
-    country: u.country ?? null,
-    residence: u.residence ?? null,
-    city: u.city ?? null,
-    town: u.town ?? null
-  } as any;
-};
+    country: user.country ?? null,
+    residence: user.residence ?? null,
+    city: user.city ?? null,
+    town: user.town ?? null,
+  };
+}
 
-const saveUserToLocalTop = (u: User | null) => {
+/**
+ * Obtiene usuario desde el backend
+ */
+async function fetchUserFromBackend(email: string): Promise<User | null> {
   try {
-    const safe = getSafeUserForStorageTop(u);
-    if (safe) localStorage.setItem('user', JSON.stringify(safe));
-    else localStorage.removeItem('user');
-  } catch (e) {
-    loggerClient.error('Error guardando user en localStorage (saveUserToLocalTop):', e);
-  }
-};
-// --- NUEVA FUNCIÓN PARA REGISTRAR ACCIONES ---
-const logAction = (action: string, userEmail: string) => {
-  try {
-    const logsRaw = localStorage.getItem('appLogs');
-    const logs = logsRaw ? JSON.parse(logsRaw) : [];
-    const newLog = {
-      action,
-      userEmail,
-      timestamp: new Date().toISOString(),
-    };
-    // Añadimos el nuevo registro al principio y limitamos a 100 entradas
-    const updatedLogs = [newLog, ...logs].slice(0, 100);
-    localStorage.setItem('appLogs', JSON.stringify(updatedLogs));
+    const response = await apiClient.post<{ user: User }>('/api/user/by-email', { email });
+
+    if (!response.success || !response.data?.user) {
+      return null;
+    }
+
+    let user = response.data.user;
+
+    // Preservar residence del localStorage si el backend no la devuelve
+    const storedUser = getUserFromStorage();
+    if (storedUser?.residence && !user.residence) {
+      user = { ...user, residence: storedUser.residence };
+    }
+
+    return user;
   } catch (error) {
-    loggerClient.error("Error al guardar el log:", error);
+    loggerClient.error('Error fetching user from backend:', error);
+    return null;
   }
-};
+}
 
+// ===== AuthProvider Component =====
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Guardar sólo una versión compacta del usuario en localStorage para evitar QuotaExceeded
-  const getSafeUserForStorage = (u: User | null) => {
-    if (!u) return null;
-    const schoolId = typeof u.school === 'object' && (u.school as any)?.id ? (u.school as any).id : (u.schoolId ?? null);
-  const name = (u.name ?? (`${u.firstName ?? ''}${u.lastName ? ' ' + u.lastName : ''}`.trim())) || undefined;
-    // No almacenar avatares en base64 (data:), sólo URLs
-    const avatarUrl = u.avatarUrl && typeof u.avatarUrl === 'string' && !u.avatarUrl.startsWith('data:') ? u.avatarUrl : null;
-    return {
-      id: u.id,
-      name,
-      email: u.email,
-      role: u.role,
-      schoolId,
-      avatarUrl,
-      country: u.country ?? null,
-      residence: u.residence ?? null,
-      city: u.city ?? null,
-      town: u.town ?? null
-    } as any;
-  };
-
-  const saveUserToLocal = (u: User | null) => {
-    try {
-      const safe = getSafeUserForStorage(u);
-      if (safe) {
-  localStorage.setItem('user', JSON.stringify(safe));
-      } else {
-        localStorage.removeItem('user');
-      }
-    } catch (e) {
-      loggerClient.error('Error guardando user en localStorage (saveUserToLocal):', e);
-    }
-  };
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const onlyAdmins = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
 
+  const onlyAdmins =
+    typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
 
-  // ...
-  // Declaraciones de useState
-  // ...
+  // ===== Initialization =====
 
-  // Notificación de reseña Google
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const storedUserRaw = localStorage.getItem('user');
-    if (!storedUserRaw) return;
+    const initializeAuth = async () => {
+      loggerClient.debug('🔄 AuthContext: Inicializando...');
+
+      const storedUser = getUserFromStorage();
+
+      if (storedUser) {
+        loggerClient.debug('📦 Usuario encontrado en localStorage:', storedUser.email);
+
+        // Refrescar datos desde backend
+        const refreshedUser = await fetchUserFromBackend(storedUser.email);
+
+        if (refreshedUser) {
+          setUser(refreshedUser);
+          saveUserToStorage(userToStorageData(refreshedUser));
+          loggerClient.info('✅ Usuario actualizado desde backend');
+        } else {
+          // Si falla, limpiar
+          setUser(null);
+          LocalStorage.remove('user');
+          loggerClient.warn('⚠️ No se pudo refrescar usuario, limpiando localStorage');
+        }
+      }
+
+      setIsLoading(false);
+      loggerClient.info('✅ AuthContext: Inicialización completada');
+
+      // Inicializar telemetría
+      try {
+        const currentUser = getUserFromStorage();
+        telemetry.initTelemetry({
+          userEmail: currentUser?.email ?? null,
+          endpoint: '/api/telemetry',
+        });
+      } catch (error) {
+        loggerClient.error('Error inicializando telemetría:', error);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  // ===== Google Review Prompt =====
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !user) return;
+
     // Guardar fecha de registro si no existe
-    if (!localStorage.getItem('userRegisteredAt')) {
-      localStorage.setItem('userRegisteredAt', new Date().toISOString());
+    if (!LocalStorage.has('userRegisteredAt')) {
+      LocalStorage.set('userRegisteredAt', new Date().toISOString());
     }
+
     // Verificar si han pasado 2 días
-    const registeredAt = localStorage.getItem('userRegisteredAt');
+    const registeredAt = LocalStorage.get<string>('userRegisteredAt');
     if (registeredAt) {
       const now = new Date();
       const regDate = new Date(registeredAt);
       const diffDays = (now.getTime() - regDate.getTime()) / (1000 * 60 * 60 * 24);
-      if (diffDays >= 2 && !localStorage.getItem('reviewPrompted')) {
-        // Lanzar evento personalizado para mostrar notificación
+
+      if (diffDays >= 2 && !LocalStorage.has('reviewPrompted')) {
         window.dispatchEvent(new CustomEvent('showGoogleReviewPrompt'));
-        localStorage.setItem('reviewPrompted', 'true');
+        LocalStorage.set('reviewPrompted', 'true');
       }
     }
   }, [user]);
 
-  useEffect(() => {
-    loggerClient.debug('🔄 AuthContext: Inicializando...');
-    const storedUser = localStorage.getItem('user');
-    loggerClient.debug('📦 AuthContext: Usuario en localStorage:', storedUser ? 'Existe' : 'No existe');
+  // ===== Login =====
 
-    async function fetchUserFromBackend(email: string) {
+  const login = useCallback(
+    async (userData: User) => {
+      loggerClient.debug('🔐 Login iniciado para:', userData.email);
+
+      // Verificar restricción de solo admins
+      if (onlyAdmins && userData.role !== 'admin') {
+        loggerClient.warn('⚠️ Intento de login bloqueado (modo solo admins)');
+        throw new Error('Acceso solo permitido para administradores');
+      }
+
+      // Guardar usuario inicial
+      setUser(userData);
+      saveUserToStorage(userToStorageData(userData));
+
+      if (userData.id) {
+        LocalStorage.set('userId', userData.id.toString());
+      }
+
+      // Log de acción
+      logUserAction('login', userData.email);
       try {
-        const response = await fetch('/api/user/by-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-          credentials: 'include'
-        });
-        if (response.ok) {
-          const { user } = await response.json();
-            if (user) {
-            // Si localStorage guarda una residencia (cliente-only), preservarla si el backend no la devuelve
-            try {
-              const storedRaw = localStorage.getItem('user');
-              if (storedRaw) {
-                const parsedStored = JSON.parse(storedRaw) as any;
-                if (parsedStored?.residence && !user.residence) {
-                  user.residence = parsedStored.residence;
-                }
-              }
-            } catch (e) {
-                    // ignore JSON parse errors
-            }
-            setUser(user);
-            // Use safe storage helper to avoid storing large base64 avatars
-            saveUserToLocal(user);
-                  loggerClient.info('✅ AuthContext: Usuario actualizado desde backend:', user);
-          }
-        } else {
-          setUser(null);
-          localStorage.removeItem('user');
-        }
+        telemetry.sendTelemetryEvent('login', { email: userData.email });
       } catch (e) {
-        setUser(null);
-        localStorage.removeItem('user');
-        loggerClient.error('❌ AuthContext: Error actualizando usuario desde backend:', e);
+        // Ignore telemetry errors
       }
-    }
 
-    const init = async () => {
-      if (storedUser) {
-        try {
-          const parsed: User = JSON.parse(storedUser);
-          loggerClient.debug('👤 AuthContext: Usuario parseado:', {
-            id: parsed.id,
-            email: parsed.email,
-            role: parsed.role,
-            country: parsed.country,
-            city: parsed.city,
-            town: parsed.town
-          });
-          // Siempre refrescar desde backend para cualquier usuario (admin o no)
-          await fetchUserFromBackend(parsed.email);
-        } catch (e) {
-          loggerClient.error('❌ AuthContext: Error parseando usuario almacenado, limpiando.', e);
-          localStorage.removeItem('user');
-        }
-      }
-      setIsLoading(false);
-      loggerClient.info('✅ AuthContext: Carga completada');
-      // Inicializar telemetría con el usuario si existe
+      // Refrescar datos desde backend
       try {
-        const parsedUserRaw = localStorage.getItem('user');
-        const parsedUser = parsedUserRaw ? JSON.parse(parsedUserRaw) : null;
-        telemetry.initTelemetry({ userEmail: parsedUser?.email ?? null, endpoint: '/api/telemetry' });
-      } catch (e) {
-        loggerClient.error('Error inicializando telemetría:', e);
-      }
-    };
-    init();
-  }, []);
+        const refreshedUser = await fetchUserFromBackend(userData.email);
 
-  const login = async (userData: User) => {
-    loggerClient.debug('🔐 AuthContext: Login iniciado para:', userData.email);
-    loggerClient.debug('👤 AuthContext: Datos completos de usuario:', userData);
-    if (userData.school) {
-      loggerClient.debug('🏫 AuthContext: userData.school:', userData.school, 'typeof:', typeof userData.school);
-    } else {
-      loggerClient.debug('🏫 AuthContext: userData.school está vacío:', userData.school);
-    }
-    
-    if (onlyAdmins && userData.role !== 'admin') {
-      loggerClient.warn('⚠️ AuthContext: Intento de login bloqueado por modo solo admins.');
-      return;
-    }
-  // Guardar datos iniciales (safe)
-  saveUserToLocal(userData);
-    if (userData.id) {
-      loggerClient.debug('🔍 AuthContext: Guardando userId en localStorage:', userData.id);
-      localStorage.setItem('userId', userData.id.toString());
-      loggerClient.info('✅ AuthContext: userId guardado:', localStorage.getItem('userId'));
-    } else {
-      loggerClient.error('❌ AuthContext: userData.id no está presente:', userData);
-    }
-    setUser(userData);
-    logAction('login', userData.email);
-  try { telemetry.sendTelemetryEvent('login', { email: userData.email }); } catch (e) {}
-    // Refrescar inmediatamente desde backend para asegurar datos completos
-    try {
-      const response = await fetch('/api/user/by-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userData.email }),
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const { user } = await response.json();
-        if (user) {
-          // Si el backend no incluye residence (modo cliente-only), conservar la que vino en userData
-          if (!user.residence && (userData as any).residence) {
-            (user as any).residence = (userData as any).residence;
+        if (refreshedUser) {
+          // Preservar residence si vino del registro
+          if (!refreshedUser.residence && userData.residence) {
+            refreshedUser.residence = userData.residence;
           }
-          setUser(user);
-          saveUserToLocal(user);
-          if (user.id) {
-            loggerClient.debug('🔍 AuthContext: Actualizando userId tras refresco:', user.id);
-            localStorage.setItem('userId', user.id.toString());
-            loggerClient.info('✅ AuthContext: userId actualizado:', localStorage.getItem('userId'));
+
+          setUser(refreshedUser);
+          saveUserToStorage(userToStorageData(refreshedUser));
+
+          if (refreshedUser.id) {
+            LocalStorage.set('userId', refreshedUser.id.toString());
           }
-          loggerClient.info('✅ AuthContext: Usuario actualizado tras login desde backend:', user);
+
+          loggerClient.info('✅ Usuario actualizado tras login');
         }
+      } catch (error) {
+        loggerClient.error('Error refrescando usuario tras login:', error);
       }
-    } catch (e) {
-      loggerClient.error('❌ AuthContext: Error refrescando usuario tras login:', e);
-    }
-    loggerClient.info('✅ AuthContext: Login completado exitosamente');
-  };
 
-  const logout = () => {
+      loggerClient.info('✅ Login completado exitosamente');
+    },
+    [onlyAdmins]
+  );
+
+  // ===== Logout =====
+
+  const logout = useCallback(() => {
     const currentUser = user;
+
     if (currentUser) {
-      logAction('logout', currentUser.email); // Registramos el cierre de sesión
-      // Llamada best-effort al backend para registrar logout en DB
-      fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUser.id })
-      }).catch(() => {});
+      logUserAction('logout', currentUser.email);
+
+      // Notificar al backend (best-effort)
+      apiClient
+        .post('/api/auth/logout', { userId: currentUser.id })
+        .catch(() => {});
+
+      try {
+        telemetry.sendTelemetryEvent('logout', { email: currentUser.email });
+      } catch (e) {
+        // Ignore telemetry errors
+      }
     }
-    try { telemetry.sendTelemetryEvent('logout', { email: currentUser?.email ?? null }); } catch (e) {}
-  // ensure safe remove
-  saveUserToLocal(null);
+
     setUser(null);
-  };
+    LocalStorage.remove('user');
+    LocalStorage.remove('userId');
 
-  const updateUser = async (data: UserUpdateData) => {
-    if (!user) return;
-
-    try {
-      // No enviamos 'residence' al backend; lo guardamos sólo en caché local
-      const { residence: residenceToCache, ...serverData } = data as any;
-
-      // Llamada al servidor con los campos permitidos (sin residence)
-      const response = await fetch('/api/user/update', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, ...serverData }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        // Si falla el backend, igualmente aplicamos el cambio en caché para que el usuario pueda modificar su residencia localmente
-        loggerClient.warn('Warning: falló la actualización en servidor, aplicando cambios en caché localmente');
-      }
-
-      // Actualizar el estado local siempre, incluyendo residence en caché
-      setUser(prevUser => {
-        if (!prevUser) return null;
-        const updatedUser = { ...prevUser, ...data } as User;
-        saveUserToLocal(updatedUser as User);
-        return updatedUser;
-      });
-
-    } catch (error) {
-      loggerClient.error('Error actualizando usuario:', error);
-      throw error;
-    }
-  };
-
-  const updateAvatar = useCallback(async (avatarUrl: string) => {
-    if (!user) return;
-
-    try {
-      const response = await fetch('/api/avatar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, avatarUrl }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al actualizar avatar');
-      }
-
-      const data = await response.json();
-
-      // Actualizar el usuario local con el nuevo avatar
-      setUser(prevUser => {
-        if (!prevUser) return null;
-        const updatedUser = { ...prevUser, avatarUrl: data.avatarUrl };
-        saveUserToLocal(updatedUser as User);
-        return updatedUser;
-      });
-
-    } catch (error) {
-      loggerClient.error('Error updating avatar:', error);
-      throw error;
-    }
+    loggerClient.info('✅ Logout completado');
   }, [user]);
+
+  // ===== Update User =====
+
+  const updateUser = useCallback(
+    async (data: UserUpdateData) => {
+      if (!user) return;
+
+      try {
+        // No enviar 'residence' al backend (solo en caché local)
+        const { residence, ...serverData } = data as UserUpdateData & { residence?: string };
+
+        // Actualizar en el servidor
+        const response = await apiClient.put('/api/user/update', {
+          userId: user.id,
+          ...serverData,
+        });
+
+        if (!response.success) {
+          loggerClient.warn('Advertencia: falló actualización en servidor');
+        }
+
+        // Actualizar localmente siempre (incluir residence)
+        setUser((prevUser) => {
+          if (!prevUser) return null;
+          const updatedUser = { ...prevUser, ...data } as User;
+          saveUserToStorage(userToStorageData(updatedUser));
+          return updatedUser;
+        });
+
+        loggerClient.info('✅ Usuario actualizado');
+      } catch (error) {
+        loggerClient.error('Error actualizando usuario:', error);
+        throw error;
+      }
+    },
+    [user]
+  );
+
+  // ===== Update Avatar =====
+
+  const updateAvatar = useCallback(
+    async (avatarUrl: string) => {
+      if (!user) return;
+
+      try {
+        const response = await apiClient.post<{ avatarUrl: string }>('/api/avatar', {
+          userId: user.id,
+          avatarUrl,
+        });
+
+        if (!response.success) {
+          throw new Error('Error al actualizar avatar');
+        }
+
+        setUser((prevUser) => {
+          if (!prevUser) return null;
+          const updatedUser = { ...prevUser, avatarUrl: response.data?.avatarUrl };
+          saveUserToStorage(userToStorageData(updatedUser));
+          return updatedUser;
+        });
+
+        loggerClient.info('✅ Avatar actualizado');
+      } catch (error) {
+        loggerClient.error('Error actualizando avatar:', error);
+        throw error;
+      }
+    },
+    [user]
+  );
+
+  // ===== Delete Avatar =====
 
   const deleteAvatar = useCallback(async () => {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/avatar?userId=${user.id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
+      const response = await apiClient.delete(`/api/avatar?userId=${user.id}`);
 
-      if (!response.ok) {
+      if (!response.success) {
         throw new Error('Error al eliminar avatar');
       }
 
-      // Actualizar el usuario local removiendo el avatar
-      setUser(prevUser => {
+      setUser((prevUser) => {
         if (!prevUser) return null;
         const updatedUser = { ...prevUser, avatarUrl: null };
-        saveUserToLocal(updatedUser as User);
+        saveUserToStorage(userToStorageData(updatedUser));
         return updatedUser;
       });
 
+      loggerClient.info('✅ Avatar eliminado');
     } catch (error) {
-      loggerClient.error('Error deleting avatar:', error);
+      loggerClient.error('Error eliminando avatar:', error);
       throw error;
     }
   }, [user]);
+
+  // ===== Refresh Avatar =====
 
   const refreshAvatar = useCallback(async () => {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/avatar?userId=${user.id}`, {
-        credentials: 'include'
-      });
+      const response = await apiClient.get<{ avatarUrl: string }>(
+        `/api/avatar?userId=${user.id}`
+      );
 
-      if (!response.ok) {
+      if (!response.success) {
         throw new Error('Error al obtener avatar');
       }
 
-      const data = await response.json();
-
-      // Actualizar el usuario local con el avatar del servidor
-      setUser(prevUser => {
+      setUser((prevUser) => {
         if (!prevUser) return null;
-        const updatedUser = { ...prevUser, avatarUrl: data.avatarUrl };
-        saveUserToLocal(updatedUser as User);
+        const updatedUser = { ...prevUser, avatarUrl: response.data?.avatarUrl };
+        saveUserToStorage(userToStorageData(updatedUser));
         return updatedUser;
       });
 
+      loggerClient.info('✅ Avatar refrescado');
     } catch (error) {
-      loggerClient.error('Error refreshing avatar:', error);
+      loggerClient.error('Error refrescando avatar:', error);
       throw error;
     }
   }, [user]);
 
-  return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated: !!user,
-      isLoading,
-      login,
-      logout,
-      updateUser,
-      updateAvatar,
-      deleteAvatar,
-      refreshAvatar
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // ===== Refresh User =====
+
+  const refreshUser = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const refreshedUser = await fetchUserFromBackend(user.email);
+
+      if (refreshedUser) {
+        setUser(refreshedUser);
+        saveUserToStorage(userToStorageData(refreshedUser));
+        loggerClient.info('✅ Usuario refrescado');
+      }
+    } catch (error) {
+      loggerClient.error('Error refrescando usuario:', error);
+    }
+  }, [user]);
+
+  // ===== Context Value =====
+
+  const value: AuthContextType = {
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    login,
+    logout,
+    updateUser,
+    updateAvatar,
+    deleteAvatar,
+    refreshAvatar,
+    refreshUser,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+// ===== useAuth Hook =====
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -462,22 +421,16 @@ export function useAuth() {
   return context;
 }
 
-// Export default for compatibility
 export default useAuth;
 
-// Expose helper globally as a fallback for simple pages/scripts
-try {
-  if (typeof window !== 'undefined') {
-    (window as any).saveUserToLocal = (u: User | null) => {
-      try {
-        const safe = getSafeUserForStorageTop(u);
-        if (safe) localStorage.setItem('user', JSON.stringify(safe));
-        else localStorage.removeItem('user');
-      } catch (e) {
-        loggerClient.error('window.saveUserToLocal error:', e);
-      }
-    };
-  }
-} catch (e) {
-  // ignore in SSR
+// ===== Global Helper (backwards compatibility) =====
+
+if (typeof window !== 'undefined') {
+  (window as any).saveUserToLocal = (u: User | null) => {
+    try {
+      saveUserToStorage(userToStorageData(u));
+    } catch (e) {
+      loggerClient.error('window.saveUserToLocal error:', e);
+    }
+  };
 }

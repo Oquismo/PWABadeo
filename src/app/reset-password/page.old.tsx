@@ -10,9 +10,8 @@ import {
   Link as MuiLink, 
   Alert,
   Paper,
-  LinearProgress,
-  IconButton,
-  InputAdornment
+  CircularProgress,
+  LinearProgress
 } from '@mui/material';
 import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
 import MaterialTextField from '@/components/ui/MaterialTextField';
@@ -23,118 +22,115 @@ import {
   Visibility,
   VisibilityOff
 } from '@mui/icons-material';
+import { IconButton, InputAdornment } from '@mui/material';
 import Link from 'next/link';
 
-// Hooks y utilidades refactorizadas
-import { useForm, useToggle } from '@/hooks/useForm';
-import { validatePasswordResetForm, PasswordResetFormData } from '@/utils/validation.utils';
-import { apiClient } from '@/utils/api-client.utils';
-import loggerClient from '@/lib/loggerClient';
-import { useHaptics } from '@/hooks/useHaptics';
-
-// Función para calcular fortaleza de contraseña
-function getPasswordStrength(password: string) {
-  if (password.length === 0) return { strength: 0, label: '', color: 'inherit' };
-  if (password.length < 6) return { strength: 25, label: 'Muy débil', color: 'error' };
-  if (password.length < 8) return { strength: 50, label: 'Débil', color: 'warning' };
-  if (password.length < 12) return { strength: 75, label: 'Buena', color: 'info' };
-  return { strength: 100, label: 'Muy fuerte', color: 'success' };
-}
-
-// Componente del formulario
+// Componente que maneja los search params
 function ResetPasswordForm() {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [validatingToken, setValidatingToken] = useState(true);
+  const [tokenValid, setTokenValid] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token');
-  const { success: hapticSuccess, error: hapticError } = useHaptics();
-  
-  // Estados locales para validación de token y éxito
-  const [validatingToken, setValidatingToken] = useState(true);
-  const [tokenValid, setTokenValid] = useState(false);
-  const [tokenError, setTokenError] = useState('');
-  const [success, setSuccess] = useState(false);
-  
-  // Toggles para mostrar contraseñas
-  const { value: showPassword, toggle: toggleShowPassword } = useToggle(false);
-  const { value: showConfirmPassword, toggle: toggleShowConfirmPassword } = useToggle(false);
 
-  // Hook de formulario
-  const {
-    values,
-    errors,
-    handleChange,
-    handleSubmit,
-    isSubmitting,
-    setFieldError,
-  } = useForm<PasswordResetFormData>({
-    initialValues: {
-      password: '',
-      confirmPassword: '',
-    },
-    validate: validatePasswordResetForm,
-    onSubmit: handlePasswordReset,
-  });
-
-  // Calcular fortaleza de contraseña
-  const passwordStrength = getPasswordStrength(values.password);
-
-  // Validar token al montar
   useEffect(() => {
     if (!token) {
-      setTokenError('Token de recuperación no válido');
+      setError('Token de recuperación no válido');
       setValidatingToken(false);
       return;
     }
 
+    // Verificar validez del token
+    const validateToken = async () => {
+      try {
+        const response = await fetch('/api/auth/validate-reset-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.valid) {
+          setTokenValid(true);
+        } else {
+          setError(data.error || 'Token inválido o expirado');
+        }
+      } catch (err) {
+        setError('Error al validar el token');
+      } finally {
+        setValidatingToken(false);
+      }
+    };
+
     validateToken();
   }, [token]);
 
-  // Función para validar token
-  async function validateToken() {
+  const validate = () => {
+    if (!password) {
+      setError('La contraseña es obligatoria.');
+      return false;
+    }
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden.');
+      return false;
+    }
+    return true;
+  };
+
+  const getPasswordStrength = () => {
+    if (password.length === 0) return { strength: 0, label: '' };
+    if (password.length < 6) return { strength: 25, label: 'Muy débil', color: 'error' };
+    if (password.length < 8) return { strength: 50, label: 'Débil', color: 'warning' };
+    if (password.length < 12) return { strength: 75, label: 'Buena', color: 'info' };
+    return { strength: 100, label: 'Muy fuerte', color: 'success' };
+  };
+
+  const passwordStrength = getPasswordStrength();
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    
+    if (!validate()) return;
+    
+    setLoading(true);
+    setError('');
+    setMessage('');
+
     try {
-      const response = await apiClient.post<{ valid: boolean }>('/api/auth/validate-reset-token', {
-        token,
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password }),
       });
 
-      if (response.success && response.data?.valid) {
-        setTokenValid(true);
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+        setMessage('Contraseña restablecida exitosamente');
       } else {
-        setTokenError(response.error || 'Token inválido o expirado');
+        setError(data.error || 'Error al restablecer la contraseña');
       }
-    } catch (error) {
-      loggerClient.error('❌ Error al validar token:', error);
-      setTokenError('Error al validar el token');
+    } catch (err) {
+      setError('Error de conexión. Intenta nuevamente.');
     } finally {
-      setValidatingToken(false);
+      setLoading(false);
     }
-  }
-
-  // Función para resetear contraseña
-  async function handlePasswordReset(formData: PasswordResetFormData) {
-    try {
-      loggerClient.debug('🔐 Restableciendo contraseña...');
-
-      const response = await apiClient.post('/api/auth/reset-password', {
-        token,
-        password: formData.password,
-      });
-
-      if (!response.success) {
-        setFieldError('api', response.error || 'Error al restablecer la contraseña');
-        await hapticError();
-        return;
-      }
-
-      // Éxito
-      setSuccess(true);
-      await hapticSuccess();
-      loggerClient.info('✅ Contraseña restablecida exitosamente');
-    } catch (error) {
-      loggerClient.error('❌ Error al restablecer contraseña:', error);
-      setFieldError('api', 'Error de conexión. Intenta nuevamente.');
-      await hapticError();
-    }
-  }
+  };
 
   // Estado de carga inicial
   if (validatingToken) {
@@ -163,7 +159,7 @@ function ResetPasswordForm() {
           </Typography>
           
           <Typography variant="body1" sx={{ mb: 3 }}>
-            {tokenError}
+            {error}
           </Typography>
           
           <Alert severity="warning" sx={{ mb: 3 }}>
@@ -235,23 +231,21 @@ function ResetPasswordForm() {
           <MaterialTextField
             fullWidth
             label="Nueva Contraseña"
-            name="password"
             type={showPassword ? 'text' : 'password'}
-            value={values.password}
-            onChange={handleChange}
-            error={!!errors.password}
-            helperText={errors.password}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError('');
+            }}
             margin="normal"
             required
             autoFocus
-            disabled={isSubmitting}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onClick={toggleShowPassword}
+                    onClick={() => setShowPassword(!showPassword)}
                     edge="end"
-                    disabled={isSubmitting}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
@@ -260,7 +254,7 @@ function ResetPasswordForm() {
             }}
           />
 
-          {values.password && (
+          {password && (
             <Box sx={{ mt: 1, mb: 2 }}>
               <Typography variant="caption" display="block" gutterBottom>
                 Fortaleza de la contraseña: {passwordStrength.label}
@@ -277,22 +271,20 @@ function ResetPasswordForm() {
           <MaterialTextField
             fullWidth
             label="Confirmar Contraseña"
-            name="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
-            value={values.confirmPassword}
-            onChange={handleChange}
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword}
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setError('');
+            }}
             margin="normal"
             required
-            disabled={isSubmitting}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onClick={toggleShowConfirmPassword}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     edge="end"
-                    disabled={isSubmitting}
                   >
                     {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
@@ -301,9 +293,9 @@ function ResetPasswordForm() {
             }}
           />
 
-          {errors.api && (
+          {error && (
             <Alert severity="error" sx={{ mt: 2 }}>
-              {errors.api}
+              {error}
             </Alert>
           )}
 
@@ -311,10 +303,10 @@ function ResetPasswordForm() {
             type="submit" 
             fullWidth 
             variant="contained" 
-            disabled={isSubmitting}
+            disabled={loading}
             sx={{ mt: 3, mb: 2, py: 1.5 }}
           >
-            {isSubmitting ? (
+            {loading ? (
               <>
                 <Material3LoadingIndicator size="small" sx={{ mr: 1 }} />
                 Restableciendo...
@@ -336,7 +328,7 @@ function ResetPasswordForm() {
 }
 
 // Componente principal que envuelve en Suspense
-export default function ResetPasswordPageRefactored() {
+export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <Container maxWidth="sm" sx={{ py: 8 }}>

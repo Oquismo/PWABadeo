@@ -6,13 +6,14 @@ import {
   Container, 
   Box, 
   Typography, 
+  TextField, 
   Button, 
   Link as MuiLink, 
   Alert,
-  Paper
+  Paper,
+  CircularProgress
 } from '@mui/material';
 import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
-import MaterialTextField from '@/components/ui/MaterialTextField';
 import { 
   Email as EmailIcon,
   ArrowBack as ArrowBackIcon,
@@ -20,79 +21,57 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 
-// Hooks y utilidades refactorizadas
-import { useForm } from '@/hooks/useForm';
-import { validators } from '@/utils/validation.utils';
-import { apiClient } from '@/utils/api-client.utils';
-import { FormErrors } from '@/types/api.types';
-import loggerClient from '@/lib/loggerClient';
-import { useHaptics } from '@/hooks/useHaptics';
-
-// Tipo para el formulario de email
-interface ForgotPasswordFormData extends Record<string, unknown> {
-  email: string;
-}
-
-// Validador para forgot password
-const validateForgotPasswordForm = (data: ForgotPasswordFormData): FormErrors => {
-  const errors: FormErrors = {};
-
-  const emailError = validators.required(data.email, 'Email') || validators.email(data.email);
-  if (emailError) errors[emailError.field] = emailError.message;
-
-  return errors;
-};
-
-export default function ForgotPasswordPageRefactored() {
-  const router = useRouter();
-  const { success: hapticSuccess } = useHaptics();
-  
-  // Estado para controlar si el email fue enviado
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const [emailSent, setEmailSent] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const router = useRouter();
 
-  // Hook de formulario
-  const {
-    values,
-    errors,
-    handleChange,
-    handleSubmit,
-    isSubmitting,
-    setFieldError,
-  } = useForm<ForgotPasswordFormData>({
-    initialValues: {
-      email: '',
-    },
-    validate: validateForgotPasswordForm,
-    onSubmit: handleForgotPassword,
-  });
+  const validate = () => {
+    if (!email) {
+      setError('El email es obligatorio.');
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError('El formato del email es inválido.');
+      return false;
+    }
+    return true;
+  };
 
-  // Función para enviar email de recuperación
-  async function handleForgotPassword(formData: ForgotPasswordFormData) {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    
+    if (!validate()) return;
+    
+    setLoading(true);
+    setError('');
+    setMessage('');
+
     try {
-      loggerClient.debug('📧 Solicitando recuperación de contraseña para:', formData.email);
-
-      const response = await apiClient.post('/api/auth/forgot-password', {
-        email: formData.email,
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       });
 
-      if (!response.success) {
-        setFieldError('api', response.error || 'Error al enviar el email de recuperación');
-        return;
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmailSent(true);
+        setMessage('Si existe una cuenta con ese email, recibirás un enlace de recuperación en unos minutos.');
+      } else {
+        setError(data.error || 'Error al enviar el email de recuperación');
       }
-
-      // Éxito - mostrar mensaje genérico por seguridad
-      setEmailSent(true);
-      setSuccessMessage('Si existe una cuenta con ese email, recibirás un enlace de recuperación en unos minutos.');
-      await hapticSuccess();
-      loggerClient.info('✅ Email de recuperación enviado');
-    } catch (error) {
-      loggerClient.error('❌ Error al solicitar recuperación:', error);
-      setFieldError('api', 'Error de conexión. Intenta nuevamente.');
+    } catch (err) {
+      setError('Error de conexión. Intenta nuevamente.');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  // Vista de éxito
   if (emailSent) {
     return (
       <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -104,7 +83,7 @@ export default function ForgotPasswordPageRefactored() {
           </Typography>
           
           <Typography variant="body1" sx={{ mb: 3 }}>
-            {successMessage}
+            {message}
           </Typography>
           
           <Alert severity="info" sx={{ mb: 3 }}>
@@ -125,7 +104,6 @@ export default function ForgotPasswordPageRefactored() {
     );
   }
 
-  // Formulario
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Box sx={{ textAlign: 'center', mb: 4 }}>
@@ -140,36 +118,31 @@ export default function ForgotPasswordPageRefactored() {
 
       <Paper sx={{ p: 4 }}>
         <Box component="form" onSubmit={handleSubmit}>
-          <MaterialTextField
+          <TextField
             fullWidth
             label="Email"
-            name="email"
             type="email"
-            value={values.email}
-            onChange={handleChange}
-            error={!!errors.email}
-            helperText={errors.email}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError('');
+            }}
+            error={!!error}
+            helperText={error}
             margin="normal"
             required
             autoFocus
-            disabled={isSubmitting}
             placeholder="tu@email.com"
           />
-
-          {errors.api && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {errors.api}
-            </Alert>
-          )}
 
           <Button 
             type="submit" 
             fullWidth 
             variant="contained" 
-            disabled={isSubmitting}
+            disabled={loading}
             sx={{ mt: 3, mb: 2, py: 1.5 }}
           >
-            {isSubmitting ? (
+            {loading ? (
               <>
                 <Material3LoadingIndicator size="small" sx={{ mr: 1 }} />
                 Enviando...
@@ -178,6 +151,12 @@ export default function ForgotPasswordPageRefactored() {
               'Enviar Enlace de Recuperación'
             )}
           </Button>
+
+          {message && (
+            <Alert severity="success" sx={{ mt: 2 }}>
+              {message}
+            </Alert>
+          )}
 
           <Box sx={{ textAlign: 'center', mt: 3 }}>
             <MuiLink component={Link} href="/login" variant="body2">
