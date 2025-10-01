@@ -7,9 +7,10 @@ import EmergencyIcon from '@mui/icons-material/EmergencyShare';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { getTranslation, Language } from '@/lib/i18n';
 import useAuth from '@/context/AuthContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
-// Detectar idioma (puedes mejorar esto según tu lógica global)
-const lang: Language = typeof window !== 'undefined' && (localStorage.getItem('lang') as Language) || 'es';
+// Obtener idioma desde el LanguageProvider
+const { language: lang } = { language: 'es' as Language } as { language: Language };
 
 const basePhoneNumbers = [
     { nameKey: 'emergencyGeneral', number: '112', isEmergency: true },
@@ -56,6 +57,7 @@ function formatDisplayNumber(raw: string) {
 
 export default function PhoneList() {
     const { user } = useAuth();
+    const { language: lang } = useLanguage();
 
     // Construir la lista final: base + posible número de residencia si el usuario tiene seleccionado
     const phoneNumbers = [...basePhoneNumbers];

@@ -371,7 +371,7 @@ export const translations = {
       showPlacesList: "Show places list",
       categories: {
         all: "All",
-        residence: "Residence",
+  residence: "Residencia",
         cultural: "Cultural",
         food: "Food", 
         leisure: "Leisure",
@@ -594,8 +594,8 @@ export const translations = {
       }
       ,residencia: {
         construction: {
-          title: "Under construction",
-          body: "This Residence section is currently under construction. We'll be back soon with more content."
+          title: "En construcción",
+          body: "Esta sección de Residencia está actualmente en construcción. Volveremos pronto con más contenido."
         }
       },
       notifications: {
@@ -652,12 +652,12 @@ export const translations = {
     // Interactive map places
     places: {
       residenciaAmro: {
-        name: "AMRO Residence Seville",
-        description: "University residence with excellent location near the center. Individual rooms and common areas."
+        name: "Residencia AMRO Sevilla",
+        description: "Residencia universitaria con excelente ubicación cerca del centro. Habitaciones individuales y zonas comunes."
       },
       residenciaOne: {
-        name: "ONE University Residence Seville (Livinnx)",
-        description: "Modern residence with all amenities for international students. WiFi, equipped kitchen, study rooms."
+        name: "Residencia Universitaria ONE Sevilla (Livinnx)",
+        description: "Residencia moderna con todas las comodidades para estudiantes internacionales. WiFi, cocina equipada, salas de estudio."
       },
       oficinaBarrio: {
         name: "Barrio de Oportunidades Office",

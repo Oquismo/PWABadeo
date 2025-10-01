@@ -1,4 +1,4 @@
-# Campo Residence - Persistencia en Base de Datos
+# Campo `residence` - Persistencia en Base de Datos
 
 ## Problema Resuelto
 
@@ -110,5 +110,5 @@ El campo fue probado exitosamente:
 
 Para completar la funcionalidad, se podría considerar:
 - [ ] Añadir opción para editar residencia en el perfil de usuario
-- [ ] Validación de valores permitidos para residence
+- [ ] Validación de valores permitidos para `residence`
 - [ ] Migración de datos de localStorage a base de datos para usuarios existentes

@@ -255,5 +255,3 @@ const { isDark, mode } = useTheme();
 - `useTheme`: Retorna valores constantes
 - Manifest: Colores oscuros fijos
 
-¿Te gustaría que implemente alguna de las funcionalidades adicionales mencionadas o que profundice en algún aspecto específico?</content>
-<parameter name="filePath">c:\Users\BARRIO\Documents\Badeo\PWABadeo\MEJORAS_PWA_NATIVA.md
