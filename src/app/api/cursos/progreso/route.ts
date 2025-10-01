@@ -162,7 +162,25 @@ export async function POST(request: Request) {
     loggerClient.info(`💾 Guardando progreso para usuario ${user.id} (${user.email})`);
     loggerClient.debug(`📊 Datos: nivel=${currentLevel}, niveles completados=${Object.keys(levelScores).length}`);
 
-    // Usar upsert para crear o actualizar el progreso
+    // Calcular totalScore: preferir stats.totalScore si existe, sino sumar levelScores
+    let totalScore = 0;
+    try {
+      if (stats && typeof stats === 'object' && 'totalScore' in stats) {
+        const s = (stats as any).totalScore;
+        totalScore = typeof s === 'number' ? s : parseInt(s || '0', 10) || 0;
+      } else if (levelScores && typeof levelScores === 'object') {
+        // levelScores: { "1": { score: 90 }, "2": { score: 80 } }
+        totalScore = Object.values(levelScores).reduce((acc: number, lv: any) => {
+          const sc = lv && typeof lv.score === 'number' ? lv.score : (lv && lv.score ? parseInt(lv.score, 10) || 0 : 0);
+          return acc + sc;
+        }, 0);
+      }
+    } catch (e) {
+      loggerClient.warn('No se pudo calcular totalScore automáticamente, usando 0', e);
+      totalScore = 0;
+    }
+
+    // Usar upsert para crear o actualizar el progreso (incluye totalScore)
     const savedProgress = await prisma.courseProgress.upsert({
       where: {
         userId: user.id
@@ -172,6 +190,7 @@ export async function POST(request: Request) {
         levelScores,
         achievements,
         stats,
+        totalScore,
         lastQuestionSeen,
         updatedAt: new Date()
       },
@@ -182,6 +201,7 @@ export async function POST(request: Request) {
         levelScores,
         achievements,
         stats,
+        totalScore,
         lastQuestionSeen
       }
     });

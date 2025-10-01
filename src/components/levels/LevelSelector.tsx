@@ -13,6 +13,7 @@ import { UserProgress } from '@/types/progression.types';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
+import SchoolIcon from '@mui/icons-material/School';
 import '@/styles/levels-expressive.css';
 
 interface LevelSelectorProps {
@@ -243,6 +244,27 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({
   userProgress,
   onLevelSelect,
 }) => {
+  const [rankInfo, setRankInfo] = React.useState<{ rank?: number; totalUsers?: number; averageScore?: number } | null>(null);
+
+  // Cargar comparativa (puesto, totalUsers, avg) en mount
+  React.useEffect(() => {
+    let mounted = true;
+    async function loadCompare() {
+      try {
+        const res = await fetch('/api/cursos/progreso/compare');
+        if (!res.ok) return;
+        const json = await res.json();
+        if (mounted && json && json.data) {
+          setRankInfo({ rank: json.data.user.rank, totalUsers: json.data.totalUsers, averageScore: json.data.averageScore });
+        }
+      } catch (e) {
+        console.warn('No se pudo cargar comparativa', e);
+      }
+    }
+    loadCompare();
+    return () => { mounted = false; };
+  }, []);
+
   // Calcular estadísticas de progreso global
   const completedCount = Object.values(userProgress.levelsProgress).filter(
     (p) => p.status === 'completed'
@@ -260,13 +282,22 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({
         transition={{ duration: 0.5, ease: [0.2, 0, 0, 1.0] as const }}
       >
         <h1 className="selector-title">
-          <span className="title-icon">🎓</span>
-          Sistema de Niveles de Español
+          {/* Usar icono SVG de MUI para mejor control visual */}
+          <SchoolIcon className="title-icon" fontSize="inherit" />
         </h1>
-        
-        <p className="selector-description">
-          Completa cada nivel con al menos 80% para desbloquear el siguiente
-        </p>
+
+        {/* Comparativa: puesto y promedio global */}
+        {rankInfo && (
+          <div className="ranking-summary" aria-live="polite">
+            <strong>Estás en el puesto {rankInfo.rank}</strong>
+            {rankInfo.totalUsers ? (
+              <span> de {rankInfo.totalUsers} usuarios</span>
+            ) : null}
+            {typeof rankInfo.averageScore === 'number' && (
+              <div className="ranking-average">Media global: {Math.round(rankInfo.averageScore)}</div>
+            )}
+          </div>
+        )}
 
         {/* Barra de progreso global */}
         <div className="global-progress-container">
@@ -289,28 +320,7 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({
           <span className="progress-percentage">{Math.round(progressPercentage)}%</span>
         </div>
 
-        {/* Estadísticas adicionales */}
-        <div className="stats-row">
-          <div className="stat-item">
-            <span className="stat-icon">🏆</span>
-            <span className="stat-value">{userProgress.perfectLevels}</span>
-            <span className="stat-label">Perfectos</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-icon">🔥</span>
-            <span className="stat-value">{userProgress.currentStreak}</span>
-            <span className="stat-label">Racha</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-icon">🎯</span>
-            <span className="stat-value">
-              {userProgress.totalScore > 0 
-                ? Math.round(userProgress.totalScore / Math.max(completedCount, 1))
-                : 0}%
-            </span>
-            <span className="stat-label">Promedio</span>
-          </div>
-        </div>
+        {/* Estadísticas adicionales eliminadas por petición del diseño */}
       </motion.div>
 
       {/* Grid de niveles */}

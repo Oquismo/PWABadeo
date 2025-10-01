@@ -192,11 +192,13 @@ model CourseProgress {
   levelScores      Json     @default("{}") // { "1": { score: 90, grade: "A", completedAt: "..." }, ... }
   achievements     Json     @default("[]") // Array de achievements desbloqueados
   stats            Json     @default("{}") // { totalQuestions: 0, correctAnswers: 0, ... }
+  totalScore       Int      @default(0) // Campo indexado con la puntuación agregada para comparativas
   lastQuestionSeen Int?     // Índice de la última pregunta vista (para retomar)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   
   @@index([userId])
+  @@index([totalScore])
   @@index([courseId])
   @@index([updatedAt])
 }

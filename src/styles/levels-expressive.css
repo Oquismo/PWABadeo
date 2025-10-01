@@ -31,8 +31,9 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1rem;
-  min-height: 100vh;
+  /* Reducir espacio superior para header más compacto */
+  padding: 1rem 1rem 2rem 1rem; /* top 1rem, sides 1rem, bottom 2rem */
+  min-height: calc(100vh - 40px);
 }
 
 /* ============================================
@@ -44,21 +45,25 @@
 }
 
 .selector-title {
-  font-size: clamp(1.75rem, 6vw, 2.5rem); /* Responsive: 28px móvil → 40px desktop */
+  font-size: clamp(1.5rem, 5vw, 2rem); /* ligeramente reducido para centrar visualmente con el icono */
   font-weight: 800;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* reducir espacio debajo del icono */
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .title-icon {
-  font-size: clamp(2rem, 7vw, 3rem); /* Responsive: 32px móvil → 48px desktop */
+  /* Icono más grande y prominente */
+  font-size: clamp(3.5rem, 10vw, 5.5rem); /* Responsive: ~56px móvil → ~88px desktop */
+  line-height: 1;
+  display: inline-block;
+  transform: translateY(-6px); /* subir ligeramente para compensar margin */
 }
 
 .selector-description {
@@ -456,17 +461,34 @@
    ============================================ */
 .perfect-badge {
   position: absolute;
-  top: -10px;
-  right: -10px;
+  /* mover al lado izquierdo, dentro del borde */
+  top: 8px;
+  left: 8px;
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
   color: #000;
   font-weight: 900;
-  font-size: 0.75rem;
-  padding: 0.4rem 0.8rem;
+  /* responsivo: escala mínima y máxima */
+  font-size: clamp(0.6rem, 1.8vw, 0.85rem);
+  padding: 0.28rem 0.6rem;
   border-radius: 999px;
   box-shadow: 0 4px 16px rgba(255, 215, 0, 0.5);
   z-index: 3;
-  transform-origin: top right;
+  transform-origin: top left;
+  display: inline-block;
+  max-width: 46%; /* evitar que ocupe más del ancho de la tarjeta */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* truncar si hace falta */
+  line-height: 1;
+}
+
+/* versión compacta para pantallas muy pequeñas */
+@media (max-width: 420px) {
+  .perfect-badge {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.45rem;
+    max-width: 60%;
+  }
 }
 
 /* ============================================
