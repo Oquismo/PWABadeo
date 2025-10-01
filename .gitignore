@@ -79,3 +79,6 @@ next-env.d.ts
 .github/chatmodes/ejemplo 1.chatmode.md
 cookies.txt
 MEJORAS_PWA_NATIVA.md
+
+# Ignore all markdown files by default (add explicit negations for docs you want tracked)
+*.md
