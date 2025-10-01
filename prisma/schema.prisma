@@ -182,3 +182,21 @@ model TelemetryEvent {
   @@index([createdAt])
   @@index([userEmail])
 }
+
+// Tabla para almacenar el progreso del cuestionario de español (ADD/UPDATE ONLY)
+model CourseProgress {
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique // Un progreso por usuario
+  courseId         String   @default("spanish") // Por si añades más cursos en el futuro
+  currentLevel     Int      @default(1) // Último nivel desbloqueado
+  levelScores      Json     @default("{}") // { "1": { score: 90, grade: "A", completedAt: "..." }, ... }
+  achievements     Json     @default("[]") // Array de achievements desbloqueados
+  stats            Json     @default("{}") // { totalQuestions: 0, correctAnswers: 0, ... }
+  lastQuestionSeen Int?     // Índice de la última pregunta vista (para retomar)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([courseId])
+  @@index([updatedAt])
+}

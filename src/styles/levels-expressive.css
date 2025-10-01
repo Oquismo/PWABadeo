@@ -1,0 +1,516 @@
+/**
+ * Estilos Material 3 Expressive para Sistema de Niveles
+ * Incluye estados: locked, available, completed
+ */
+
+/* ============================================
+   VARIABLES DE DISEÑO
+   ============================================ */
+:root {
+  /* Colores del sistema de niveles */
+  --level-locked-bg: rgba(189, 189, 189, 0.1);
+  --level-locked-border: rgba(189, 189, 189, 0.3);
+  --level-available-bg: rgba(255, 255, 255, 0.05);
+  --level-completed-bg: rgba(0, 230, 118, 0.08);
+  
+  /* Sombras expresivas */
+  --level-shadow-small: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --level-shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --level-shadow-large: 0 16px 48px rgba(0, 0, 0, 0.25);
+  
+  /* Animaciones */
+  --level-transition-fast: 150ms cubic-bezier(0.2, 0, 0, 1.0);
+  --level-transition-medium: 250ms cubic-bezier(0.2, 0, 0, 1.0);
+  --level-transition-slow: 400ms cubic-bezier(0.2, 0, 0, 1.0);
+}
+
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+.level-selector-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+}
+
+/* ============================================
+   HEADER Y ESTADÍSTICAS
+   ============================================ */
+.level-selector-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.selector-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.title-icon {
+  font-size: 3rem;
+}
+
+.selector-description {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2rem;
+}
+
+/* Barra de progreso global */
+.global-progress-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 2rem auto;
+  max-width: 600px;
+  box-shadow: var(--level-shadow-small);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.progress-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.progress-numbers {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 999px;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+  position: relative;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: progress-shimmer 2s infinite;
+}
+
+@keyframes progress-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-percentage {
+  display: block;
+  text-align: right;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #667eea;
+  margin-top: 0.5rem;
+}
+
+/* Fila de estadísticas */
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-icon {
+  font-size: 2rem;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+/* ============================================
+   GRID DE NIVELES
+   ============================================ */
+.levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .levels-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .stats-row {
+    gap: 2rem;
+  }
+  
+  .selector-title {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================
+   CARD DE NIVEL
+   ============================================ */
+.level-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--level-locked-border);
+  border-radius: 20px;
+  padding: 2rem;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: all var(--level-transition-medium);
+  overflow: hidden;
+}
+
+/* Efecto de brillo de fondo */
+.level-card-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Estados del card */
+.level-card.locked {
+  opacity: 0.5;
+  filter: grayscale(0.8);
+  background: var(--level-locked-bg);
+  border-color: var(--level-locked-border);
+}
+
+.level-card.available {
+  background: var(--level-available-bg);
+  box-shadow: var(--level-shadow-medium);
+}
+
+.level-card.available .level-card-glow {
+  opacity: 0.15;
+}
+
+.level-card.completed {
+  background: var(--level-completed-bg);
+  border-color: rgba(0, 230, 118, 0.5);
+  box-shadow: var(--level-shadow-small);
+}
+
+/* Hover effect (solo para disponibles y completados) */
+.level-card.available:hover,
+.level-card.completed:hover {
+  box-shadow: var(--level-shadow-large);
+  transform: translateY(-8px) scale(1.02);
+}
+
+.level-card.available:hover .level-card-glow {
+  opacity: 0.25;
+}
+
+/* ============================================
+   INDICADOR DE ESTADO
+   ============================================ */
+.level-status-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+.status-icon {
+  font-size: 2rem !important;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.locked-icon {
+  color: rgba(189, 189, 189, 0.7);
+}
+
+.completed-icon {
+  color: #00e676;
+}
+
+.perfect-icon {
+  color: #ffd700;
+  animation: star-pulse 2s infinite;
+}
+
+@keyframes star-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+  }
+}
+
+/* ============================================
+   CONTENIDO DEL NIVEL
+   ============================================ */
+.level-icon {
+  font-size: 3rem;
+  text-align: center;
+  margin: 0.5rem 0;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+}
+
+.level-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.level-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+}
+
+.level-description {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Metadata del nivel */
+.level-metadata {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  margin-top: auto;
+}
+
+.level-metadata span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.level-difficulty {
+  font-weight: 700 !important;
+}
+
+/* ============================================
+   BADGE DE CALIFICACIÓN
+   ============================================ */
+.level-score-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.level-grade-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.level-grade-badge::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+.grade-letter {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1;
+}
+
+.grade-score {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.level-attempts {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+/* ============================================
+   PROMPT DE INICIO
+   ============================================ */
+.level-start-prompt {
+  text-align: center;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================
+   BADGE DE PERFECCIÓN
+   ============================================ */
+.perfect-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #000;
+  font-weight: 900;
+  font-size: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.5);
+  z-index: 3;
+  transform-origin: top right;
+}
+
+/* ============================================
+   MENSAJE DE COMPLETADO
+   ============================================ */
+.completion-message {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-radius: 24px;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  margin-top: 3rem;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+}
+
+.completion-icon {
+  font-size: 5rem;
+  display: block;
+  margin-bottom: 1rem;
+  animation: completion-bounce 1s infinite alternate;
+}
+
+@keyframes completion-bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-20px); }
+}
+
+.completion-message h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.completion-message p {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ============================================
+   ACCESIBILIDAD
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .level-card,
+  .progress-bar-fill,
+  .level-start-prompt,
+  .completion-icon,
+  .perfect-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .progress-bar-fill::after {
+    animation: none !important;
+  }
+}
+
+/* Focus states para accesibilidad */
+.level-card:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 4px;
+}

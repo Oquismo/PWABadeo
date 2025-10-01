@@ -1,0 +1,163 @@
+/**
+ * Material Design 3 Expressive Motion System
+ * Optimizaciones de rendimiento para transiciones de página
+ * 
+ * Material 3 Motion Principles:
+ * - Duration: 250ms (medium) - fast and energetic
+ * - Easing: emphasized (cubic-bezier(0.2, 0, 0, 1.0)) - bold and expressive
+ * - Movement: purposeful and responsive
+ * 
+ * Referencias:
+ * - https://m3.material.io/styles/motion/overview
+ * - https://m3.material.io/styles/motion/easing-and-duration/tokens-specs
+ */
+
+/* Optimización global para elementos animados - Material 3 */
+.page-transition-container {
+  /* Habilitar aceleración por hardware */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  
+  /* Optimizar rendering con Material 3 timing */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  
+  /* Mejorar suavizado de fuentes durante animación */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Crear contexto de apilamiento para mejor composición */
+  isolation: isolate;
+  
+  /* Material 3: transiciones rápidas y expresivas */
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1.0);
+  transition-duration: 250ms;
+}
+
+/* Optimizaciones para elementos en transición - Material 3 expresivo */
+.page-transition-entering,
+.page-transition-exiting {
+  /* Forzar layer de composición para animaciones más suaves */
+  transform: translateZ(0) scale3d(1, 1, 1);
+  -webkit-transform: translateZ(0) scale3d(1, 1, 1);
+  
+  /* Optimizar para cambios rápidos y fluidos */
+  will-change: transform, opacity;
+  
+  /* Material 3 emphasized easing */
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1.0);
+}
+
+/* Limpiar will-change después de la animación */
+.page-transition-idle {
+  will-change: auto;
+}
+
+/* Reducir motion para usuarios con preferencias de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-container,
+  .page-transition-entering,
+  .page-transition-exiting {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Optimización para pantallas de alta densidad */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .page-transition-container {
+    /* Mejorar antialiasing en pantallas retina */
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+}
+
+/* Blur optimizado con GPU */
+.page-blur-effect {
+  filter: blur(0);
+  -webkit-filter: blur(0);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Prevenir layout shifts durante transiciones */
+.page-transition-wrapper {
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+/* Optimización para scrolling durante transiciones */
+.page-transition-scroll-lock {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Skeleton con animación mejorada */
+@keyframes skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  /* Material 3: animación más rápida y fluida */
+  animation: skeleton-shimmer 1.2s cubic-bezier(0.2, 0, 0, 1.0) infinite;
+  transform: translateZ(0);
+}
+
+/* Material 3 Expressive Fade Animations */
+@keyframes md3-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) translateZ(0);
+  }
+}
+
+@keyframes md3-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateZ(0);
+  }
+}
+
+/* Clases CSS para animación como fallback - Material 3 */
+.css-page-enter {
+  animation: md3-fade-in 0.25s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards;
+}
+
+.css-page-exit {
+  animation: md3-fade-out 0.2s cubic-bezier(0.2, 0, 0, 1.0) forwards;
+}
+
+/* Performance hints para el navegador */
+.page-content {
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Optimización para imágenes en transición */
+.page-transition-container img {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}

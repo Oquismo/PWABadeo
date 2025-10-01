@@ -41,6 +41,7 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'; // Icono de Cursos
 import Link from 'next/link';
 import loggerClient from '@/lib/loggerClient';
 import TaskManager from '@/components/admin/TaskManager';
@@ -268,7 +269,7 @@ export default function PerfilPage() {
               />
             )}
 
-            {/* Botones de acción: Editar perfil y Ajustes (reubicados y rediseñados) */}
+            {/* Botones de acción: Editar perfil, Cursos y Ajustes */}
             <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/perfil/editar" passHref>
                 <M3Button
@@ -279,6 +280,30 @@ export default function PerfilPage() {
                   sx={{ px: 2.5, py: 1.25, borderRadius: 3, fontWeight: 700 }}
                 >
                   Editar perfil
+                </M3Button>
+              </Link>
+
+              <Link href="/cursos/espanol" passHref>
+                <M3Button
+                  component="a"
+                  m3variant="filled"
+                  color="secondary"
+                  startIcon={<MenuBookRoundedIcon />}
+                  sx={{ 
+                    px: 2.5, 
+                    py: 1.25, 
+                    borderRadius: 3, 
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5568d3 0%, #653a8a 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)',
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1.0)',
+                  }}
+                >
+                  Cursos 🇪🇸
                 </M3Button>
               </Link>
 
