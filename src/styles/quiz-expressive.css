@@ -106,7 +106,7 @@
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--quiz-spacing-lg);
+  padding: clamp(1rem, 4vw, 2rem); /* Responsive: 16px móvil → 32px desktop */
 }
 
 /* ============================================
@@ -117,7 +117,7 @@
   position: relative;
   background: var(--quiz-surface-elevated);
   border-radius: var(--quiz-border-radius-xl);
-  padding: var(--quiz-spacing-xl);
+  padding: clamp(1.5rem, 5vw, 3rem); /* Responsive: 24px móvil → 48px desktop */
   box-shadow: var(--quiz-shadow-xl);
   overflow: hidden;
   
@@ -167,7 +167,7 @@
 }
 
 .quiz-title {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 5vw, 2rem); /* Responsive: 24px móvil → 32px desktop */
   font-weight: 800;
   color: var(--quiz-on-surface);
   margin-bottom: var(--quiz-spacing-sm);
@@ -224,7 +224,7 @@
 }
 
 .quiz-question-text {
-  font-size: 1.5rem;
+  font-size: clamp(1.125rem, 4vw, 1.5rem); /* Responsive: 18px móvil → 24px desktop */
   font-weight: 700;
   color: var(--quiz-on-surface);
   line-height: 1.4;
@@ -243,7 +243,8 @@
 
 .quiz-answer-option {
   position: relative;
-  padding: var(--quiz-spacing-md) var(--quiz-spacing-lg);
+  padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 4vw, 2rem); /* Responsive padding */
+  min-height: 48px; /* ✅ WCAG AAA tap target mínimo */
   background: var(--quiz-surface-variant);
   border: 3px solid transparent;
   border-radius: var(--quiz-border-radius-lg);
@@ -356,8 +357,9 @@
 }
 
 .quiz-button {
-  padding: 16px 32px;
-  font-size: 1rem;
+  padding: clamp(12px, 3vw, 16px) clamp(24px, 6vw, 32px); /* Responsive padding */
+  min-height: 48px; /* ✅ WCAG AAA tap target mínimo */
+  font-size: clamp(0.875rem, 2.5vw, 1rem); /* Responsive: 14px móvil → 16px desktop */
   font-weight: 700;
   border: none;
   border-radius: 12px;

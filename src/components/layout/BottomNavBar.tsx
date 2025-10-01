@@ -148,11 +148,11 @@ export default function BottomNavBar() {
                       : theme.palette.mode === 'dark' ? '#CAC4D0' : '#49454F',
                     transition: 'all 0.15s cubic-bezier(0.2, 0, 0, 1)',
                     zIndex: 2,
-                    minWidth: '40px',
-                    height: '40px',
-                    padding: '8px',
+                    minWidth: '48px', // ✅ WCAG AAA compliant (44px mínimo)
+                    height: '48px',   // ✅ Material Design 3 tap target
+                    padding: '12px',
                     borderRadius: '50%', // Completamente redondo como IconButton M3
-                    margin: '0 6px',
+                    margin: '0 4px',  // Reducido para compensar tamaño mayor
                     '&:hover': {
                       backgroundColor: theme => theme.palette.mode === 'dark' 
                         ? 'rgba(232, 222, 248, 0.08)' 
@@ -162,6 +162,13 @@ export default function BottomNavBar() {
                       backgroundColor: theme => theme.palette.mode === 'dark' 
                         ? 'rgba(232, 222, 248, 0.12)' 
                         : 'rgba(90, 69, 112, 0.12)',
+                    },
+                    // Área táctil extendida para mejor UX móvil
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: '-4px', // Expande área táctil 4px en todas direcciones
+                      borderRadius: 'inherit',
                     },
                     // Deshabilitar selección de texto y arrastre
                     userSelect: 'none',
