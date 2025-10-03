@@ -1,7 +1,9 @@
 @echo off
+
 echo ========================================
 echo Aplicando Migracion de CourseProgress
 echo ========================================
+
 echo.
 
 echo [1/3] Verificando schema de Prisma...

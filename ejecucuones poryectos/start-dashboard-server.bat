@@ -3,9 +3,11 @@ echo ========================================
 echo 🚀 Servidor Local para Dashboard de Tráfico
 echo ========================================
 echo.
+
 echo Este script inicia un servidor local para probar
 echo el dashboard de tráfico sin problemas de CORS.
 echo.
+
 echo Instrucciones:
 echo 1. Asegúrate de que tu aplicación PWABadeo esté ejecutándose
 echo 2. El dashboard estará disponible en:
