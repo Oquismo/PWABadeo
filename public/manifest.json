@@ -1,9 +1,13 @@
 {
   "name": "Barrio de Oportunidades",
-  "short_name": "Badeo PWA",
+  "short_name": "Badeo",
   "start_url": "/",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "fullscreen",
+    "minimal-ui"
+  ],
   "description": "App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.",
   "lang": "es-ES",
   "dir": "ltr",
@@ -11,10 +15,14 @@
   "background_color": "#18181B",
   "orientation": "portrait-primary",
   "scope": "/",
-  "categories": ["education", "lifestyle", "social", "navigation", "productivity"],
+  "categories": [
+    "education",
+    "lifestyle",
+    "social",
+    "navigation",
+    "productivity"
+  ],
   "prefer_related_applications": false,
-  "iarc_rating_id": "",
-  "related_applications": [],
   "edge_side_panel": {
     "preferred_width": 400
   },
@@ -32,8 +40,12 @@
     {
       "action": "/import",
       "accept": {
-        "application/json": [".json"],
-        "text/csv": [".csv"]
+        "application/json": [
+          ".json"
+        ],
+        "text/csv": [
+          ".csv"
+        ]
       }
     }
   ],
@@ -48,7 +60,11 @@
       "files": [
         {
           "name": "files",
-          "accept": ["image/*", "video/*", "audio/*"]
+          "accept": [
+            "image/*",
+            "video/*",
+            "audio/*"
+          ]
         }
       ]
     }
@@ -59,35 +75,60 @@
       "short_name": "Proyectos",
       "description": "Ver proyectos activos",
       "url": "/proyectos",
-      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon_192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Mapa",
       "short_name": "Mapa",
       "description": "Ver mapa del barrio",
       "url": "/mapa",
-      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon_192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Perfil",
       "short_name": "Perfil",
       "description": "Ver mi perfil",
       "url": "/perfil",
-      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon_192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Calendario",
       "short_name": "Calendario",
       "description": "Ver eventos y calendario",
       "url": "/calendario",
-      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon_192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Check-in",
       "short_name": "Check-in",
       "description": "Hacer check-in en lugares",
       "url": "/checkin",
-      "icons": [{ "src": "/icons/icon_192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon_192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "icons": [
