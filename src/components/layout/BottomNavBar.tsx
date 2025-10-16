@@ -153,6 +153,15 @@ export default function BottomNavBar() {
                     padding: '12px',
                     borderRadius: '50%', // Completamente redondo como IconButton M3
                     margin: '0 4px',  // Reducido para compensar tamaño mayor
+                    
+                    // Expandir área táctil sin cambiar apariencia visual
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: '-4px', // Expande 4px en todas direcciones
+                      borderRadius: 'inherit',
+                    },
+                    
                     '&:hover': {
                       backgroundColor: theme => theme.palette.mode === 'dark' 
                         ? 'rgba(232, 222, 248, 0.08)' 
@@ -162,14 +171,9 @@ export default function BottomNavBar() {
                       backgroundColor: theme => theme.palette.mode === 'dark' 
                         ? 'rgba(232, 222, 248, 0.12)' 
                         : 'rgba(90, 69, 112, 0.12)',
+                      transform: 'scale(0.95)', // Feedback táctil al presionar
                     },
-                    // Área táctil extendida para mejor UX móvil
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      inset: '-4px', // Expande área táctil 4px en todas direcciones
-                      borderRadius: 'inherit',
-                    },
+                    
                     // Deshabilitar selección de texto y arrastre
                     userSelect: 'none',
                     WebkitUserSelect: 'none',

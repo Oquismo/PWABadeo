@@ -3,51 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Política de Privacidad</title>
+  <title>Redirigiendo a Política de Privacidad...</title>
+  <meta http-equiv="refresh" content="0; url=/politica-privacidad">
   <style>
     body {
       font-family: 'Inter', Arial, sans-serif;
-      background: #f7f7f7;
-      color: #222;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      max-width: 700px;
-      margin: 40px 0;
-      padding: 32px;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 24px;
       text-align: center;
     }
-    h2 {
-      font-size: 1.2rem;
-      margin-top: 32px;
-      margin-bottom: 12px;
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
     }
     p {
-      margin-bottom: 16px;
-      line-height: 1.7;
+      margin-bottom: 24px;
+      opacity: 0.9;
     }
-    ul {
-      margin-bottom: 16px;
-      padding-left: 20px;
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    a {
+      color: white;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Política de Privacidad</h1>
-    <p>Esta política de privacidad describe cómo la app Barrio de Oportunidades recopila, utiliza y protege la información de los usuarios.</p>
+    <div class="spinner"></div>
+    <h1>Redirigiendo...</h1>
+    <p>Serás redirigido a nuestra Política de Privacidad actualizada.</p>
+    <p><a href="/politica-privacidad">Haz clic aquí si no eres redirigido automáticamente</a></p>
+  </div>
+</body>
     <h2>1. Información que recopilamos</h2>
     <ul>
       <li>Datos de registro (nombre, correo electrónico, etc.)</li>

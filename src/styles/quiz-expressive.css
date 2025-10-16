@@ -258,6 +258,15 @@
   will-change: transform, box-shadow, background;
 }
 
+/* Expandir área táctil invisible para mejor UX móvil */
+.quiz-answer-option::before {
+  content: '';
+  position: absolute;
+  inset: -4px; /* Expande 4px en todas direcciones */
+  border-radius: inherit;
+  z-index: -1;
+}
+
 /* Variaciones de clip-path para cada opción */
 .quiz-answer-option:nth-child(1) {
   clip-path: polygon(0 0, 98% 0, 100% 8%, 100% 100%, 0 100%);
@@ -281,6 +290,12 @@
   border-color: var(--quiz-neutral);
   box-shadow: var(--quiz-shadow-md);
   transform: translateX(8px) scale(1.02) translateZ(0);
+}
+
+/* Feedback táctil al presionar */
+.quiz-answer-option:active:not(.disabled) {
+  transform: scale(0.98) translateZ(0);
+  transition-duration: 50ms; /* Respuesta rápida */
 }
 
 /* Estado seleccionado */
@@ -357,6 +372,7 @@
 }
 
 .quiz-button {
+  position: relative; /* Para el pseudo-elemento ::before */
   padding: clamp(12px, 3vw, 16px) clamp(24px, 6vw, 32px); /* Responsive padding */
   min-height: 48px; /* ✅ WCAG AAA tap target mínimo */
   font-size: clamp(0.875rem, 2.5vw, 1rem); /* Responsive: 14px móvil → 16px desktop */
@@ -375,6 +391,14 @@
   will-change: transform, box-shadow;
 }
 
+/* Expandir área táctil invisible */
+.quiz-button::before {
+  content: '';
+  position: absolute;
+  inset: -4px; /* Expande 4px en todas direcciones */
+  border-radius: inherit;
+}
+
 .quiz-button:hover:not(:disabled) {
   background: #1565c0;
   box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
@@ -383,7 +407,7 @@
 
 .quiz-button:active:not(:disabled) {
   background: #0d47a1;
-  transform: translateY(0) translateZ(0);
+  transform: translateY(0) scale(0.98) translateZ(0); /* Feedback táctil mejorado */
 }
 
 .quiz-button:disabled {

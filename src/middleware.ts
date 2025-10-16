@@ -39,7 +39,9 @@ const publicRoutes = [
   '/test-login',
   '/test-email',
   '/unauthorized',
-  '/create-school'
+  '/create-school',
+  '/politica-privacidad', // ✅ Política de privacidad pública
+  '/privacy-policy' // ✅ Alias en inglés
   // '/' // Página principal ahora protegida, solo con login
 ];
 
