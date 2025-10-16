@@ -85,3 +85,64 @@ body {
 md-filter-chip {
   display: none;
 }
+
+/* ==========================================
+   PWA STANDALONE MODE - Ocultar barra navegador
+   ========================================== */
+
+/* Detectar modo standalone y ajustar viewport */
+@media (display-mode: standalone) {
+  html {
+    /* Forzar altura completa sin barra del navegador */
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    /* Usar toda la altura disponible */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Ajustar padding para safe areas (notch en iOS) */
+  body.pwa-standalone {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* iOS específico - Ocultar barra del navegador */
+@supports (-webkit-touch-callout: none) {
+  html {
+    /* Forzar altura completa en iOS */
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Clase aplicada por JavaScript cuando está en modo standalone */
+.pwa-standalone {
+  /* Optimizaciones específicas para PWA instalada */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevenir comportamientos no deseados en PWA */
+.pwa-standalone * {
+  /* Prevenir selección accidental de texto */
+  -webkit-touch-callout: none;
+}
+
+/* Permitir selección solo en inputs y áreas de texto */
+.pwa-standalone input,
+.pwa-standalone textarea {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}

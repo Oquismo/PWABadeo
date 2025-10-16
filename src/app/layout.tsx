@@ -21,6 +21,7 @@ import WarmupInitializer from '../components/WarmupInitializer';
 import LanguageTest from '@/components/LanguageTest';
 import InitialLanguageDialog from '@/components/InitialLanguageDialog';
 import PullToRefreshPreventer from '@/components/layout/PullToRefreshPreventer';
+import StandaloneModeDetector from '@/components/layout/StandaloneModeDetector';
 import SplashScreen from '@/components/layout/SplashScreen';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import ClientTopBarWrapper from '@/components/layout/ClientTopBarWrapper';
@@ -66,14 +67,26 @@ export default function RootLayout({
     <html lang="es" className={inter.className}>
       <head>
         <link rel="manifest" href="/manifest.json" />
+        
+        {/* PWA Configuration - Mobile */}
         <meta name="mobile-web-app-capable" content="yes" />
+        
+        {/* iOS Specific - Forzar modo standalone sin barra del navegador */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Badeo PWA" />
-        {/* Prevenir pull-to-refresh y mejorar experiencia de app nativa */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+        
+        {/* Android Chrome - Forzar modo standalone */}
+        <meta name="theme-color" content="#18181B" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        
+        {/* Viewport optimizado para PWA */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="msapplication-tap-highlight" content="no" />
+        
+        {/* Prevenir zoom accidental */}
+        <meta name="HandheldFriendly" content="true" />
         {/* 2. Hemos eliminado el bloque <style> de aquí */}
       </head>
       <body>
@@ -90,6 +103,9 @@ export default function RootLayout({
 
                     {/* Dialogo inicial para elegir idioma (solo la primera vez) */}
                     <InitialLanguageDialog />
+
+                    {/* Detector de modo standalone para PWA */}
+                    <StandaloneModeDetector />
 
                     {/* <PullToRefreshPreventer /> */}
                     <DebugInitializer />

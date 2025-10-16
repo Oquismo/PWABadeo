@@ -3,6 +3,7 @@
   "short_name": "Badeo PWA",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "description": "App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.",
   "lang": "es-ES",
   "dir": "ltr",
