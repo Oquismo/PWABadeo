@@ -1,11 +1,10 @@
 {
   "name": "Barrio de Oportunidades",
   "short_name": "Badeo",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "display_override": [
     "standalone",
-    "fullscreen",
     "minimal-ui"
   ],
   "description": "App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.",

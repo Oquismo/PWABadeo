@@ -106,6 +106,7 @@ md-filter-chip {
   
   /* Ajustar padding para safe areas (notch en iOS) */
   body.pwa-standalone {
+    /* Respeta la barra de estado del sistema */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);

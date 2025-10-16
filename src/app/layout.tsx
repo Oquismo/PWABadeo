@@ -68,24 +68,24 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         
-        {/* PWA Configuration - Mobile */}
+        {/* PWA Configuration - STANDALONE MODE (con barra de estado del sistema) */}
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="Badeo" />
         
-        {/* iOS Specific - Forzar modo standalone sin barra del navegador */}
+        {/* iOS Specific - Standalone con barra de estado */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Badeo PWA" />
+        <meta name="apple-mobile-web-app-title" content="Badeo" />
         
-        {/* Android Chrome - Forzar modo standalone */}
-        <meta name="theme-color" content="#18181B" media="(prefers-color-scheme: dark)" />
-        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        {/* Android Chrome - Standalone */}
+        <meta name="theme-color" content="#18181B" />
         
-        {/* Viewport optimizado para PWA */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+        {/* Viewport optimizado - Sin zoom pero con barra de estado */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        
+        {/* Prevenir interfaz del NAVEGADOR (no del sistema) */}
         <meta name="format-detection" content="telephone=no" />
         <meta name="msapplication-tap-highlight" content="no" />
-        
-        {/* Prevenir zoom accidental */}
         <meta name="HandheldFriendly" content="true" />
         {/* 2. Hemos eliminado el bloque <style> de aquí */}
       </head>

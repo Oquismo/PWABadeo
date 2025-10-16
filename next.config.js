@@ -1,16 +1,23 @@
 // next.config.js
-// import withPWAInit from '@ducanh2912/next-pwa';
+import withPWAInit from '@ducanh2912/next-pwa';
 
-// Temporalmente deshabilitado para debug
-// const withPWA = withPWAInit({
-//   dest: 'public',
-//   register: true,
-//   skipWaiting: true,
-//   disable: process.env.NODE_ENV === 'development',
-// });
+const withPWA = withPWAInit({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: false, // ✅ HABILITADO SIEMPRE para que funcione en producción
+  scope: '/',
+  sw: 'sw.js',
+  reloadOnOnline: true,
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  fallbacks: {
+    document: '/offline.html',
+  },
+});
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfigBase = {
   reactStrictMode: true,
   swcMinify: true,
   experimental: {
@@ -201,4 +208,5 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// ✅ Exportar con wrapper de PWA
+export default withPWA(nextConfigBase);
