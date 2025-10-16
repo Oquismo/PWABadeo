@@ -26,6 +26,7 @@ import Tooltip from '@mui/material/Tooltip';
 import M3Button from '@/components/ui/M3Button';
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import ReviewDialog from '@/components/perfil/ReviewDialog';
+import DeleteAccountDialog from '@/components/perfil/DeleteAccountDialog';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
@@ -55,6 +56,7 @@ export default function PerfilPage() {
     return () => window.removeEventListener('showGoogleReviewPrompt', handler);
   }, []);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const { user, isAuthenticated, isLoading, logout, refreshAvatar } = useAuth();
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string>('');
@@ -515,7 +517,45 @@ export default function PerfilPage() {
         </M3Button>
       </Box>
 
+      {/* Sección de zona de peligro - Eliminación de cuenta */}
+      <Material3ElevatedCard 
+        sx={{ 
+          mt: 4, 
+          p: 3, 
+          borderRadius: 3,
+          border: '2px solid',
+          borderColor: 'error.main',
+          bgcolor: 'error.light',
+          opacity: 0.95
+        }}
+      >
+        <Typography variant="h6" fontWeight={600} color="error.dark" gutterBottom>
+          ⚠️ Zona de Peligro
+        </Typography>
+        <Typography variant="body2" color="text.secondary" paragraph>
+          Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, ten la seguridad
+          de que deseas hacer esto.
+        </Typography>
+        <M3Button
+          m3variant="outlined"
+          color="error"
+          onClick={() => setDeleteAccountOpen(true)}
+          sx={{
+            borderWidth: 2,
+            fontWeight: 600,
+            '&:hover': {
+              borderWidth: 2,
+              bgcolor: 'error.main',
+              color: 'white',
+            }
+          }}
+        >
+          🗑️ Eliminar mi cuenta permanentemente
+        </M3Button>
+      </Material3ElevatedCard>
+
       <ReviewDialog open={reviewOpen} onClose={() => setReviewOpen(false)} />
+      <DeleteAccountDialog open={deleteAccountOpen} onClose={() => setDeleteAccountOpen(false)} />
     </Container>
     </Fade>
   );
