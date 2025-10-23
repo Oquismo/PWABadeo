@@ -1,6 +1,8 @@
 {
   "name": "Barrio de Oportunidades",
   "short_name": "Badeo",
+  "version": "1.3.0",
+  "id": "/",
   "start_url": "/?source=pwa",
   "display": "standalone",
   "display_override": [

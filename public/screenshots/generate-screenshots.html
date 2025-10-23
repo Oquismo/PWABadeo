@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Screenshots - Badeo PWA</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #18181B;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .screenshot-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .screenshot-preview {
+            position: relative;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .screenshot-mobile {
+            aspect-ratio: 390/844;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .screenshot-desktop {
+            aspect-ratio: 1280/720;
+            background: linear-gradient(135deg, #18181B 0%, #3B82F6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 60px 40px;
+        }
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .app-name {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .app-desc {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 300px;
+        }
+        .screenshot-info {
+            padding: 10px 0;
+        }
+        .screenshot-info h3 {
+            margin: 0 0 10px 0;
+            color: #18181B;
+            font-size: 18px;
+        }
+        .screenshot-info p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .download-btn {
+            width: 100%;
+            padding: 12px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .download-btn:hover {
+            background: #F7931E;
+        }
+        .instructions {
+            background: #FFF3E0;
+            border-left: 4px solid #FF6B35;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .instructions h2 {
+            margin-top: 0;
+            color: #E65100;
+        }
+        .instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+            color: #5D4037;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Generador de Screenshots - Badeo PWA</h1>
+        <p class="subtitle">Genera screenshots placeholder para tu Progressive Web App</p>
+
+        <div class="instructions">
+            <h2>📋 Instrucciones</h2>
+            <ul>
+                <li><strong>Opción 1 (Recomendada):</strong> Toma screenshots reales de tu app instalada en el móvil</li>
+                <li><strong>Opción 2 (Temporal):</strong> Usa estos placeholders hasta tener screenshots reales</li>
+                <li>Haz clic en "Descargar" para guardar cada imagen</li>
+                <li>Guarda las imágenes en: <code>public/screenshots/</code></li>
+                <li>Verifica que los nombres coincidan: <code>home-mobile.png</code>, <code>map-mobile.png</code>, <code>home-desktop.png</code></li>
+            </ul>
+        </div>
+
+        <div class="screenshots-grid">
+            <!-- Home Mobile -->
+            <div class="screenshot-card">
+                <div class="screenshot-preview">
+                    <canvas id="home-mobile" class="screenshot-mobile"></canvas>
+                </div>
+                <div class="screenshot-info">
+                    <h3>Home Mobile</h3>
+                    <p><strong>Tamaño:</strong> 390x844px</p>
+                    <p><strong>Tipo:</strong> Mobile (narrow)</p>
+                    <p><strong>Descripción:</strong> Pantalla principal de la app</p>
+                </div>
+                <button class="download-btn" onclick="downloadScreenshot('home-mobile', 390, 844)">
+                    ⬇️ Descargar
+                </button>
+            </div>
+
+            <!-- Map Mobile -->
+            <div class="screenshot-card">
+                <div class="screenshot-preview">
+                    <canvas id="map-mobile" class="screenshot-mobile"></canvas>
+                </div>
+                <div class="screenshot-info">
+                    <h3>Map Mobile</h3>
+                    <p><strong>Tamaño:</strong> 390x844px</p>
+                    <p><strong>Tipo:</strong> Mobile (narrow)</p>
+                    <p><strong>Descripción:</strong> Vista del mapa interactivo</p>
+                </div>
+                <button class="download-btn" onclick="downloadScreenshot('map-mobile', 390, 844)">
+                    ⬇️ Descargar
+                </button>
+            </div>
+
+            <!-- Home Desktop -->
+            <div class="screenshot-card">
+                <div class="screenshot-preview">
+                    <canvas id="home-desktop" class="screenshot-desktop"></canvas>
+                </div>
+                <div class="screenshot-info">
+                    <h3>Home Desktop</h3>
+                    <p><strong>Tamaño:</strong> 1280x720px</p>
+                    <p><strong>Tipo:</strong> Desktop (wide)</p>
+                    <p><strong>Descripción:</strong> Vista de escritorio completa</p>
+                </div>
+                <button class="download-btn" onclick="downloadScreenshot('home-desktop', 1280, 720)">
+                    ⬇️ Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dibujar placeholders en los canvas
+        function drawPlaceholder(canvasId, width, height, isMobile, title) {
+            const canvas = document.getElementById(canvasId);
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            // Gradiente de fondo
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            if (title.includes('Map')) {
+                gradient.addColorStop(0, '#4CAF50');
+                gradient.addColorStop(1, '#2196F3');
+            } else if (isMobile) {
+                gradient.addColorStop(0, '#FF6B35');
+                gradient.addColorStop(1, '#F7931E');
+            } else {
+                gradient.addColorStop(0, '#18181B');
+                gradient.addColorStop(1, '#3B82F6');
+            }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Icono de app (simulado)
+            const iconSize = isMobile ? 100 : 120;
+            const iconX = (width - iconSize) / 2;
+            const iconY = isMobile ? height / 3 - iconSize / 2 : height / 2 - iconSize / 2 - 60;
+            
+            ctx.fillStyle = 'white';
+            ctx.roundRect = function(x, y, w, h, r) {
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.lineTo(x + w - r, y);
+                this.quadraticCurveTo(x + w, y, x + w, y + r);
+                this.lineTo(x + w, y + h - r);
+                this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                this.lineTo(x + r, y + h);
+                this.quadraticCurveTo(x, y + h, x, y + h - r);
+                this.lineTo(x, y + r);
+                this.quadraticCurveTo(x, y, x + r, y);
+                this.closePath();
+            };
+            ctx.roundRect(iconX, iconY, iconSize, iconSize, 20);
+            ctx.fill();
+
+            // Emoji del icono
+            ctx.font = `${iconSize * 0.5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const emoji = title.includes('Map') ? '🗺️' : '🎓';
+            ctx.fillText(emoji, width / 2, iconY + iconSize / 2);
+
+            // Nombre de la app
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${isMobile ? '32' : '48'}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 2;
+            ctx.fillText('Badeo', width / 2, iconY + iconSize + 60);
+
+            // Subtítulo
+            ctx.font = `${isMobile ? '16' : '20'}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillText(title, width / 2, iconY + iconSize + 95);
+
+            // Descripción
+            ctx.font = `${isMobile ? '14' : '16'}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            const desc = 'Barrio de Oportunidades';
+            ctx.fillText(desc, width / 2, iconY + iconSize + 125);
+
+            // Marca de agua
+            ctx.shadowBlur = 0;
+            ctx.font = `${isMobile ? '12' : '14'}px monospace`;
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText(`${width}x${height}px`, width / 2, height - 30);
+        }
+
+        // Generar placeholders al cargar
+        window.onload = function() {
+            drawPlaceholder('home-mobile', 390, 844, true, 'Pantalla Principal');
+            drawPlaceholder('map-mobile', 390, 844, true, 'Mapa Interactivo');
+            drawPlaceholder('home-desktop', 1280, 720, false, 'Dashboard Completo');
+        };
+
+        // Función para descargar
+        function downloadScreenshot(id, width, height) {
+            const canvas = document.getElementById(id);
+            const link = document.createElement('a');
+            link.download = `${id}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
