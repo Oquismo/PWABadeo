@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso desde Móvil - Badeo PWA</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #18181B;
+            margin-top: 0;
+            font-size: 28px;
+        }
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #F8F9FA;
+            border-radius: 16px;
+        }
+        .url-box {
+            background: #18181B;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .steps {
+            text-align: left;
+            margin: 30px 0;
+        }
+        .step {
+            background: #F8F9FA;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .warning {
+            background: #FFF3CD;
+            border: 2px solid #FFC107;
+            color: #856404;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .success {
+            background: #D4EDDA;
+            border: 2px solid #28A745;
+            color: #155724;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .copy-btn {
+            background: #28A745;
+        }
+        .copy-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📱 Acceso desde tu Móvil</h1>
+        
+        <div class="success">
+            ✅ ¡Servidor Activo y Listo!
+        </div>
+
+        <p style="font-size: 18px; color: #666;">
+            Escanea el QR o ingresa la URL en tu móvil
+        </p>
+
+        <div class="qr-container">
+            <canvas id="qr"></canvas>
+        </div>
+
+        <div class="url-box" id="url">
+            192.168.1.120:3000
+        </div>
+
+        <button class="copy-btn" onclick="copyUrl()">📋 Copiar URL</button>
+
+        <div class="steps">
+            <h3 style="color: #18181B;">📋 Pasos para instalar:</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Conecta a la misma WiFi</strong>
+                <br>PC y móvil deben estar en la misma red
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Abre la URL en el móvil</strong>
+                <br>http://192.168.1.120:3000
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Instala la PWA</strong>
+                <br>Android: Menú → "Instalar app"
+                <br>iOS: Compartir → "Añadir a inicio"
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Abre desde el ÍCONO</strong>
+                <br>NO desde el navegador
+            </div>
+        </div>
+
+        <div class="warning">
+            ⚠️ Si no carga, desactiva temporalmente el firewall de Windows
+        </div>
+
+        <button onclick="window.location.href='/check-pwa-mode.html'">
+            🔍 Verificar Modo PWA
+        </button>
+        <button onclick="window.location.href='/'">
+            🏠 Ir a la App
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        const url = 'http://192.168.1.120:3000';
+        
+        // Generar QR
+        const canvas = document.getElementById('qr');
+        QRCode.toCanvas(canvas, url, {
+            width: 250,
+            margin: 2,
+            color: {
+                dark: '#18181B',
+                light: '#FFFFFF'
+            }
+        });
+
+        function copyUrl() {
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ ¡Copiado!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

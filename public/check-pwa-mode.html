@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico PWA - Badeo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #18181B;
+            margin-top: 0;
+            font-size: 24px;
+        }
+        .status-box {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .status-standalone {
+            background: #D4EDDA;
+            color: #155724;
+            border: 2px solid #28A745;
+        }
+        .status-browser {
+            background: #FFF3CD;
+            color: #856404;
+            border: 2px solid #FFC107;
+        }
+        .info {
+            background: #F8F9FA;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .check-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #F8F9FA;
+            border-radius: 8px;
+        }
+        .check-ok {
+            color: #28A745;
+            font-weight: bold;
+        }
+        .check-fail {
+            color: #DC3545;
+            font-weight: bold;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .install-steps {
+            background: #E7F3FF;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .install-steps ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .install-steps li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico de PWA</h1>
+        
+        <div id="status" class="status-box"></div>
+        
+        <div class="check-item">
+            <strong>Display Mode:</strong> <span id="displayMode"></span>
+        </div>
+        
+        <div class="check-item">
+            <strong>Standalone (iOS):</strong> <span id="iosStandalone"></span>
+        </div>
+        
+        <div class="check-item">
+            <strong>Android App:</strong> <span id="androidApp"></span>
+        </div>
+        
+        <div class="check-item">
+            <strong>User Agent:</strong> <span id="userAgent" style="font-size: 12px;"></span>
+        </div>
+
+        <div id="solution" class="info"></div>
+
+        <button onclick="location.reload()">🔄 Actualizar Diagnóstico</button>
+        <button onclick="window.location.href='/'">🏠 Ir a la App</button>
+    </div>
+
+    <script>
+        // Detectar modo standalone
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                           window.navigator.standalone === true ||
+                           document.referrer.includes('android-app://');
+
+        const statusDiv = document.getElementById('status');
+        const solutionDiv = document.getElementById('solution');
+        
+        // Display mode
+        const displayModes = ['fullscreen', 'standalone', 'minimal-ui', 'browser'];
+        let currentDisplayMode = 'browser';
+        for (const mode of displayModes) {
+            if (window.matchMedia(`(display-mode: ${mode})`).matches) {
+                currentDisplayMode = mode;
+                break;
+            }
+        }
+        document.getElementById('displayMode').textContent = currentDisplayMode;
+        document.getElementById('displayMode').className = currentDisplayMode === 'standalone' ? 'check-ok' : 'check-fail';
+
+        // iOS Standalone
+        const iosStandalone = window.navigator.standalone === true;
+        document.getElementById('iosStandalone').textContent = iosStandalone ? '✅ SÍ' : '❌ NO';
+        document.getElementById('iosStandalone').className = iosStandalone ? 'check-ok' : 'check-fail';
+
+        // Android App
+        const androidApp = document.referrer.includes('android-app://');
+        document.getElementById('androidApp').textContent = androidApp ? '✅ SÍ' : '❌ NO';
+        document.getElementById('androidApp').className = androidApp ? 'check-ok' : 'check-fail';
+
+        // User Agent
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+
+        if (isStandalone) {
+            statusDiv.className = 'status-box status-standalone';
+            statusDiv.innerHTML = '✅ <strong>MODO STANDALONE ACTIVADO</strong><br>La barra del navegador NO debería aparecer';
+            
+            solutionDiv.innerHTML = `
+                <h3>✅ Todo Correcto</h3>
+                <p>Tu PWA está instalada y en modo standalone.</p>
+                <p><strong>Si aún ves la barra del navegador:</strong></p>
+                <ul>
+                    <li>Cierra todas las pestañas del navegador</li>
+                    <li>Abre la app SOLO desde el ícono de la pantalla de inicio</li>
+                    <li>NO uses marcadores del navegador</li>
+                    <li>Si persiste, desinstala y reinstala la PWA</li>
+                </ul>
+            `;
+        } else {
+            statusDiv.className = 'status-box status-browser';
+            statusDiv.innerHTML = '⚠️ <strong>MODO NAVEGADOR</strong><br>La PWA NO está instalada o la abriste desde el navegador';
+            
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            
+            let instructions = '';
+            
+            if (isAndroid) {
+                instructions = `
+                    <h3>📱 Cómo Instalar en Android (Chrome)</h3>
+                    <ol>
+                        <li>Toca el menú (⋮) en la esquina superior derecha</li>
+                        <li>Selecciona <strong>"Instalar aplicación"</strong> o <strong>"Añadir a pantalla de inicio"</strong></li>
+                        <li>Confirma la instalación</li>
+                        <li>Abre la app desde el <strong>ícono en tu pantalla de inicio</strong></li>
+                    </ol>
+                    <p style="color: #DC3545; font-weight: bold;">⚠️ IMPORTANTE: Después de instalar, abre la app DESDE EL ÍCONO, no desde el navegador.</p>
+                `;
+            } else if (isIOS) {
+                instructions = `
+                    <h3>📱 Cómo Instalar en iOS (Safari)</h3>
+                    <ol>
+                        <li>Toca el botón de <strong>Compartir</strong> (□↑)</li>
+                        <li>Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong></li>
+                        <li>Toca <strong>"Añadir"</strong></li>
+                        <li>Abre la app desde el <strong>ícono en tu pantalla de inicio</strong></li>
+                    </ol>
+                    <p style="color: #DC3545; font-weight: bold;">⚠️ IMPORTANTE: Debe ser desde Safari, no Chrome. Después abre la app DESDE EL ÍCONO.</p>
+                `;
+            } else {
+                instructions = `
+                    <h3>💻 Cómo Instalar en Desktop (Chrome/Edge)</h3>
+                    <ol>
+                        <li>Busca el ícono de instalación (⊕) en la barra de direcciones</li>
+                        <li>O ve a Menú (⋮) → <strong>"Instalar Badeo"</strong></li>
+                        <li>Confirma la instalación</li>
+                        <li>Abre la app desde el <strong>acceso directo en tu escritorio/menú inicio</strong></li>
+                    </ol>
+                    <p style="color: #DC3545; font-weight: bold;">⚠️ IMPORTANTE: Abre la app DESDE EL ACCESO DIRECTO, no desde el navegador.</p>
+                `;
+            }
+            
+            solutionDiv.innerHTML = `
+                <div class="install-steps">
+                    ${instructions}
+                </div>
+            `;
+        }
+
+        console.log('=== DIAGNÓSTICO PWA ===');
+        console.log('Display Mode:', currentDisplayMode);
+        console.log('Standalone:', isStandalone);
+        console.log('iOS Standalone:', iosStandalone);
+        console.log('Android App:', androidApp);
+        console.log('User Agent:', navigator.userAgent);
+    </script>
+</body>
+</html>
