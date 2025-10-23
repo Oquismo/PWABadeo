@@ -1,8 +1,11 @@
 [{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.pwa_badeo.twa",
-        "sha256_cert_fingerprints": ["A6:2B:71:55:B4:98:49:C3:97:DF:CE:8F:DF:8F:40:F5:DC:5C:7A:05:D6:B1:93:4B:14:78:E8:72:2E:67:0E:EA"]
-      }
-    }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.pwa_badeo.twa",
+    "sha256_cert_fingerprints": [
+      "2D:23:7F:81:FC:35:08:4C:35:B8:CC:70:BA:1E:FB:A6:BE:56:34:58:6A:44:36:FB:C8:A6:B3:78:76:F9:72:1B",
+      "28:EC:45:C0:76:EC:A3:15:39:BE:46:8F:96:43:D3:A2:8D:DC:85:7D:59:E7:25:B0:2F:1F:12:C5:5B:24:ED:6B"
+    ]
+  }
+}]
