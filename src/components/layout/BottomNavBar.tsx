@@ -18,6 +18,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EventRoundedIcon from '@mui/icons-material/EventRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import HotelRoundedIcon from '@mui/icons-material/HotelRounded';
+import VideoLibraryRoundedIcon from '@mui/icons-material/VideoLibraryRounded';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, LayoutGroup } from 'framer-motion'; // 1. Importar de Framer Motion
@@ -64,6 +65,7 @@ export default function BottomNavBar() {
     { value: "/recomendaciones", icon: <RestaurantRoundedIcon />, label: t('nav.recommendations') },
     // { value: "/eventos", icon: <EventRoundedIcon />, label: t('nav.events') }, // Ocultado temporalmente
     { value: "/residencia", icon: <HotelRoundedIcon />, label: t('nav.residence') },
+    { value: "/tutoriales", icon: <VideoLibraryRoundedIcon />, label: t('nav.tutorials') },
     // opciones adicionales temporales
     // { value: "/spotify", icon: <MusicNoteRoundedIcon />, label: "Spotify" },
   ];

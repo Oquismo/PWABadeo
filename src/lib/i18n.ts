@@ -138,6 +138,7 @@ export const translations = {
       recommendations: "Recomendaciones",
       events: "Eventos",
       residence: "Residencia",
+  tutorials: "Tutoriales",
       more: "Más",
       moreMenu: "Menú más",
       back: "Volver"
@@ -231,6 +232,12 @@ export const translations = {
         privacy: "Privacidad",
         logout: "Cerrar Sesión",
         editProfile: "Editar Perfil"
+      },
+      tutorials: {
+        title: "Tutoriales",
+        subtitle: "Aprende con guías rápidas pensadas para estudiantes Erasmus",
+        intro: "Aquí encontrarás respuestas prácticas a las dudas más comunes antes y durante tu estancia en Sevilla.",
+        moreComing: "Seguiremos ampliando la lista con vuestras preguntas frecuentes."
       },
       residencia: {
         construction: {
@@ -487,7 +494,17 @@ export const translations = {
       profile: "Profile",
       phones: "Phones",
       admin: "Admin",
-      logout: "Logout"
+      logout: "Logout",
+      of: "of",
+      nextSites: "Next spots",
+      tour: "Tour",
+      recommendations: "Recommendations",
+      events: "Events",
+      residence: "Residence",
+      tutorials: "Tutorials",
+      more: "More",
+      moreMenu: "More menu",
+      back: "Back"
     },
     // Common texts
     common: {
@@ -583,6 +600,12 @@ export const translations = {
         privacy: "Privacy",
         logout: "Sign Out",
         editProfile: "Edit Profile"
+      },
+      tutorials: {
+        title: "Tutorials",
+        subtitle: "Quick guides prepared for incoming Erasmus students",
+        intro: "Find practical answers to the most common questions before arriving in Seville and during your stay.",
+        moreComing: "We will keep expanding this list with your frequent questions."
       },
       phones: {
         title: "Important Phone Numbers",
