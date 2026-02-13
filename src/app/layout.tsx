@@ -112,10 +112,8 @@ export default function RootLayout({
                     <WarmupInitializer />
                   <ServiceWorkerProvider>
                     <Box sx={{ 
-                      minHeight: '100vh', 
-                      bgcolor: 'background.default',
                       width: '100%',
-                      overflow: 'hidden', // Prevenir scrollbars horizontales
+                      bgcolor: 'background.default',
                       position: 'relative' // Asegurar contexto de posicionamiento
                     }}>
                       {/* Indicador superior de progreso de scroll */}

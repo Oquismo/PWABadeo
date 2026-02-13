@@ -2,17 +2,19 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
     // Obtener información del usuario desde las cookies
     const userData = request.headers.get('cookie')?.match(/user=([^;]+)/)?.[1];
     
+    // Si no hay usuario (ej: durante el build), retornar escuelas vacías
     if (!userData) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado en la sesión' },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        schools: [],
+        total: 0
+      });
     }
 
     let user;
