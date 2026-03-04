@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma-client';
 import { authMiddleware } from '@/lib/auth';
 
 // POST /api/community/questions/[id]/answers - Responder a una pregunta
