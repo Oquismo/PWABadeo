@@ -40,6 +40,8 @@ model User {
   userEvents       UserEvent[]       // Relación con eventos personalizados
   pushSubscription PushSubscription?
   feedbacks        Feedback[]        // Relación con feedbacks
+  questions        CommunityQuestion[] // Preguntas en la comunidad
+  answers          CommunityAnswer[]   // Respuestas en la comunidad
   
   @@index([schoolId])
 }
@@ -66,6 +68,8 @@ model School {
   users       User[]
   // Relación con tasks asignadas a esta escuela
   tasks       Task[]   @relation("SchoolTasks")
+  // Relación con preguntas de la comunidad
+  questions   CommunityQuestion[]
   
   @@index([name])
   @@index([city])
