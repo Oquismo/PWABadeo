@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import {
   Box,
   Typography,
@@ -65,6 +66,7 @@ interface Question {
 export default function QuestionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const questionId = parseInt(params.id as string);
 
   const [question, setQuestion] = useState<Question | null>(null);
@@ -100,7 +102,7 @@ export default function QuestionDetailPage() {
       const res = await fetch(`/api/community/questions/${questionId}/answers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newAnswer }),
+        body: JSON.stringify({ content: newAnswer, userId: user?.id }),
       });
 
       if (res.ok) {
