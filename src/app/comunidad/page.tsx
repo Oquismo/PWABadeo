@@ -97,6 +97,10 @@ export default function ComunidadPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...newQuestion, userId: user?.id }),
       });
+
+      const data = await res.json();
+
+      if (res.ok) {
         setQuestions([data.question, ...questions]);
         setOpenDialog(false);
         setNewQuestion({ title: '', content: '' });
