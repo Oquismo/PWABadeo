@@ -202,3 +202,41 @@ model CourseProgress {
   @@index([courseId])
   @@index([updatedAt])
 }
+
+// Sistema de Q&A Buddy - Preguntas de la comunidad
+model CommunityQuestion {
+  id          Int                @id @default(autoincrement())
+  title       String
+  content     String
+  userId      Int
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schoolId    Int?
+  school      School?            @relation(fields: [schoolId], references: [id])
+  isResolved  Boolean            @default(false)
+  views       Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  answers     CommunityAnswer[]
+  
+  @@index([userId])
+  @@index([schoolId])
+  @@index([createdAt])
+  @@index([isResolved])
+}
+
+// Respuestas a preguntas de la comunidad
+model CommunityAnswer {
+  id          Int               @id @default(autoincrement())
+  content     String
+  userId      Int
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId  Int
+  question    CommunityQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  isAccepted  Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@index([userId])
+  @@index([questionId])
+  @@index([createdAt])
+}
