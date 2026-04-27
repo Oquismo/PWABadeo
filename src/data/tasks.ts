@@ -7,6 +7,8 @@ export interface TaskData {
   color: string;
   avatars: string[];
   date?: string;
+  /** Explicit completion status; derived from progress if not set */
+  status?: 'completado' | 'proceso' | 'pendiente';
   // Rol mínimo requerido para crear/gestionar esta tarea (edición/eliminación)
   role?: 'admin' | 'user';
   // Nueva propiedades para sistema de escuelas

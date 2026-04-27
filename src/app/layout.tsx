@@ -26,7 +26,10 @@ import SplashScreen from '@/components/layout/SplashScreen';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import ClientTopBarWrapper from '@/components/layout/ClientTopBarWrapper';
 
-const inter = Inter({ subsets: ['latin'] });
+import { Bricolage_Grotesque } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const bricolage = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-bricolage', weight: ['400', '500', '600', '700', '800'] });
 
 export default function RootLayout({
   children,
@@ -64,7 +67,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="es" className={inter.className}>
+    <html lang="es" className={`${inter.variable} ${bricolage.variable} ${inter.className}`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         

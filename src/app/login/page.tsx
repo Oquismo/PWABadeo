@@ -15,14 +15,11 @@ import {
   Typography,
   TextField,
   Button,
-  Paper,
-  Avatar,
   IconButton,
   InputAdornment,
   Link as MuiLink,
 } from '@mui/material';
 import Link from 'next/link';
-import LockOutlined from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
@@ -130,90 +127,89 @@ export default function LoginPageRefactored() {
   return (
     <Container
       component="main"
-      maxWidth={false}
-      disableGutters
-      sx={{
-        bgcolor: 'background.paper',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-      }}
+      maxWidth="xs"
+      sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 4 }}
     >
       {/* Tour de bienvenida */}
       {showTour && <OnboardingTour run={showTour} onFinish={handleFinishTour} />}
 
-      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', py: 6 }}>
-        <Paper
-          elevation={errors.api ? 12 : 6}
+      {/* App icon + title */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pb: 4 }}>
+        <Box sx={{
+          width: 72, height: 72, borderRadius: '22px', overflow: 'hidden',
+          mb: 2.5, boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+        }}>
+          <Box component="img" src="/icons/icon_192x192.png" alt="Badeo" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </Box>
+        <Typography
+          component="h1"
           sx={{
-            width: '100%',
-            maxWidth: 460,
-            p: 5,
-            borderRadius: 4,
-            bgcolor: 'background.default',
-            boxShadow: '0 8px 30px rgba(20,20,30,0.06)',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            '&:hover': {
-              boxShadow: '0 12px 40px rgba(20,20,30,0.12)',
-            },
+            fontSize: '1.5rem', fontWeight: 800, color: 'text.primary', textAlign: 'center',
+            fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
           }}
         >
-          {/* Header */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-              <LockOutlined />
-            </Avatar>
-            <Typography component="h1" variant="h5" fontWeight="bold">
-              {t('login.title')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
-              {isAdminOnly ? t('login.adminOnly') : t('login.subtitle')}
-            </Typography>
-          </Box>
+          Barrio de Oportunidades
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, textAlign: 'center' }}>
+          {isAdminOnly ? t('login.adminOnly') : (t('login.subtitle') || 'Inicia sesión para continuar')}
+        </Typography>
+      </Box>
 
-          {/* Formulario */}
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
-            {/* Campo Email */}
+      {/* Form */}
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {/* Email field — M3 filled style */}
+        <Box>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'primary.main', mb: 0.5, display: 'block', fontSize: '0.75rem' }}>
+            {t('login.email') || 'Correo electrónico'}
+          </Typography>
+          <Box sx={{
+            background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F3F4F6',
+            border: '1px solid', borderColor: 'rgba(255,255,255,0.12)',
+            borderBottom: '2px solid', borderBottomColor: 'primary.main',
+            borderRadius: '4px 4px 0 0',
+            display: 'flex', alignItems: 'center', gap: 1.25, px: 2,
+          }}>
+            <Box component="span" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', py: 1.5 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </Box>
             <TextField
-              margin="normal"
-              required
-              fullWidth
-              label={t('login.email')}
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={values.email}
-              onChange={handleChange}
-              error={!!errors.email}
-              helperText={errors.email}
-              disabled={isSubmitting}
-              variant="outlined"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  transition: 'all 0.3s ease',
-                  '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
-                  '&.Mui-focused': { boxShadow: '0 6px 20px rgba(0,0,0,0.15)' },
-                },
-              }}
+              required fullWidth name="email" autoComplete="email" autoFocus
+              placeholder="tu@correo.com"
+              value={values.email} onChange={handleChange}
+              error={!!errors.email} helperText={errors.email}
+              disabled={isSubmitting} variant="standard"
+              InputProps={{ disableUnderline: true, sx: { fontSize: '0.875rem', color: 'text.primary' } }}
+              sx={{ '& .MuiInputBase-root': { py: 0 } }}
             />
+          </Box>
+        </Box>
 
-            {/* Campo Password */}
+        {/* Password field */}
+        <Box>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5, display: 'block', fontSize: '0.75rem' }}>
+            {t('login.password') || 'Contraseña'}
+          </Typography>
+          <Box sx={{
+            background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F3F4F6',
+            border: '1px solid', borderColor: 'rgba(255,255,255,0.12)',
+            borderBottom: '2px solid', borderBottomColor: 'rgba(255,255,255,0.12)',
+            borderRadius: '4px 4px 0 0',
+            display: 'flex', alignItems: 'center', gap: 1.25, px: 2,
+          }}>
+            <Box component="span" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', py: 1.5 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            </Box>
             <TextField
-              margin="normal"
-              required
-              fullWidth
-              label={t('login.password')}
-              name="password"
+              required fullWidth name="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              value={values.password}
-              onChange={handleChange}
-              error={!!errors.password}
-              helperText={errors.password}
-              disabled={isSubmitting}
-              variant="outlined"
+              placeholder="••••••••"
+              value={values.password} onChange={handleChange}
+              error={!!errors.password} helperText={errors.password}
+              disabled={isSubmitting} variant="standard"
               InputProps={{
+                disableUnderline: true,
+                sx: { fontSize: '0.875rem', color: 'text.primary' },
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
@@ -221,72 +217,65 @@ export default function LoginPageRefactored() {
                       onClick={toggleShowPassword}
                       edge="end"
                       disabled={isSubmitting}
+                      size="small"
                     >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  transition: 'all 0.3s ease',
-                  '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
-                  '&.Mui-focused': { boxShadow: '0 6px 20px rgba(0,0,0,0.15)' },
-                },
-              }}
+              sx={{ '& .MuiInputBase-root': { py: 0 } }}
             />
-
-            {/* Error de API */}
-            {errors.api && (
-              <Typography color="error" variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
-                {errors.api}
-              </Typography>
-            )}
-
-            {/* Botón de Submit */}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isSubmitting}
-              sx={{
-                mt: 3,
-                mb: 2,
-                py: 1.5,
-                borderRadius: 3,
-                fontWeight: 'bold',
-                textTransform: 'none',
-                fontSize: '1rem',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
-                  transform: 'translateY(-2px)',
-                },
-                '&:active': {
-                  transform: 'translateY(0)',
-                },
-              }}
-            >
-              {isSubmitting ? 'Iniciando sesión...' : t('login.submit')}
-            </Button>
-
-            {/* Enlaces */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Link href="/forgot-password" passHref legacyBehavior>
-                <MuiLink variant="body2" sx={{ cursor: 'pointer' }}>
-                  {t('login.forgotPassword')}
-                </MuiLink>
-              </Link>
-              <Link href="/registro" passHref legacyBehavior>
-                <MuiLink variant="body2" sx={{ cursor: 'pointer' }}>
-                  {t('login.noAccount')}
-                </MuiLink>
-              </Link>
-            </Box>
           </Box>
-        </Paper>
+        </Box>
+
+        {/* Forgot password */}
+        <Box sx={{ textAlign: 'right' }}>
+          <Link href="/forgot-password" passHref legacyBehavior>
+            <MuiLink variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none' }}>
+              {t('login.forgotPassword') || '¿Olvidaste tu contraseña?'}
+            </MuiLink>
+          </Link>
+        </Box>
+
+        {/* API error */}
+        {errors.api && (
+          <Typography color="error" variant="body2" sx={{ textAlign: 'center' }}>
+            {errors.api}
+          </Typography>
+        )}
+
+        {/* Submit button */}
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          disabled={isSubmitting}
+          sx={{
+            mt: 1, height: 48,
+            borderRadius: '9999px',
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            textTransform: 'none',
+            background: 'primary.main',
+            color: 'primary.contrastText',
+            boxShadow: '0 2px 8px rgba(190,242,100,0.30)',
+            '&:hover': { filter: 'brightness(0.92)' },
+            '&:active': { transform: 'scale(0.98)' },
+          }}
+        >
+          {isSubmitting ? 'Iniciando sesión...' : (t('login.submit') || 'Iniciar sesión')}
+        </Button>
+
+        {/* Register link */}
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 1, fontSize: '0.8rem' }}>
+          ¿No tienes cuenta?{' '}
+          <Link href="/registro" passHref legacyBehavior>
+            <MuiLink sx={{ fontWeight: 600, color: 'primary.main', cursor: 'pointer', textDecoration: 'none' }}>
+              {t('login.noAccount') || 'Regístrate'}
+            </MuiLink>
+          </Link>
+        </Typography>
       </Box>
     </Container>
   );

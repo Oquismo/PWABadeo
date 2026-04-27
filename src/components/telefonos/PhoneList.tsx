@@ -1,137 +1,186 @@
- 'use client';
+'use client';
 
-import { Box, Typography, Container, Grid, Avatar, Link, Chip, IconButton, Tooltip } from '@mui/material';
-import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmergencyIcon from '@mui/icons-material/EmergencyShare';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { getTranslation, Language } from '@/lib/i18n';
+import { Box, Typography, IconButton, Tooltip } from '@mui/material';
+import SosRoundedIcon from '@mui/icons-material/SosRounded';
+import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded';
+import ShieldRoundedIcon from '@mui/icons-material/ShieldRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
+import LocalHospitalRoundedIcon from '@mui/icons-material/LocalHospitalRounded';
+import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
+import DirectionsBusRoundedIcon from '@mui/icons-material/DirectionsBusRounded';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import CallRoundedIcon from '@mui/icons-material/CallRounded';
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import useAuth from '@/context/AuthContext';
-import { useLanguage } from '@/hooks/useLanguage';
 
-// Obtener idioma desde el LanguageProvider
-const { language: lang } = { language: 'es' as Language } as { language: Language };
-
-const basePhoneNumbers = [
-    { nameKey: 'emergencyGeneral', number: '112', isEmergency: true },
-    { nameKey: 'police', number: '091', isEmergency: true },
-    { nameKey: 'neighborhoodEmergency', number: '+34649347760' },
-    { nameKey: 'municipal', number: '+34 955 47 00 92' },
-];
-
-// Mapping simple entre claves de residencia y números asociados
-const residencePhoneMap: Record<string, { nameKey: string; number: string }> = {
-    'ONE': { nameKey: 'residenciaOne', number: '+34 955 11 22 33' },
-    'AMRO': { nameKey: 'residenciaAmro', number: '+34 644 93 47 760' },
-    'ESTANISLAO': { nameKey: 'residenciaEstanislao', number: '+34 955 22 33 44' }
-};
-
-// Normaliza para href tel: (quita espacios y caracteres no numéricos excepto +)
-function normalizeTelHref(raw: string) {
-    return raw.replace(/[^+0-9]/g, '');
+interface PhoneEntry {
+  name: string;
+  num: string;
+  icon: React.ReactNode;
 }
 
-// Formatea para mostrar al usuario (simple, grouping para España +34)
-function formatDisplayNumber(raw: string) {
-    const n = normalizeTelHref(raw);
-    // Si empieza con +34 y tiene 11 chars (+34 + 9 dígitos)
-    if (n.startsWith('+34') && n.length === 12) {
-        // +34 955 47 00 92 -> +34 955 47 00 92 (ya separado) — devolver con espacios cada 3/2/2
-        const rest = n.slice(3); // 955470092
-        return `+34 ${rest.slice(0,3)} ${rest.slice(3,5)} ${rest.slice(5,7)} ${rest.slice(7)}`;
-    }
-    // Si empieza con +34 y tiene 11 dígitos sin separadores (ej +34649347760 -> +34 649 34 77 60)
-    if (n.startsWith('+34') && n.length === 12) {
-        const rest = n.slice(3);
-        return `+34 ${rest.slice(0,3)} ${rest.slice(3,5)} ${rest.slice(5,7)} ${rest.slice(7)}`;
-    }
-    // Fallback: insertar espacios cada 3 desde el inicio después del + si existe
-    if (n.startsWith('+')) {
-        const cc = n.slice(1,3);
-        const rest = n.slice(3);
-        return `+${cc} ${rest}`;
-    }
-    // Para números cortos (112/091) devolver tal cual
-    return raw;
+interface PhoneCategory {
+  title: string;
+  color: string;
+  phones: PhoneEntry[];
+}
+
+const residencePhoneMap: Record<string, PhoneEntry> = {
+  ONE: { name: 'Residencia ONE', num: '+34 955 11 22 33', icon: <HomeRoundedIcon /> },
+  AMRO: { name: 'Residencia AMRO', num: '+34 644 93 47 760', icon: <HomeRoundedIcon /> },
+  ESTANISLAO: { name: 'Residencia Estanislao', num: '+34 955 22 33 44', icon: <HomeRoundedIcon /> },
+};
+
+function normalizeTel(raw: string) {
+  return raw.replace(/[^+0-9]/g, '');
+}
+
+function PhoneCard({ phone, accentColor }: { phone: PhoneEntry; accentColor: string }) {
+  const handleCopy = () => {
+    try { navigator.clipboard.writeText(normalizeTel(phone.num)); } catch {}
+  };
+
+  return (
+    <Box sx={{
+      display: 'flex', alignItems: 'center', gap: 1.5,
+      background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F7F2FA',
+      borderRadius: '12px',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.15)',
+      padding: '12px 14px',
+    }}>
+      <Box sx={{
+        width: 36, height: 36, borderRadius: '8px', flexShrink: 0,
+        background: `${accentColor}18`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: accentColor,
+        '& .MuiSvgIcon-root': { fontSize: 18 },
+      }}>
+        {phone.icon}
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" fontWeight={600} sx={{ color: 'text.primary', fontSize: '0.8rem', lineHeight: 1.3 }}>
+          {phone.name}
+        </Typography>
+        <Typography
+          component="a"
+          href={`tel:${normalizeTel(phone.num)}`}
+          sx={{ fontSize: '0.875rem', fontWeight: 700, color: accentColor, fontFamily: 'monospace', mt: 0.25, display: 'block', textDecoration: 'none' }}
+        >
+          {phone.num}
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
+        <Tooltip title="Copiar número">
+          <IconButton size="small" onClick={handleCopy} sx={{ color: 'text.secondary' }}>
+            <ContentCopyRoundedIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
+        <IconButton
+          component="a"
+          href={`tel:${normalizeTel(phone.num)}`}
+          size="small"
+          sx={{
+            width: 36, height: 36, borderRadius: '50%',
+            background: '#3A2C4A', color: '#E8DEF8',
+            '&:hover': { background: '#4A3C5A' },
+          }}
+          aria-label={`Llamar a ${phone.name}`}
+        >
+          <CallRoundedIcon sx={{ fontSize: 18 }} />
+        </IconButton>
+      </Box>
+    </Box>
+  );
 }
 
 export default function PhoneList() {
-    const { user } = useAuth();
-    const { language: lang } = useLanguage();
+  const { user } = useAuth();
 
-    // Construir la lista final: base + posible número de residencia si el usuario tiene seleccionado
-    const phoneNumbers = [...basePhoneNumbers];
-    const rawResid = user && (user as any).residence ? String((user as any).residence).trim().toUpperCase() : null;
-    if (rawResid && residencePhoneMap[rawResid]) {
-        const mapped = residencePhoneMap[rawResid];
-        phoneNumbers.push({ nameKey: mapped.nameKey, number: mapped.number });
-    }
+  const residenceKey = user && (user as any).residence
+    ? String((user as any).residence).trim().toUpperCase()
+    : null;
 
-    // Traducciones para los nombres de teléfono
-    const nameTranslations: Record<string, string> = {
-        emergencyGeneral: getTranslation(lang, 'pages.phones.emergency') + ' 112',
-        police: getTranslation(lang, 'pages.phones.police'),
-        neighborhoodEmergency: getTranslation(lang, 'pages.phones.emergency') + ' barrio',
-        municipal: getTranslation(lang, 'pages.phones.municipal'),
-        residenciaOne: getTranslation(lang, 'places.residenciaOne.name') || 'Residencia ONE',
-        residenciaAmro: getTranslation(lang, 'places.residenciaAmro.name') || 'Residencia AMRO',
-        residenciaEstanislao: getTranslation(lang, 'places.residenciaEstanislao.name') || 'Residencia Estanislao'
-    };
+  const residenceSection: PhoneCategory | null = residenceKey && residencePhoneMap[residenceKey]
+    ? {
+        title: 'Mi residencia',
+        color: '#BEF264',
+        phones: [residencePhoneMap[residenceKey]],
+      }
+    : null;
 
-    return (
-        <Container sx={{ py: 4 }}>
-            <Grid container spacing={2}>
-                {phoneNumbers.map((phone) => (
-                    <Grid item key={phone.nameKey} xs={12} sm={6}>
-                        <Material3ElevatedCard sx={{ p: 3, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, bgcolor: phone.isEmergency ? 'error.dark' : undefined }}>
-                            <Link href={`tel:${normalizeTelHref(phone.number)}`} sx={{ display: 'inline-flex' }}>
-                                <Avatar sx={{ width: 56, height: 56, bgcolor: phone.isEmergency ? 'error.main' : 'primary.main', cursor: 'pointer' }}>
-                                    {phone.isEmergency ? <EmergencyIcon fontSize="large" /> : <PhoneIcon fontSize="large" />}
-                                </Avatar>
-                            </Link>
+  const categories: PhoneCategory[] = [
+    {
+      title: 'Emergencias',
+      color: '#FF5252',
+      phones: [
+        { name: 'Emergencias generales', num: '112', icon: <SosRoundedIcon /> },
+        { name: 'Policía Local', num: '092', icon: <SecurityRoundedIcon /> },
+        { name: 'Guardia Civil', num: '062', icon: <ShieldRoundedIcon /> },
+      ],
+    },
+    {
+      title: 'Programa AMRO',
+      color: '#8EA8F0',
+      phones: [
+        { name: 'Coordinador del programa', num: '+34 649 347 760', icon: <PersonRoundedIcon /> },
+        { name: 'Secretaría AMRO', num: '+34 954 000 000', icon: <ApartmentRoundedIcon /> },
+      ],
+    },
+    {
+      title: 'Servicios locales',
+      color: '#00E676',
+      phones: [
+        { name: 'Centro de Salud Norte', num: '+34 954 111 222', icon: <LocalHospitalRoundedIcon /> },
+        { name: 'Ayuntamiento de Sevilla', num: '+34 955 470 000', icon: <AccountBalanceRoundedIcon /> },
+        { name: 'EMT Sevilla (Bus)', num: '+34 900 010 059', icon: <DirectionsBusRoundedIcon /> },
+      ],
+    },
+    ...(residenceSection ? [residenceSection] : []),
+  ];
 
-                            <Box sx={{ flexGrow: 1 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-                                    <Typography variant="h6" fontWeight={700}>
-                                        {phone.nameKey === 'neighborhoodEmergency' ? 'Emergencias (barrio)' : (nameTranslations[phone.nameKey] || phone.number)}
-                                    </Typography>
-                                    {
-                                        (() => {
-                                            const residenceKeys = ['residenciaOne', 'residenciaAmro', 'residenciaEstanislao'];
-                                            const isResidence = phone.nameKey && residenceKeys.includes(phone.nameKey);
-                                            const chipLabel = phone.isEmergency
-                                                ? getTranslation(lang, 'pages.phones.emergency') || 'Emergencia'
-                                                : (phone.nameKey === 'neighborhoodEmergency'
-                                                    ? 'Badeo'
-                                                    : isResidence
-                                                        ? getTranslation(lang, 'map.categories.residence') || 'Residencia'
-                                                        : (phone.nameKey === 'municipal' ? (
-                                                            // Prefer a more specific label for municipal police
-                                                            getTranslation(lang, 'pages.phones.municipalPolice') || getTranslation(lang, 'pages.phones.municipal') || 'Policía municipal'
-                                                        ) : ''));
-                                            return <Chip label={chipLabel} color={phone.isEmergency ? 'error' : 'primary'} size="small" />;
-                                        })()
-                                    }
-                                </Box>
+  return (
+    <Box sx={{ py: 2 }}>
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: 700,
+          fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
+          color: 'text.primary',
+          mb: 0.5,
+        }}
+      >
+        Teléfonos útiles
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, fontSize: '0.8rem' }}>
+        Contactos de emergencia y del programa
+      </Typography>
 
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                                    <Link href={`tel:${normalizeTelHref(phone.number)}`} color="inherit" underline="hover" sx={{ fontSize: '1.15rem', fontWeight: 600 }}>
-                                        {formatDisplayNumber(phone.number)}
-                                    </Link>
-
-                                    <Tooltip title="Copiar número">
-                                        <IconButton size="small" onClick={() => {
-                                            try { navigator.clipboard.writeText(normalizeTelHref(phone.number)); } catch (e) {}
-                                        }}>
-                                            <ContentCopyIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </Box>
-                        </Material3ElevatedCard>
-                    </Grid>
-                ))}
-            </Grid>
-        </Container>
-    );
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {categories.map((cat) => (
+          <Box key={cat.title}>
+            {/* Category header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Box sx={{ width: 4, height: 16, background: cat.color, borderRadius: 1, flexShrink: 0 }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700, color: cat.color,
+                  letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: '0.72rem',
+                }}
+              >
+                {cat.title}
+              </Typography>
+            </Box>
+            {/* Phone cards */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+              {cat.phones.map((p) => (
+                <PhoneCard key={p.num} phone={p} accentColor={cat.color} />
+              ))}
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
 }

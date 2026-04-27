@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, CircularProgress, Fade } from '@mui/material';
+import { Box, CircularProgress, Fade, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 
 interface SplashScreenProps {
@@ -69,6 +69,26 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               filter: 'drop-shadow(0 6px 20px rgba(0, 0, 0, 0.2))',
             }}
           />
+        </motion.div>
+
+        {/* App name */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <Typography
+            sx={{
+              fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
+              fontWeight: 800,
+              fontSize: '1.25rem',
+              color: 'text.primary',
+              textAlign: 'center',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Barrio de Oportunidades
+          </Typography>
         </motion.div>
 
         {/* Loading Indicator de Material Design 3 */}

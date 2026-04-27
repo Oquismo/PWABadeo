@@ -1,3 +1,40 @@
+/* Design system tokens — Badeo */
+:root {
+  --font-sans: var(--font-inter, 'Inter', system-ui, sans-serif);
+  --font-display: var(--font-bricolage, 'Bricolage Grotesque', 'Inter', sans-serif);
+
+  /* MD3 Color Roles — Dark Theme */
+  --md-primary: #BEF264;
+  --md-on-primary: #1A2E00;
+  --md-secondary: #D946EF;
+  --md-secondary-container: #3A2C4A;
+  --md-on-secondary-container: #E8DEF8;
+  --md-tertiary: #667EEA;
+  --md-tertiary-container: #764BA2;
+  --md-background: #18181B;
+  --md-surface-low: #1E1E21;
+  --md-surface: #27272A;
+  --md-surface-high: #2D2D30;
+  --md-on-surface: #FFFFFF;
+  --md-on-surface-variant: #A1A1AA;
+  --md-outline: rgba(255,255,255,0.12);
+  --md-correct: #00E676;
+  --md-error: #FF5252;
+
+  /* Spacing */
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}
+
 /* Deshabilitar pull-to-refresh manteniendo scroll normal */
 html {
   overscroll-behavior-y: contain;

@@ -19,6 +19,7 @@ import ProjectsDashboard from "@/components/home/ProjectsDashboard";
 import CalendarSection from "@/components/home/CalendarSection/CalendarSection";
 import ExternalInfoPanel from "@/components/home/ExternalInfoPanel";
 import AnimatedEntrance from '@/components/AnimatedEntrance';
+import InlineBanner from '@/components/home/InlineBanner';
 // import SpotifyPlayer from "@/components/SpotifyPlayer";
 
 export default function Home() {
@@ -83,6 +84,7 @@ export default function Home() {
           <Box sx={{ pt: 2, pb: 2 }}>
             <AnimatedEntrance>
               <HeroSection />
+              <InlineBanner />
               {/* <SpotifyPlayer compact /> */}
               <ExternalInfoPanel />
               <ProjectsDashboard />

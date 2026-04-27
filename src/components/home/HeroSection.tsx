@@ -117,12 +117,13 @@ export default function HeroSection() {
             </Material3Dialog>
           </Box>
           <Box>
-            <Typography 
-              component="h1" 
+            <Typography
+              component="h1"
               variant="h4"
-              fontWeight="bold"
+              fontWeight={700}
+              sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)', lineHeight: 1.2 }}
             >
-              {isAuthenticated && user ? `${getGreeting()}, ${user.name?.split(' ')[0] || 'Usuario'}` : getGreeting()}
+              {isAuthenticated && user ? `${getGreeting()}, ${user.name?.split(' ')[0] || 'estudiante'}` : getGreeting()}
             </Typography>
           </Box>
         </Stack>

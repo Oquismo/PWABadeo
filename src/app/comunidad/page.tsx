@@ -117,7 +117,12 @@ export default function ComunidadPage() {
       <Box sx={{ p: 2, maxWidth: 800, mx: 'auto', pb: 10 }}>
         {/* Header */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
+          <Typography
+            variant="h4"
+            fontWeight={800}
+            gutterBottom
+            sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' }}
+          >
             Comunidad
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -127,9 +132,17 @@ export default function ComunidadPage() {
 
         {/* Stats */}
         <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-          <Card sx={{ flex: 1, textAlign: 'center' }}>
+          <Card sx={{ flex: 1, textAlign: 'center', background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)' }}>
             <CardContent>
-              <Typography variant="h5" fontWeight="bold" color="primary">
+              <Typography
+                variant="h5"
+                fontWeight={800}
+                sx={{
+                  background: 'linear-gradient(135deg,#667EEA 0%,#764BA2 100%)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                  fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
+                }}
+              >
                 {questions.length}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -137,9 +150,16 @@ export default function ComunidadPage() {
               </Typography>
             </CardContent>
           </Card>
-          <Card sx={{ flex: 1, textAlign: 'center' }}>
+          <Card sx={{ flex: 1, textAlign: 'center', background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)' }}>
             <CardContent>
-              <Typography variant="h5" fontWeight="bold" color="success.main">
+              <Typography
+                variant="h5"
+                fontWeight={800}
+                sx={{
+                  color: '#00E676',
+                  fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
+                }}
+              >
                 {questions.filter((q) => q.isResolved).length}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -154,7 +174,7 @@ export default function ComunidadPage() {
           {loading ? (
             // Skeleton loading
             [...Array(3)].map((_, i) => (
-              <Card key={i} sx={{ mb: 2 }}>
+              <Card key={i} sx={{ mb: 2, background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <CardContent>
                   <Skeleton variant="text" width="60%" height={32} />
                   <Skeleton variant="text" width="100%" />
@@ -187,10 +207,12 @@ export default function ComunidadPage() {
                   sx={{
                     mb: 2,
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    background: '#1E1E21',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    transition: 'transform 0.25s cubic-bezier(0.2,0,0,1), box-shadow 0.25s cubic-bezier(0.2,0,0,1)',
                     '&:hover': {
-                      boxShadow: 4,
-                      transform: 'translateY(-2px)',
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
                     },
                   }}
                   onClick={() => router.push(`/comunidad/${question.id}`)}
@@ -233,7 +255,11 @@ export default function ComunidadPage() {
                     <Divider sx={{ my: 1.5 }} />
 
                     {/* Question content */}
-                    <Typography variant="h6" gutterBottom>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)', fontWeight: 700 }}
+                    >
                       {question.title}
                     </Typography>
                     <Typography

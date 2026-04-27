@@ -73,34 +73,49 @@ export default function ProyectosPage() {
   return (
     <Container sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography component="h1" variant="h3" fontWeight="bold">
+        <Typography
+          component="h1"
+          variant="h3"
+          fontWeight={800}
+          sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' }}
+        >
           Nuestros Proyectos
         </Typography>
-        <Button
-          variant={showOnlyFavorites ? 'contained' : 'outlined'}
-          startIcon={<FilterListIcon />}
+        <Box
+          component="button"
           onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-          color="secondary"
+          sx={{
+            height: 36, px: 2,
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+            borderRadius: '18px', cursor: 'pointer',
+            fontSize: '0.8rem', fontWeight: 600,
+            border: '1px solid',
+            borderColor: showOnlyFavorites ? 'transparent' : 'rgba(255,255,255,0.18)',
+            background: showOnlyFavorites ? '#3A2C4A' : 'transparent',
+            color: showOnlyFavorites ? '#E8DEF8' : 'text.secondary',
+            transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
+          }}
         >
+          <FilterListIcon sx={{ fontSize: 16 }} />
           {showOnlyFavorites ? 'Mostrar Todos' : 'Solo Favoritos'}
-        </Button>
+        </Box>
       </Box>
       
       <Grid container spacing={4}>
         {filteredProjects.map((project, index) => (
           <Grid item key={project.id} xs={12} sm={6} md={4}>
             <Fade in={true} timeout={500 + index * 100}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  backgroundColor: 'background.paper',
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  backgroundColor: '#1E1E21',
                   cursor: 'pointer',
-                  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                  transition: 'transform 0.25s cubic-bezier(0.2,0,0,1), box-shadow 0.25s cubic-bezier(0.2,0,0,1)',
                   '&:hover': {
-                    transform: 'scale(1.05)',
-                    boxShadow: 6,
+                    transform: 'translateY(-6px) scale(1.01)',
+                    boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
                   },
                 }}
                 onClick={() => handleExpandClick(project.id)}

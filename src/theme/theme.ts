@@ -23,11 +23,11 @@ export const darkTheme = createTheme({
   // --- CORRECCIÓN AQUÍ ---
   // Se ha añadido el objeto de tipografía que faltaba
   typography: {
-    fontFamily: [ 'Inter', 'sans-serif' ].join(','),
-    h1: { fontWeight: 700 },
-    h2: { fontWeight: 700 },
-    h3: { fontWeight: 700 },
-    h4: { fontWeight: 700 },
+    fontFamily: [ 'var(--font-inter)', 'Inter', 'sans-serif' ].join(','),
+    h1: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
+    h2: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
+    h3: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
+    h4: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
   },
   components: {
     MuiPaper: {
@@ -83,11 +83,11 @@ export const lightTheme = createTheme({
   // --- CORRECCIÓN AQUÍ ---
   // Se ha añadido el objeto de tipografía que faltaba
   typography: {
-    fontFamily: [ 'Inter', 'sans-serif' ].join(','),
-    h1: { fontWeight: 700 },
-    h2: { fontWeight: 700 },
-    h3: { fontWeight: 700 },
-    h4: { fontWeight: 700 },
+    fontFamily: [ 'var(--font-inter)', 'Inter', 'sans-serif' ].join(','),
+    h1: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
+    h2: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
+    h3: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
+    h4: { fontWeight: 700, fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' },
   },
   components: {
     MuiPaper: {
