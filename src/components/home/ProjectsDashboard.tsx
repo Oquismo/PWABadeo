@@ -1,6 +1,6 @@
 'use client';
 
-import { Typography, Box, Chip } from '@mui/material';
+import { Typography, Box, Chip, useTheme } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
@@ -19,25 +19,25 @@ function deriveStatus(task: TaskData): 'completado' | 'proceso' | 'pendiente' {
   return 'pendiente';
 }
 
-// Accent color per status (left bar + chip)
-const STATUS_CONFIG = {
-  completado: { color: '#00E676', bg: 'rgba(0,230,118,0.12)', border: 'rgba(0,230,118,0.35)', label: 'Completado' },
-  proceso:    { color: '#8EA8F0', bg: 'rgba(102,126,234,0.12)', border: 'rgba(102,126,234,0.30)', label: 'En proceso' },
-  pendiente:  { color: '#FF5252', bg: 'rgba(255,82,82,0.10)', border: 'rgba(255,82,82,0.28)', label: 'Pendiente' },
-};
-
 function StatusChip({ status }: { status: 'completado' | 'proceso' | 'pendiente' }) {
-  const s = STATUS_CONFIG[status];
+  const theme = useTheme();
+  const config = {
+    completado: { color: theme.palette.success.main, label: 'Completado' },
+    proceso:    { color: theme.palette.info?.main || theme.palette.primary.main, label: 'En proceso' },
+    pendiente:  { color: theme.palette.error.main, label: 'Pendiente' },
+  }[status];
+
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-      height: 24, padding: '0 10px', borderRadius: 9999,
-      background: s.bg, border: `1px solid ${s.border}`,
-      fontSize: '0.7rem', fontWeight: 700, color: s.color, flexShrink: 0,
+    <Box sx={{
+      display: 'inline-flex', alignItems: 'center', gap: 0.625,
+      height: 24, px: '10px', borderRadius: 9999,
+      background: config.color + '1A',
+      border: `1px solid ${config.color}4D`,
+      fontSize: '0.7rem', fontWeight: 700, color: config.color, flexShrink: 0,
     }}>
-      <span style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} />
-      {s.label}
-    </span>
+      <Box sx={{ width: 5, height: 5, borderRadius: '50%', background: config.color }} />
+      {config.label}
+    </Box>
   );
 }
 
@@ -56,11 +56,20 @@ function formatDate(raw?: string): string {
 }
 
 export default function ProjectsDashboard() {
+  const theme = useTheme();
   const { tasks } = useTasks();
   const { user } = useAuth();
   const { t } = useTranslation();
   const [isHydrated, setIsHydrated] = useState(false);
   const [filter, setFilter] = useState<ChipFilter>('Todos');
+
+  const getStatusColor = (status: 'completado' | 'proceso' | 'pendiente') => {
+    switch (status) {
+      case 'completado': return theme.palette.success.main;
+      case 'proceso': return theme.palette.info?.main || theme.palette.primary.main;
+      case 'pendiente': return theme.palette.error.main;
+    }
+  };
 
   useEffect(() => { setIsHydrated(true); }, []);
 
@@ -118,7 +127,7 @@ export default function ProjectsDashboard() {
         {CHIPS.map(chip => {
           const sel = filter === chip;
           return (
-            <Box
+              <Box
               key={chip}
               component="button"
               onClick={() => setFilter(chip)}
@@ -126,19 +135,19 @@ export default function ProjectsDashboard() {
                 flexShrink: 0, height: 32,
                 px: sel ? '10px' : '14px',
                 pl: sel ? '6px' : '14px',
-                borderRadius: '8px',
+                borderRadius: 1,
                 display: 'inline-flex', alignItems: 'center', gap: '4px',
                 fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
                 userSelect: 'none', border: 'none', outline: 'none',
-                background: sel ? '#3A2C4A' : 'transparent',
-                color: sel ? '#E8DEF8' : 'text.secondary',
-                borderColor: sel ? 'transparent' : 'rgba(255,255,255,0.12)',
+                background: sel ? 'secondary.dark' : 'transparent',
+                color: sel ? 'secondary.light' : 'text.secondary',
+                borderColor: sel ? 'transparent' : 'divider',
                 borderStyle: 'solid', borderWidth: '1px',
                 transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
                 '&:active': { transform: 'scale(0.97)' },
               }}
             >
-              {sel && <CheckRoundedIcon sx={{ fontSize: 16, color: '#E8DEF8' }} />}
+              {sel && <CheckRoundedIcon sx={{ fontSize: 16, color: 'secondary.light' }} />}
               {chip}
             </Box>
           );
@@ -159,7 +168,7 @@ export default function ProjectsDashboard() {
           </Typography>
         ) : filtered.map((task, index) => {
           const status = deriveStatus(task);
-          const accent = STATUS_CONFIG[status].color;
+          const accent = getStatusColor(status);
           return (
             <motion.div
               key={task.id || index}
@@ -169,15 +178,14 @@ export default function ProjectsDashboard() {
               }}
             >
               <Box sx={{
-                background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F7F2FA',
-                borderRadius: '12px',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.15)',
+                background: 'background.paper',
+                borderRadius: 3,
                 overflow: 'hidden',
                 position: 'relative',
                 padding: '12px 14px 12px 18px',
                 transition: 'transform 200ms cubic-bezier(0.2,0,0,1), box-shadow 200ms cubic-bezier(0.2,0,0,1)',
                 '@media (hover: hover) and (pointer: fine)': {
-                  '&:hover': { transform: 'translateY(-3px) scale(1.005)', boxShadow: '0 6px 20px rgba(0,0,0,0.25)' },
+                  '&:hover': { transform: 'translateY(-3px) scale(1.005)' },
                 },
                 '&:active': { transform: 'translateY(1px) scale(0.998)' },
                 // Left accent bar

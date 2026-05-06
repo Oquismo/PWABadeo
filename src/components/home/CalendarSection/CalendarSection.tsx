@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Typography, Collapse } from '@mui/material';
+import { Box, Typography, Collapse, useTheme } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
 import MaterialCalendar from '@/components/home/MaterialCalendar';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
@@ -18,6 +18,7 @@ function buildWeekDays(today: number) {
 }
 
 export default function CalendarSection() {
+  const theme = useTheme();
   const { t } = useTranslation();
   const today = new Date().getDate();
   const [selected, setSelected] = useState(today);
@@ -72,7 +73,7 @@ export default function CalendarSection() {
                 borderRadius: '12px', cursor: 'pointer',
                 border: 'none', outline: 'none',
                 background: isSel
-                  ? 'linear-gradient(135deg,#667EEA 0%,#764BA2 100%)'
+                  ? 'primary.main'
                   : 'transparent',
                 transition: 'background 150ms cubic-bezier(0.2,0,0,1)',
                 '&:active': { transform: 'scale(0.96)' },
@@ -82,7 +83,7 @@ export default function CalendarSection() {
                 variant="caption"
                 sx={{
                   fontSize: '0.65rem', fontWeight: 600, lineHeight: 1,
-                  color: isSel ? '#fff' : 'text.secondary',
+                  color: isSel ? 'primary.contrastText' : 'text.secondary',
                 }}
               >
                 {DAY_LABELS[i]}
@@ -91,15 +92,14 @@ export default function CalendarSection() {
                 variant="body2"
                 sx={{
                   fontSize: '0.875rem', fontWeight: 700, lineHeight: 1,
-                  color: isSel ? '#fff' : isToday ? 'primary.main' : 'text.primary',
+                  color: isSel ? 'primary.contrastText' : isToday ? 'primary.main' : 'text.primary',
                 }}
               >
                 {day}
               </Typography>
               <Box sx={{
                 width: 4, height: 4, borderRadius: '50%',
-                background: hasEvent ? (isSel ? '#fff' : 'primary.main') : 'transparent',
-                bgcolor: hasEvent ? (isSel ? '#fff' : 'primary.main') : 'transparent',
+                bgcolor: hasEvent ? (isSel ? 'primary.contrastText' : 'primary.main') : 'transparent',
               }} />
             </Box>
           );

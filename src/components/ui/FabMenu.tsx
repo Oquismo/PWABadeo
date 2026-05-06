@@ -19,12 +19,6 @@ export default function FabMenu({ phone = '+34649347760', message = '', onOpenFe
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
-  // Colores pensados para emular la imagen: fondo píldora lila muy claro y texto/ícono morado oscuro
-  const pillBg = '#EDE6FF'; // pale lilac
-  const pillIconBg = '#5E3C86'; // deep purple for icon area (slightly adjusted)
-  const pillTextColor = '#4B2C83';
-
-  // estilos para botones circulares (ajustados: más pequeños)
   const circleSx = {
     width: 48,
     height: 48,
@@ -34,7 +28,7 @@ export default function FabMenu({ phone = '+34649347760', message = '', onOpenFe
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 12px 28px rgba(45,35,95,0.14)',
+    boxShadow: theme.shadows[4],
     transition: 'transform 160ms ease'
   } as const;
 
@@ -45,8 +39,8 @@ export default function FabMenu({ phone = '+34649347760', message = '', onOpenFe
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: pillIconBg,
-    color: 'white'
+    background: theme.palette.primary.dark,
+    color: theme.palette.primary.contrastText,
   } as const;
 
   const whatsappUrl = phone ? `https://wa.me/${phone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(message || '')}` : undefined;
@@ -97,16 +91,16 @@ export default function FabMenu({ phone = '+34649347760', message = '', onOpenFe
                           onClick={() => { it.onClick(); setOpen(false); }}
                           sx={{
                             ...circleSx,
-                            bgcolor: '#ffffff',
-                            border: it.key === 'whatsapp' ? '2px solid #25D366' : `2px solid ${pillIconBg}`,
-                            color: it.key === 'whatsapp' ? '#25D366' : pillIconBg,
-                            '&:hover': { transform: 'translateY(-3px) scale(1.03)', bgcolor: '#fff' }
+                            bgcolor: 'background.paper',
+                            border: it.key === 'whatsapp' ? '2px solid #25D366' : `2px solid ${theme.palette.primary.dark}`,
+                            color: it.key === 'whatsapp' ? '#25D366' : theme.palette.primary.dark,
+                            '&:hover': { transform: 'translateY(-3px) scale(1.03)', bgcolor: 'background.paper' }
                           }}
                           aria-label={it.label}
                           title={it.label}
                         >
                           <Box sx={{ ...circleIconSx, background: 'transparent' }}>
-                            <it.Icon sx={{ fontSize: 18, color: it.key === 'whatsapp' ? '#25D366' : pillIconBg }} />
+                            <it.Icon sx={{ fontSize: 18, color: it.key === 'whatsapp' ? '#25D366' : theme.palette.primary.dark }} />
                           </Box>
                         </Button>
                       </span>
@@ -125,11 +119,11 @@ export default function FabMenu({ phone = '+34649347760', message = '', onOpenFe
             <Fab
               onClick={() => setOpen(v => !v)}
               sx={{
-                bgcolor: '#5E3C86',
-                color: 'white',
+                bgcolor: 'primary.dark',
+                color: 'primary.contrastText',
                 width: 56,
                 height: 56,
-                boxShadow: '0 20px 36px rgba(45,35,95,0.28)'
+                boxShadow: theme.shadows[6],
               }}
               aria-label={open ? 'Cerrar menú rápido' : 'Abrir chat / menú rápido'}
               title={open ? 'Cerrar' : 'Abrir chat'}

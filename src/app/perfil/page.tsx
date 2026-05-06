@@ -12,10 +12,8 @@ import {
   AccordionSummary,
   AccordionDetails,
   Fade,
+  useTheme,
 } from '@mui/material';
-import Tooltip from '@mui/material/Tooltip';
-import M3Button from '@/components/ui/M3Button';
-import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
@@ -23,7 +21,6 @@ import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import CakeRoundedIcon from '@mui/icons-material/CakeRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
@@ -43,11 +40,7 @@ const NotificationsPanel = dynamic(() => import('@/components/home/Notifications
 const TaskManager = dynamic(() => import('@/components/admin/TaskManager'), { ssr: false });
 
 export default function PerfilPage() {
-  useEffect(() => {
-    const handler = () => setReviewOpen(true);
-    window.addEventListener('showGoogleReviewPrompt', handler);
-    return () => window.removeEventListener('showGoogleReviewPrompt', handler);
-  }, []);
+  const theme = useTheme();
   const [reviewOpen, setReviewOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const { user, isAuthenticated, isLoading, logout, refreshAvatar } = useAuth();
@@ -58,7 +51,12 @@ export default function PerfilPage() {
 
   const defaultEggAvatar = '/img/twittereggavatar.jpg';
 
-  useEffect(() => { setIsMounted(true); }, []);
+  useEffect(() => {
+    setIsMounted(true);
+    const handler = () => setReviewOpen(true);
+    window.addEventListener('showGoogleReviewPrompt', handler);
+    return () => window.removeEventListener('showGoogleReviewPrompt', handler);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && !user) {
@@ -77,13 +75,13 @@ export default function PerfilPage() {
       }
     };
     loadAvatar();
-  }, [user?.id]);
+  }, [user?.id, refreshAvatar]);
 
   useEffect(() => {
     const handleProfileImageChange = () => { if (user?.id) refreshAvatar(); };
     window.addEventListener('profileImageChanged', handleProfileImageChange);
     return () => window.removeEventListener('profileImageChanged', handleProfileImageChange);
-  }, [user?.id]);
+  }, [user?.id, refreshAvatar]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -141,6 +139,14 @@ export default function PerfilPage() {
     ? (typeof user.school === 'string' ? user.school : (user.school as any).name)
     : 'No especificada';
 
+  const infoRows = [
+    { icon: <EmailRoundedIcon sx={{ fontSize: 18, color: 'primary.main' }} />, label: 'Email', value: user.email },
+    !isAdmin ? { icon: <SchoolRoundedIcon sx={{ fontSize: 18, color: 'primary.main' }} />, label: 'Escuela', value: schoolName } : null,
+    !isAdmin ? { icon: <CakeRoundedIcon sx={{ fontSize: 18, color: 'secondary.main' }} />, label: 'Edad', value: user.age ? `${user.age} años` : 'No especificada' } : null,
+    { icon: <LocationOnRoundedIcon sx={{ fontSize: 18, color: 'warning.main' }} />, label: 'Ubicación', value: locationStr },
+    (!isAdmin && user.residence) ? { icon: <HotelRoundedIcon sx={{ fontSize: 18, color: 'success.main' }} />, label: 'Residencia', value: user.residence } : null,
+  ].filter(Boolean) as { icon: React.ReactNode; label: string; value: string }[];
+
   return (
     <Fade in={true} timeout={350}>
       <Container component="main" maxWidth="md" sx={{ py: 2, pb: 6 }}>
@@ -158,12 +164,12 @@ export default function PerfilPage() {
 
         {/* ── Hero ── */}
         <Box sx={{
-          mb: 2.5, borderRadius: '24px',
-          background: 'linear-gradient(135deg, #3A2C4A 0%, #1C1230 100%)',
+          mb: 2.5, borderRadius: 6,
+          background: (t) => `linear-gradient(135deg, ${t.palette.secondary.dark} 0%, ${t.palette.background.default} 100%)`,
           p: '28px 22px', position: 'relative', overflow: 'hidden',
         }}>
-          <Box sx={{ position: 'absolute', top: -48, right: -48, width: 180, height: 180, borderRadius: '50%', background: 'rgba(102,126,234,0.10)', pointerEvents: 'none' }} />
-          <Box sx={{ position: 'absolute', bottom: -24, left: -16, width: 100, height: 100, borderRadius: '50%', background: 'rgba(190,242,100,0.07)', pointerEvents: 'none' }} />
+          <Box sx={{ position: 'absolute', top: -48, right: -48, width: 180, height: 180, borderRadius: '50%', background: (t) => `${t.palette.primary.main}1A`, pointerEvents: 'none' }} />
+          <Box sx={{ position: 'absolute', bottom: -24, left: -16, width: 100, height: 100, borderRadius: '50%', background: (t) => `${t.palette.primary.main}12`, pointerEvents: 'none' }} />
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
             {/* Avatar */}
@@ -172,8 +178,8 @@ export default function PerfilPage() {
                 src={user.avatarUrl || defaultEggAvatar}
                 sx={{
                   width: 84, height: 84,
-                  bgcolor: '#667EEA',
-                  border: '3px solid rgba(255,255,255,0.18)',
+                  bgcolor: 'primary.main',
+                  border: (t) => `3px solid ${t.palette.primary.contrastText}2E`,
                   cursor: 'pointer',
                   transition: 'transform 240ms cubic-bezier(0.2,0,0,1)',
                   '&:hover': { transform: 'scale(1.05)' },
@@ -190,12 +196,12 @@ export default function PerfilPage() {
                 <Box sx={{
                   position: 'absolute', bottom: 0, right: 0,
                   width: 28, height: 28, borderRadius: '50%',
-                  background: '#BEF264',
+                  bgcolor: 'primary.main',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+                  cursor: 'pointer', boxShadow: (t) => t.shadows[2],
                   transition: 'transform 150ms', '&:hover': { transform: 'scale(1.1)' },
                 }}>
-                  <EditRoundedIcon sx={{ fontSize: 15, color: '#1A2E00' }} />
+                  <EditRoundedIcon sx={{ fontSize: 15, color: 'primary.contrastText' }} />
                 </Box>
               </Link>
             </Box>
@@ -203,18 +209,18 @@ export default function PerfilPage() {
             {/* Name + badge */}
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography sx={{
-                fontSize: '1.5rem', fontWeight: 800, color: '#fff', lineHeight: 1.1, mb: 1,
+                fontSize: '1.5rem', fontWeight: 800, color: 'text.primary', lineHeight: 1.1, mb: 1,
                 fontFamily: 'var(--font-bricolage,"Bricolage Grotesque",Inter,sans-serif)',
               }}>
                 {user.name || 'Estudiante'}
               </Typography>
               <Box component="span" sx={{
                 display: 'inline-flex', alignItems: 'center', gap: '5px',
-                px: '10px', py: '4px', borderRadius: '9999px',
-                background: isAdmin ? 'rgba(217,70,239,0.18)' : 'rgba(190,242,100,0.15)',
-                border: `1px solid ${isAdmin ? 'rgba(217,70,239,0.35)' : 'rgba(190,242,100,0.3)'}`,
+                px: '10px', py: '4px', borderRadius: 9999,
+                bgcolor: isAdmin ? 'secondary.dark' : 'primary.dark',
+                border: (t) => `1px solid ${isAdmin ? t.palette.secondary.main : t.palette.primary.main}4D`,
                 fontSize: '0.72rem', fontWeight: 700,
-                color: isAdmin ? '#F0ABFC' : '#BEF264',
+                color: isAdmin ? 'secondary.light' : 'primary.light',
               }}>
                 {isAdmin
                   ? <AdminPanelSettingsRoundedIcon sx={{ fontSize: 13 }} />
@@ -231,40 +237,44 @@ export default function PerfilPage() {
           overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
         }}>
           {([
-            { href: '/perfil/editar', icon: <EditRoundedIcon sx={{ fontSize: 20 }} />, label: 'Editar', accent: '#BEF264', bg: 'rgba(190,242,100,0.10)', border: 'rgba(190,242,100,0.22)' },
-            { href: '/cursos/espanol', icon: <MenuBookRoundedIcon sx={{ fontSize: 20 }} />, label: 'Cursos', accent: '#8EA8F0', bg: 'rgba(102,126,234,0.10)', border: 'rgba(102,126,234,0.22)' },
-            { href: '/ajustes', icon: <SettingsRoundedIcon sx={{ fontSize: 20 }} />, label: 'Ajustes', accent: '#E8DEF8', bg: 'rgba(232,222,248,0.07)', border: 'rgba(232,222,248,0.14)' },
-          ] as const).map(item => (
-            <Link key={item.label} href={item.href} passHref style={{ textDecoration: 'none', flexShrink: 0 }}>
-              <Box sx={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                px: 2.5, py: 1.5, borderRadius: '16px', cursor: 'pointer',
-                background: item.bg, border: `1px solid ${item.border}`,
-                transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
-                '&:hover': { transform: 'translateY(-3px)', filter: 'brightness(1.2)' },
-                '&:active': { transform: 'scale(0.95)' },
-              }}>
-                <Box sx={{ color: item.accent, display: 'flex' }}>{item.icon}</Box>
-                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: item.accent, lineHeight: 1 }}>
-                  {item.label}
-                </Typography>
-              </Box>
-            </Link>
-          ))}
+            { href: '/perfil/editar', icon: <EditRoundedIcon sx={{ fontSize: 20 }} />, label: 'Editar', palette: 'primary' as const },
+            { href: '/cursos/espanol', icon: <MenuBookRoundedIcon sx={{ fontSize: 20 }} />, label: 'Cursos', palette: 'secondary' as const },
+            { href: '/ajustes', icon: <EditRoundedIcon sx={{ fontSize: 20 }} />, label: 'Ajustes', palette: 'info' as const },
+          ]).map(item => {
+            const colorKey = item.palette;
+            const mainColor = theme.palette[colorKey]?.main || theme.palette.primary.main;
+            return (
+              <Link key={item.label} href={item.href} passHref style={{ textDecoration: 'none', flexShrink: 0 }}>
+                <Box sx={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                  px: 2.5, py: 1.5, borderRadius: 4, cursor: 'pointer',
+                  bgcolor: `${mainColor}1A`, border: (t) => `1px solid ${mainColor}38`,
+                  transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
+                  '&:hover': { transform: 'translateY(-3px)', bgcolor: `${mainColor}2E` },
+                  '&:active': { transform: 'scale(0.95)' },
+                }}>
+                  <Box sx={{ color: mainColor, display: 'flex' }}>{item.icon}</Box>
+                  <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: mainColor, lineHeight: 1 }}>
+                    {item.label}
+                  </Typography>
+                </Box>
+              </Link>
+            );
+          })}
           <Box
             component="button"
             onClick={() => setModalOpen(true)}
             sx={{
               flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-              px: 2.5, py: 1.5, borderRadius: '16px', cursor: 'pointer',
-              background: 'rgba(217,70,239,0.10)', border: '1px solid rgba(217,70,239,0.22)',
+              px: 2.5, py: 1.5, borderRadius: 4, cursor: 'pointer',
+              bgcolor: (t) => `${t.palette.secondary.main}1A`, border: (t) => `1px solid ${t.palette.secondary.main}38`,
               transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
-              '&:hover': { transform: 'translateY(-3px)', filter: 'brightness(1.2)' },
+              '&:hover': { transform: 'translateY(-3px)', bgcolor: (t) => `${t.palette.secondary.main}2E` },
               '&:active': { transform: 'scale(0.95)' },
             }}
           >
-            <NotificationsOutlinedIcon sx={{ fontSize: 20, color: '#D946EF' }} />
-            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#D946EF', lineHeight: 1 }}>
+            <NotificationsOutlinedIcon sx={{ fontSize: 20, color: 'secondary.main' }} />
+            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: 'secondary.main', lineHeight: 1 }}>
               Avisos
             </Typography>
           </Box>
@@ -272,28 +282,22 @@ export default function PerfilPage() {
 
         {/* ── Info list ── */}
         <Box sx={{
-          mb: 2.5, borderRadius: '16px',
-          background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)',
+          mb: 2.5, borderRadius: 4,
+          bgcolor: 'background.paper', border: (t) => `1px solid ${t.palette.divider}`,
           overflow: 'hidden',
         }}>
-          {([
-            { icon: <EmailRoundedIcon sx={{ fontSize: 18, color: '#8EA8F0' }} />, label: 'Email', value: user.email },
-            !isAdmin ? { icon: <SchoolRoundedIcon sx={{ fontSize: 18, color: '#BEF264' }} />, label: 'Escuela', value: schoolName } : null,
-            !isAdmin ? { icon: <CakeRoundedIcon sx={{ fontSize: 18, color: '#D946EF' }} />, label: 'Edad', value: user.age ? `${user.age} años` : 'No especificada' } : null,
-            { icon: <LocationOnRoundedIcon sx={{ fontSize: 18, color: '#F97316' }} />, label: 'Ubicación', value: locationStr },
-            (!isAdmin && user.residence) ? { icon: <HotelRoundedIcon sx={{ fontSize: 18, color: '#00E676' }} />, label: 'Residencia', value: user.residence } : null,
-          ].filter(Boolean) as { icon: React.ReactNode; label: string; value: string }[]).map((row, i, arr) => (
+          {infoRows.map((row, i, arr) => (
             <Box
               key={row.label}
               sx={{
                 display: 'flex', alignItems: 'center', gap: 1.5,
                 px: 2.5, py: 1.75,
-                borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                borderBottom: i < arr.length - 1 ? (t) => `1px solid ${t.palette.divider}` : 'none',
               }}
             >
               {row.icon}
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography sx={{ fontSize: '0.68rem', fontWeight: 600, color: '#71717A', lineHeight: 1 }}>
+                <Typography sx={{ fontSize: '0.68rem', fontWeight: 600, color: 'text.secondary', lineHeight: 1 }}>
                   {row.label}
                 </Typography>
                 <Typography sx={{ fontSize: '0.875rem', color: 'text.primary', mt: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -305,7 +309,7 @@ export default function PerfilPage() {
         </Box>
 
         {/* ── Mis Tareas ── */}
-        <Box sx={{ mb: 2, borderRadius: '16px', background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+        <Box sx={{ mb: 2, borderRadius: 4, bgcolor: 'background.paper', border: (t) => `1px solid ${t.palette.divider}`, overflow: 'hidden' }}>
           <Accordion
             elevation={0}
             sx={{
@@ -316,10 +320,10 @@ export default function PerfilPage() {
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreRoundedIcon sx={{ color: '#BEF264', fontSize: 20 }} />}
+              expandIcon={<ExpandMoreRoundedIcon sx={{ color: 'primary.main', fontSize: 20 }} />}
               sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.25 } }}
             >
-              <AssignmentRoundedIcon sx={{ fontSize: 20, color: '#BEF264' }} />
+              <AssignmentRoundedIcon sx={{ fontSize: 20, color: 'primary.main' }} />
               <Typography sx={{
                 fontWeight: 700, fontSize: '0.95rem',
                 fontFamily: 'var(--font-bricolage,"Bricolage Grotesque",Inter,sans-serif)',
@@ -338,7 +342,7 @@ export default function PerfilPage() {
 
         {/* ── Admin panel ── */}
         {isAdmin && (
-          <Box sx={{ mb: 2, borderRadius: '16px', background: 'rgba(217,70,239,0.08)', border: '1px solid rgba(217,70,239,0.25)', overflow: 'hidden' }}>
+          <Box sx={{ mb: 2, borderRadius: 4, bgcolor: (t) => `${t.palette.secondary.main}14`, border: (t) => `1px solid ${t.palette.secondary.main}3F`, overflow: 'hidden' }}>
             <Accordion
               elevation={0}
               sx={{
@@ -349,19 +353,19 @@ export default function PerfilPage() {
               }}
             >
               <AccordionSummary
-                expandIcon={<ExpandMoreRoundedIcon sx={{ color: '#F0ABFC', fontSize: 20 }} />}
+                expandIcon={<ExpandMoreRoundedIcon sx={{ color: 'secondary.light', fontSize: 20 }} />}
                 sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.25 } }}
               >
-                <AdminPanelSettingsRoundedIcon sx={{ fontSize: 20, color: '#F0ABFC' }} />
+                <AdminPanelSettingsRoundedIcon sx={{ fontSize: 20, color: 'secondary.light' }} />
                 <Typography sx={{
-                  fontWeight: 700, fontSize: '0.95rem', color: '#F0ABFC',
+                  fontWeight: 700, fontSize: '0.95rem', color: 'secondary.light',
                   fontFamily: 'var(--font-bricolage,"Bricolage Grotesque",Inter,sans-serif)',
                 }}>
                   Panel de Administración
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0 }}>
-                <Typography variant="body2" sx={{ mb: 2, color: '#E8DEF8', opacity: 0.8 }}>
+                <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
                   Accede a las herramientas de gestión de usuarios y tareas administrativas.
                 </Typography>
                 <TaskManager />
@@ -377,10 +381,10 @@ export default function PerfilPage() {
             onClick={() => setReviewOpen(true)}
             sx={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
-              height: 40, px: 2, borderRadius: '20px', cursor: 'pointer',
-              background: 'rgba(190,242,100,0.10)', border: '1px solid rgba(190,242,100,0.25)',
-              fontSize: '0.82rem', fontWeight: 700, color: '#BEF264',
-              transition: 'all 150ms', '&:hover': { background: 'rgba(190,242,100,0.18)' },
+              height: 40, px: 2, borderRadius: 5, cursor: 'pointer',
+              bgcolor: (t) => `${t.palette.primary.main}1A`, border: (t) => `1px solid ${t.palette.primary.main}3F`,
+              fontSize: '0.82rem', fontWeight: 700, color: 'primary.main',
+              transition: 'all 150ms', '&:hover': { bgcolor: (t) => `${t.palette.primary.main}2E` },
             }}
           >
             <StarRoundedIcon sx={{ fontSize: 17 }} />
@@ -391,10 +395,10 @@ export default function PerfilPage() {
             onClick={handleLogout}
             sx={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
-              height: 40, px: 2, borderRadius: '20px', cursor: 'pointer',
-              background: 'transparent', border: '1px solid rgba(255,255,255,0.14)',
-              fontSize: '0.82rem', fontWeight: 700, color: '#A1A1AA',
-              transition: 'all 150ms', '&:hover': { borderColor: '#EF4444', color: '#FCA5A5', background: 'rgba(239,68,68,0.08)' },
+              height: 40, px: 2, borderRadius: 5, cursor: 'pointer',
+              bgcolor: 'transparent', border: (t) => `1px solid ${t.palette.divider}`,
+              fontSize: '0.82rem', fontWeight: 700, color: 'text.secondary',
+              transition: 'all 150ms', '&:hover': { borderColor: 'error.main', color: 'error.light', bgcolor: (t) => `${t.palette.error.main}14` },
             }}
           >
             <LogoutRoundedIcon sx={{ fontSize: 17 }} />
@@ -404,13 +408,13 @@ export default function PerfilPage() {
 
         {/* ── Danger zone ── */}
         <Box sx={{
-          mt: 3, p: '18px 20px', borderRadius: '16px',
-          background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.22)',
+          mt: 3, p: '18px 20px', borderRadius: 4,
+          bgcolor: (t) => `${t.palette.error.main}0D`, border: (t) => `1px solid ${t.palette.error.main}38`,
         }}>
-          <Typography sx={{ fontWeight: 700, color: '#FCA5A5', mb: 0.5, fontSize: '0.9rem' }}>
+          <Typography sx={{ fontWeight: 700, color: 'error.light', mb: 0.5, fontSize: '0.9rem' }}>
             Zona de peligro
           </Typography>
-          <Typography sx={{ fontSize: '0.8rem', color: '#71717A', mb: 2, lineHeight: 1.5 }}>
+          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 2, lineHeight: 1.5 }}>
             Una vez que elimines tu cuenta no hay vuelta atrás. Esta acción es permanente.
           </Typography>
           <Box
@@ -418,10 +422,10 @@ export default function PerfilPage() {
             onClick={() => setDeleteAccountOpen(true)}
             sx={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
-              height: 36, px: 2, borderRadius: '18px', cursor: 'pointer',
-              background: 'transparent', border: '1px solid rgba(239,68,68,0.4)',
-              fontSize: '0.8rem', fontWeight: 700, color: '#FCA5A5',
-              transition: 'all 150ms', '&:hover': { background: 'rgba(239,68,68,0.15)', borderColor: '#EF4444' },
+              height: 36, px: 2, borderRadius: 4.5, cursor: 'pointer',
+              bgcolor: 'transparent', border: (t) => `1px solid ${t.palette.error.main}66`,
+              fontSize: '0.8rem', fontWeight: 700, color: 'error.light',
+              transition: 'all 150ms', '&:hover': { bgcolor: (t) => `${t.palette.error.main}26`, borderColor: 'error.main' },
             }}
           >
             Eliminar mi cuenta permanentemente

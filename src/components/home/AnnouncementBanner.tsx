@@ -218,12 +218,12 @@ export default function AnnouncementBanner() {
                 padding: '6px 16px',
                 borderRadius: 24,
                 cursor: 'pointer',
-                backgroundColor: 'rgba(0,0,0,0.04)',
+                backgroundColor: 'rgba(255,255,255,0.08)',
                 marginLeft: 12,
                 transition: 'background 0.2s',
               }}
-              onMouseOver={e => (e.currentTarget.style.backgroundColor = '#e0e0e0')}
-              onMouseOut={e => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)')}
+              onMouseOver={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.16)')}
+              onMouseOut={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)')}
             >
               Cerrar
             </button>
