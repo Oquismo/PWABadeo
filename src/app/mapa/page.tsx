@@ -6,10 +6,11 @@ import { useTranslation } from '@/hooks/useTranslation';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import GeolocalizacionDemo from '@/components/GeolocalizacionDemo';
 import dynamic from 'next/dynamic';
-import RoutePlanner from '@/components/mapa/RoutePlanner';
 import ListIcon from '@mui/icons-material/List';
 import CloseIcon from '@mui/icons-material/Close';
-import PlacesListSection from '@/components/mapa/PlacesListSection';
+
+const RoutePlanner = dynamic(() => import('@/components/mapa/RoutePlanner'), { ssr: false });
+const PlacesListSection = dynamic(() => import('@/components/mapa/PlacesListSection'), { ssr: false });
 import { Place } from '@/data/places';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded';

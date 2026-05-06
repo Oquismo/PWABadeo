@@ -16,12 +16,9 @@ import {
 import Tooltip from '@mui/material/Tooltip';
 import M3Button from '@/components/ui/M3Button';
 import Material3ElevatedCard from '@/components/ui/Material3ElevatedCard';
-import ReviewDialog from '@/components/perfil/ReviewDialog';
-import DeleteAccountDialog from '@/components/perfil/DeleteAccountDialog';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
-import NotificationsPanel from '@/components/home/NotificationsPanel';
 import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import CakeRoundedIcon from '@mui/icons-material/CakeRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
@@ -38,7 +35,12 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import Link from 'next/link';
 import loggerClient from '@/lib/loggerClient';
-import TaskManager from '@/components/admin/TaskManager';
+import dynamic from 'next/dynamic';
+
+const ReviewDialog = dynamic(() => import('@/components/perfil/ReviewDialog'), { ssr: false });
+const DeleteAccountDialog = dynamic(() => import('@/components/perfil/DeleteAccountDialog'), { ssr: false });
+const NotificationsPanel = dynamic(() => import('@/components/home/NotificationsPanel'), { ssr: false });
+const TaskManager = dynamic(() => import('@/components/admin/TaskManager'), { ssr: false });
 
 export default function PerfilPage() {
   useEffect(() => {

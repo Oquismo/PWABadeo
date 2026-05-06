@@ -67,9 +67,12 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-1e54d6fe'], (function (workbox) { 'use strict';
+define(['./workbox-1a3b2097'], (function (workbox) { 'use strict';
 
-  importScripts("/fallback-development.js");
+  importScripts("/fallback-development.js", "/sw-push.js");
+  workbox.setCacheNameDetails({
+    prefix: "badeo-pwa"
+  });
   self.skipWaiting();
   workbox.clientsClaim();
 

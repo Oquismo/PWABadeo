@@ -163,11 +163,10 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       }
       loggerClient.debug('✅ usePushNotifications: Permisos concedidos');
 
-      loggerClient.debug('🔧 usePushNotifications: Registrando service worker...');
-      // Register service worker if not already registered
-      const registration = await navigator.serviceWorker.register('/service-worker.js');
-      await navigator.serviceWorker.ready;
-      loggerClient.debug('✅ usePushNotifications: Service worker registrado');
+      loggerClient.debug('🔧 usePushNotifications: Usando service worker existente...');
+      // Usar el service worker de next-pwa (sw.js) ya registrado
+      const registration = await navigator.serviceWorker.ready;
+      loggerClient.debug('✅ usePushNotifications: Service worker listo');
 
       loggerClient.debug('📡 usePushNotifications: Creando suscripción push...');
       // Subscribe to push notifications
@@ -296,24 +295,16 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     }
 
     try {
-      // Limpiar todos los service workers existentes primero
-      const existingRegistrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(
-        existingRegistrations.map(registration => {
-          loggerClient.debug('Unregistering existing service worker:', registration.scope);
-          return registration.unregister();
-        })
-      );
-
-      // Pequeña pausa para asegurar limpieza completa
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Registrar el nuevo service worker
-      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      // Registrar el service worker de next-pwa si aún no está registrado
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      const hasBadeoSW = registrations.some(r => r.scope.includes(location.origin));
+      if (!hasBadeoSW) {
+        await navigator.serviceWorker.register('/sw.js');
+      }
       await navigator.serviceWorker.ready;
-      loggerClient.info('Service worker registered successfully after cleanup');
+      loggerClient.info('Service worker registrado correctamente');
     } catch (err) {
-        loggerClient.error('Error registering service worker:', err);
+      loggerClient.error('Error registering service worker:', err);
       setError('Error registering service worker');
     }
   }, [isSupported]);

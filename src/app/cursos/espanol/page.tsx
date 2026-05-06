@@ -31,9 +31,11 @@ import {
   CloudQueue as CloudQueueIcon,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import QuizCard from '@/components/quiz/QuizCard';
-import LevelSelector from '@/components/levels/LevelSelector';
+import dynamic from 'next/dynamic';
 import { spanishLevels } from '@/data/quizzes/spanish-levels';
+
+const QuizCard = dynamic(() => import('@/components/quiz/QuizCard'), { ssr: false });
+const LevelSelector = dynamic(() => import('@/components/levels/LevelSelector'), { ssr: false });
 import { useProgression } from '@/hooks/useProgression';
 import { QuizResult } from '@/types/quiz.types';
 import { LevelCompletionResult } from '@/types/progression.types';

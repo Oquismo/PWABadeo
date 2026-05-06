@@ -5,7 +5,7 @@ const withPWA = withPWAInit({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: false, // ✅ HABILITADO SIEMPRE para que funcione en producción
+  disable: false,
   scope: '/',
   sw: 'sw.js',
   reloadOnOnline: true,
@@ -13,6 +13,11 @@ const withPWA = withPWAInit({
   aggressiveFrontEndNavCaching: true,
   fallbacks: {
     document: '/offline.html',
+  },
+  workboxOptions: {
+    importScripts: ['/sw-push.js'],
+    // Nunca cachear el service worker mismo
+    cacheId: 'badeo-pwa',
   },
 });
 
@@ -132,8 +137,20 @@ const nextConfigBase = {
     styledComponents: true,
   },
 
-  // Headers de performance
+  // Headers de performance y seguridad
   async headers() {
+    const cspHeader = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' blob: data: https:",
+      "font-src 'self'",
+      "connect-src 'self' https:",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ');
+
     return [
       {
         source: '/:path*',
@@ -156,7 +173,38 @@ const nextConfigBase = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin'
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader
+          }
+        ]
+      },
+      // Nunca cachear el service worker
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate'
+          }
+        ]
+      },
+      {
+        source: '/sw-push.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate'
           }
         ]
       },

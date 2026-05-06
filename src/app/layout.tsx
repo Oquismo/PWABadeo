@@ -1,204 +1,100 @@
-"use client";
-import { Inter } from 'next/font/google';
-import React, { useState, useEffect } from 'react';
-import './globals.css'; // 1. Importar el archivo de estilos globales
-import '@/styles/page-transitions.css'; // Estilos optimizados para transiciones
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
-import { AuthProvider } from '@/context/AuthContext';
-import { CustomThemeProvider } from '@/context/ThemeContext';
-import { SpotifyAuthProvider } from '@/context/SpotifyAuthContext';
-import { TasksProvider } from '@/context/TasksContext';
-import { LanguageProvider } from '@/hooks/useLanguage';
-import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import BottomNavBar from '@/components/layout/BottomNavBar';
-import PageTransition from '@/components/layout/PageTransition';
-import DebugInitializer from '@/components/debug/DebugInitializer';
-import AnnouncementBanner from '@/components/home/AnnouncementBanner';
-import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
-import { ConnectionMonitor } from '@/components/ConnectionMonitor';
-import WarmupInitializer from '../components/WarmupInitializer';
-import LanguageTest from '@/components/LanguageTest';
-import InitialLanguageDialog from '@/components/InitialLanguageDialog';
-import PullToRefreshPreventer from '@/components/layout/PullToRefreshPreventer';
-import StandaloneModeDetector from '@/components/layout/StandaloneModeDetector';
-import SplashScreen from '@/components/layout/SplashScreen';
-import ScrollProgress from '@/components/ui/ScrollProgress';
-import ClientTopBarWrapper from '@/components/layout/ClientTopBarWrapper';
+import type { Metadata, Viewport } from 'next';
+import { Inter, Bricolage_Grotesque } from 'next/font/google';
+import './globals.css';
+import '@/styles/page-transitions.css';
+import ClientLayout from '@/components/layout/ClientLayout';
 
-import { Bricolage_Grotesque } from 'next/font/google';
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const bricolage = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-bricolage', weight: ['400', '500', '600', '700', '800'] });
+const bricolage = Bricolage_Grotesque({
+  subsets: ['latin'],
+  variable: '--font-bricolage',
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Badeo — Barrio de Oportunidades',
+    template: '%s | Badeo',
+  },
+  description:
+    'App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades. Descubre Sevilla, gestiona tus tareas, conecta con la comunidad y vive tu experiencia al máximo.',
+  keywords: ['Erasmus', 'Sevilla', 'Barrio de Oportunidades', 'Badeo', 'estudiantes', 'app'],
+  authors: [{ name: 'Badeo Team' }],
+  creator: 'Badeo',
+  publisher: 'Badeo',
+  robots: 'index, follow',
+  openGraph: {
+    type: 'website',
+    locale: 'es_ES',
+    url: 'https://badeo.es',
+    siteName: 'Badeo',
+    title: 'Badeo — Barrio de Oportunidades',
+    description:
+      'App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.',
+    images: [
+      {
+        url: '/icons/icon_512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'Badeo App Icon',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Badeo — Barrio de Oportunidades',
+    description:
+      'App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.',
+    images: ['/icons/icon_512x512.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/icons/apple-touch-icon.png',
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'Badeo',
+    statusBarStyle: 'black-translucent',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'application-name': 'Badeo',
+    'msapplication-tap-highlight': 'no',
+    ' HandheldFriendly': 'true',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#18181B',
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode; 
+  children: React.ReactNode;
 }) {
-  // ...existing code...
-  // Diálogo de política de privacidad
-  const [showPrivacy, setShowPrivacy] = useState(false);
-
-  // Splash Screen
-  const [showSplash, setShowSplash] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const accepted = localStorage.getItem('privacyAccepted');
-      if (!accepted) setShowPrivacy(true);
-
-      // Mostrar splash screen solo en la primera carga (no cuando se reabre desde segundo plano)
-      const splashShown = sessionStorage.getItem('splashShown');
-      if (!splashShown) {
-        setShowSplash(true);
-        sessionStorage.setItem('splashShown', 'true');
-      }
-    }
-  }, []);
-
-  const handleAcceptPrivacy = () => {
-    localStorage.setItem('privacyAccepted', 'true');
-    setShowPrivacy(false);
-  };
-
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
-
   return (
-    <html lang="es" className={`${inter.variable} ${bricolage.variable} ${inter.className}`}>
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        
-        {/* PWA Configuration - STANDALONE MODE (con barra de estado del sistema) */}
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="Badeo" />
-        
-        {/* iOS Specific - Standalone con barra de estado */}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Badeo" />
-        
-        {/* Android Chrome - Standalone */}
-        <meta name="theme-color" content="#18181B" />
-        
-        {/* Viewport optimizado - Sin zoom pero con barra de estado */}
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-        
-        {/* Prevenir interfaz del NAVEGADOR (no del sistema) */}
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="HandheldFriendly" content="true" />
-        {/* 2. Hemos eliminado el bloque <style> de aquí */}
-      </head>
-      <body>
-        <AppRouterCacheProvider>
-          <LanguageProvider>
-            <AuthProvider> 
-              <CustomThemeProvider>
-                <TasksProvider>
-                  <SpotifyAuthProvider>
-                    <CssBaseline />
-
-                    {/* Splash Screen */}
-                    {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-
-                    {/* Dialogo inicial para elegir idioma (solo la primera vez) */}
-                    <InitialLanguageDialog />
-
-                    {/* Detector de modo standalone para PWA */}
-                    <StandaloneModeDetector />
-
-                    {/* <PullToRefreshPreventer /> */}
-                    <DebugInitializer />
-                    <WarmupInitializer />
-                  <ServiceWorkerProvider>
-                    <Box sx={{ 
-                      width: '100%',
-                      bgcolor: 'background.default',
-                      position: 'relative' // Asegurar contexto de posicionamiento
-                    }}>
-                      {/* Indicador superior de progreso de scroll */}
-                      <ScrollProgress />
-                      {/* Top app bar: mostrar en páginas distintas de la principal */}
-                      {/* Nota: usamos client side hook usePathname dentro de un componente cliente */}
-                      <ClientTopBarWrapper />
-                      {/* Diálogo de privacidad */}
-                      {showPrivacy && (
-                        <div style={{
-                          position: 'fixed',
-                          top: 0,
-                          left: 0,
-                          width: '100vw',
-                          height: '100vh',
-                          background: 'rgba(0,0,0,0.45)',
-                          zIndex: 9999,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}>
-                          <div style={{
-                            background: '#fff',
-                            borderRadius: 16,
-                            boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
-                            maxWidth: 420,
-                            padding: 32,
-                            textAlign: 'center',
-                            color: '#222',
-                          }}>
-                            <h2 style={{marginBottom: 16, color: '#222'}}>Política de Privacidad</h2>
-                            <div style={{maxHeight: 300, overflowY: 'auto', marginBottom: 16, textAlign: 'left', fontSize: '14px', color: '#444', lineHeight: 1.6}}>
-                              <p><strong>Información que recopilamos:</strong></p>
-                              <ul>
-                                <li>Datos de registro (nombre, correo electrónico, etc.)</li>
-                                <li>Información de uso y actividad dentro de la app</li>
-                                <li>Datos de ubicación (si el usuario lo permite)</li>
-                              </ul>
-                              <p><strong>Uso de la información:</strong></p>
-                              <ul>
-                                <li>Mejorar la experiencia y los servicios ofrecidos</li>
-                                <li>Personalizar el contenido y las notificaciones</li>
-                                <li>Contactar al usuario en caso necesario</li>
-                              </ul>
-                              <p><strong>Protección de datos:</strong> La información se almacena de forma segura y no se comparte con terceros salvo obligación legal o consentimiento explícito del usuario.</p>
-                              <p><strong>Contacto:</strong> Para cualquier duda escribir a info@badeo.es</p>
-                            </div>
-                            <button style={{
-                              background: '#1976d2',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 8,
-                              padding: '10px 28px',
-                              fontSize: '1rem',
-                              fontWeight: 500,
-                              cursor: 'pointer',
-                              marginTop: 8,
-                            }} onClick={handleAcceptPrivacy}>Aceptar y continuar</button>
-                          </div>
-                        </div>
-                      )}
-                      <Box component="main" sx={{ 
-                        pb: '90px',
-                        width: '100%',
-                        overflow: 'visible' // Permitir que el contenido fluya naturalmente
-                      }}>
-                        <PageTransition>
-                          {children}
-                        </PageTransition>
-                      </Box>
-
-                      <BottomNavBar />
-                      <ConnectionMonitor />
-
-                    </Box>
-                  </ServiceWorkerProvider>
-                </SpotifyAuthProvider>
-              </TasksProvider>
-            </CustomThemeProvider>
-          </AuthProvider>
-        </LanguageProvider>
-        </AppRouterCacheProvider>
+    <html lang="es" className={`${inter.variable} ${bricolage.variable}`}>
+      <body className={inter.className}>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
