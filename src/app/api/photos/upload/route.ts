@@ -31,10 +31,15 @@ export async function POST(req: NextRequest) {
       ],
     });
 
+    const thumbnailUrl = result.secure_url.replace(
+      '/upload/',
+      '/upload/c_fill,f_auto,h_400,q_auto:good,w_400/'
+    );
+
     const photo = await prisma.photo.create({
       data: {
         url: result.secure_url,
-        thumbnailUrl: result.secure_url,
+        thumbnailUrl,
         caption: caption || null,
         userId: user.id,
         width: result.width,

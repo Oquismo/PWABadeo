@@ -281,16 +281,13 @@ export default function AlbumPage() {
                     )}
 
                     {/* Image */}
-                    <Box
-                      component="img"
+                    <img
                       src={photo.thumbnailUrl || photo.url}
                       alt={photo.caption || ''}
-                      sx={{
+                      style={{
                         width: '100%',
                         display: 'block',
-                        aspectRatio: photo.width && photo.height
-                          ? `${photo.width} / ${photo.height}`
-                          : 'auto',
+                        objectFit: 'cover',
                       }}
                       loading="lazy"
                     />
@@ -373,15 +370,14 @@ export default function AlbumPage() {
                 </Button>
               </label>
               {selectedFile && (
-                <Box
-                  component="img"
+                <img
                   src={URL.createObjectURL(selectedFile)}
-                  sx={{
+                  style={{
                     width: '100%',
                     maxHeight: 200,
                     objectFit: 'contain',
-                    borderRadius: 2,
-                    mb: 2,
+                    borderRadius: '8px',
+                    marginBottom: '16px',
                   }}
                 />
               )}
@@ -473,15 +469,14 @@ export default function AlbumPage() {
                 p: 4,
               }}
             >
-              <Box
-                component="img"
+              <img
                 src={photos[lightboxIndex].url}
                 alt={photos[lightboxIndex].caption || ''}
-                sx={{
+                style={{
                   maxWidth: '100%',
                   maxHeight: '80vh',
                   objectFit: 'contain',
-                  borderRadius: 2,
+                  borderRadius: '8px',
                 }}
               />
               {photos[lightboxIndex].caption && (
