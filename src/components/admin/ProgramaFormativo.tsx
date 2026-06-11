@@ -18,7 +18,6 @@ import {
   ListItemText,
   ListItemIcon,
   Divider,
-  IconButton,
   TextField,
   InputAdornment,
   Tabs,
@@ -27,7 +26,6 @@ import {
 import {
   School as SchoolIcon,
   Sync as SyncIcon,
-  Event as EventIcon,
   LocationOn as LocationIcon,
   Person as PersonIcon,
   AccessTime as TimeIcon,
@@ -50,56 +48,41 @@ interface SchoolEvent {
   schoolId: number;
 }
 
-interface School {
-  id: number;
-  name: string;
+interface SchoolWithEvents {
+  school: { id: number; name: string };
   events: SchoolEvent[];
 }
 
 export default function ProgramaFormativo() {
-  const [schools, setSchools] = useState<School[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<SchoolWithEvents[]>([]);
+  const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('upcoming');
 
-  const loadEvents = async () => {
+  const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/admin/schools/sync-ics', { cache: 'no-store' });
       if (res.ok) {
-        const data = await res.json();
-        // Group events by school
-        const schoolMap = new Map<number, School>();
-        for (const school of data.results.schools) {
-          schoolMap.set(school.id, { id: school.id, name: school.name, events: [] });
-        }
-        // We need to fetch events separately
-        setSchools(Array.from(schoolMap.values()));
+        const json = await res.json();
+        setData(json.schools || []);
+      } else {
+        setError('Error al cargar datos');
       }
     } catch (err) {
-      setError('Error al cargar eventos');
+      setError('Error de conexión');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadSchoolEvents = async (schoolId: number) => {
-    try {
-      const res = await fetch(`/api/schools/${schoolId}/events`);
-      if (res.ok) {
-        const data = await res.json();
-        setSchools(prev =>
-          prev.map(s => (s.id === schoolId ? { ...s, events: data.events } : s))
-        );
-      }
-    } catch (err) {
-      console.error('Error loading school events:', err);
-    }
-  };
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -110,16 +93,16 @@ export default function ProgramaFormativo() {
         method: 'POST',
         credentials: 'include',
       });
-      const data = await res.json();
+      const json = await res.json();
 
       if (res.ok) {
+        const r = json.results;
         setSuccess(
-          `Sincronización completada: ${data.results.schoolsCreated} escuelas creadas, ${data.results.schoolsFound} encontradas, ${data.results.eventsCreated} eventos nuevos, ${data.results.eventsUpdated} actualizados`
+          `Sincronizado: ${r.schoolsCreated} escuelas nuevas, ${r.schoolsFound} existentes, ${r.eventsCreated} eventos creados, ${r.eventsUpdated} actualizados`
         );
-        // Reload schools list
-        loadEvents();
+        loadData();
       } else {
-        setError(data.error || 'Error al sincronizar');
+        setError(json.error || 'Error al sincronizar');
       }
     } catch (err) {
       setError('Error de conexión al sincronizar');
@@ -149,20 +132,25 @@ export default function ProgramaFormativo() {
     return new Date(dateStr) >= new Date();
   };
 
-  const filteredSchools = schools.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = data.filter(s =>
+    s.school.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedSchool = schools.find(s => s.id === selectedSchoolId);
+  const totalEvents = data.reduce((sum, s) => sum + s.events.length, 0);
 
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <SchoolIcon />
-          Programa Formativo
-        </Typography>
+        <Box>
+          <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SchoolIcon />
+            Programa Formativo
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {data.length} escuelas · {totalEvents} eventos
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           startIcon={syncing ? <CircularProgress size={20} color="inherit" /> : <SyncIcon />}
@@ -209,12 +197,12 @@ export default function ProgramaFormativo() {
         <Tab label="Pasados" value="past" />
       </Tabs>
 
-      {/* Schools list */}
+      {/* Content */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
         </Box>
-      ) : filteredSchools.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <Card sx={{ textAlign: 'center', py: 4 }}>
           <CardContent>
             <SchoolIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
@@ -228,45 +216,38 @@ export default function ProgramaFormativo() {
         </Card>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {filteredSchools.map((school) => (
-            <Accordion
-              key={school.id}
-              onChange={() => {
-                setSelectedSchoolId(selectedSchoolId === school.id ? null : school.id);
-                if (!school.events.length) {
-                  loadSchoolEvents(school.id);
-                }
-              }}
-            >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                  <SchoolIcon color="primary" />
-                  <Typography variant="subtitle1" fontWeight="medium">
-                    {school.name}
-                  </Typography>
-                  <Chip
-                    label={`${school.events.length} eventos`}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                    sx={{ ml: 'auto' }}
-                  />
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails>
-                {school.events.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                    Cargando eventos...
-                  </Typography>
-                ) : (
-                  <List dense>
-                    {school.events
-                      .filter(ev => {
-                        if (filter === 'upcoming') return isUpcoming(ev.date);
-                        if (filter === 'past') return !isUpcoming(ev.date);
-                        return true;
-                      })
-                      .map((event, idx) => (
+          {filtered.map((item) => {
+            const events = item.events.filter(ev => {
+              if (filter === 'upcoming') return isUpcoming(ev.date);
+              if (filter === 'past') return !isUpcoming(ev.date);
+              return true;
+            });
+
+            return (
+              <Accordion key={item.school.id}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                    <SchoolIcon color="primary" />
+                    <Typography variant="subtitle1" fontWeight="medium">
+                      {item.school.name}
+                    </Typography>
+                    <Chip
+                      label={`${events.length} eventos`}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      sx={{ ml: 'auto' }}
+                    />
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {events.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                      No hay eventos en este filtro
+                    </Typography>
+                  ) : (
+                    <List dense>
+                      {events.map((event, idx) => (
                         <Box key={event.id}>
                           <ListItem
                             sx={{
@@ -292,7 +273,7 @@ export default function ProgramaFormativo() {
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
                                   <Typography variant="caption" color="text.secondary">
                                     {formatDate(event.date)}
-                                    {!event.isAllDay && ` • ${formatTime(event.date)}`}
+                                    {!event.isAllDay && ` · ${formatTime(event.date)}`}
                                   </Typography>
                                   {event.location && (
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -317,14 +298,15 @@ export default function ProgramaFormativo() {
                               }
                             />
                           </ListItem>
-                          {idx < school.events.length - 1 && <Divider />}
+                          {idx < events.length - 1 && <Divider />}
                         </Box>
                       ))}
-                  </List>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          ))}
+                    </List>
+                  )}
+                </AccordionDetails>
+              </Accordion>
+            );
+          })}
         </Box>
       )}
     </Box>
