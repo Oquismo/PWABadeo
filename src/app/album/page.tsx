@@ -218,6 +218,22 @@ export default function AlbumPage() {
           </Card>
         </Box>
 
+        {/* Debug info - siempre visible */}
+        <Card sx={{ mb: 2, bgcolor: 'rgba(255,0,0,0.1)', border: '1px solid', borderColor: 'error.main' }}>
+          <CardContent>
+            <Typography variant="caption" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              DEBUG: loading={String(loading)} count={photos.length}{'\n'}
+              {photos.map(p => `[${p.id}] ${p.thumbnailUrl || p.url}`).join('\n')}
+            </Typography>
+            {/* Test image - hardcoded Cloudinary URL */}
+            <img
+              src="https://res.cloudinary.com/dxdifniem/image/upload/c_fill,f_auto,h_200,q_auto:good,w_200/v1781169470/badeo/album/gy4upqeucpdavmgbgmgj.jpg"
+              alt="test"
+              style={{ width: 100, height: 100, objectFit: 'cover', marginTop: 8, border: '2px solid lime' }}
+            />
+          </CardContent>
+        </Card>
+
         {/* Masonry Grid */}
         {loading ? (
           <Box sx={{ columns: { xs: 2, sm: 3, md: 4 }, columnGap: 2 }}>

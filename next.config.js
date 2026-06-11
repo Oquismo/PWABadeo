@@ -16,8 +16,29 @@ const withPWA = withPWAInit({
   },
   workboxOptions: {
     importScripts: ['/sw-push.js'],
-    // Nunca cachear el service worker mismo
     cacheId: 'badeo-pwa',
+    runtimeCaching: [
+      {
+        urlPattern: /^https?.*\/api\/.*/i,
+        method: 'GET',
+        handler: 'NetworkOnly',
+        options: {
+          cacheName: 'api-cache',
+          expiration: {
+            maxEntries: 0,
+            maxAgeSeconds: 0,
+          },
+        },
+      },
+      {
+        urlPattern: /^https?.*\/api\/.*/i,
+        method: 'POST',
+        handler: 'NetworkOnly',
+        options: {
+          cacheName: 'api-cache',
+        },
+      },
+    ],
   },
 });
 
