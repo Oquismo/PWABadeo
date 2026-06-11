@@ -19,6 +19,34 @@ const withPWA = withPWAInit({
     cacheId: 'badeo-pwa',
     runtimeCaching: [
       {
+        urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'cloudinary-images',
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
+        urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|gif|svg|webp|avif)$/i,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'external-images',
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 60 * 60 * 24 * 7,
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
         urlPattern: /^https?.*\/api\/.*/i,
         method: 'GET',
         handler: 'NetworkOnly',
