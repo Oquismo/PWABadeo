@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import {
   Box,
   Typography,
@@ -23,7 +24,6 @@ import {
   Close as CloseIcon,
   Delete as DeleteIcon,
   PhotoLibrary as PhotoIcon,
-  Fullscreen as FullscreenIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Refresh as RefreshIcon,
@@ -225,12 +225,6 @@ export default function AlbumPage() {
               DEBUG: loading={String(loading)} count={photos.length}{'\n'}
               {photos.map(p => `[${p.id}] ${p.thumbnailUrl || p.url}`).join('\n')}
             </Typography>
-            {/* Test image - hardcoded Cloudinary URL */}
-            <img
-              src="https://res.cloudinary.com/dxdifniem/image/upload/c_fill,f_auto,h_200,q_auto:good,w_200/v1781169470/badeo/album/gy4upqeucpdavmgbgmgj.jpg"
-              alt="test"
-              style={{ width: 100, height: 100, objectFit: 'cover', marginTop: 8, border: '2px solid lime' }}
-            />
           </CardContent>
         </Card>
 
@@ -310,16 +304,15 @@ export default function AlbumPage() {
                     )}
 
                     {/* Image */}
-                    <img
-                      src={photo.thumbnailUrl || photo.url}
-                      alt={photo.caption || ''}
-                      style={{
-                        width: '100%',
-                        display: 'block',
-                        objectFit: 'cover',
-                      }}
-                      loading="lazy"
-                    />
+                    <Box sx={{ position: 'relative', width: '100%', aspectRatio: photo.width && photo.height ? `${photo.width} / ${photo.height}` : '1 / 1' }}>
+                      <Image
+                        src={photo.thumbnailUrl || photo.url}
+                        alt={photo.caption || ''}
+                        fill
+                        sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </Box>
 
                     {/* Caption overlay */}
                     {photo.caption && (
@@ -399,16 +392,14 @@ export default function AlbumPage() {
                 </Button>
               </label>
               {selectedFile && (
-                <img
-                  src={URL.createObjectURL(selectedFile)}
-                  style={{
-                    width: '100%',
-                    maxHeight: 200,
-                    objectFit: 'contain',
-                    borderRadius: '8px',
-                    marginBottom: '16px',
-                  }}
-                />
+                <Box sx={{ position: 'relative', width: '100%', height: 200, mb: 2 }}>
+                  <Image
+                    src={URL.createObjectURL(selectedFile)}
+                    alt="preview"
+                    fill
+                    style={{ objectFit: 'contain', borderRadius: '8px' }}
+                  />
+                </Box>
               )}
               <TextField
                 label="Descripción (opcional)"
@@ -498,16 +489,16 @@ export default function AlbumPage() {
                 p: 4,
               }}
             >
-              <img
-                src={photos[lightboxIndex].url}
-                alt={photos[lightboxIndex].caption || ''}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '80vh',
-                  objectFit: 'contain',
-                  borderRadius: '8px',
-                }}
-              />
+              <Box sx={{ position: 'relative', maxWidth: '100%', maxHeight: '80vh', width: '100%', height: '80vh' }}>
+                <Image
+                  src={photos[lightboxIndex].url}
+                  alt={photos[lightboxIndex].caption || ''}
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  sizes="100vw"
+                  priority
+                />
+              </Box>
               {photos[lightboxIndex].caption && (
                 <Typography
                   variant="h6"
