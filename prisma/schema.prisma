@@ -72,6 +72,8 @@ model School {
   tasks       Task[]   @relation("SchoolTasks")
   // Relación con preguntas de la comunidad
   questions   CommunityQuestion[]
+  // Relación con eventos del programa formativo
+  events      SchoolEvent[]
   
   @@index([name])
   @@index([city])
@@ -285,4 +287,28 @@ model Photo {
   @@index([albumId])
   @@index([createdAt])
   @@index([order])
+}
+
+// Eventos del programa formativo (importados desde ICS Teamup)
+model SchoolEvent {
+  id          Int      @id @default(autoincrement())
+  uid         String   @unique // UID del evento en Teamup (para evitar duplicados)
+  title       String   // Título del evento (del ICS SUMMARY)
+  description String?  // Descripción detallada
+  date        DateTime // Fecha y hora de inicio
+  endDate     DateTime // Fecha y hora de fin
+  location    String?  // Ubicación (aula, etc.)
+  category    String?  // Categoría de Teamup (coordinador responsable)
+  who         String?  // Responsable asignado
+  isAllDay    Boolean  @default(false) // Evento de todo el día
+  rawSummary  String?  // Resumen original del ICS para referencia
+  schoolId    Int
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([schoolId])
+  @@index([date])
+  @@index([category])
+  @@index([uid])
 }

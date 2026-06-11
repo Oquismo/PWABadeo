@@ -33,6 +33,7 @@ import UserManagement from '@/components/admin/UserManagement';
 import LogViewer from '@/components/admin/LogViewer';
 import AnnouncementManager from '@/components/admin/AnnouncementManager';
 import SchoolManagement from '@/components/admin/SchoolManagement';
+import ProgramaFormativo from '@/components/admin/ProgramaFormativo';
 import AdminDevTools from '@/components/admin/AdminDevTools';
 import AuthDebugPanel from '@/components/admin/AuthDebugPanel';
 
@@ -73,6 +74,7 @@ export default function AdminPage() {
     { label: 'Logs', icon: <ArticleIcon />, component: <LogViewer /> },
     { label: 'Anuncios', icon: <CampaignIcon />, component: <AnnouncementManager /> },
     { label: 'Escuelas', icon: <SchoolIcon />, component: <SchoolManagement /> },
+    { label: 'Programa', icon: <EventIcon />, component: <ProgramaFormativo /> },
     { label: 'Dev Tools', icon: <BuildIcon />, component: <AdminDevTools /> },
     { label: 'Auth Debug', icon: <BugReportIcon />, component: <AuthDebugPanel /> },
   ];
