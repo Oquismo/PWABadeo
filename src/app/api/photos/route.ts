@@ -5,17 +5,19 @@ import { authMiddleware } from '@/lib/auth';
 export async function GET(req: NextRequest) {
   try {
     const user = await authMiddleware(req);
-    if (!user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
+    console.log('[GET /api/photos] user:', user?.id || 'anonymous');
+
+    const where = user
+      ? {
+          OR: [
+            { userId: user.id },
+            { isPublic: true },
+          ],
+        }
+      : { isPublic: true };
 
     const photos = await prisma.photo.findMany({
-      where: {
-        OR: [
-          { userId: user.id },
-          { isPublic: true },
-        ],
-      },
+      where,
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
@@ -29,6 +31,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    console.log('[GET /api/photos] returning', photos.length, 'photos');
     return NextResponse.json({ photos });
   } catch (error) {
     console.error('Error fetching photos:', error);
