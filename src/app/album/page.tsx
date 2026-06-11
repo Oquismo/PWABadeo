@@ -74,10 +74,13 @@ export default function AlbumPage() {
 
   const fetchPhotos = async () => {
     try {
-      const res = await fetch('/api/photos');
+      const res = await fetch('/api/photos', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
+        console.log('Fetched photos:', data.photos?.length);
         setPhotos(data.photos);
+      } else {
+        console.error('Fetch photos failed, status:', res.status);
       }
     } catch (error) {
       console.error('Error fetching photos:', error);
@@ -109,7 +112,8 @@ export default function AlbumPage() {
 
       if (res.ok) {
         const data = await res.json();
-        setPhotos([data.photo, ...photos]);
+        console.log('Upload success, photo:', data.photo?.id, data.photo?.url);
+        fetchPhotos();
         setOpenUploadDialog(false);
         setSelectedFile(null);
         setCaption('');

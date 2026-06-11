@@ -34,13 +34,7 @@ export async function POST(req: NextRequest) {
     const photo = await prisma.photo.create({
       data: {
         url: result.secure_url,
-        thumbnailUrl: cloudinary.url(result.public_id, {
-          width: 400,
-          height: 400,
-          crop: 'fill',
-          quality: 'auto:good',
-          fetch_format: 'auto',
-        }),
+        thumbnailUrl: result.secure_url,
         caption: caption || null,
         userId: user.id,
         width: result.width,
