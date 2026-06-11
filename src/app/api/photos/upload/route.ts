@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    console.log('[POST /api/photos/upload] user:', user.id);
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const caption = formData.get('caption') as string | null;
@@ -30,6 +32,8 @@ export async function POST(req: NextRequest) {
         { quality: 'auto:good', fetch_format: 'auto' },
       ],
     });
+
+    console.log('[POST /api/photos/upload] cloudinary result:', result.secure_url);
 
     const thumbnailUrl = result.secure_url.replace(
       '/upload/',

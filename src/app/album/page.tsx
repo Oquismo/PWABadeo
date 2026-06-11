@@ -26,6 +26,7 @@ import {
   Fullscreen as FullscreenIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/layout/PageTransition';
@@ -74,14 +75,17 @@ export default function AlbumPage() {
 
   const fetchPhotos = async () => {
     try {
-      const res = await fetch('/api/photos', { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        console.log('Fetched photos:', data.photos?.length);
-        setPhotos(data.photos);
-      } else {
-        console.error('Fetch photos failed, status:', res.status);
+      const res = await fetch(`/api/photos?t=${Date.now()}`, {
+        cache: 'no-store',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('Fetch photos failed:', data.error, 'status:', res.status);
+        return;
       }
+      console.log('Fetched photos:', data.photos?.length, data.photos);
+      setPhotos(data.photos);
     } catch (error) {
       console.error('Error fetching photos:', error);
     } finally {
@@ -107,6 +111,7 @@ export default function AlbumPage() {
 
       const res = await fetch('/api/photos/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
 
@@ -117,6 +122,9 @@ export default function AlbumPage() {
         setOpenUploadDialog(false);
         setSelectedFile(null);
         setCaption('');
+      } else {
+        const errorData = await res.json();
+        console.error('Upload failed:', errorData.error, 'status:', res.status);
       }
     } catch (error) {
       console.error('Error uploading photo:', error);
@@ -168,18 +176,23 @@ export default function AlbumPage() {
     <PageTransition>
       <Box sx={{ p: 2, maxWidth: 1200, mx: 'auto', pb: 10 }}>
         {/* Header */}
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h4"
-            fontWeight={800}
-            gutterBottom
-            sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' }}
-          >
-            Álbum de Fotos
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Comparte tus mejores momentos con la comunidad
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Box>
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              gutterBottom
+              sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' }}
+            >
+              Álbum de Fotos
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Comparte tus mejores momentos con la comunidad
+            </Typography>
+          </Box>
+          <IconButton onClick={fetchPhotos} sx={{ color: 'text.secondary' }}>
+            <RefreshIcon />
+          </IconButton>
         </Box>
 
         {/* Stats */}
