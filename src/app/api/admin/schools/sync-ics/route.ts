@@ -1,11 +1,39 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { parseICS, extractSchoolName } from '@/lib/ics-parser';
+import { parseICS } from '@/lib/ics-parser';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const ICS_URL = 'https://ics.teamup.com/feed/ksampdkmv21a529vhx/0.ics';
+
+// Fuzzy match: find school in DB by checking if names share key words
+function findSchoolInDB(schoolName: string, allSchools: any[]): any {
+  const target = schoolName.toLowerCase();
+
+  // Exact match first
+  const exact = allSchools.find((s: any) => s.name.toLowerCase() === target);
+  if (exact) return exact;
+
+  // Check if target contains DB school name or vice versa
+  const contains = allSchools.find((s: any) => {
+    const dbName = s.name.toLowerCase();
+    return target.includes(dbName) || dbName.includes(target);
+  });
+  if (contains) return contains;
+
+  // Check by first significant word
+  const targetWords = target.split(/\s+/).filter(w => w.length > 2);
+  if (targetWords.length > 0) {
+    const byWord = allSchools.find((s: any) => {
+      const dbName = s.name.toLowerCase();
+      return dbName.includes(targetWords[0]);
+    });
+    if (byWord) return byWord;
+  }
+
+  return null;
+}
 
 export async function POST(request: Request) {
   try {
@@ -20,10 +48,6 @@ export async function POST(request: Request) {
       user = JSON.parse(decodeURIComponent(userData));
     } catch {
       return NextResponse.json({ error: 'Datos de usuario inválidos' }, { status: 401 });
-    }
-
-    if (user.role !== 'admin' && !user.schoolId) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     // Fetch ICS
@@ -43,37 +67,34 @@ export async function POST(request: Request) {
     const parsedEvents = parseICS(icsContent);
     console.log(`[sync-ics] Parsed ${parsedEvents.length} school events`);
 
+    // Get all existing schools
+    const allSchools = await (prisma as any).school.findMany();
+    console.log(`[sync-ics] Found ${allSchools.length} schools in DB`);
+
     // Group events by school name
     const eventsBySchool = new Map<string, typeof parsedEvents>();
     for (const event of parsedEvents) {
-      if (!eventsBySchool.has(event.rawIcsName)) {
-        eventsBySchool.set(event.rawIcsName, []);
+      if (!eventsBySchool.has(event.schoolName)) {
+        eventsBySchool.set(event.schoolName, []);
       }
-      eventsBySchool.get(event.rawIcsName)!.push(event);
+      eventsBySchool.get(event.schoolName)!.push(event);
     }
 
-    console.log(`[sync-ics] Found ${eventsBySchool.size} unique schools`);
+    console.log(`[sync-ics] ${eventsBySchool.size} unique schools in ICS`);
 
     const results = {
       schoolsCreated: 0,
       schoolsFound: 0,
       eventsCreated: 0,
       eventsUpdated: 0,
-      eventsSkipped: 0,
-      schools: [] as Array<{ name: string; id: number; eventCount: number }>,
+      schools: [] as Array<{ name: string; dbId: number | null; eventCount: number }>,
+      unmatched: [] as string[],
     };
 
     // Process each school
     for (const [schoolName, events] of eventsBySchool) {
-      // Find or create school
-      let school = await (prisma as any).school.findFirst({
-        where: {
-          OR: [
-            { name: { contains: schoolName, mode: 'insensitive' } },
-            { name: { startsWith: schoolName.split(' ')[0], mode: 'insensitive' } },
-          ],
-        },
-      });
+      // Find matching school in DB
+      let school = findSchoolInDB(schoolName, allSchools);
 
       if (!school) {
         // Create school with minimal info
@@ -86,11 +107,12 @@ export async function POST(request: Request) {
             description: `Escuela importada desde calendario Teamup (${events.length} eventos)`,
           },
         });
+        allSchools.push(school);
         results.schoolsCreated++;
         console.log(`[sync-ics] Created school: ${schoolName}`);
       } else {
         results.schoolsFound++;
-        console.log(`[sync-ics] Found school: ${school.name} (ICS: ${schoolName})`);
+        console.log(`[sync-ics] Matched "${schoolName}" -> DB: "${school.name}"`);
       }
 
       // Process events for this school
@@ -131,8 +153,8 @@ export async function POST(request: Request) {
       }
 
       results.schools.push({
-        name: school.name,
-        id: school.id,
+        name: schoolName,
+        dbId: school.id,
         eventCount: events.length,
       });
     }
@@ -152,7 +174,6 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    // Get all school events grouped by school
     const events = await (prisma as any).schoolEvent.findMany({
       include: {
         school: {

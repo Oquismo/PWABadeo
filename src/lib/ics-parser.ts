@@ -1,5 +1,5 @@
 // ICS Parser for Teamup calendar
-// Parses the DIDATTICA calendar and maps events to schools
+// Maps ICS event summaries to real schools in the database
 
 export interface ParsedEvent {
   uid: string;
@@ -11,288 +11,390 @@ export interface ParsedEvent {
   dtEnd: Date;
   isAllDay: boolean;
   who: string | null;
-  rawIcsName: string; // The school name as it appears in ICS
+  schoolName: string; // Canonical school name
 }
 
-// Mapping: ICS school name patterns -> canonical school name
-// Keys are lowercase patterns to match against the event summary
-// The first match wins, so put more specific patterns first
-export const SCHOOL_NAME_MAP: Array<{ pattern: string; canonicalName: string }> = [
-  // Multi-school events (will be assigned to first school)
-  { pattern: 'giovanni cena', canonicalName: 'Giovanni Cena' },
-  { pattern: 'gobetti', canonicalName: 'Maristas Gobetti' },
-  { pattern: 'de filippo', canonicalName: 'Maristas Gobetti' },
-  
+// Each entry: [pattern to match in summary (lowercase), canonical school name]
+// Order matters: more specific patterns first
+const SCHOOL_MAP: Array<[string, string]> = [
+  // Multi-school events - match the first school
+  ['giovanni cena', 'Giovanni Cena'],
+  ['gobetti', 'Maristas Gobetti'],
+  ['de filippo', 'Maristas Gobetti'],
+  ['maristas gobetti', 'Maristas Gobetti'],
+
   // Individual schools
-  { pattern: 'matera adu', canonicalName: 'Matera ADU' },
-  { pattern: 'mater adu', canonicalName: 'Matera ADU' },
-  { pattern: 'matera quota', canonicalName: 'Matera ADU' },
-  { pattern: 'mater quota', canonicalName: 'Matera ADU' },
-  { pattern: 'piazz[a]', canonicalName: 'Matera ADU - Piazza' },
-  { pattern: 'pacioli', canonicalName: 'IIS Pacioli' },
-  { pattern: 'ferrara', canonicalName: 'Matera ADU - Ferrara' },
-  
-  { pattern: 'barsanti', canonicalName: 'Barsanti' },
-  
-  { pattern: 'minzoni', canonicalName: 'Minzoni' },
-  
-  { pattern: 'volta di aversa', canonicalName: 'IS Volta di Aversa' },
-  { pattern: 'volta aversa', canonicalName: 'IS Volta di Aversa' },
-  
-  { pattern: 'amari mercuri', canonicalName: 'Amari Mercuri' },
-  
-  { pattern: 'marconi di torre', canonicalName: 'Marconi di Torre Annunziata' },
-  { pattern: 'marconi torre', canonicalName: 'Marconi di Torre Annunziata' },
-  
-  { pattern: 'lombardo radice', canonicalName: 'IISS Lombardo Radice' },
-  
-  { pattern: 'imbriani', canonicalName: 'Imbriani' },
-  
-  { pattern: 'nitti', canonicalName: 'Nitti' },
-  
-  { pattern: 'cuoco campanella', canonicalName: 'Liceo Cuoco Campanella' },
-  
-  { pattern: 'liceo segre', canonicalName: 'Liceo Segre' },
-  { pattern: 'segre', canonicalName: 'Liceo Segre' },
-  
-  { pattern: 'galvani', canonicalName: 'ITIS Galvani' },
-  
-  { pattern: 'duca di buonvicino', canonicalName: 'Duca di Buonvicino' },
-  
-  { pattern: 'de gasperi', canonicalName: 'De Gasperi' },
-  
-  { pattern: 'forio', canonicalName: 'IC Forio' },
-  
-  { pattern: 'tassinari', canonicalName: 'Tassinari' },
-  
-  { pattern: 'moscati', canonicalName: 'Liceo Moscati' },
-  
-  { pattern: 'ruggiero caserta', canonicalName: 'Ruggiero di Caserta' },
-  { pattern: 'ruggieri caserta', canonicalName: 'Ruggiero di Caserta' },
-  
-  { pattern: "d'este", canonicalName: "D'Este" },
-  { pattern: 'deste', canonicalName: "D'Este" },
-  
-  { pattern: 'villari', canonicalName: 'Liceo Villari' },
-  
-  { pattern: 'pascoli', canonicalName: 'Pascoli' },
-  
-  { pattern: 'ferrari', canonicalName: 'Ferrari' },
-  
-  { pattern: 'medi', canonicalName: 'Liceo Medi' },
-  
-  { pattern: 'filangieri', canonicalName: 'Filangieri' },
-  
-  { pattern: 'marea', canonicalName: 'Marea' },
-  
-  { pattern: 'dalla chiesa', canonicalName: 'IS Dalla Chiesa' },
-  
-  { pattern: 'pisco[po]', canonicalName: 'Piscopo' },
-  
-  { pattern: 'polizzi generosa', canonicalName: 'Polizzi Generosa' },
-  
-  { pattern: 'marie curie', canonicalName: 'Marie Curie' },
-  
-  { pattern: 'marconi giugliano', canonicalName: 'IS Marconi Giugliano' },
-  
-  { pattern: 'archime[de]', canonicalName: 'Archimede' },
-  
-  { pattern: 'sereni', canonicalName: 'Sereni' },
-  
-  { pattern: 'manzi maffucci', canonicalName: 'IS Manzi-Maffucci' },
-  
-  { pattern: 'san giorgio', canonicalName: 'Istituto Paritario San Giorgio' },
-  
-  { pattern: 'vittorio veneto', canonicalName: 'IS Vittorio Veneto' },
-  
-  { pattern: 'prosit', canonicalName: 'Prosit' },
-  
-  { pattern: 'sinergie', canonicalName: 'Sinergie' },
-  
-  { pattern: 'cicero[ne]', canonicalName: 'IIS Cicerone' },
-  
-  { pattern: 'dall[a] chiesa', canonicalName: 'IS Dalla Chiesa' },
-  
-  { pattern: 'colletta', canonicalName: 'Colletta' },
-  
-  { pattern: 'ceschelli', canonicalName: 'IC Ceschelli' },
-  
-  { pattern: 'caboto', canonicalName: 'Caboto' },
-  
-  { pattern: 'bernini', canonicalName: 'Bernini De Sanctis' },
-  
-  { pattern: 'carinola', canonicalName: 'Carinola' },
-  
-  { pattern: 'hadjidimovo', canonicalName: 'Hadjidimovo' },
-  
-  { pattern: 'comenio', canonicalName: 'Liceo Comenio' },
-  
-  { pattern: 'mantegna', canonicalName: 'Mantegna' },
-  
-  { pattern: 'nicolai', canonicalName: 'IC Nicolai' },
-  
-  { pattern: 'san nicola la strada', canonicalName: 'IC San Nicola La Strada' },
-  
-  { pattern: 'cappell', canonicalName: 'Liceo Chris Cappell' },
-  { pattern: 'chris cappell', canonicalName: 'Liceo Chris Cappell' },
-  
-  { pattern: 'mercato san severino', canonicalName: 'Mercato San Severino' },
-  
-  { pattern: "d'auria nosengo", canonicalName: "D'Auria Nosengo" },
-  { pattern: 'dauria nosengo', canonicalName: "D'Auria Nosengo" },
-  
-  { pattern: 'russolillo', canonicalName: 'Russolillo' },
-  
-  { pattern: 'della porta porzio', canonicalName: 'Della Porta Porzio' },
-  
-  { pattern: 'don milani', canonicalName: 'Don Milani' },
-  
-  { pattern: 'san isidoro', canonicalName: 'Don Milani San Isidoro' },
-  
-  { pattern: 'hypinia', canonicalName: 'Hyrpinia Lab' },
-  { pattern: 'hirpinia', canonicalName: 'Hyrpinia Lab' },
-  
-  { pattern: 'de caro', canonicalName: 'De Caro' },
-  
-  { pattern: 'azuni', canonicalName: 'Azuni' },
-  
-  { pattern: 'merco[gl]iano', canonicalName: 'Mercogliano Guadagni' },
-  { pattern: 'guadagni', canonicalName: 'Mercogliano Guadagni' },
-  
-  { pattern: 'castellana sicula', canonicalName: 'IC Castellana Sicula' },
-  { pattern: 'castellana polizzi', canonicalName: 'IC Castellana Polizzi' },
-  
-  { pattern: 'panzini', canonicalName: 'IC Panzini' },
-  
-  { pattern: 'marista gobetti', canonicalName: 'Maristas Gobetti' },
-  { pattern: 'maristas gobetti', canonicalName: 'Maristas Gobetti' },
-  
-  { pattern: 'hispalis', canonicalName: 'IES Hispalis' },
-  
-  { pattern: 'pablo de la torre', canonicalName: 'Pablo de la Torre' },
-  
-  { pattern: 'cpia ragusa', canonicalName: 'CPIA Ragusa' },
-  
-  { pattern: 'de petra', canonicalName: 'IC De Petra' },
-  
-  { pattern: 'samokov', canonicalName: 'Samokov' },
-  { pattern: 'fakali', canonicalName: 'Fakali' },
-  
-  { pattern: 'michelangelo augusto', canonicalName: 'Michelangelo Augusto' },
-  
-  { pattern: 'vanoni', canonicalName: 'Ezio Vanoni' },
-  
-  { pattern: 'case[ll]i', canonicalName: 'Caselli' },
-  
-  { pattern: 'cavalcanti', canonicalName: 'Cavalcanti' },
-  
-  { pattern: 'elen[a] di savoia', canonicalName: 'Elena di Savoia' },
-  { pattern: 'savoia', canonicalName: 'Elena di Savoia' },
-  
-  { pattern: 'marconi vet', canonicalName: 'Marconi VET' },
-  
-  { pattern: 'ipf civita', canonicalName: 'IPF Civita' },
-  
-  { pattern: 'galiani', canonicalName: 'Galiani Da Vinci' },
-  { pattern: 'galiani da vinci', canonicalName: 'Galiani Da Vinci' },
-  
-  { pattern: 'marconi di torre annunziata', canonicalName: 'Marconi di Torre Annunziata' },
-  
-  { pattern: 'marcon[i]', canonicalName: 'Marconi' },
-  
-  { pattern: 'cell[eti]', canonicalName: 'Celleti' },
-  
-  { pattern: 'unitre fossano', canonicalName: 'Unitre Fossano' },
-  
-  { pattern: 'conservatorio', canonicalName: 'Conservatorio Guerrero' },
-  { pattern: 'guerrero', canonicalName: 'Conservatorio Guerrero' },
-  
-  { pattern: 'helio[po]lis', canonicalName: 'Heliopolis' },
-  
-  // Internal/non-school events (these get skipped)
-  { pattern: 'vacaciones', canonicalName: '__INTERNAL__' },
-  { pattern: 'no esta', canonicalName: '__INTERNAL__' },
-  { pattern: 'no está', canonicalName: '__INTERNAL__' },
-  { pattern: 'sale a las', canonicalName: '__INTERNAL__' },
-  { pattern: 'esce alle', canonicalName: '__INTERNAL__' },
-  { pattern: 'vuelve', canonicalName: '__INTERNAL__' },
-  { pattern: 'llegada', canonicalName: '__INTERNAL__' },
-  { pattern: 'arriv[o]', canonicalName: '__INTERNAL__' },
-  { pattern: 'smart', canonicalName: '__INTERNAL__' },
-  { pattern: 'teletrabajo', canonicalName: '__INTERNAL__' },
-  { pattern: 'oficina cerrada', canonicalName: '__INTERNAL__' },
-  { pattern: 'cerramos', canonicalName: '__INTERNAL__' },
-  { pattern: 'cena de empresa', canonicalName: '__INTERNAL__' },
-  { pattern: 'riunione', canonicalName: '__INTERNAL__' },
-  { pattern: 'reunion', canonicalName: '__INTERNAL__' },
-  { pattern: 'reunión', canonicalName: '__INTERNAL__' },
-  { pattern: 'call ', canonicalName: '__INTERNAL__' },
-  { pattern: 'entrevista', canonicalName: '__INTERNAL__' },
-  { pattern: 'call ', canonicalName: '__INTERNAL__' },
-  { pattern: 'pier ', canonicalName: '__INTERNAL__' },
-  { pattern: 'guido ', canonicalName: '__INTERNAL__' },
-  { pattern: 'carmen ', canonicalName: '__INTERNAL__' },
-  { pattern: 'blanca ', canonicalName: '__INTERNAL__' },
-  { pattern: 'daniela ', canonicalName: '__INTERNAL__' },
-  { pattern: 'stefano ', canonicalName: '__INTERNAL__' },
-  { pattern: 'lucia ', canonicalName: '__INTERNAL__' },
-  { pattern: 'diletta ', canonicalName: '__INTERNAL__' },
-  { pattern: 'sabri', canonicalName: '__INTERNAL__' },
-  { pattern: 'irene ', canonicalName: '__INTERNAL__' },
-  { pattern: 'mg ', canonicalName: '__INTERNAL__' },
-  { pattern: 'paloma', canonicalName: '__INTERNAL__' },
-  { pattern: 'veronica', canonicalName: '__INTERNAL__' },
-  { pattern: 'enrique', canonicalName: '__INTERNAL__' },
-  { pattern: 'leonardo', canonicalName: '__INTERNAL__' },
-  { pattern: 'francesca', canonicalName: '__INTERNAL__' },
-  { pattern: 'montse', canonicalName: '__INTERNAL__' },
-  { pattern: 'jean pierre', canonicalName: '__INTERNAL__' },
-  { pattern: 'jean', canonicalName: '__INTERNAL__' },
-  { pattern: 'anna de rosa', canonicalName: '__INTERNAL__' },
-  { pattern: 'horario intensivo', canonicalName: '__INTERNAL__' },
-  { pattern: 'institutos cerrados', canonicalName: '__INTERNAL__' },
-  { pattern: 'todo el mundo', canonicalName: '__INTERNAL__' },
-  { pattern: 'pier g', canonicalName: '__INTERNAL__' },
-  { pattern: 'concierto', canonicalName: '__INTERNAL__' },
-  { pattern: 'tussam', canonicalName: '__INTERNAL__' },
-  { pattern: 'app barrio', canonicalName: '__INTERNAL__' },
-  { pattern: 'svb y desa', canonicalName: '__INTERNAL__' },
-  { pattern: 'josue', canonicalName: '__INTERNAL__' },
-  { pattern: 'josé', canonicalName: '__INTERNAL__' },
-  { pattern: 'jose', canonicalName: '__INTERNAL__' },
-  { pattern: 'dominguez', canonicalName: '__INTERNAL__' },
-  { pattern: 'pastor', canonicalName: '__INTERNAL__' },
-  { pattern: 'ia jose', canonicalName: '__INTERNAL__' },
-  { pattern: 'duca di buonvicino', canonicalName: 'Duca di Buonvicino' },
-  { pattern: 'acompañar', canonicalName: '__INTERNAL__' },
-  { pattern: 'manos abiertas', canonicalName: '__INTERNAL__' },
-  { pattern: 'conservatorio guerrero', canonicalName: '__INTERNAL__' },
+  ['marea adu', 'Marea ADU'],
+  ['marea ', 'Marea ADU'],
+
+  ['mater adu', 'Mater ADU'],
+  ['matera adu', 'Mater ADU'],
+  ['mater ', 'Mater ADU'],
+  ['piazz', 'Mater ADU'],
+  ['pacioli', 'IIS Pacioli'],
+  ['ferrara', 'Mater ADU'],
+
+  ['barsanti', 'Barsanti'],
+
+  ['minzoni', 'Minzoni'],
+
+  ['volta aversa', 'VOLTA AVERSA'],
+  ['volta di aversa', 'VOLTA AVERSA'],
+
+  ['amari mercuri', 'Amari Mercuri'],
+
+  ['marconi di torre', 'Marconi'],
+  ['marconi torre', 'Marconi'],
+  ['marconi vet', 'Marconi'],
+  ['marconi giugliano', 'Marconi'],
+  ['marconi di giugliano', 'Marconi'],
+  ['marconi di giuliano', 'Marconi'],
+  ['marconi ', 'Marconi'],
+
+  ['lombardo radice', 'Lombardo Radice'],
+
+  ['imbriani', 'Imbriani'],
+
+  ['nitti', 'Nitti'],
+
+  ['cuoco campanella', 'Liceo Cuoco Campanella'],
+  ['liceo cuoco', 'Liceo Cuoco Campanella'],
+
+  ['liceo segre', 'Liceo Segre'],
+  ['segr', 'Liceo Segre'],
+
+  ['galvani', 'ITIS Galvani'],
+  ['is galvani', 'ITIS Galvani'],
+
+  ['duca di buonvicino', 'Duca di Buonvicino'],
+  ['duca di buon vicino', 'Duca di Buonvicino'],
+  ['buonivicino', 'Duca di Buonvicino'],
+
+  ['de gasperi', 'De Gasperi'],
+
+  ['forio', 'IC Forio'],
+
+  ['tassinari', 'Tassinari'],
+
+  ['moscati', 'Liceo Moscati'],
+  ['liceo moscati', 'Liceo Moscati'],
+  ['isis moscati', 'Liceo Moscati'],
+
+  ['ruggiero caserta', 'Ruggiero di Caserta'],
+  ['ruggieri caserta', 'Ruggiero di Caserta'],
+  ['ruggero di caserta', 'Ruggiero di Caserta'],
+
+  ["d'este", "D'Este"],
+  ['deste', "D'Este"],
+
+  ['villari', 'Liceo Villari'],
+  ['liceo villari', 'Liceo Villari'],
+
+  ['pascoli', 'Pascoli'],
+  ['pascoli colliano', 'Pascoli'],
+
+  ['ferrari', 'Ferrari'],
+
+  ['liceo medi', 'Liceo Medi'],
+  ['medi ', 'Liceo Medi'],
+
+  ['filangieri', 'Filangieri'],
+
+  ['dalla chiesa', 'Dalla Chiesa'],
+  ['dall[a] chiesa', 'Dalla Chiesa'],
+
+  ['piscopo', 'Piscopo'],
+
+  ['polizzi generosa', 'Polizzi Generosa'],
+
+  ['marie curie', 'Marie Curie'],
+
+  ['archime', 'Archimede'],
+
+  ['sereni', 'IS E. Sereni'],
+  ['e. sereni', 'IS E. Sereni'],
+  ['is seren', 'IS E. Sereni'],
+  ['pcto seren', 'IS E. Sereni'],
+
+  ['manzi maffucci', 'IS Manzi-Maffucci'],
+  ['manzi ', 'IS Manzi-Maffucci'],
+
+  ['san giorgio', 'IP San Giorgio'],
+  ['ip san giorgio', 'IP San Giorgio'],
+
+  ['vittorio veneto', 'IS Vittorio Veneto'],
+  ['is vittorio veneto', 'IS Vittorio Veneto'],
+  ['isis vittorio veneto', 'IS Vittorio Veneto'],
+
+  ['prosit', 'Prosit'],
+
+  ['sinergie', 'Sinergie'],
+
+  ['cicerone', 'IIS Cicerone'],
+  ['iis cicero', 'IIS Cicerone'],
+
+  ['colletta', 'Pietro Colletta'],
+  ['pietro colletta', 'Pietro Colletta'],
+
+  ['ceschelli', 'IC Ceschelli'],
+
+  ['caboto', 'Caboto'],
+
+  ['bernini', 'Bernini-De Sanctis'],
+  ['bernini de sanctis', 'Bernini-De Sanctis'],
+
+  ['carinola', 'IC Carinola Falciano'],
+  ['carinola falciano', 'IC Carinola Falciano'],
+
+  ['hadjidimovo', 'Hadjidimovo'],
+
+  ['comenio', 'Liceo Comenio'],
+  ['liceo comenio', 'Liceo Comenio'],
+
+  ['mantegna', 'ITET Mantegna'],
+  ['itet mantegna', 'ITET Mantegna'],
+
+  ['nicolai', 'IC Nicolai'],
+  ['ic nicolai', 'IC Nicolai'],
+
+  ['san nicola', 'San Nicola La Strada'],
+  ['ic san nicola', 'San Nicola La Strada'],
+
+  ['cappell', 'Liceo Chris Cappell'],
+  ['chris cappell', 'Liceo Chris Cappell'],
+  ['liceo chris cappell', 'Liceo Chris Cappell'],
+
+  ['mercato san severino', 'ICS Mercato San Severino'],
+  ['ics mercato', 'ICS Mercato San Severino'],
+
+  ["d'auria nosengo", "IC D'Auria Nosengo"],
+  ['dauria nosengo', "IC D'Auria Nosengo"],
+  ['ic dauria', "IC D'Auria Nosengo"],
+  ['ic d\'auria', "IC D'Auria Nosengo"],
+
+  ['russolillo', 'Russolillo'],
+
+  ['della porta porzio', 'Della Porta Porzio'],
+
+  ['don milani', 'Don Lorenzo Milani'],
+  ['liceo don milani', 'Don Lorenzo Milani'],
+
+  ['san isidoro', 'Don Lorenzo Milani'],
+
+  ['hyrpini', 'Hyrpinia Lab'],
+  ['hirpini', 'Hyrpinia Lab'],
+
+  ['de caro', 'IC De Caro'],
+
+  ['azuni', 'Azuni'],
+  ['liceo azuni', 'Azuni'],
+
+  ['merco[gl]iano', 'Mercogliano Guadagni'],
+  ['guadagni', 'Mercogliano Guadagni'],
+  ['ic merco', 'Mercogliano Guadagni'],
+
+  ['castellana sicula', 'IC Castellana Sicula'],
+  ['castellana polizzi', 'IC Castellana Sicula'],
+  ['ic castellana', 'IC Castellana Sicula'],
+
+  ['panzini', 'ISTITUTO COMPRENSIVO 2 PANZINI'],
+  ['ic panzini', 'ISTITUTO COMPRENSIVO 2 PANZINI'],
+  ['panzini di castellammare', 'ISTITUTO COMPRENSIVO 2 PANZINI'],
+
+  ['hispalis', 'IES Hispalis'],
+
+  ['pablo de la torre', 'Pablo de la Torre'],
+
+  ['cpia ragusa', 'CPIA Ragusa'],
+
+  ['de petra', 'IC De Petra'],
+  ['ic de petra', 'IC De Petra'],
+
+  ['samokov', 'Samokov OU'],
+  ['fakali', 'Samokov OU'],
+
+  ['michelangelo augusto', 'Michelangelo Augusto'],
+  ['ic michelangelo', 'Michelangelo Augusto'],
+
+  ['vanoni', 'IS Ezio Vanoni'],
+  ['ezio vanoni', 'IS Ezio Vanoni'],
+  ['is ezio vanoni', 'IS Ezio Vanoni'],
+  ['iiss ezio vanoni', 'IS Ezio Vanoni'],
+
+  ['caselli', 'Caselli'],
+  ['caselli palizzi', 'Caselli'],
+
+  ['cavalcanti', 'Cavalcanti'],
+
+  ['eleonora d\'arborea', 'Eleonora D\'Arborea'],
+  ['eleonora d arborea', 'Eleonora D\'Arborea'],
+
+  ['montessori', 'IC Montessori'],
+  ['ic montessori', 'IC Montessori'],
+
+  ['galiani', 'Galiani Da Vinci'],
+  ['galiani da vinci', 'Galiani Da Vinci'],
+  ['pcto galiani', 'Galiani Da Vinci'],
+
+  ['celleti', 'Celleti'],
+
+  ['unitre', 'Unitre Fossano'],
+  ['unitre fossano', 'Unitre Fossano'],
+
+  ['conservatorio', 'Conservatorio Guerrero'],
+  ['guerrero', 'Conservatorio Guerrero'],
+
+  ['heliopoli', 'Heliopolis'],
+
+  ['da collo', 'Francesco Da Collo'],
+  ['francesco da collo', 'Francesco Da Collo'],
+
+  ['dante alighieri', 'IC Dante Alighieri'],
+  ['ic dante alighieri', 'IC Dante Alighieri'],
+  ['dante alighieri bellona', 'IC Dante Alighieri'],
+  ['c dante alighieri', 'IC Dante Alighieri'],
+  ['ic dante', 'IC Dante Alighieri'],
+
+  ['giordano bruno', 'IC Giordano Bruno-Fiore-Sanseverino'],
+  ['ic giordano bruno', 'IC Giordano Bruno-Fiore-Sanseverino'],
+
+  ['ferdinando russo', 'ICS Ferdinando Russo'],
+  ['ics ferdinando russo', 'ICS Ferdinando Russo'],
+  ['ics ferdinando', 'ICS Ferdinando Russo'],
+
+  ['gandhi', 'IISS M.K. GANDHI'],
+  ['iiss m.k. gandhi', 'IISS M.K. GANDHI'],
+
+  ['sauro morelli', 'Sauro Morelli'],
+
+  ['osvaldo conti', 'ISIS OSVALDO CONTI'],
+  ['isis osvaldo conti', 'ISIS OSVALDO CONTI'],
+
+  ['majorana', 'ISIS Majorana'],
+  ['isis majorana', 'ISIS Majorana'],
+
+  ['leonardo spadola', 'Leonardo Spadola'],
+
+  ['ic buccino', 'IC Buccino'],
+
+  ['ic villaggio coppola', 'IC Villaggio Coppola'],
+
+  ['bulgaro', 'Bulgaros'],
+  ['bulgari', 'Bulgaros'],
 ];
 
-// Extract school name from event summary
-export function extractSchoolName(summary: string): string | null {
-  const lowerSummary = summary.toLowerCase();
-  
-  for (const mapping of SCHOOL_NAME_MAP) {
-    if (lowerSummary.includes(mapping.pattern.toLowerCase())) {
-      if (mapping.canonicalName === '__INTERNAL__') {
-        return null; // Skip internal events
+// Patterns that indicate internal/non-school events (should be skipped)
+const INTERNAL_PATTERNS = [
+  'vacaciones', 'no est', 'sale a las', 'esce alle', 'vuelve',
+  'llegada', 'arriv', 'smart', 'teletrabajo', 'oficina cerrada',
+  'cerramos', 'cena de empresa', 'riunione', 'reunion', 'reuni',
+  'concierto', 'tussam', 'app barrio', 'svb y desa',
+  'acompa', 'manos abiertas', 'horario intensivo',
+  'institutos cerrados', 'todo el mundo',
+  'viene veronica', 'viene al',
+  'fuori ',
+  'primer d',
+  'vien',
+  'van',
+  'llamada ',
+  'videochiamata',
+  'parlare con',
+  'chiamare ',
+  'visita empresa',
+  'visitas empresa',
+  'alcazar',
+  'madrid',
+  'pcto ',
+  'ia en el aula',
+  'ice breaking',
+  'cv & linkedin',
+  'social dilemma',
+  'english class',
+  'goodbye session',
+  'goodbye ',
+  'welcome session',
+  'welcome ',
+  'goodbye',
+];
+
+// Check if event is internal (not a school event)
+function isInternalEvent(summary: string): boolean {
+  const lower = summary.toLowerCase();
+
+  // Skip calls
+  if (lower.startsWith('call ') || lower.includes('[fatto] call')) {
+    return true;
+  }
+
+  // Skip interviews
+  if (lower.includes('entrevista') || lower.includes('intervista')) {
+    return true;
+  }
+
+  for (const pattern of INTERNAL_PATTERNS) {
+    if (lower.includes(pattern.toLowerCase())) {
+      // Special case: some patterns like "pcto" appear in school names too
+      // Only skip if it's purely a PCTO event without a school name
+      if (pattern === 'pcto ') {
+        // Check if there's a school name in the summary
+        const hasSchool = SCHOOL_MAP.some(([p]) => {
+          if (p === 'pcto') return false;
+          return lower.includes(p.toLowerCase());
+        });
+        if (!hasSchool) return true;
+      } else {
+        return true;
       }
-      return mapping.canonicalName;
     }
   }
-  
-  return null; // No school found
+
+  // Skip personal notes (pier, guido, carmen, etc. without school context)
+  const personalPatterns = [
+    /^pier\s+$/, /^guido\s*$/, /^carmen\s*$/, /^blanca\s*$/,
+    /^daniela\s*$/, /^stefano\s*$/, /^lucia\s*$/, /^diletta\s*$/,
+    /^sabri\s*$/, /^irene\s*$/, /^mg\s*$/, /^paloma\s*$/,
+    /^veronica\s*$/, /^enrique\s*$/, /^leonardo\s*$/, /^francesca\s*$/,
+    /^montse\s*$/, /^jean\s*$/, /^yo\s*$/,
+  ];
+
+  for (const regex of personalPatterns) {
+    if (regex.test(lower.trim())) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Extract canonical school name from event summary
+export function extractSchoolName(summary: string): string | null {
+  if (isInternalEvent(summary)) {
+    return null;
+  }
+
+  const lowerSummary = summary.toLowerCase();
+
+  // Find the first matching school pattern
+  for (const [pattern, canonicalName] of SCHOOL_MAP) {
+    // Convert pattern to regex-like matching (handle special chars)
+    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedPattern, 'i');
+    if (regex.test(lowerSummary)) {
+      return canonicalName;
+    }
+  }
+
+  return null;
 }
 
 // Parse ICS content into events
 export function parseICS(content: string): ParsedEvent[] {
   const events: ParsedEvent[] = [];
   const vevents = content.split('BEGIN:VEVENT');
-  
+
   for (let i = 1; i < vevents.length; i++) {
     const vevent = vevents[i];
-    
+
     const uid = extractField(vevent, 'UID');
     const summary = extractField(vevent, 'SUMMARY');
     const description = extractField(vevent, 'DESCRIPTION');
@@ -300,37 +402,45 @@ export function parseICS(content: string): ParsedEvent[] {
     const categoriesStr = extractField(vevent, 'CATEGORIES');
     const who = extractField(vevent, 'X-TEAMUP-WHO');
     const isAllDay = vevent.includes('X-MICROSOFT-CDO-ALLDAYEVENT:TRUE');
-    
+
     const dtStartRaw = extractRawField(vevent, 'DTSTART');
     const dtEndRaw = extractRawField(vevent, 'DTEND');
-    
+
     if (!dtStartRaw || !summary) continue;
-    
+
     const dtStart = parseICSDate(dtStartRaw, isAllDay);
     const dtEnd = parseICSDate(dtEndRaw || dtStartRaw, isAllDay);
-    
+
     if (!dtStart || isNaN(dtStart.getTime())) continue;
-    
-    const categories = categoriesStr ? categoriesStr.split(',').map(c => c.trim()) : [];
-    
+
     const schoolName = extractSchoolName(summary);
-    if (!schoolName) continue; // Skip events without a school
-    
+    if (!schoolName) continue;
+
+    const categories = categoriesStr ? categoriesStr.split(',').map(c => c.trim()) : [];
+
     events.push({
       uid: uid || '',
-      summary: summary.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';'),
-      description: description ? description.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';') : null,
-      location: location ? location.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';') : null,
+      summary: cleanICSText(summary),
+      description: description ? cleanICSText(description) : null,
+      location: location ? cleanICSText(location) : null,
       categories,
       dtStart,
       dtEnd: dtEnd || dtStart,
       isAllDay,
-      who: who ? who.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';') : null,
-      rawIcsName: schoolName,
+      who: who ? cleanICSText(who) : null,
+      schoolName,
     });
   }
-  
+
   return events;
+}
+
+function cleanICSText(text: string): string {
+  return text
+    .replace(/\\n/g, '\n')
+    .replace(/\\,/g, ',')
+    .replace(/\\;/g, ';')
+    .replace(/\\\\/g, '\\');
 }
 
 function extractField(content: string, fieldName: string): string | null {
@@ -345,7 +455,7 @@ function extractRawField(content: string, fieldName: string): string | null {
 
 function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
   if (!dateStr) return null;
-  
+
   // Handle VALUE=DATE:YYYYMMDD format
   if (dateStr.includes('VALUE=DATE:')) {
     const datePart = dateStr.replace('VALUE=DATE:', '');
@@ -354,7 +464,7 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const day = parseInt(datePart.substring(6, 8));
     return new Date(year, month, day);
   }
-  
+
   // Handle TZID format: DTSTART;TZID=Europe/Madrid:20251211T093000
   if (dateStr.includes('TZID=')) {
     const timePart = dateStr.split(':').slice(1).join(':');
@@ -366,7 +476,7 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const second = parseInt(timePart.substring(13, 15)) || 0;
     return new Date(year, month, day, hour, minute, second);
   }
-  
+
   // Handle simple format: YYYYMMDDTHHMMSS
   if (dateStr.includes('T')) {
     const year = parseInt(dateStr.substring(0, 4));
@@ -377,7 +487,7 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const second = parseInt(dateStr.substring(13, 15)) || 0;
     return new Date(Date.UTC(year, month, day, hour, minute, second));
   }
-  
+
   // Handle simple date: YYYYMMDD
   if (dateStr.length === 8) {
     const year = parseInt(dateStr.substring(0, 4));
@@ -385,6 +495,6 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const day = parseInt(dateStr.substring(6, 8));
     return new Date(year, month, day);
   }
-  
+
   return null;
 }
