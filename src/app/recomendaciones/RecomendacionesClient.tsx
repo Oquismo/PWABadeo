@@ -569,7 +569,7 @@ export default function RecomendacionesClient({ mode = 'recomendaciones', defaul
                       <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                         {typeof restaurant.rating === 'number' && (
                           <Chip
-                            icon={<StarRoundedIcon sx={{ color: '#ffd700' }} />}
+                            icon={<StarRoundedIcon sx={{ color: 'warning.main' }} />}
                             label={`${restaurant.rating}`}
                             size="small"
                             sx={{ fontWeight: 700 }}

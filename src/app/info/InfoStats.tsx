@@ -16,7 +16,7 @@ const stats = [
   {
     value: '150+',
     label: 'Instituciones y empresas asociadas',
-    color: '#f59e0b', // Naranja/amarillo
+    color: 'warning.main', // Naranja/amarillo
   },
 ];
 

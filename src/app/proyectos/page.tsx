@@ -90,9 +90,9 @@ export default function ProyectosPage() {
             borderRadius: '18px', cursor: 'pointer',
             fontSize: '0.8rem', fontWeight: 600,
             border: '1px solid',
-            borderColor: showOnlyFavorites ? 'transparent' : 'rgba(255,255,255,0.18)',
-            background: showOnlyFavorites ? '#3A2C4A' : 'transparent',
-            color: showOnlyFavorites ? '#E8DEF8' : 'text.secondary',
+            borderColor: showOnlyFavorites ? 'transparent' : 'divider',
+            background: showOnlyFavorites ? 'secondary.dark' : 'transparent',
+            color: showOnlyFavorites ? 'secondary.light' : 'text.secondary',
             transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
           }}
         >
@@ -110,7 +110,7 @@ export default function ProyectosPage() {
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  backgroundColor: '#1E1E21',
+                  backgroundColor: 'background.paper',
                   cursor: 'pointer',
                   transition: 'transform 0.25s cubic-bezier(0.2,0,0,1), box-shadow 0.25s cubic-bezier(0.2,0,0,1)',
                   '&:hover': {

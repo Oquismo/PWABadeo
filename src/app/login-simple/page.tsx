@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Box, Typography, TextField, Button, Link, useTheme } from '@mui/material';
 
 export default function SimpleLoginPage() {
+  const theme = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -14,24 +16,23 @@ export default function SimpleLoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-    
+
     try {
       console.log('🔐 Login attempt:', email);
-      
+
       const response = await fetch('/api/auth/login-retry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         setMessage('✅ Login exitoso!');
         console.log('User:', data.user);
-        
-        // Guardar usuario en localStorage de forma segura si el helper está disponible
+
         try {
           if (typeof window !== 'undefined' && (window as any).saveUserToLocal) {
             (window as any).saveUserToLocal(data.user);
@@ -41,8 +42,7 @@ export default function SimpleLoginPage() {
         } catch (e) {
           console.error('Error guardando user en localStorage:', e);
         }
-        
-        // Redirigir después de un momento
+
         setTimeout(() => {
           router.push('/');
         }, 1000);
@@ -62,115 +62,77 @@ export default function SimpleLoginPage() {
     setPassword('password123');
   };
 
+  const isSuccess = message.includes('✅');
+
   return (
-    <div style={{ 
-      maxWidth: '400px', 
-      margin: '50px auto', 
-      padding: '20px',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>
+    <Box sx={{ maxWidth: 400, mx: 'auto', mt: 6, p: 2.5 }}>
+      <Typography variant="h4" align="center" sx={{ mb: 4 }}>
         🔐 Login Simple
-      </h1>
-      
-      <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Email:
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '16px',
-              boxSizing: 'border-box'
-            }}
-          />
-        </div>
-        
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Password:
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '16px',
-              boxSizing: 'border-box'
-            }}
-          />
-        </div>
-        
-        <button
+      </Typography>
+
+      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 2.5 }}>
+        <TextField
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          fullWidth
+          sx={{ mb: 2.5 }}
+        />
+        <Button
           type="submit"
+          variant="contained"
+          fullWidth
           disabled={loading}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: loading ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '16px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            marginBottom: '10px'
-          }}
+          sx={{ mb: 1.25 }}
         >
           {loading ? 'Conectando...' : 'Login'}
-        </button>
-      </form>
+        </Button>
+      </Box>
 
-      <button
+      <Button
         onClick={testLogin}
-        style={{
-          width: '100%',
-          padding: '10px',
-          backgroundColor: '#28a745',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          fontSize: '14px',
-          cursor: 'pointer',
-          marginBottom: '15px'
-        }}
+        variant="outlined"
+        color="secondary"
+        fullWidth
+        sx={{ mb: 2 }}
       >
         🧪 Usar credenciales de prueba
-      </button>
+      </Button>
 
       {message && (
-        <div style={{
-          padding: '10px',
-          marginBottom: '15px',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
-          color: message.includes('✅') ? '#155724' : '#721c24'
-        }}>
-          {message}
-        </div>
+        <Box
+          sx={{
+            p: 1.25,
+            mb: 2,
+            borderRadius: 1,
+            border: `1px solid ${theme.palette.divider}`,
+            bgcolor: isSuccess ? theme.palette.success.light : theme.palette.error.light,
+            color: isSuccess ? theme.palette.success.dark : theme.palette.error.dark,
+          }}
+        >
+          <Typography variant="body2">{message}</Typography>
+        </Box>
       )}
 
-      <div style={{ textAlign: 'center', fontSize: '14px', color: '#666' }}>
-        <p>💡 Este es un login simplificado sin Material-UI</p>
-        <p>
-          <a href="/test-login" style={{ color: '#007bff' }}>
-            Ver versión completa
-          </a>
-        </p>
-      </div>
-    </div>
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+          💡 Este es un login simplificado con Material-UI
+        </Typography>
+        <Link href="/test-login" underline="hover">
+          <Typography variant="body2">Ver versión completa</Typography>
+        </Link>
+      </Box>
+    </Box>
   );
 }

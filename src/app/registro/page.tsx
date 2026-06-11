@@ -419,7 +419,7 @@ export default function RegistroPageRefactored() {
                           color="success.main" 
                           sx={{ 
                             p: 1, 
-                            bgcolor: '#e8f5e8', 
+                            bgcolor: 'success.light', 
                             borderRadius: 1, 
                             display: 'inline-block' 
                           }}

@@ -37,8 +37,8 @@ export default function PoliticaPrivacidadPage() {
           p: 4,
           mb: 4,
           borderRadius: 3,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
+          background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+          color: 'text.primary',
         }}
       >
         <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>

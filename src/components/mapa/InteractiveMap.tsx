@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from 'rea
 import 'leaflet/dist/leaflet.css';
 import { LatLngExpression, LatLng } from 'leaflet';
 import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, CircularProgress, Card, CardContent, CardActions } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import MaterialTextField from '@/components/ui/MaterialTextField';
 import MaterialFilterChips from '@/components/ui/MaterialFilterChips';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
@@ -127,6 +128,7 @@ function MapController({ setMap, setIsMapReady }: { setMap: (map: L.Map) => void
 
 function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
   const map = useMap();
+  const theme = useTheme();
   const [isLocating, setIsLocating] = useState(false);
 
   const handleClick = () => {
@@ -168,14 +170,14 @@ function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) =>
         // Mostrar toast de éxito (temporal)
         const toast = document.createElement('div');
         toast.style.cssText = `
-          position: fixed; 
-          top: 20px; 
-          left: 50%; 
-          transform: translateX(-50%); 
-          background: #4caf50; 
-          color: white; 
-          padding: 12px 24px; 
-          border-radius: 24px; 
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: ${theme.palette.success.main};
+          color: ${theme.palette.success.contrastText || theme.palette.common.white};
+          padding: 12px 24px;
+          border-radius: 24px;
           z-index: 2000;
           font-family: system-ui;
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -271,6 +273,14 @@ export default function InteractiveMap({ selectedPlace, compact = false, height 
   const [isMapReady, setIsMapReady] = useState(false);
   const selectedMarkerRef = useRef<any>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const theme = useTheme();
+  const userLocationSvg = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="${theme.palette.primary.main}"/><circle cx="16" cy="16" r="8" fill="white"/><circle cx="16" cy="16" r="4" fill="${theme.palette.primary.main}"/></svg>`;
+  const userLocationIcon = L.icon({
+    iconUrl: `data:image/svg+xml;base64,${btoa(userLocationSvg)}`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  });
   // Botón flotante para alternar el heatmap
   const HeatmapToggleButton = () => (
     <Fab
@@ -694,22 +704,22 @@ export default function InteractiveMap({ selectedPlace, compact = false, height 
                   borderRadius: 3,
                   overflow: 'hidden',
                   px: 0,
-                  bgcolor: 'rgba(6,10,12,0.72)',
-                  color: 'common.white',
+                  bgcolor: alpha(theme.palette.background.paper, 0.72),
+                  color: theme.palette.text.primary,
                   boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  border: `1px solid ${alpha(theme.palette.common.white, 0.06)}`,
                   backdropFilter: 'blur(6px)'
                 }}>
                   <CardContent sx={{ pb: 0.25, pt: 0.6, px: 1 }}>
-                    <Typography variant="subtitle2" fontWeight={800} gutterBottom noWrap sx={{ color: 'common.white' }}>
+                    <Typography variant="subtitle2" fontWeight={800} gutterBottom noWrap sx={{ color: theme.palette.text.primary }}>
                       {selectedPlace.name}
                     </Typography>
                     {selectedPlace.address && (
-                      <Typography variant="caption" sx={{ display: 'block', mb: 0.2, color: 'rgba(255,255,255,0.78)' }} noWrap>
+                      <Typography variant="caption" sx={{ display: 'block', mb: 0.2, color: alpha(theme.palette.text.primary, 0.78) }} noWrap>
                         {selectedPlace.address}
                       </Typography>
                     )}
-                    <Typography variant="caption" sx={{ mb: 0.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', color: 'rgba(255,255,255,0.68)' }}>
+                    <Typography variant="caption" sx={{ mb: 0.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', color: theme.palette.text.secondary }}>
                       {selectedPlace.description}
                     </Typography>
                   </CardContent>
@@ -735,7 +745,7 @@ export default function InteractiveMap({ selectedPlace, compact = false, height 
                       href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.coordinates.lat},${selectedPlace.coordinates.lng}&travelmode=transit`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      sx={{ ml: 'auto', textTransform: 'none', fontSize: 12, py: 0.4, px: 1, borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.92)' }}
+                      sx={{ ml: 'auto', textTransform: 'none', fontSize: 12, py: 0.4, px: 1, borderColor: alpha(theme.palette.common.white, 0.12), color: alpha(theme.palette.text.primary, 0.92) }}
                     >
                       Cómo llegar
                     </Button>
@@ -748,14 +758,9 @@ export default function InteractiveMap({ selectedPlace, compact = false, height 
 
 
   {!markersOnly && userPosition && (
-            <Marker 
+            <Marker
               position={userPosition}
-              icon={L.icon({
-                iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0Mjg1RjQiLz4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iOCIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iNCIgZmlsbD0iIzQyODVGNCIvPgo8L3N2Zz4K',
-                iconSize: [32, 32],
-                iconAnchor: [16, 16],
-                popupAnchor: [0, -16]
-              })}
+              icon={userLocationIcon}
             >
                 <Popup>📍 Tu ubicación actual</Popup>
             </Marker>

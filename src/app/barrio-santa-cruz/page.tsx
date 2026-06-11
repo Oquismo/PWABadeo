@@ -33,49 +33,49 @@ export default function BarrioSantaCruzPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#111', color: '#fff', width: '100vw', position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary', width: '100vw', position: 'relative', overflow: 'hidden' }}>
       <Box sx={{
         height: '46vh',
         backgroundImage: 'url("/img/Giralda.jpg")',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}>
-        <IconButton onClick={() => router.back()} sx={{ position: 'absolute', top: 16, left: 16, color: '#fff', zIndex: 10 }}>
+        <IconButton onClick={() => router.back()} sx={{ position: 'absolute', top: 16, left: 16, color: 'text.primary', zIndex: 10 }}>
           <ArrowBackIcon />
         </IconButton>
-        <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: '#fff', zIndex: 10 }}>
+        <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: 'text.primary', zIndex: 10 }}>
           <ShareIcon />
         </IconButton>
-        <IconButton onClick={openMaps} sx={{ position: 'absolute', top: 16, right: 70, color: '#fff', zIndex: 10 }}>
+        <IconButton onClick={openMaps} sx={{ position: 'absolute', top: 16, right: 70, color: 'text.primary', zIndex: 10 }}>
           <DirectionsIcon />
         </IconButton>
         <Box sx={{ position: 'absolute', bottom: 16, left: 16 }}>
           <Typography variant="h4" sx={{ fontWeight: 800 }}>{spot.name}</Typography>
-          <Typography variant="body2" sx={{ color: '#ddd' }}>{t('nav.tour') || 'Tour'}</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>{t('nav.tour') || 'Tour'}</Typography>
         </Box>
       </Box>
 
       <Box sx={{ px: 3, py: 3 }}>
         <Stack spacing={2}>
-          <Typography variant="body1" sx={{ color: '#e0e0e0', lineHeight: 1.6 }}>{spot.description}</Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>{spot.description}</Typography>
 
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 1 }}>Horario</Typography>
-            <Typography variant="body2" sx={{ color: '#cfcfcf' }}>{spot.openingHours}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{spot.openingHours}</Typography>
           </Box>
 
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 1 }}>Qué ver</Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
               {spot.highlights.map(h => (
-                <Chip key={h} label={h} size="small" sx={{ bgcolor: '#2b2b2b', color: '#fff' }} />
+                <Chip key={h} label={h} size="small" sx={{ bgcolor: 'background.paper', color: 'text.primary' }} />
               ))}
             </Stack>
           </Box>
 
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 1 }}>Cómo llegar</Typography>
-            <Typography variant="body2" sx={{ color: '#cfcfcf', mb: 1 }}>A pie desde la Catedral (5–10 min). También accesible en transporte público y taxi.</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>A pie desde la Catedral (5–10 min). También accesible en transporte público y taxi.</Typography>
             <IconButton onClick={openMaps} aria-label="Abrir en Maps">
               <DirectionsIcon />
             </IconButton>
@@ -83,10 +83,10 @@ export default function BarrioSantaCruzPage() {
 
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Link href="/plaza-espana" style={{ textDecoration: 'none' }}>
-              <Chip label="Plaza de España" clickable sx={{ bgcolor: '#222', color: '#fff' }} />
+              <Chip label="Plaza de España" clickable sx={{ bgcolor: 'background.paper', color: 'text.primary' }} />
             </Link>
             <Link href="/alcazar-sevilla" style={{ textDecoration: 'none' }}>
-              <Chip label="Alcázar" clickable sx={{ bgcolor: '#222', color: '#fff' }} />
+              <Chip label="Alcázar" clickable sx={{ bgcolor: 'background.paper', color: 'text.primary' }} />
             </Link>
           </Box>
 

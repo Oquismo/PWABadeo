@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, Container, Fab, Drawer, IconButton, Typography, InputBase } from '@mui/material';
+import { Box, Container, Fab, Drawer, IconButton, Typography, InputBase, useTheme } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import GeolocalizacionDemo from '@/components/GeolocalizacionDemo';
@@ -21,6 +21,7 @@ type MapFilter = typeof MAP_FILTERS[number];
 
 export default function MapaPage() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | undefined>();
   const [mapFilter, setMapFilter] = useState<MapFilter>('Todos');
@@ -55,9 +56,9 @@ export default function MapaPage() {
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 1.5 }}>
           <Box sx={{
             flex: 1, height: 44,
-            background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F3F4F6',
+            background: theme.palette.background.paper,
             border: '1px solid',
-            borderColor: theme => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : '#E5E7EB',
+            borderColor: 'divider',
             borderRadius: '22px',
             display: 'flex', alignItems: 'center', gap: 1.25, px: 2,
           }}>
@@ -71,13 +72,13 @@ export default function MapaPage() {
           </Box>
           <Box sx={{
             width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-            background: '#3A2C4A',
+            background: theme.palette.secondary.dark,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
           }}
             onClick={() => setOpenDrawer(true)}
           >
-            <TuneRoundedIcon sx={{ color: '#E8DEF8', fontSize: 20 }} />
+            <TuneRoundedIcon sx={{ color: theme.palette.secondary.light, fontSize: 20 }} />
           </Box>
         </Box>
         {/* Filter chips */}
@@ -101,14 +102,14 @@ export default function MapaPage() {
                   display: 'inline-flex', alignItems: 'center', gap: '4px',
                   fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
                   userSelect: 'none', border: 'none', outline: 'none',
-                  background: sel ? '#3A2C4A' : 'transparent',
-                  color: sel ? '#E8DEF8' : 'text.secondary',
-                  borderColor: sel ? 'transparent' : 'rgba(255,255,255,0.12)',
+                  background: sel ? theme.palette.secondary.dark : 'transparent',
+                  color: sel ? theme.palette.secondary.light : 'text.secondary',
+                  borderColor: sel ? 'transparent' : 'divider',
                   borderStyle: 'solid', borderWidth: '1px',
                   transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
                 }}
               >
-                {sel && <CheckRoundedIcon sx={{ fontSize: 16, color: '#E8DEF8' }} />}
+                {sel && <CheckRoundedIcon sx={{ fontSize: 16, color: theme.palette.secondary.light }} />}
                 {chip}
               </Box>
             );

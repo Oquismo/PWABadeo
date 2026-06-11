@@ -132,16 +132,16 @@ export default function ComunidadPage() {
 
         {/* Stats */}
         <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-          <Card sx={{ flex: 1, textAlign: 'center', background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Card sx={{ flex: 1, textAlign: 'center', background: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
             <CardContent>
               <Typography
                 variant="h5"
                 fontWeight={800}
-                sx={{
-                  background: 'linear-gradient(135deg,#667EEA 0%,#764BA2 100%)',
+                sx={(theme) => ({
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                   fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
-                }}
+                })}
               >
                 {questions.length}
               </Typography>
@@ -150,13 +150,13 @@ export default function ComunidadPage() {
               </Typography>
             </CardContent>
           </Card>
-          <Card sx={{ flex: 1, textAlign: 'center', background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Card sx={{ flex: 1, textAlign: 'center', background: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
             <CardContent>
               <Typography
                 variant="h5"
                 fontWeight={800}
                 sx={{
-                  color: '#00E676',
+                  color: 'success.main',
                   fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
                 }}
               >
@@ -174,7 +174,7 @@ export default function ComunidadPage() {
           {loading ? (
             // Skeleton loading
             [...Array(3)].map((_, i) => (
-              <Card key={i} sx={{ mb: 2, background: '#1E1E21', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <Card key={i} sx={{ mb: 2, background: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
                 <CardContent>
                   <Skeleton variant="text" width="60%" height={32} />
                   <Skeleton variant="text" width="100%" />
@@ -207,8 +207,9 @@ export default function ComunidadPage() {
                   sx={{
                     mb: 2,
                     cursor: 'pointer',
-                    background: '#1E1E21',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider',
                     transition: 'transform 0.25s cubic-bezier(0.2,0,0,1), box-shadow 0.25s cubic-bezier(0.2,0,0,1)',
                     '&:hover': {
                       transform: 'translateY(-4px)',

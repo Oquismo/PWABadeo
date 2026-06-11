@@ -92,12 +92,12 @@ function MapComponentWrapper({ specificKey, overrideKey }: { specificKey?: strin
     // Debug panel: mostrar intento y claves normalizadas
     return (
       <div>
-        <div style={{ padding: 8, background: '#fff3cd', borderRadius: 8, marginBottom: 8 }}>
+        <Box sx={{ padding: 1, backgroundColor: 'warning.light', borderRadius: 2, marginBottom: 1 }}>
           <strong>Debug residencias:</strong>
           <div>Valor original: <code>{keyToUse}</code></div>
           <div>Normalizado: <code>{keyNorm}</code></div>
           <div>Fuzzy encontrado: <code>{fuzzy ? fuzzy.id : 'no'}</code></div>
-        </div>
+        </Box>
         <InteractiveMap selectedPlace={fuzzy} compact height={260} markersOnly />
       </div>
     );

@@ -19,7 +19,7 @@ const processSteps = [
     step: '3',
     title: 'Experience & Monitoring',
     description: 'Support throughout your stay abroad with personalized tutoring.',
-    color: '#f59e0b',
+    color: 'warning.main',
   },
 ];
 

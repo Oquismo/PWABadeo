@@ -43,13 +43,13 @@ export default function PlazaEspanaPage() {
     return (
       <Box sx={{ 
         minHeight: '100vh', 
-        bgcolor: '#1a1a1a', 
+        bgcolor: 'background.default', 
         width: '100vw', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center' 
       }}>
-        <Typography variant="h6" sx={{ color: '#fff' }}>
+        <Typography variant="h6" sx={{ color: 'text.primary' }}>
           Cargando información del lugar...
         </Typography>
       </Box>
@@ -62,7 +62,7 @@ export default function PlazaEspanaPage() {
   }
   
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#1a1a1a', width: '100vw', position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', width: '100vw', position: 'relative', overflow: 'hidden' }}>
       {/* Imagen principal con overlay */}
       <Box sx={{ 
         height: '100vh', 
@@ -80,18 +80,18 @@ export default function PlazaEspanaPage() {
         {/* Botón atrás */}
         <IconButton 
           onClick={() => router.back()}
-          sx={{ position: 'absolute', top: 16, left: 16, color: '#fff', zIndex: 10 }}
+          sx={{ position: 'absolute', top: 16, left: 16, color: 'text.primary', zIndex: 10 }}
         >
           <ArrowBackIcon />
         </IconButton>
         {/* Botón compartir */}
-        <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: '#fff', zIndex: 10 }}>
+        <IconButton sx={{ position: 'absolute', top: 16, right: 16, color: 'text.primary', zIndex: 10 }}>
           <ShareIcon />
         </IconButton>
         {/* Botón de Maps */}
         <IconButton 
           onClick={openMaps}
-          sx={{ position: 'absolute', top: 16, right: 70, color: '#fff', zIndex: 10 }}
+          sx={{ position: 'absolute', top: 16, right: 70, color: 'text.primary', zIndex: 10 }}
         >
           <DirectionsIcon />
         </IconButton>
@@ -106,7 +106,7 @@ export default function PlazaEspanaPage() {
           background: 'linear-gradient(transparent, rgba(0,0,0,0.9))'
         }}>
           <Typography variant="h4" sx={{ 
-            color: '#fff', 
+            color: 'text.primary', 
             fontWeight: 800, 
             mb: 1,
             textShadow: '2px 2px 8px rgba(0,0,0,0.7)',
@@ -115,7 +115,7 @@ export default function PlazaEspanaPage() {
             {spot.name}
           </Typography>
           <Typography variant="body2" sx={{ 
-            color: '#e0e0e0',
+            color: 'text.secondary',
             textShadow: '1px 1px 4px rgba(0,0,0,0.8)',
             fontWeight: 500
           }}>
@@ -126,7 +126,7 @@ export default function PlazaEspanaPage() {
 
       {/* Contenido inferior - Panel deslizable */}
       <Box sx={{ 
-        bgcolor: '#1a1a1a', 
+        bgcolor: 'background.default', 
         px: 3, 
         py: 2,
         position: 'fixed',
@@ -145,20 +145,20 @@ export default function PlazaEspanaPage() {
           sx={{
             width: '60px',
             height: '6px',
-            bgcolor: '#888',
+            bgcolor: 'text.disabled',
             borderRadius: '3px',
             mx: 'auto',
             mb: 3,
             cursor: 'pointer',
             '&:hover': {
-              bgcolor: '#aaa'
+              bgcolor: 'text.secondary'
             }
           }} 
         />
         
         {/* Descripción */}
         <Typography variant="body2" sx={{ 
-          color: '#d0d0d0', 
+          color: 'text.secondary', 
           lineHeight: 1.8,
           mb: 3,
           fontWeight: 400,
@@ -172,18 +172,18 @@ export default function PlazaEspanaPage() {
 
         {/* Next exercises */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ 
-            color: '#fff', 
+          <Typography variant="h6" sx={(theme) => ({ 
+            color: theme.palette.text.primary, 
             fontWeight: 700,
             textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
-            background: 'linear-gradient(45deg, #ffffff, #e3f2fd)',
+            background: `linear-gradient(45deg, ${theme.palette.text.primary}, ${theme.palette.primary.main})`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
-          }}>
+          })}>
             {t('nav.nextSites')}
           </Typography>
           <Typography variant="body2" sx={{ 
-            color: '#90caf9',
+            color: 'primary.main',
             fontWeight: 600,
             textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
           }}>
@@ -196,7 +196,7 @@ export default function PlazaEspanaPage() {
           <Material3ElevatedCard 
             interactive={true}
             sx={{ 
-            bgcolor: '#2a2a2a', 
+            bgcolor: 'background.paper', 
             borderRadius: 2, 
             mb: 3,
             border: 'none',
@@ -204,7 +204,7 @@ export default function PlazaEspanaPage() {
             cursor: 'pointer',
             transition: 'all 0.3s ease',
             '&:hover': {
-              bgcolor: '#333',
+              bgcolor: 'action.hover',
               transform: 'translateY(-2px)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
             }
@@ -214,7 +214,7 @@ export default function PlazaEspanaPage() {
               <Box sx={{ 
                 width: 80, 
                 height: 80, 
-                bgcolor: '#3a3a3a', 
+                bgcolor: 'background.paper', 
                 borderRadius: 2, 
                 mr: 2,
                 display: 'flex',
@@ -224,26 +224,26 @@ export default function PlazaEspanaPage() {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}>
-                <Typography variant="caption" sx={{ color: '#666', opacity: 0.3 }}>
+                <Typography variant="caption" sx={{ color: 'text.disabled', opacity: 0.3 }}>
                   IMG
                 </Typography>
               </Box>
               
               {/* Contenido */}
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" sx={{ 
-                  color: '#fff', 
+                <Typography variant="h6" sx={(theme) => ({ 
+                  color: theme.palette.text.primary, 
                   fontWeight: 700, 
                   mb: 1,
                   textShadow: '1px 1px 3px rgba(0,0,0,0.4)',
-                  background: 'linear-gradient(135deg, #ffffff, #f5f5f5)',
+                  background: `linear-gradient(135deg, ${theme.palette.text.primary}, ${theme.palette.text.secondary})`,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent'
-                }}>
+                })}>
                   {spot.currentSpot.name}
                 </Typography>
                 <Typography variant="body2" sx={{ 
-                  color: '#b3b3b3', 
+                  color: 'text.secondary', 
                   mb: 1,
                   fontWeight: 500,
                   textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
@@ -257,8 +257,8 @@ export default function PlazaEspanaPage() {
                     label={spot.currentSpot.distance} 
                     size="small"
                     sx={{ 
-                      bgcolor: '#4caf50', 
-                      color: '#fff', 
+                      bgcolor: 'success.main', 
+                      color: 'text.primary', 
                       fontWeight: 600,
                       fontSize: '0.75rem'
                     }} 
@@ -268,8 +268,8 @@ export default function PlazaEspanaPage() {
                     size="small"
                     sx={{ 
                       bgcolor: 'transparent', 
-                      color: '#9c27b0', 
-                      border: '1px solid #9c27b0',
+                      color: 'secondary.main', 
+                      border: '1px solid', borderColor: 'secondary.main',
                       fontSize: '0.75rem'
                     }} 
                   />

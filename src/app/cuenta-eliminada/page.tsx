@@ -26,8 +26,8 @@ export default function CuentaEliminadaPage() {
           p: 4,
           borderRadius: 3,
           textAlign: 'center',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
+          background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+          color: 'text.primary',
         }}
       >
         <Stack spacing={3} alignItems="center">

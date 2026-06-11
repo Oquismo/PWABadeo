@@ -4,7 +4,7 @@ import { Container, Box, Typography, Link } from "@mui/material";
 export default function PrivacyPolicyApp() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box sx={{ background: '#fff', borderRadius: 4, boxShadow: 2, p: 4 }}>
+      <Box sx={{ background: 'background.paper', borderRadius: 4, boxShadow: 2, p: 4 }}>
         <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
           Política de Privacidad
         </Typography>

@@ -163,8 +163,8 @@ export default function LoginPageRefactored() {
             {t('login.email') || 'Correo electrónico'}
           </Typography>
           <Box sx={{
-            background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F3F4F6',
-            border: '1px solid', borderColor: 'rgba(255,255,255,0.12)',
+            background: 'background.paper',
+            border: '1px solid', borderColor: 'divider',
             borderBottom: '2px solid', borderBottomColor: 'primary.main',
             borderRadius: '4px 4px 0 0',
             display: 'flex', alignItems: 'center', gap: 1.25, px: 2,
@@ -190,9 +190,9 @@ export default function LoginPageRefactored() {
             {t('login.password') || 'Contraseña'}
           </Typography>
           <Box sx={{
-            background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F3F4F6',
-            border: '1px solid', borderColor: 'rgba(255,255,255,0.12)',
-            borderBottom: '2px solid', borderBottomColor: 'rgba(255,255,255,0.12)',
+            background: 'background.paper',
+            border: '1px solid', borderColor: 'divider',
+            borderBottom: '2px solid', borderBottomColor: 'divider',
             borderRadius: '4px 4px 0 0',
             display: 'flex', alignItems: 'center', gap: 1.25, px: 2,
           }}>
