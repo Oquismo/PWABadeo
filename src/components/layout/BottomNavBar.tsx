@@ -20,6 +20,7 @@ import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import HotelRoundedIcon from '@mui/icons-material/HotelRounded';
 import VideoLibraryRoundedIcon from '@mui/icons-material/VideoLibraryRounded';
 import QuestionAnswerRoundedIcon from '@mui/icons-material/QuestionAnswerRounded';
+import PhotoLibraryRoundedIcon from '@mui/icons-material/PhotoLibraryRounded';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, LayoutGroup } from 'framer-motion'; // 1. Importar de Framer Motion
@@ -63,6 +64,7 @@ export default function BottomNavBar() {
   // Acciones que van al overflow (Menú "Más") — diseño expresivo tipo Material
   const overflowActions = [
     { value: "/comunidad", icon: <QuestionAnswerRoundedIcon />, label: t('nav.community') || 'Comunidad' },
+    { value: "/album", icon: <PhotoLibraryRoundedIcon />, label: 'Álbum' },
     { value: "/sevilla-spot", icon: <ExploreRoundedIcon />, label: t('nav.tour') },
     { value: "/recomendaciones", icon: <RestaurantRoundedIcon />, label: t('nav.recommendations') },
     // { value: "/eventos", icon: <EventRoundedIcon />, label: t('nav.events') }, // Ocultado temporalmente

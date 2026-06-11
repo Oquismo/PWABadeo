@@ -42,6 +42,8 @@ model User {
   feedbacks        Feedback[]        // Relación con feedbacks
   questions        CommunityQuestion[] // Preguntas en la comunidad
   answers          CommunityAnswer[]   // Respuestas en la comunidad
+  photos           Photo[]             // Fotos del álbum
+  albums           PhotoAlbum[]        // Álbumes de fotos
   
   @@index([schoolId])
 }
@@ -243,4 +245,44 @@ model CommunityAnswer {
   @@index([userId])
   @@index([questionId])
   @@index([createdAt])
+}
+
+// Álbum de fotos - agrupación opcional
+model PhotoAlbum {
+  id          Int      @id @default(autoincrement())
+  name        String   @default("Mi Álbum")
+  description String?
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coverUrl    String?  // URL de la foto de portada
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  photos      Photo[]
+  
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Fotos del álbum
+model Photo {
+  id          Int          @id @default(autoincrement())
+  url         String       // URL original en Cloudinary
+  thumbnailUrl String?     // URL optimizada para thumbnails
+  caption     String?
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  albumId     Int?
+  album       PhotoAlbum?  @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  width       Int?         // Ancho original para layout masonry
+  height      Int?         // Alto original para layout masonry
+  order       Int          @default(0) // Orden manual
+  isPublic    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  @@index([userId])
+  @@index([albumId])
+  @@index([createdAt])
+  @@index([order])
 }
