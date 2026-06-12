@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 // Validación de admin por cookie, igual que el middleware
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db';
 
 
 export async function GET(request: Request) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma-client';
+import { prisma } from '@/lib/db';
 import bcrypt from 'bcrypt';
 import { verifyAdminAccess, SECURITY_CONFIG } from '@/lib/security';
 import SecurityLogger from '@/lib/security-logger';

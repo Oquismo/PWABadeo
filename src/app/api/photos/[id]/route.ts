@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma-client';
+import { prisma } from '@/lib/db';
 import { authMiddleware } from '@/lib/auth';
 import cloudinary from '@/lib/cloudinary';
 

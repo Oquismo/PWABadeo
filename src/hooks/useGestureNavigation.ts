@@ -46,7 +46,6 @@ export function useGestureNavigation(
   const mainRoutes = [
     '/',
     '/mapa',
-    '/proyectos',
     '/perfil',
     '/calendario'
   ];

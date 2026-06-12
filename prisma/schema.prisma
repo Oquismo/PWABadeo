@@ -72,6 +72,8 @@ model School {
   tasks       Task[]   @relation("SchoolTasks")
   // Relación con preguntas de la comunidad
   questions   CommunityQuestion[]
+  // Relación con fotos del álbum
+  photos      Photo[]
   // Relación con eventos del programa formativo
   events      SchoolEvent[]
   
@@ -274,6 +276,8 @@ model Photo {
   caption     String?
   userId      Int
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schoolId    Int?
+  school      School?      @relation(fields: [schoolId], references: [id], onDelete: SetNull)
   albumId     Int?
   album       PhotoAlbum?  @relation(fields: [albumId], references: [id], onDelete: SetNull)
   width       Int?         // Ancho original para layout masonry
@@ -284,6 +288,7 @@ model Photo {
   updatedAt   DateTime     @updatedAt
   
   @@index([userId])
+  @@index([schoolId])
   @@index([albumId])
   @@index([createdAt])
   @@index([order])

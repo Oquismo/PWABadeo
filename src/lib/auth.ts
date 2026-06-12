@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { prisma } from './prisma-client';
+import { prisma } from './db';
 
 export interface AuthUser {
   id: number;

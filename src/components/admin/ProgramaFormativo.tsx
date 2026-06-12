@@ -32,7 +32,10 @@ import {
   Search as SearchIcon,
   ExpandMore as ExpandMoreIcon,
   Today as TodayIcon,
+  AutoFixHigh as AutoIcon,
+  Schedule as ScheduleIcon,
 } from '@mui/icons-material';
+import AutoSyncHelp from './AutoSyncHelp';
 
 interface SchoolEvent {
   id: number;
@@ -61,6 +64,8 @@ export default function ProgramaFormativo() {
   const [success, setSuccess] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('upcoming');
+  const [lastSync, setLastSync] = useState<string | null>(null);
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -70,6 +75,14 @@ export default function ProgramaFormativo() {
       if (res.ok) {
         const json = await res.json();
         setData(json.schools || []);
+        // Check last event creation date as proxy for last sync
+        const dates = (json.schools || []).flatMap((s: any) =>
+          s.events.map((e: any) => new Date(e.date))
+        );
+        if (dates.length > 0) {
+          const max = new Date(Math.max(...dates.map((d: any) => d.getTime())));
+          setLastSync(max.toLocaleDateString('es-ES'));
+        }
       } else {
         setError('Error al cargar datos');
       }
@@ -82,6 +95,15 @@ export default function ProgramaFormativo() {
 
   useEffect(() => {
     loadData();
+    // Check if auto-sync is configured (CRON_SECRET env var)
+    fetch('/api/cron/sync-events?token=check')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) setAutoSyncEnabled(true);
+      })
+      .catch(() => {
+        // Auto-sync not configured
+      });
   }, []);
 
   const handleSync = async () => {
@@ -132,34 +154,66 @@ export default function ProgramaFormativo() {
     return new Date(dateStr) >= new Date();
   };
 
-  const filtered = data.filter(s =>
-    s.school.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtrar escuelas que tengan eventos en el filtro actual
+  const filtered = data.filter(s => {
+    const matchesSearch = s.school.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const hasEventsInFilter = s.events.filter(ev => {
+      if (filter === 'upcoming') return isUpcoming(ev.date);
+      if (filter === 'past') return !isUpcoming(ev.date);
+      return true;
+    }).length > 0;
+    return matchesSearch && hasEventsInFilter;
+  });
 
   const totalEvents = data.reduce((sum, s) => sum + s.events.length, 0);
+  const activeSchools = data.filter(s => s.events.some(ev => isUpcoming(ev.date))).length;
 
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <SchoolIcon />
             Programa Formativo
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {data.length} escuelas · {totalEvents} eventos
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Typography variant="body2" color="text.secondary">
+              {activeSchools} escuelas activas · {totalEvents} eventos futuros
+            </Typography>
+            {lastSync && (
+              <Chip
+                icon={<ScheduleIcon fontSize="small" />}
+                label={`Actualizado: ${lastSync}`}
+                size="small"
+                variant="outlined"
+                sx={{ height: 24, fontSize: '0.7rem' }}
+              />
+            )}
+            {autoSyncEnabled && (
+              <Chip
+                icon={<AutoIcon fontSize="small" />}
+                label="Auto-sync activo"
+                size="small"
+                color="success"
+                variant="outlined"
+                sx={{ height: 24, fontSize: '0.7rem' }}
+              />
+            )}
+          </Box>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={syncing ? <CircularProgress size={20} color="inherit" /> : <SyncIcon />}
-          onClick={handleSync}
-          disabled={syncing}
-          sx={{ borderRadius: 2 }}
-        >
-          {syncing ? 'Sincronizando...' : 'Sincronizar ICS'}
-        </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AutoSyncHelp />
+          <Button
+            variant="contained"
+            startIcon={syncing ? <CircularProgress size={20} color="inherit" /> : <SyncIcon />}
+            onClick={handleSync}
+            disabled={syncing}
+            sx={{ borderRadius: 2 }}
+          >
+            {syncing ? 'Sincronizando...' : 'Sincronizar ahora'}
+          </Button>
+        </Box>
       </Box>
 
       {/* Messages */}
@@ -207,10 +261,14 @@ export default function ProgramaFormativo() {
           <CardContent>
             <SchoolIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
             <Typography variant="h6" gutterBottom>
-              No hay escuelas con eventos
+              {filter === 'upcoming' 
+                ? 'No hay escuelas con eventos próximos' 
+                : 'No hay escuelas con eventos'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Pulsa "Sincronizar ICS" para importar el programa formativo desde Teamup
+              {filter === 'upcoming' 
+                ? 'Las escuelas sin eventos futuros no aparecen aquí. Pulsa "Sincronizar ahora" para actualizar desde Teamup.'
+                : 'Pulsa "Sincronizar ahora" para importar desde Teamup.'}
             </Typography>
           </CardContent>
         </Card>

@@ -52,6 +52,10 @@ interface Photo {
     firstName: string;
     lastName: string;
     avatarUrl: string | null;
+    school: {
+      id: number;
+      name: string;
+    } | null;
   };
 }
 

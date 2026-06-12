@@ -7,22 +7,21 @@ export const revalidate = 0;
 
 const ICS_URL = 'https://ics.teamup.com/feed/ksampdkmv21a529vhx/0.ics';
 
-// Fuzzy match: find school in DB by checking if names share key words
+// Token secreto para cron jobs
+const CRON_SECRET = process.env.CRON_SECRET || process.env.ICS_SYNC_TOKEN;
+
 function findSchoolInDB(schoolName: string, allSchools: any[]): any {
   const target = schoolName.toLowerCase();
 
-  // Exact match first
   const exact = allSchools.find((s: any) => s.name.toLowerCase() === target);
   if (exact) return exact;
 
-  // Check if target contains DB school name or vice versa
   const contains = allSchools.find((s: any) => {
     const dbName = s.name.toLowerCase();
     return target.includes(dbName) || dbName.includes(target);
   });
   if (contains) return contains;
 
-  // Check by first significant word
   const targetWords = target.split(/\s+/).filter(w => w.length > 2);
   if (targetWords.length > 0) {
     const byWord = allSchools.find((s: any) => {
@@ -35,37 +34,64 @@ function findSchoolInDB(schoolName: string, allSchools: any[]): any {
   return null;
 }
 
-export async function POST(request: Request) {
+function isAuthorized(request: Request): { authorized: boolean; method: string } {
+  const url = new URL(request.url);
+  const token = url.searchParams.get('token');
+  const authHeader = request.headers.get('authorization');
+  const headerToken = authHeader?.replace('Bearer ', '');
+  const vercelSignature = request.headers.get('x-vercel-signature');
+  const userData = request.headers.get('cookie')?.match(/user=([^;]+)/)?.[1];
+
+  // 1. Vercel Cron sends x-vercel-signature header
+  if (vercelSignature) {
+    return { authorized: true, method: 'vercel-cron' };
+  }
+
+  // 2. Admin via cookie
+  if (userData) {
+    try {
+      const user = JSON.parse(decodeURIComponent(userData));
+      if (user.role === 'admin') {
+        return { authorized: true, method: 'admin' };
+      }
+    } catch {
+      // Invalid cookie
+    }
+  }
+
+  // 3. Token in Authorization header or query param
+  if (CRON_SECRET) {
+    if (headerToken === CRON_SECRET || token === CRON_SECRET) {
+      return { authorized: true, method: 'token' };
+    }
+  }
+
+  return { authorized: false, method: 'none' };
+}
+
+export async function GET(request: Request) {
   try {
-    // Auth check
-    const userData = request.headers.get('cookie')?.match(/user=([^;]+)/)?.[1];
-    if (!userData) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const auth = isAuthorized(request);
+    
+    if (!auth.authorized) {
+      return NextResponse.json({ 
+        error: 'No autorizado',
+        hint: 'Configura CRON_SECRET como variable de entorno para Vercel Cron'
+      }, { status: 401 });
     }
 
-    let user;
-    try {
-      user = JSON.parse(decodeURIComponent(userData));
-    } catch {
-      return NextResponse.json({ error: 'Datos de usuario inválidos' }, { status: 401 });
-    }
+    console.log(`[cron-sync] Authorized via ${auth.method}`);
 
     // Fetch ICS
-    console.log('[sync-ics] Fetching ICS from Teamup...');
+    console.log('[cron-sync] Fetching ICS from Teamup...');
     const res = await fetch(ICS_URL, { cache: 'no-store' });
     if (!res.ok) {
-      return NextResponse.json(
-        { error: `Error fetching ICS: ${res.status}` },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: `Error fetching ICS: ${res.status}` }, { status: 502 });
     }
 
     const icsContent = await res.text();
-    console.log('[sync-ics] ICS fetched, parsing...');
-
-    // Parse events
     const parsedEvents = parseICS(icsContent);
-    console.log(`[sync-ics] Parsed ${parsedEvents.length} raw events`);
+    console.log(`[cron-sync] Parsed ${parsedEvents.length} raw events`);
 
     // SOLO eventos futuros o de hoy - pasados no importan
     const today = new Date();
@@ -76,14 +102,11 @@ export async function POST(request: Request) {
       return eventDate >= today;
     });
     
-    console.log(`[sync-ics] Filtered to ${futureEvents.length} future events`);
+    console.log(`[cron-sync] Filtered to ${futureEvents.length} future events (today onwards)`);
 
-    // Get all existing schools
     const allSchools = await (prisma as any).school.findMany();
-    console.log(`[sync-ics] Found ${allSchools.length} schools in DB`);
-
-    // Group events by school name
     const eventsBySchool = new Map<string, typeof futureEvents>();
+    
     for (const event of futureEvents) {
       if (!eventsBySchool.has(event.schoolName)) {
         eventsBySchool.set(event.schoolName, []);
@@ -91,21 +114,16 @@ export async function POST(request: Request) {
       eventsBySchool.get(event.schoolName)!.push(event);
     }
 
-    console.log(`[sync-ics] ${eventsBySchool.size} active schools with future events`);
-
     const results = {
       schoolsCreated: 0,
       schoolsFound: 0,
       eventsCreated: 0,
       eventsUpdated: 0,
       eventsDeleted: 0,
-      schools: [] as Array<{ name: string; dbId: number | null; eventCount: number }>,
-      unmatched: [] as string[],
+      totalEvents: 0,
     };
 
-    // Process each school
     for (const [schoolName, events] of eventsBySchool) {
-      // Find matching school in DB
       let school = findSchoolInDB(schoolName, allSchools);
 
       if (!school) {
@@ -121,15 +139,11 @@ export async function POST(request: Request) {
         });
         allSchools.push(school);
         results.schoolsCreated++;
-        console.log(`[sync-ics] Created school: ${schoolName}`);
       } else {
         results.schoolsFound++;
-        console.log(`[sync-ics] Matched "${schoolName}" -> DB: "${school.name}"`);
       }
 
-      // Process events for this school
       for (const event of events) {
-        // Check if event already exists (by UID)
         const existing = await (prisma as any).schoolEvent.findFirst({
           where: { uid: event.uid },
         });
@@ -155,23 +169,17 @@ export async function POST(request: Request) {
           results.eventsUpdated++;
         } else {
           await (prisma as any).schoolEvent.create({
-            data: {
-              ...eventData,
-              uid: event.uid,
-            },
+            data: { ...eventData, uid: event.uid },
           });
           results.eventsCreated++;
         }
       }
-
-      results.schools.push({
-        name: schoolName,
-        dbId: school.id,
-        eventCount: events.length,
-      });
     }
 
-    // Borrar eventos pasados
+    // Borrar TODOS los eventos pasados (de antes de hoy)
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
     const deleted = await (prisma as any).schoolEvent.deleteMany({
       where: {
         date: { lt: today },
@@ -179,63 +187,18 @@ export async function POST(request: Request) {
     });
     results.eventsDeleted = deleted.count;
 
+    results.totalEvents = futureEvents.length;
+
+    console.log('[cron-sync] Results:', results);
+
     return NextResponse.json({
-      message: 'ICS sync completed - future events only',
+      success: true,
+      message: 'Sync completed',
+      method: auth.method,
       results,
     });
   } catch (error) {
-    console.error('[sync-ics] Error:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor', details: String(error) },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(request: Request) {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const events = await (prisma as any).schoolEvent.findMany({
-      where: {
-        date: { gte: today },
-      },
-      include: {
-        school: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        date: 'asc',
-      },
-    });
-
-    // Group by school
-    const bySchool = new Map<number, any>();
-    for (const event of events) {
-      const schoolId = event.school.id;
-      if (!bySchool.has(schoolId)) {
-        bySchool.set(schoolId, {
-          school: event.school,
-          events: [],
-        });
-      }
-      bySchool.get(schoolId)!.events.push(event);
-    }
-
-    return NextResponse.json({
-      schools: Array.from(bySchool.values()),
-      total: events.length,
-    });
-  } catch (error) {
-    console.error('[sync-ics] GET Error:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    console.error('[cron-sync] Error:', error);
+    return NextResponse.json({ error: 'Error interno', details: String(error) }, { status: 500 });
   }
 }

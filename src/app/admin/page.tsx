@@ -27,7 +27,6 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import SchoolIcon from '@mui/icons-material/School';
 import BuildIcon from '@mui/icons-material/Build';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import EventManagement from '@/components/admin/EventManagement';
 import TelemetryPanel from '@/components/admin/TelemetryPanel';
 import UserManagement from '@/components/admin/UserManagement';
 import LogViewer from '@/components/admin/LogViewer';
@@ -69,7 +68,6 @@ export default function AdminPage() {
 
   const tabs = [
     { label: 'Telemetría', icon: <InsightsIcon />, component: <TelemetryPanel /> },
-    { label: 'Eventos', icon: <EventIcon />, component: <EventManagement /> },
     { label: 'Usuarios', icon: <PeopleIcon />, component: <UserManagement /> },
     { label: 'Logs', icon: <ArticleIcon />, component: <LogViewer /> },
     { label: 'Anuncios', icon: <CampaignIcon />, component: <AnnouncementManager /> },

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma-client';
+import { prisma } from '@/lib/db';
 import webpush from 'web-push';
 
 export const dynamic = 'force-dynamic';
