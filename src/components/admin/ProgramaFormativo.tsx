@@ -119,8 +119,17 @@ export default function ProgramaFormativo() {
 
       if (res.ok) {
         const r = json.results;
+        const messages = [];
+        if (r.eventsCreated > 0) messages.push(`${r.eventsCreated} creados`);
+        if (r.eventsUpdated > 0) messages.push(`${r.eventsUpdated} actualizados`);
+        if (r.eventsDeleted > 0) messages.push(`${r.eventsDeleted} pasados borrados`);
+        if (r.eventsObsolete > 0) messages.push(`${r.eventsObsolete} obsoletos borrados`);
+        if (r.schoolsCreated > 0) messages.push(`${r.schoolsCreated} escuelas nuevas`);
+        
         setSuccess(
-          `Sincronizado: ${r.schoolsCreated} escuelas nuevas, ${r.schoolsFound} existentes, ${r.eventsCreated} eventos creados, ${r.eventsUpdated} actualizados`
+          messages.length > 0 
+            ? `Sincronizado: ${messages.join(', ')}`
+            : 'Sin cambios - todo está actualizado'
         );
         loadData();
       } else {

@@ -93,7 +93,7 @@ export async function GET(request: Request) {
     const parsedEvents = parseICS(icsContent);
     console.log(`[cron-sync] Parsed ${parsedEvents.length} raw events`);
 
-    // SOLO eventos futuros o de hoy - pasados no importan
+    // SOLO eventos futuros o de hoy
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
       return eventDate >= today;
     });
     
-    console.log(`[cron-sync] Filtered to ${futureEvents.length} future events (today onwards)`);
+    console.log(`[cron-sync] Filtered to ${futureEvents.length} future events`);
 
     const allSchools = await (prisma as any).school.findMany();
     const eventsBySchool = new Map<string, typeof futureEvents>();
@@ -120,21 +120,49 @@ export async function GET(request: Request) {
       eventsCreated: 0,
       eventsUpdated: 0,
       eventsDeleted: 0,
+      eventsObsolete: 0,
       totalEvents: 0,
     };
 
+    // Track all UIDs from current ICS
+    const currentUids = new Set(futureEvents.map(e => e.uid));
+
+    // 1. BORRAR eventos pasados y obsoletos
+    console.log('[cron-sync] Cleaning old and obsolete events...');
+    
+    const deletedPast = await (prisma as any).schoolEvent.deleteMany({
+      where: { date: { lt: today } },
+    });
+    results.eventsDeleted = deletedPast.count;
+    console.log(`[cron-sync] Deleted ${deletedPast.count} past events`);
+
+    // Borrar eventos futuros que ya no están en el ICS
+    const dbFutureEvents = await (prisma as any).schoolEvent.findMany({
+      where: { date: { gte: today } },
+    });
+
+    for (const dbEvent of dbFutureEvents) {
+      if (!currentUids.has(dbEvent.uid)) {
+        await (prisma as any).schoolEvent.delete({
+          where: { id: dbEvent.id },
+        });
+        results.eventsObsolete++;
+      }
+    }
+    console.log(`[cron-sync] Deleted ${results.eventsObsolete} obsolete events`);
+
+    // 2. Procesar cada escuela
     for (const [schoolName, events] of eventsBySchool) {
       let school = findSchoolInDB(schoolName, allSchools);
 
       if (!school) {
-        // Solo crear escuela si tiene eventos futuros
         school = await (prisma as any).school.create({
           data: {
             name: schoolName,
             country: 'Italia',
             type: 'pública',
             level: 'secondaria_secondo',
-            description: `Escuela activa en Teamup`,
+            description: 'Escuela activa en Teamup',
           },
         });
         allSchools.push(school);
@@ -176,24 +204,13 @@ export async function GET(request: Request) {
       }
     }
 
-    // Borrar TODOS los eventos pasados (de antes de hoy)
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    const deleted = await (prisma as any).schoolEvent.deleteMany({
-      where: {
-        date: { lt: today },
-      },
-    });
-    results.eventsDeleted = deleted.count;
-
     results.totalEvents = futureEvents.length;
 
     console.log('[cron-sync] Results:', results);
 
     return NextResponse.json({
       success: true,
-      message: 'Sync completed',
+      message: 'Sync completed - mirror mode',
       method: auth.method,
       results,
     });

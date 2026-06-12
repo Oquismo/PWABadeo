@@ -474,6 +474,24 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const hour = parseInt(timePart.substring(9, 11));
     const minute = parseInt(timePart.substring(11, 13));
     const second = parseInt(timePart.substring(13, 15)) || 0;
+    
+    // Extract timezone from the dateStr
+    const tzMatch = dateStr.match(/TZID=([^;:]+)/);
+    const tzid = tzMatch ? tzMatch[1] : 'Europe/Madrid';
+    
+    // Build ISO string and parse with timezone
+    const isoStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+    
+    try {
+      // Try to parse with timezone info
+      const date = new Date(`${isoStr} ${tzid}`);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    } catch {
+      // Fallback to local time
+    }
+    
     return new Date(year, month, day, hour, minute, second);
   }
 

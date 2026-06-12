@@ -7,22 +7,18 @@ export const revalidate = 0;
 
 const ICS_URL = 'https://ics.teamup.com/feed/ksampdkmv21a529vhx/0.ics';
 
-// Fuzzy match: find school in DB by checking if names share key words
 function findSchoolInDB(schoolName: string, allSchools: any[]): any {
   const target = schoolName.toLowerCase();
 
-  // Exact match first
   const exact = allSchools.find((s: any) => s.name.toLowerCase() === target);
   if (exact) return exact;
 
-  // Check if target contains DB school name or vice versa
   const contains = allSchools.find((s: any) => {
     const dbName = s.name.toLowerCase();
     return target.includes(dbName) || dbName.includes(target);
   });
   if (contains) return contains;
 
-  // Check by first significant word
   const targetWords = target.split(/\s+/).filter(w => w.length > 2);
   if (targetWords.length > 0) {
     const byWord = allSchools.find((s: any) => {
@@ -67,7 +63,7 @@ export async function POST(request: Request) {
     const parsedEvents = parseICS(icsContent);
     console.log(`[sync-ics] Parsed ${parsedEvents.length} raw events`);
 
-    // SOLO eventos futuros o de hoy - pasados no importan
+    // SOLO eventos futuros o de hoy
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -99,24 +95,53 @@ export async function POST(request: Request) {
       eventsCreated: 0,
       eventsUpdated: 0,
       eventsDeleted: 0,
+      eventsObsolete: 0,
       schools: [] as Array<{ name: string; dbId: number | null; eventCount: number }>,
       unmatched: [] as string[],
     };
 
-    // Process each school
+    // Track all UIDs from current ICS
+    const currentUids = new Set(futureEvents.map(e => e.uid));
+
+    // 1. BORRAR eventos pasados y eventos obsoletos (no están en el ICS actual)
+    console.log('[sync-ics] Cleaning old and obsolete events...');
+    
+    // Borrar eventos pasados
+    const deletedPast = await (prisma as any).schoolEvent.deleteMany({
+      where: { date: { lt: today } },
+    });
+    results.eventsDeleted = deletedPast.count;
+    console.log(`[sync-ics] Deleted ${deletedPast.count} past events`);
+
+    // Borrar eventos futuros que ya no están en el ICS
+    const dbFutureEvents = await (prisma as any).schoolEvent.findMany({
+      where: { date: { gte: today } },
+    });
+
+    for (const dbEvent of dbFutureEvents) {
+      if (!currentUids.has(dbEvent.uid)) {
+        await (prisma as any).schoolEvent.delete({
+          where: { id: dbEvent.id },
+        });
+        results.eventsObsolete++;
+      }
+    }
+    console.log(`[sync-ics] Deleted ${results.eventsObsolete} obsolete events (removed from ICS)`);
+
+    // 2. Procesar cada escuela del ICS
     for (const [schoolName, events] of eventsBySchool) {
       // Find matching school in DB
       let school = findSchoolInDB(schoolName, allSchools);
 
       if (!school) {
-        // Solo crear escuela si tiene eventos futuros
+        // Create school with minimal info
         school = await (prisma as any).school.create({
           data: {
             name: schoolName,
             country: 'Italia',
             type: 'pública',
             level: 'secondaria_secondo',
-            description: `Escuela activa en Teamup`,
+            description: 'Escuela activa en Teamup',
           },
         });
         allSchools.push(school);
@@ -171,16 +196,8 @@ export async function POST(request: Request) {
       });
     }
 
-    // Borrar eventos pasados
-    const deleted = await (prisma as any).schoolEvent.deleteMany({
-      where: {
-        date: { lt: today },
-      },
-    });
-    results.eventsDeleted = deleted.count;
-
     return NextResponse.json({
-      message: 'ICS sync completed - future events only',
+      message: 'ICS sync completed - mirror mode',
       results,
     });
   } catch (error) {
