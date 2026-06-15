@@ -4,7 +4,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import telemetry from '@/lib/telemetry';
 import loggerClient from '@/lib/loggerClient';
 import { UserBase, UserUpdateData, UserStorageData } from '@/types/api.types';
@@ -97,6 +97,8 @@ async function fetchUserFromBackend(email: string): Promise<User | null> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const userRef = useRef(user);
+  userRef.current = user;
 
   const onlyAdmins =
     typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
@@ -256,48 +258,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = useCallback(
     async (data: UserUpdateData) => {
-      if (!user) return;
+      const currentUser = userRef.current;
+      if (!currentUser) return;
 
       try {
-        // No enviar 'residence' al backend (solo en caché local)
-        const { residence, ...serverData } = data as UserUpdateData & { residence?: string };
-
-        // Actualizar en el servidor
-        const response = await apiClient.put('/api/user/update', {
-          userId: user.id,
-          ...serverData,
+        const response = await apiClient.put<{ user: User }>('/api/user/update', {
+          fields: data,
+          userId: currentUser.id,
         });
 
-        if (!response.success) {
-          loggerClient.warn('Advertencia: falló actualización en servidor');
+        if (response.success) {
+          setUser((prevUser) => {
+            if (!prevUser) return null;
+            const updatedUser = { ...prevUser, ...response.data?.user };
+            saveUserToStorage(userToStorageData(updatedUser));
+            return updatedUser;
+          });
+
+          loggerClient.info('✅ Usuario actualizado');
+        } else {
+          throw new Error(response.error || 'Error al actualizar usuario');
         }
-
-        // Actualizar localmente siempre (incluir residence)
-        setUser((prevUser) => {
-          if (!prevUser) return null;
-          const updatedUser = { ...prevUser, ...data } as User;
-          saveUserToStorage(userToStorageData(updatedUser));
-          return updatedUser;
-        });
-
-        loggerClient.info('✅ Usuario actualizado');
       } catch (error) {
         loggerClient.error('Error actualizando usuario:', error);
         throw error;
       }
     },
-    [user]
+    []
   );
 
   // ===== Update Avatar =====
 
   const updateAvatar = useCallback(
     async (avatarUrl: string) => {
-      if (!user) return;
+      const currentUser = userRef.current;
+      if (!currentUser) return;
 
       try {
         const response = await apiClient.post<{ avatarUrl: string }>('/api/avatar', {
-          userId: user.id,
+          userId: currentUser.id,
           avatarUrl,
         });
 
@@ -318,16 +317,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error;
       }
     },
-    [user]
+    []
   );
 
   // ===== Delete Avatar =====
 
   const deleteAvatar = useCallback(async () => {
-    if (!user) return;
+    const currentUser = userRef.current;
+    if (!currentUser) return;
 
     try {
-      const response = await apiClient.delete(`/api/avatar?userId=${user.id}`);
+      const response = await apiClient.delete(`/api/avatar?userId=${currentUser.id}`);
 
       if (!response.success) {
         throw new Error('Error al eliminar avatar');
@@ -345,16 +345,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loggerClient.error('Error eliminando avatar:', error);
       throw error;
     }
-  }, [user]);
+  }, []);
 
   // ===== Refresh Avatar =====
 
   const refreshAvatar = useCallback(async () => {
-    if (!user) return;
+    const currentUser = userRef.current;
+    if (!currentUser) return;
 
     try {
       const response = await apiClient.get<{ avatarUrl: string }>(
-        `/api/avatar?userId=${user.id}`
+        `/api/avatar?userId=${currentUser.id}`
       );
 
       if (!response.success) {
@@ -373,15 +374,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loggerClient.error('Error refrescando avatar:', error);
       throw error;
     }
-  }, [user]);
+  }, []);
 
   // ===== Refresh User =====
 
   const refreshUser = useCallback(async () => {
-    if (!user) return;
+    const currentUser = userRef.current;
+    if (!currentUser) return;
 
     try {
-      const refreshedUser = await fetchUserFromBackend(user.email);
+      const refreshedUser = await fetchUserFromBackend(currentUser.email);
 
       if (refreshedUser) {
         setUser(refreshedUser);
@@ -391,7 +393,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       loggerClient.error('Error refrescando usuario:', error);
     }
-  }, [user]);
+  }, []);
 
   // ===== Context Value =====
 

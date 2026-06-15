@@ -21,6 +21,7 @@ import WarmupInitializer from '@/components/WarmupInitializer';
 import InitialLanguageDialog from '@/components/InitialLanguageDialog';
 import StandaloneModeDetector from '@/components/layout/StandaloneModeDetector';
 import SplashScreen from '@/components/layout/SplashScreen';
+import InstallPrompt from '@/components/layout/InstallPrompt';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import ClientTopBarWrapper from '@/components/layout/ClientTopBarWrapper';
 
@@ -122,6 +123,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
                 <InitialLanguageDialog />
                 <StandaloneModeDetector />
+                <InstallPrompt />
                 <DebugInitializer />
                 <WarmupInitializer />
 
