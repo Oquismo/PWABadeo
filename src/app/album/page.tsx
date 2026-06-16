@@ -71,7 +71,7 @@ export default function AlbumPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -83,6 +83,10 @@ export default function AlbumPage() {
   useEffect(() => {
     fetchPhotos();
   }, []);
+
+  useEffect(() => {
+    console.log('🔍 Album - user:', user?.id, 'role:', user?.role, 'isLoading:', isLoading);
+  }, [user, isLoading]);
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
     setSnackbar({ open: true, message, severity });
@@ -261,7 +265,7 @@ export default function AlbumPage() {
                   }}
                 >
                   {/* Delete button */}
-                  {(user?.id === photo.user.id || user?.role === 'admin') && (
+                  {(user?.id === photo.user.id || user?.role?.toLowerCase() === 'admin') && (
                     <IconButton
                       size="small"
                       sx={{
