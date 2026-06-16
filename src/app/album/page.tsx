@@ -39,6 +39,8 @@ import 'swiper/css/pagination';
 import 'swiper/css/zoom';
 import PageTransition from '@/components/layout/PageTransition';
 
+import { useAuth } from '@/context/AuthContext';
+
 interface Photo {
   id: number;
   url: string;
@@ -69,8 +71,7 @@ export default function AlbumPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useAuth();
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -81,18 +82,6 @@ export default function AlbumPage() {
 
   useEffect(() => {
     fetchPhotos();
-    try {
-      const userCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('user='));
-      if (userCookie) {
-        const userData = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
-        setCurrentUserId(userData.id);
-        setIsAdmin(userData.role === 'admin');
-      }
-    } catch (e) {
-      console.error('Error reading user cookie:', e);
-    }
   }, []);
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
@@ -272,7 +261,7 @@ export default function AlbumPage() {
                   }}
                 >
                   {/* Delete button */}
-                  {(currentUserId === photo.user.id || isAdmin) && (
+                  {(user?.id === photo.user.id || user?.role === 'admin') && (
                     <IconButton
                       size="small"
                       sx={{
