@@ -65,10 +65,11 @@ export default function AlbumPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [caption, setCaption] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const { user, isLoading } = useAuth();
@@ -83,10 +84,6 @@ export default function AlbumPage() {
   useEffect(() => {
     fetchPhotos();
   }, []);
-
-  useEffect(() => {
-    console.log('🔍 Album - user:', user?.id, 'role:', user?.role, 'isLoading:', isLoading);
-  }, [user, isLoading]);
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
     setSnackbar({ open: true, message, severity });
@@ -112,22 +109,25 @@ export default function AlbumPage() {
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(URL.createObjectURL(file));
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setSelectedFiles(files);
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      setPreviewUrls(files.map(file => URL.createObjectURL(file)));
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (selectedFiles.length === 0) return;
 
     setUploading(true);
+    setUploadProgress(0);
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
-      if (caption) formData.append('caption', caption);
+      selectedFiles.forEach(file => formData.append('files', file));
+      if (caption) {
+        selectedFiles.forEach(() => formData.append('captions', caption));
+      }
 
       const res = await fetch('/api/photos/upload', {
         method: 'POST',
@@ -136,15 +136,13 @@ export default function AlbumPage() {
       });
 
       if (res.ok) {
-        showSnackbar('Foto subida correctamente', 'success');
+        showSnackbar(`${selectedFiles.length} foto${selectedFiles.length > 1 ? 's' : ''} subida${selectedFiles.length > 1 ? 's' : ''} correctamente`, 'success');
         fetchPhotos();
         setOpenUploadDialog(false);
-        setSelectedFile(null);
+        setSelectedFiles([]);
         setCaption('');
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-          setPreviewUrl(null);
-        }
+        previewUrls.forEach(url => URL.revokeObjectURL(url));
+        setPreviewUrls([]);
       } else {
         const errorData = await res.json();
         showSnackbar(errorData.error || 'Error al subir', 'error');
@@ -153,6 +151,7 @@ export default function AlbumPage() {
       showSnackbar('Error de conexión', 'error');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -359,23 +358,24 @@ export default function AlbumPage() {
           open={openUploadDialog}
           onClose={() => {
             setOpenUploadDialog(false);
-            setSelectedFile(null);
-            if (previewUrl) {
-              URL.revokeObjectURL(previewUrl);
-              setPreviewUrl(null);
-            }
+            setSelectedFiles([]);
+            previewUrls.forEach(url => URL.revokeObjectURL(url));
+            setPreviewUrls([]);
           }}
           fullWidth
           maxWidth="sm"
           PaperProps={{ sx: { borderRadius: 4 } }}
         >
-          <DialogTitle sx={{ pb: 1 }}>Subir foto</DialogTitle>
+          <DialogTitle sx={{ pb: 1 }}>
+            Subir {selectedFiles.length > 0 ? `${selectedFiles.length} fotos` : 'fotos'}
+          </DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 1 }}>
               <input
                 ref={fileInputRef}
                 accept="image/*"
                 type="file"
+                multiple
                 hidden
                 onChange={handleFileSelect}
               />
@@ -393,20 +393,29 @@ export default function AlbumPage() {
                 }}
                 onClick={() => fileInputRef.current?.click()}
               >
-                {previewUrl ? (
-                  <Box sx={{ position: 'relative', width: '100%', height: 200 }}>
-                    <Image
-                      src={previewUrl}
-                      alt="preview"
-                      fill
-                      style={{ objectFit: 'cover', borderRadius: 12 }}
-                    />
+                {previewUrls.length > 0 ? (
+                  <Box sx={{ width: '100%' }}>
+                    <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
+                      {previewUrls.map((url, i) => (
+                        <Box key={i} sx={{ position: 'relative', width: 80, height: 80, flexShrink: 0, borderRadius: 2, overflow: 'hidden' }}>
+                          <Image
+                            src={url}
+                            alt={`preview-${i}`}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                      {selectedFiles.length} foto{selectedFiles.length > 1 ? 's' : ''} seleccionada{selectedFiles.length > 1 ? 's' : ''}
+                    </Typography>
                   </Box>
                 ) : (
                   <>
                     <AddIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
                     <Typography variant="body2" color="text.secondary">
-                      Toca para seleccionar
+                      Toca para seleccionar (máx. 10)
                     </Typography>
                   </>
                 )}
@@ -426,7 +435,7 @@ export default function AlbumPage() {
             <Button
               variant="contained"
               onClick={handleUpload}
-              disabled={uploading || !selectedFile}
+              disabled={uploading || selectedFiles.length === 0}
               startIcon={uploading ? <CircularProgress size={18} color="inherit" /> : null}
             >
               {uploading ? 'Subiendo...' : 'Subir'}
