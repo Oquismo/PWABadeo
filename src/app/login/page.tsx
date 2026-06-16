@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -40,20 +40,16 @@ import { UserBase } from '@/types/api.types';
 // Importación dinámica del tour
 const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ssr: false });
 
-export default function LoginPageRefactored() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
   const { t } = useTranslation();
   const { success: hapticSuccess, error: hapticError } = useHaptics();
   
-  // Estado del tour
   const [showTour, setShowTour] = useState(false);
-  
-  // Toggle para mostrar/ocultar contraseña
   const { value: showPassword, toggle: toggleShowPassword } = useToggle(false);
 
-  // Hook de formulario con validación integrada
   const {
     values,
     errors,
@@ -70,7 +66,6 @@ export default function LoginPageRefactored() {
     onSubmit: handleLogin,
   });
 
-  // Verificar si mostrar el tour
   useEffect(() => {
     const tourDone = LocalStorage.has('onboardingTourDone');
     if (!tourDone) {
@@ -78,42 +73,33 @@ export default function LoginPageRefactored() {
     }
   }, []);
 
-  // Handler del tour
   const handleFinishTour = () => {
     setShowTour(false);
     LocalStorage.set('onboardingTourDone', 'true');
   };
 
-  // Función de login (usada por el hook de formulario)
   async function handleLogin(formData: LoginFormData) {
     try {
       loggerClient.debug('🔐 Intentando login con:', formData.email);
 
-      // Usar el cliente API refactorizado
       const response = await apiClient.post<{ user: UserBase }>('/api/auth/login-retry', {
         email: formData.email,
         password: formData.password,
       });
 
-      // Manejar error
       if (!response.success) {
         setFieldError('api', response.error || 'Error al iniciar sesión');
         await hapticError();
         return;
       }
 
-      // Login exitoso
       if (response.data?.user) {
         loggerClient.info('✅ Login exitoso, usuario:', response.data.user);
         
-        // Usar contexto de autenticación
         await login(response.data.user);
-        
-        // Feedback háptico
         await hapticSuccess();
         
-        // Redirigir a la página original o al home
-        const from = searchParams?.get('from') || '/';
+        const from = searchParams.get('from') || '/';
         router.push(from);
       }
     } catch (error) {
@@ -123,7 +109,6 @@ export default function LoginPageRefactored() {
     }
   }
 
-  // Determinar si es modo admin-only
   const isAdminOnly = process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
 
   return (
@@ -132,10 +117,8 @@ export default function LoginPageRefactored() {
       maxWidth="xs"
       sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 4 }}
     >
-      {/* Tour de bienvenida */}
       {showTour && <OnboardingTour run={showTour} onFinish={handleFinishTour} />}
 
-      {/* App icon + title */}
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pb: 4 }}>
         <Box sx={{
           width: 72, height: 72, borderRadius: '22px', overflow: 'hidden',
@@ -157,9 +140,7 @@ export default function LoginPageRefactored() {
         </Typography>
       </Box>
 
-      {/* Form */}
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-        {/* Email field — M3 filled style */}
         <Box>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'primary.main', mb: 0.5, display: 'block', fontSize: '0.75rem' }}>
             {t('login.email') || 'Correo electrónico'}
@@ -186,7 +167,6 @@ export default function LoginPageRefactored() {
           </Box>
         </Box>
 
-        {/* Password field */}
         <Box>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5, display: 'block', fontSize: '0.75rem' }}>
             {t('login.password') || 'Contraseña'}
@@ -231,7 +211,6 @@ export default function LoginPageRefactored() {
           </Box>
         </Box>
 
-        {/* Forgot password */}
         <Box sx={{ textAlign: 'right' }}>
           <Link href="/forgot-password" passHref legacyBehavior>
             <MuiLink variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none' }}>
@@ -240,14 +219,12 @@ export default function LoginPageRefactored() {
           </Link>
         </Box>
 
-        {/* API error */}
         {errors.api && (
           <Typography color="error" variant="body2" sx={{ textAlign: 'center' }}>
             {errors.api}
           </Typography>
         )}
 
-        {/* Submit button */}
         <Button
           type="submit"
           fullWidth
@@ -269,7 +246,6 @@ export default function LoginPageRefactored() {
           {isSubmitting ? 'Iniciando sesión...' : (t('login.submit') || 'Iniciar sesión')}
         </Button>
 
-        {/* Register link */}
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 1, fontSize: '0.8rem' }}>
           ¿No tienes cuenta?{' '}
           <Link href="/registro" passHref legacyBehavior>
@@ -280,5 +256,13 @@ export default function LoginPageRefactored() {
         </Typography>
       </Box>
     </Container>
+  );
+}
+
+export default function LoginPageRefactored() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
