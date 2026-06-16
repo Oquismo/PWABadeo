@@ -223,17 +223,29 @@ function HeatmapLayer({ points, visible }: { points: [number, number, number?][]
 
 function MapController({ setMap, setIsMapReady }: { setMap: (m: L.Map) => void; setIsMapReady: (r: boolean) => void }) {
   const map = useMap();
-  useEffect(() => { if (map) { setMap(map); setIsMapReady(true); } }, [map, setMap, setIsMapReady]);
+  useEffect(() => {
+    if (map) {
+      setMap(map);
+      setIsMapReady(true);
+      map.invalidateSize();
+    }
+  }, [map, setMap, setIsMapReady]);
   return null;
 }
 
 function MapResizer() {
   const map = useMap();
   useEffect(() => {
-    const ro = new ResizeObserver(() => map.invalidateSize());
+    const timer = setTimeout(() => map.invalidateSize(), 100);
+    const ro = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
     const el = map.getContainer();
     if (el?.parentElement) ro.observe(el.parentElement);
-    return () => { if (el?.parentElement) ro.unobserve(el.parentElement); };
+    return () => {
+      clearTimeout(timer);
+      if (el?.parentElement) ro.unobserve(el.parentElement);
+    };
   }, [map]);
   return null;
 }
@@ -242,13 +254,42 @@ function SearchControl({ map, apiKey }: { map: L.Map | null; apiKey: string }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{ name: string; lat: number; lng: number }[]>([]);
   const [open, setOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [noResults, setNoResults] = useState(false);
   const theme = useTheme();
+
+  const searchLocalPlaces = (q: string) => {
+    const lower = q.toLowerCase();
+    return placesData
+      .filter(p =>
+        p.name.toLowerCase().includes(lower) ||
+        p.description.toLowerCase().includes(lower) ||
+        p.category.toLowerCase().includes(lower) ||
+        (p.address && p.address.toLowerCase().includes(lower))
+      )
+      .map(p => ({
+        name: `${p.name} (${p.category})`,
+        lat: p.coordinates.lat,
+        lng: p.coordinates.lng,
+      }));
+  };
 
   const handleSearch = useCallback(async () => {
     if (!query.trim() || !map) return;
+    setSearching(true);
+    setNoResults(false);
+
+    const localResults = searchLocalPlaces(query.trim());
+    if (localResults.length > 0) {
+      setResults(localResults);
+      setOpen(true);
+      setSearching(false);
+      return;
+    }
+
     const bbox = '-6.2,37.2,-5.7,37.6';
     try {
-      const res = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${apiKey}&bbox=${bbox}&limit=5`);
+      const res = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(query.trim())}.json?key=${apiKey}&bbox=${bbox}&limit=5`);
       const data = await res.json();
       if (data.features?.length) {
         setResults(data.features.map((f: any) => ({
@@ -256,13 +297,24 @@ function SearchControl({ map, apiKey }: { map: L.Map | null; apiKey: string }) {
           lat: f.center[1], lng: f.center[0],
         })));
         setOpen(true);
+        setNoResults(false);
+      } else {
+        setResults([]);
+        setNoResults(true);
+        setOpen(false);
       }
-    } catch (e) { loggerClient.error('Search error:', e); }
+    } catch (e) {
+      loggerClient.error('Search error:', e);
+      setNoResults(true);
+    } finally {
+      setSearching(false);
+    }
   }, [query, map, apiKey]);
 
   const selectResult = (r: { name: string; lat: number; lng: number }) => {
     map?.flyTo([r.lat, r.lng], 16, { duration: 1 });
     setOpen(false);
+    setNoResults(false);
     setQuery(r.name);
   };
 
@@ -270,7 +322,7 @@ function SearchControl({ map, apiKey }: { map: L.Map | null; apiKey: string }) {
     <Box sx={{ position: 'absolute', top: 12, left: 12, right: 12, zIndex: 1000 }}>
       <Box sx={{
         display: 'flex', gap: 1,
-        bgcolor: muiAlpha(theme.palette.background.paper, 0.9),
+        bgcolor: muiAlpha(theme.palette.background.paper, 0.92),
         backdropFilter: 'blur(12px)',
         borderRadius: 3,
         border: `1px solid ${muiAlpha(theme.palette.common.white, 0.08)}`,
@@ -283,9 +335,9 @@ function SearchControl({ map, apiKey }: { map: L.Map | null; apiKey: string }) {
           <SearchOutlinedIcon sx={{ color: muiAlpha(theme.palette.text.primary, 0.5), fontSize: 20 }} />
           <input
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value); setNoResults(false); }}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder="Buscar en el mapa…"
+            placeholder="Buscar lugar, dirección…"
             style={{
               flex: 1, border: 'none', outline: 'none', background: 'transparent',
               color: theme.palette.text.primary, fontSize: '0.9rem',
@@ -293,20 +345,21 @@ function SearchControl({ map, apiKey }: { map: L.Map | null; apiKey: string }) {
             }}
           />
           {query && (
-            <IconButton size="small" onClick={() => { setQuery(''); setOpen(false); }} sx={{ color: muiAlpha(theme.palette.text.primary, 0.3) }}>
+            <IconButton size="small" onClick={() => { setQuery(''); setOpen(false); setNoResults(false); }} sx={{ color: muiAlpha(theme.palette.text.primary, 0.3) }}>
               <CloseIcon sx={{ fontSize: 18 }} />
             </IconButton>
           )}
         </Box>
         <Button
           onClick={handleSearch}
+          disabled={searching || !query.trim()}
           sx={{
             minWidth: 40, height: 40, borderRadius: 2,
             background: 'linear-gradient(135deg, #7c4dff, #40c4ff)',
             color: 'white', '&:hover': { opacity: 0.9 },
           }}
         >
-          <SearchOutlinedIcon sx={{ fontSize: 20 }} />
+          {searching ? <CircularProgress size={20} color="inherit" /> : <SearchOutlinedIcon sx={{ fontSize: 20 }} />}
         </Button>
       </Box>
       {open && results.length > 0 && (
@@ -333,6 +386,19 @@ function SearchControl({ map, apiKey }: { map: L.Map | null; apiKey: string }) {
               </Typography>
             </Box>
           ))}
+        </Box>
+      )}
+      {noResults && (
+        <Box sx={{
+          mt: 0.5, borderRadius: 2, overflow: 'hidden', p: 2, textAlign: 'center',
+          bgcolor: muiAlpha(theme.palette.background.paper, 0.95),
+          backdropFilter: 'blur(12px)',
+          border: `1px solid ${muiAlpha(theme.palette.common.white, 0.08)}`,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        }}>
+          <Typography variant="body2" sx={{ color: muiAlpha(theme.palette.text.primary, 0.5) }}>
+            No se encontraron resultados
+          </Typography>
         </Box>
       )}
     </Box>
@@ -375,6 +441,19 @@ export default function InteractiveMap({
     localStorage.setItem('userCustomPlaces', JSON.stringify(customPlaces));
   }, [customPlaces]);
 
+  const getUserLocation = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const latLng = new L.LatLng(pos.coords.latitude, pos.coords.longitude);
+        setUserPosition(latLng);
+        map?.flyTo(latLng, 16, { duration: 1 });
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   useEffect(() => {
     if (selectedPlace && map && isMapReady) {
       map.flyTo([selectedPlace.coordinates.lat, selectedPlace.coordinates.lng], 16, { duration: 0.8 });
@@ -406,21 +485,23 @@ export default function InteractiveMap({
   );
 
   return (
-    <Box>
+    <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
       {!markersOnly && (
-        <MaterialFilterChips
-          categories={filterCategories}
-          selectedCategories={selectedCategories}
-          onCategoriesChange={setSelectedCategories}
-        />
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1001 }}>
+          <MaterialFilterChips
+            categories={filterCategories}
+            selectedCategories={selectedCategories}
+            onCategoriesChange={setSelectedCategories}
+          />
+        </Box>
       )}
 
-      <Box sx={{ position: 'relative', borderRadius: 3, overflow: 'hidden' }}>
+      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         <MapContainer
           center={[37.385, -5.9925]}
           zoom={14}
           style={{
-            height: compact ? (typeof height === 'number' ? `${height}px` : '260px') : height,
+            height: '100%',
             width: '100%',
             zIndex: 0,
           }}
@@ -508,6 +589,22 @@ export default function InteractiveMap({
             }}
           >
             <WhatshotIcon sx={{ fontSize: 20 }} />
+          </Fab>
+        )}
+
+        {!markersOnly && (
+          <Fab
+            size="small"
+            onClick={getUserLocation}
+            sx={{
+              position: 'absolute', bottom: 16, right: 12, zIndex: 1000,
+              bgcolor: muiAlpha(theme.palette.background.paper, 0.85),
+              backdropFilter: 'blur(8px)',
+              color: theme.palette.primary.main,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            }}
+          >
+            <MyLocationIcon />
           </Fab>
         )}
       </Box>

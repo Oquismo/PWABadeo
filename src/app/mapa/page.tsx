@@ -4,11 +4,23 @@ import { useState, useRef } from 'react';
 import { Box, Fab, Drawer, IconButton, Typography, useTheme, alpha } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
-import GeolocalizacionDemo from '@/components/GeolocalizacionDemo';
 import dynamic from 'next/dynamic';
 import ListIcon from '@mui/icons-material/List';
 import CloseIcon from '@mui/icons-material/Close';
-import LayersClearIcon from '@mui/icons-material/LayersClear';
+
+const InteractiveMap = dynamic(
+  () => import('@/components/mapa/InteractiveMap'),
+  {
+    ssr: false,
+    loading: () => (
+      <Material3LoadingPage
+        text="Cargando mapa"
+        subtitle="Preparando lugares..."
+        size="large"
+      />
+    ),
+  }
+);
 
 const PlacesListSection = dynamic(() => import('@/components/mapa/PlacesListSection'), { ssr: false });
 import { Place } from '@/data/places';
@@ -20,20 +32,6 @@ export default function MapaPage() {
   const [selectedPlace, setSelectedPlace] = useState<Place | undefined>();
   const clearTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const InteractiveMap = dynamic(
-    () => import('@/components/mapa/InteractiveMap'),
-    {
-      ssr: false,
-      loading: () => (
-        <Material3LoadingPage
-          text={t('map.loading')}
-          subtitle={t('map.preparingPlaces')}
-          size="large"
-        />
-      ),
-    }
-  );
-
   const handlePlaceSelect = (place: Place) => {
     if (clearTimer.current) clearTimeout(clearTimer.current);
     setSelectedPlace(place);
@@ -44,12 +42,8 @@ export default function MapaPage() {
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      {/* Map takes full height */}
-      <Box sx={{ flex: 1, position: 'relative' }}>
-        <GeolocalizacionDemo />
-        <InteractiveMap selectedPlace={selectedPlace} />
-      </Box>
+    <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
+      <InteractiveMap selectedPlace={selectedPlace} />
 
       {/* Places list FAB */}
       <Fab
