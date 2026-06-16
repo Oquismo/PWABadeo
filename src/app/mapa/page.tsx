@@ -31,11 +31,21 @@ export default function MapaPage() {
   };
 
   return (
-    <Box sx={{ height: '100dvh', width: '100%', overflow: 'hidden' }}>
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1,
+        bgcolor: 'background.default',
+      }}
+    >
       <InteractiveMap selectedPlace={selectedPlace} />
 
       <Fab color="secondary" aria-label={t('map.showPlacesList')} onClick={() => setOpenDrawer(true)}
-        sx={{ position: 'fixed', bottom: theme => `calc(64px + ${theme.spacing(2)})`, right: theme => theme.spacing(2), background: 'linear-gradient(135deg,#7c4dff,#40c4ff)', boxShadow: '0 8px 24px rgba(124,77,255,0.4)' }}>
+        sx={{ position: 'fixed', bottom: theme => `calc(64px + ${theme.spacing(2)})`, right: theme => theme.spacing(2), background: 'linear-gradient(135deg,#7c4dff,#40c4ff)', boxShadow: '0 8px 24px rgba(124,77,255,0.4)', zIndex: 10 }}>
         <ListIcon />
       </Fab>
 
