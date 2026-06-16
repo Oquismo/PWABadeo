@@ -31,7 +31,7 @@ export default function MapaPage() {
   };
 
   return (
-    <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <Box sx={{ height: '100dvh', width: '100%', overflow: 'hidden' }}>
       <InteractiveMap selectedPlace={selectedPlace} />
 
       <Fab color="secondary" aria-label={t('map.showPlacesList')} onClick={() => setOpenDrawer(true)}
