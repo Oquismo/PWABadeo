@@ -26,7 +26,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Foto no encontrada' }, { status: 404 });
     }
 
-    if (photo.userId !== user.id) {
+    if (photo.userId !== user.id && user.role !== 'admin') {
       return NextResponse.json({ error: 'No tienes permiso' }, { status: 403 });
     }
 

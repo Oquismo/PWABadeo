@@ -1,7 +1,32 @@
-// src/components/ui/MaterialFilterChips.tsx
-
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTheme, alpha } from '@mui/material/styles';
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Residencia: '#7c4dff',
+  Comida: '#ff6d00',
+  Salud: '#00c853',
+  Transporte: '#00bcd4',
+  Metro: '#2979ff',
+  Ocio: '#ff1744',
+  Cultural: '#d500f9',
+  Servicios: '#ff9100',
+  Estudio: '#00e676',
+  Personalizado: '#78909c',
+};
+
+const CATEGORY_EMOJIS: Record<string, string> = {
+  Residencia: '🏠',
+  Comida: '🍽️',
+  Salud: '🏥',
+  Transporte: '🚌',
+  Metro: '🚇',
+  Ocio: '🎉',
+  Cultural: '🏛️',
+  Servicios: '🔧',
+  Estudio: '📚',
+  Personalizado: '📍',
+};
 
 interface MaterialFilterChipsProps {
   categories: string[];
@@ -16,9 +41,10 @@ const MaterialFilterChips = React.memo(function MaterialFilterChips({
   selectedCategories,
   onCategoriesChange,
   className,
-  style
+  style,
 }: MaterialFilterChipsProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const handleChipClick = useCallback((category: string) => {
     if (selectedCategories.includes(category)) {
@@ -26,11 +52,8 @@ const MaterialFilterChips = React.memo(function MaterialFilterChips({
     } else {
       onCategoriesChange([...selectedCategories, category]);
     }
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
-    }
+    if ('vibrate' in navigator) navigator.vibrate(50);
   }, [selectedCategories, onCategoriesChange]);
-
 
   const categoryMap = useMemo(() => ({
     'Todos': t('map.categories.all') || 'Todos',
@@ -43,12 +66,8 @@ const MaterialFilterChips = React.memo(function MaterialFilterChips({
     'Transporte': t('map.categories.transport') || 'Transporte',
     'Metro': t('map.categories.metro') || 'Metro',
     'Salud': t('map.categories.health') || 'Salud',
-    'Personalizado': t('map.categories.custom') || 'Personalizado'
-  }), [t]) as Record<string, string>;
-
-  const getCategoryTranslation = useCallback((category: string): string => {
-    return (categoryMap as Record<string, string>)[category] || category;
-  }, [categoryMap]);
+    'Personalizado': t('map.categories.custom') || 'Personalizado',
+  }), [t]);
 
   return (
     <div
@@ -57,59 +76,45 @@ const MaterialFilterChips = React.memo(function MaterialFilterChips({
         display: 'flex',
         gap: '8px',
         overflowX: 'auto',
-        padding: '8px 0 16px 0',
+        padding: '8px 0 12px 0',
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
-        ...style
+        ...style,
       }}
     >
-      {categories.map((category) => {
+      {categories.map(category => {
         const isSelected = selectedCategories.includes(category);
+        const color = CATEGORY_COLORS[category] || '#78909c';
+        const emoji = CATEGORY_EMOJIS[category] || '';
         return (
           <button
             key={category}
             onClick={() => handleChipClick(category)}
-            className={`material-filter-chip ${isSelected ? 'selected' : ''}`}
             style={{
               flexShrink: 0,
-              padding: '8px 16px',
+              padding: '6px 14px',
               borderRadius: '20px',
               border: '1px solid',
-              backgroundColor: isSelected ? 'rgb(255, 107, 53)' : 'rgb(44, 44, 44)',
-              color: isSelected ? 'white' : 'rgb(220, 220, 220)',
-              borderColor: isSelected ? 'rgb(255, 107, 53)' : 'rgb(80, 80, 80)',
+              backgroundColor: isSelected ? alpha(color, 0.2) : 'transparent',
+              color: isSelected ? color : alpha(theme.palette.text.primary, 0.65),
+              borderColor: isSelected ? alpha(color, 0.4) : alpha(theme.palette.common.white, 0.1),
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
+              fontSize: '13px',
+              fontWeight: isSelected ? 700 : 500,
               fontFamily: 'system-ui, -apple-system, sans-serif',
               transition: 'all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)',
-              position: 'relative',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               outline: 'none',
-              userSelect: 'none'
+              userSelect: 'none',
+              transform: isSelected ? 'scale(1.02)' : 'scale(1)',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.filter = 'brightness(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.filter = 'brightness(1)';
-            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = isSelected ? 'scale(1.02)' : 'scale(1)'; }}
           >
-            {isSelected && (
-              <span style={{ 
-                fontSize: '16px', 
-                lineHeight: 1,
-                display: 'flex',
-                alignItems: 'center'
-              }}>
-                ✓
-              </span>
-            )}
-            {getCategoryTranslation(category)}
+            {emoji && <span style={{ fontSize: '14px', lineHeight: 1 }}>{emoji}</span>}
+            {(categoryMap as Record<string, string>)[category] || category}
           </button>
         );
       })}

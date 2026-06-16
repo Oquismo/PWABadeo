@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Container,
   Box,
@@ -42,6 +42,7 @@ const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ss
 
 export default function LoginPageRefactored() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const { t } = useTranslation();
   const { success: hapticSuccess, error: hapticError } = useHaptics();
@@ -111,8 +112,9 @@ export default function LoginPageRefactored() {
         // Feedback háptico
         await hapticSuccess();
         
-        // Redirigir
-        router.push('/');
+        // Redirigir a la página original o al home
+        const from = searchParams?.get('from') || '/';
+        router.push(from);
       }
     } catch (error) {
       loggerClient.error('❌ Error en login:', error);

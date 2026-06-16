@@ -1,467 +1,409 @@
-// src/components/mapa/InteractiveMap.tsx (Este código es el que ya tienes y debería funcionar)
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { LatLngExpression, LatLng } from 'leaflet';
-import { Box, Typography, Fab, IconButton, InputAdornment, Button, Stack, CircularProgress, Card, CardContent, CardActions } from '@mui/material';
-import { useTheme, alpha } from '@mui/material/styles';
+import L from 'leaflet';
+import 'leaflet.heat';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import { Box, Typography, Fab, IconButton, Stack, Button, CircularProgress, alpha as muiAlpha } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import MaterialTextField from '@/components/ui/MaterialTextField';
-import MaterialFilterChips from '@/components/ui/MaterialFilterChips';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import LanguageIcon from '@mui/icons-material/Language';
-import Image from 'next/image';
-
-import { placesData, Place } from '@/data/places'; 
-import AddPlaceModal from './AddPlaceModal'; 
-
-import L from 'leaflet';
-import 'leaflet.heat';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+import CloseIcon from '@mui/icons-material/Close';
+import { placesData, Place } from '@/data/places';
+import AddPlaceModal from './AddPlaceModal';
+import MaterialFilterChips from '@/components/ui/MaterialFilterChips';
 import loggerClient from '@/lib/loggerClient';
-// Genera los puntos del heatmap a partir de los datos reales de placesData y clicks almacenados en localStorage
+
+const API_KEY = 'Gq2uZmTMhM4Vpv2fhXOR';
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Residencia: '#7c4dff',
+  Comida: '#ff6d00',
+  Salud: '#00c853',
+  Transporte: '#00bcd4',
+  Metro: '#2979ff',
+  Ocio: '#ff1744',
+  Cultural: '#d500f9',
+  Servicios: '#ff9100',
+  Estudio: '#00e676',
+  Personalizado: '#78909c',
+};
+
+const CATEGORY_EMOJIS: Record<string, string> = {
+  Residencia: '🏠',
+  Comida: '🍽️',
+  Salud: '🏥',
+  Transporte: '🚌',
+  Metro: '🚇',
+  Ocio: '🎉',
+  Cultural: '🏛️',
+  Servicios: '🔧',
+  Estudio: '📚',
+  Personalizado: '📍',
+};
+
+function createCategoryIcon(category: string, isSelected = false) {
+  const color = CATEGORY_COLORS[category] || '#78909c';
+  const emoji = CATEGORY_EMOJIS[category] || '📍';
+  const size = isSelected ? 48 : 40;
+  const html = `
+    <div style="
+      width: ${size}px; height: ${size}px;
+      background: linear-gradient(135deg, ${color}dd, ${color}88);
+      border: ${isSelected ? 3 : 2}px solid white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 ${isSelected ? 4 : 2}px ${isSelected ? 16 : 8}px rgba(0,0,0,0.4);
+      transition: all 0.2s ease;
+      font-size: ${isSelected ? 22 : 18}px;
+      transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'};
+    ">${emoji}</div>
+  `;
+  return L.divIcon({
+    html,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
+  });
+}
+
+function createUserLocationIcon(color: string) {
+  const html = `
+    <div style="
+      width: 36px; height: 36px;
+      background: ${color};
+      border: 3px solid white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 0 8px ${color}44, 0 4px 16px rgba(0,0,0,0.5);
+      animation: userPulse 2s ease-in-out infinite;
+    ">
+      <div style="width: 12px; height: 12px; background: white; border-radius: 50%;"></div>
+    </div>
+    <style>
+      @keyframes userPulse {
+        0%, 100% { box-shadow: 0 0 0 8px ${color}44, 0 4px 16px rgba(0,0,0,0.5); }
+        50% { box-shadow: 0 0 0 16px ${color}22, 0 4px 16px rgba(0,0,0,0.5); }
+      }
+    </style>
+  `;
+  return L.divIcon({ html, className: '', iconSize: [36, 36], iconAnchor: [18, 18] });
+}
+
+function GlassPopup({ place, onClose }: { place: Place; onClose?: () => void }) {
+  const theme = useTheme();
+  const color = CATEGORY_COLORS[place.category] || '#78909c';
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
+
+  return (
+    <Box sx={{
+      minWidth: 220, maxWidth: 280,
+      borderRadius: 3, overflow: 'hidden',
+      bgcolor: muiAlpha(theme.palette.background.paper, 0.85),
+      backdropFilter: 'blur(16px)',
+      border: `1px solid ${muiAlpha(theme.palette.common.white, 0.08)}`,
+      boxShadow: '0 12px 48px rgba(0,0,0,0.5)',
+    }}>
+      {place.imageUrl && (
+        <Box sx={{
+          height: 120, overflow: 'hidden',
+          background: `linear-gradient(135deg, ${color}44, ${color}22), url(${place.imageUrl}) center/cover`,
+        }} />
+      )}
+      <Box sx={{ px: 2, pt: place.imageUrl ? 1.5 : 2, pb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <Box sx={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: `linear-gradient(135deg, ${color}, ${color}88)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 14, flexShrink: 0,
+          }}>
+            {CATEGORY_EMOJIS[place.category] || '📍'}
+          </Box>
+          <Typography variant="subtitle2" sx={{
+            fontWeight: 700, fontSize: '0.95rem',
+            color: theme.palette.text.primary,
+            lineHeight: 1.2,
+          }}>
+            {place.name}
+          </Typography>
+        </Box>
+        {place.address && (
+          <Typography variant="caption" sx={{
+            display: 'block', mb: 0.5,
+            color: muiAlpha(theme.palette.text.primary, 0.6),
+            fontSize: '0.7rem',
+          }}>
+            {place.address}
+          </Typography>
+        )}
+        <Typography variant="caption" sx={{
+          display: '-webkit-box',
+          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', mb: 1,
+          color: muiAlpha(theme.palette.text.primary, 0.7),
+          fontSize: '0.75rem',
+          lineHeight: 1.4,
+        }}>
+          {place.description}
+        </Typography>
+        <Stack direction="row" spacing={0.5}>
+          {place.link && (
+            <Button
+              variant="contained" size="small"
+              href={place.link} target="_blank" rel="noopener noreferrer"
+              startIcon={<LanguageIcon sx={{ fontSize: 14 }} />}
+              sx={{
+                textTransform: 'none', fontSize: 11, py: 0.3, px: 1,
+                borderRadius: 2, minWidth: 0,
+                background: `linear-gradient(135deg, ${color}, ${color}88)`,
+              }}
+            >
+              Web
+            </Button>
+          )}
+          <Button
+            variant="outlined" size="small"
+            href={directionsUrl} target="_blank" rel="noopener noreferrer"
+            startIcon={<DirectionsIcon sx={{ fontSize: 14 }} />}
+            sx={{
+              textTransform: 'none', fontSize: 11, py: 0.3, px: 1,
+              borderRadius: 2, minWidth: 0,
+              borderColor: muiAlpha(theme.palette.common.white, 0.12),
+              color: muiAlpha(theme.palette.text.primary, 0.8),
+            }}
+          >
+            Cómo llegar
+          </Button>
+        </Stack>
+      </Box>
+    </Box>
+  );
+}
+
 function getHeatmapPointsFromClicks(places: Place[]): [number, number, number?][] {
-  // Recupera el objeto de clicks por id de localStorage
   let clickMap: Record<string, number> = {};
   try {
     const raw = localStorage.getItem('placeClicks');
     if (raw) clickMap = JSON.parse(raw);
   } catch {}
-  // Calcula el máximo para normalizar
   const maxClicks = Math.max(1, ...Object.values(clickMap));
   return places.map(place => [
-    place.coordinates.lat,
-    place.coordinates.lng,
-    (clickMap[place.id] || 0) / maxClicks || 0.1 // mínimo 0.1 para que se vea
+    place.coordinates.lat, place.coordinates.lng,
+    (clickMap[place.id] || 0) / maxClicks || 0.1,
   ]);
 }
-// Componente para añadir la capa de heatmap a Leaflet
+
 function HeatmapLayer({ points, visible }: { points: [number, number, number?][]; visible: boolean }) {
   const map = useMap();
   const layerRef = useRef<L.Layer | null>(null);
-
   useEffect(() => {
     if (!visible) {
-      if (layerRef.current) {
-        map.removeLayer(layerRef.current);
-        layerRef.current = null;
-      }
+      if (layerRef.current) { map.removeLayer(layerRef.current); layerRef.current = null; }
       return;
     }
-    // @ts-ignore
-    const heat = (L as any).heatLayer(points, { radius: 30, blur: 18, maxZoom: 17, gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'} });
+    const heat = (L as any).heatLayer(points, {
+      radius: 30, blur: 18, maxZoom: 17,
+      gradient: { 0.4: '#7c4dff', 0.65: '#40c4ff', 1: '#ff1744' },
+    });
     heat.addTo(map);
     layerRef.current = heat;
-    return () => {
-      if (layerRef.current) {
-        map.removeLayer(layerRef.current);
-        layerRef.current = null;
-      }
-    };
+    return () => { if (layerRef.current) { map.removeLayer(layerRef.current); layerRef.current = null; } };
   }, [map, points, visible]);
   return null;
 }
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-
-const getCategoryIcon = (category: string) => {
-  // Mapeo de categorías a iconos personalizados locales
-  const iconMap: Record<string, string> = {
-    'Residencia': '/icons/hotel-svgrepo-com.svg',
-    'Comida': '/icons/food-svgrepo-com.svg',
-    'Salud': '/icons/health-svgrepo-com.svg',
-    'Transporte': '/icons/bus-svgrepo-com.svg',
-    'Metro': '/icons/location-pin-svgrepo-com.svg', // Icono diferente para metro
-    'Ocio': '/icons/school-bell-svgrepo-com.svg',
-    'Cultural': '/icons/location-pin-svgrepo-com.svg',
-    'Servicios': '/icons/location-pin-svgrepo-com.svg',
-    'Estudio': '/icons/school-bell-svgrepo-com.svg',
-  };
-  const iconFile = iconMap[category] || '/icons/location-pin-svgrepo-com.svg';
-  const shadowUrl = 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png';
-  // Ajuste especial para el icono de residencia/hotel
-  if (category === 'Residencia') {
-    return new L.Icon({
-      iconUrl: iconFile,
-      iconRetinaUrl: iconFile,
-      shadowUrl: shadowUrl,
-      iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -40],
-      shadowSize: [41, 41]
-    });
-  }
-  // Otros iconos
-  return new L.Icon({
-    iconUrl: iconFile,
-    iconRetinaUrl: iconFile,
-    shadowUrl: shadowUrl,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-    shadowSize: [41, 41]
-  });
-};
-
-interface LocationPoint {
-  position: LatLngExpression;
-  name: string;
-  description: string;
-}
-
-const locations: LocationPoint[] = [
-  // Ubicaciones se gestionan desde places.ts
-];
-
-function MapController({ setMap, setIsMapReady }: { setMap: (map: L.Map) => void; setIsMapReady: (ready: boolean) => void }) {
+function MapController({ setMap, setIsMapReady }: { setMap: (m: L.Map) => void; setIsMapReady: (r: boolean) => void }) {
   const map = useMap();
-  useEffect(() => {
-    if (map) {
-      setMap(map);
-      setIsMapReady(true);
-    }
-  }, [map, setMap, setIsMapReady]);
+  useEffect(() => { if (map) { setMap(map); setIsMapReady(true); } }, [map, setMap, setIsMapReady]);
   return null;
-}
-
-function LocationButton({ setUserPosition }: { setUserPosition: (pos: LatLng) => void }) {
-  const map = useMap();
-  const theme = useTheme();
-  const [isLocating, setIsLocating] = useState(false);
-
-  const handleClick = () => {
-    // Verificar si la geolocalización está disponible
-    if (!navigator.geolocation) {
-      alert('Tu dispositivo no soporta geolocalización.');
-      return;
-    }
-
-    setIsLocating(true);
-
-    // Configuración para máxima precisión y confiabilidad
-    const options = {
-      enableHighAccuracy: true, // Usar GPS de alta precisión
-      timeout: 20000, // Tiempo suficiente para obtener GPS preciso
-      maximumAge: 0 // Siempre obtener ubicación fresca, no usar cache
-    };
-
-  loggerClient.debug('Solicitando ubicación con GPS de alta precisión...');
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
-        const latlng = { lat, lng } as LatLng;
-        
-        setUserPosition(latlng);
-        map.flyTo([lat, lng], 18); // Zoom muy cercano para mayor precisión visual
-        
-  // Mostrar información de precisión
-  loggerClient.info(`✅ Ubicación precisa encontrada: ${lat.toFixed(6)}, ${lng.toFixed(6)} (Precisión: ${Math.round(accuracy)}m)`);
-        
-        // Feedback de éxito
-        if ('vibrate' in navigator) {
-          navigator.vibrate([50, 50, 50]); // Patrón de éxito
-        }
-        
-        // Mostrar toast de éxito (temporal)
-        const toast = document.createElement('div');
-        toast.style.cssText = `
-          position: fixed;
-          top: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: ${theme.palette.success.main};
-          color: ${theme.palette.success.contrastText || theme.palette.common.white};
-          padding: 12px 24px;
-          border-radius: 24px;
-          z-index: 2000;
-          font-family: system-ui;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        `;
-        toast.textContent = `📍 Ubicación encontrada (±${Math.round(accuracy)}m)`;
-        document.body.appendChild(toast);
-        setTimeout(() => document.body.removeChild(toast), 3000);
-        
-        setIsLocating(false);
-      },
-      (error) => {
-        setIsLocating(false);
-        let errorMessage = 'Error al obtener ubicación';
-        let errorDetails = '';
-        
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Permisos de ubicación denegados';
-            errorDetails = 'Ve a los ajustes de tu dispositivo y permite el acceso a la ubicación para esta aplicación.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Ubicación no disponible';
-            errorDetails = 'Asegúrate de tener el GPS activado y estar en un lugar con buena señal.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Tiempo de espera agotado';
-            errorDetails = 'La búsqueda de ubicación tardó demasiado. Intenta en un lugar con mejor señal GPS.';
-            break;
-        }
-        
-  loggerClient.error('❌ Error de geolocalización:', error);
-        
-        // Mostrar error más informativo
-        alert(`${errorMessage}\n\n${errorDetails}`);
-        
-        // Vibración de error
-        if ('vibrate' in navigator) {
-          navigator.vibrate([100, 100, 100, 100, 100]);
-        }
-      },
-      options
-    );
-  };
-
-  return (
-    <Fab
-      color="primary"
-      size="small"
-      onClick={handleClick}
-      disabled={isLocating}
-      sx={{ 
-        position: 'absolute', 
-        top: 85, 
-        right: 10, 
-        zIndex: 1000,
-        '& .MuiCircularProgress-root': {
-          color: 'white'
-        }
-      }}
-      aria-label="encontrar mi ubicación"
-    >
-      {isLocating ? (
-        <CircularProgress size={20} color="inherit" />
-      ) : (
-        <MyLocationIcon />
-      )}
-    </Fab>
-  );
 }
 
 function MapResizer() {
   const map = useMap();
   useEffect(() => {
-    const resizeObserver = new ResizeObserver(() => {
-      map.invalidateSize();
-    });
-
-    const mapElement = map.getContainer();
-    if (mapElement && mapElement.parentElement) {
-      resizeObserver.observe(mapElement.parentElement);
-    }
-
-    return () => {
-      if (mapElement && mapElement.parentElement) {
-        resizeObserver.unobserve(mapElement.parentElement);
-      }
-    };
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    const el = map.getContainer();
+    if (el?.parentElement) ro.observe(el.parentElement);
+    return () => { if (el?.parentElement) ro.unobserve(el.parentElement); };
   }, [map]);
   return null;
 }
 
-export default function InteractiveMap({ selectedPlace, compact = false, height = '85vh', markersOnly = false }: { selectedPlace?: Place; compact?: boolean; height?: string | number; markersOnly?: boolean }) {
-  const [isMapReady, setIsMapReady] = useState(false);
-  const selectedMarkerRef = useRef<any>(null);
-  const [showHeatmap, setShowHeatmap] = useState(false);
+function SearchControl({ map, apiKey }: { map: L.Map | null; apiKey: string }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<{ name: string; lat: number; lng: number }[]>([]);
+  const [open, setOpen] = useState(false);
   const theme = useTheme();
-  const userLocationSvg = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="${theme.palette.primary.main}"/><circle cx="16" cy="16" r="8" fill="white"/><circle cx="16" cy="16" r="4" fill="${theme.palette.primary.main}"/></svg>`;
-  const userLocationIcon = L.icon({
-    iconUrl: `data:image/svg+xml;base64,${btoa(userLocationSvg)}`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16]
-  });
-  // Botón flotante para alternar el heatmap
-  const HeatmapToggleButton = () => (
-    <Fab
-      color={showHeatmap ? 'secondary' : 'default'}
-      size="small"
-      onClick={() => setShowHeatmap((v) => !v)}
-      sx={{ position: 'absolute', top: 145, right: 10, zIndex: 1000 }}
-      aria-label="toggle heatmap"
-    >
-      <span role="img" aria-label="heatmap">🔥</span>
-    </Fab>
+
+  const handleSearch = useCallback(async () => {
+    if (!query.trim() || !map) return;
+    const bbox = '-6.2,37.2,-5.7,37.6';
+    try {
+      const res = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${apiKey}&bbox=${bbox}&limit=5`);
+      const data = await res.json();
+      if (data.features?.length) {
+        setResults(data.features.map((f: any) => ({
+          name: f.place_name || f.text,
+          lat: f.center[1], lng: f.center[0],
+        })));
+        setOpen(true);
+      }
+    } catch (e) { loggerClient.error('Search error:', e); }
+  }, [query, map, apiKey]);
+
+  const selectResult = (r: { name: string; lat: number; lng: number }) => {
+    map?.flyTo([r.lat, r.lng], 16, { duration: 1 });
+    setOpen(false);
+    setQuery(r.name);
+  };
+
+  return (
+    <Box sx={{ position: 'absolute', top: 12, left: 12, right: 12, zIndex: 1000 }}>
+      <Box sx={{
+        display: 'flex', gap: 1,
+        bgcolor: muiAlpha(theme.palette.background.paper, 0.9),
+        backdropFilter: 'blur(12px)',
+        borderRadius: 3,
+        border: `1px solid ${muiAlpha(theme.palette.common.white, 0.08)}`,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        p: '6px',
+      }}>
+        <Box sx={{
+          flex: 1, display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5,
+        }}>
+          <SearchOutlinedIcon sx={{ color: muiAlpha(theme.palette.text.primary, 0.5), fontSize: 20 }} />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            placeholder="Buscar en el mapa…"
+            style={{
+              flex: 1, border: 'none', outline: 'none', background: 'transparent',
+              color: theme.palette.text.primary, fontSize: '0.9rem',
+              fontFamily: 'inherit',
+            }}
+          />
+          {query && (
+            <IconButton size="small" onClick={() => { setQuery(''); setOpen(false); }} sx={{ color: muiAlpha(theme.palette.text.primary, 0.3) }}>
+              <CloseIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
+        </Box>
+        <Button
+          onClick={handleSearch}
+          sx={{
+            minWidth: 40, height: 40, borderRadius: 2,
+            background: 'linear-gradient(135deg, #7c4dff, #40c4ff)',
+            color: 'white', '&:hover': { opacity: 0.9 },
+          }}
+        >
+          <SearchOutlinedIcon sx={{ fontSize: 20 }} />
+        </Button>
+      </Box>
+      {open && results.length > 0 && (
+        <Box sx={{
+          mt: 0.5, borderRadius: 2, overflow: 'hidden',
+          bgcolor: muiAlpha(theme.palette.background.paper, 0.95),
+          backdropFilter: 'blur(12px)',
+          border: `1px solid ${muiAlpha(theme.palette.common.white, 0.08)}`,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        }}>
+          {results.map((r, i) => (
+            <Box
+              key={i}
+              onClick={() => selectResult(r)}
+              sx={{
+                px: 2, py: 1.5, cursor: 'pointer',
+                borderBottom: i < results.length - 1 ? `1px solid ${muiAlpha(theme.palette.common.white, 0.05)}` : 'none',
+                transition: 'background 0.15s',
+                '&:hover': { bgcolor: muiAlpha(theme.palette.common.white, 0.05) },
+              }}
+            >
+              <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontWeight: 500 }}>
+                {r.name}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Box>
   );
+}
 
-  // Estado para forzar actualización del heatmap al hacer clic
-  const [heatmapVersion, setHeatmapVersion] = useState(0);
-  const defaultPosition: LatLngExpression = [37.3850, -5.9925]; // Centrado entre el casco histórico y las residencias
-  const [userPosition, setUserPosition] = useState<LatLng | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+export default function InteractiveMap({
+  selectedPlace, compact = false, height = '85vh', markersOnly = false,
+}: {
+  selectedPlace?: Place; compact?: boolean; height?: string | number; markersOnly?: boolean;
+}) {
   const [map, setMap] = useState<L.Map | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [userPosition, setUserPosition] = useState<L.LatLng | null>(null);
   const [customPlaces, setCustomPlaces] = useState<Place[]>([]);
-  const apiKey = 'Gq2uZmTMhM4Vpv2fhXOR';
-
-  const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
-  const [coordsToAddPlace, setCoordsToAddPlace] = useState<LatLng | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [heatmapVersion, setHeatmapVersion] = useState(0);
+  const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
+  const [coordsToAdd, setCoordsToAdd] = useState<L.LatLng | null>(null);
+  const [activePopup, setActivePopup] = useState<Place | null>(null);
+  const theme = useTheme();
 
-  const filterCategories: string[] = [
-    'Residencia',
-    'Cultural',
-    'Comida',
-    'Ocio',
-    'Servicios',
-    'Estudio',
-    'Transporte',
-    'Metro',
-    'Salud',
-    'Personalizado'
+  const selectedMarkerRef = useRef<any>(null);
+
+  const filterCategories = [
+    'Residencia', 'Cultural', 'Comida', 'Ocio', 'Servicios', 'Estudio', 'Transporte', 'Metro', 'Salud', 'Personalizado',
   ];
 
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const longPressDuration = 700;
-
-  const handleMapLongPress = (latlng: LatLng) => {
-    setCoordsToAddPlace(latlng);
-    setShowAddPlaceModal(true);
-  };
-
-  const startLongPressTimer = (latlng: LatLng) => {
-    clearLongPressTimer();
-    longPressTimer.current = setTimeout(() => {
-      handleMapLongPress(latlng);
-      longPressTimer.current = null;
-    }, longPressDuration);
-  };
-
-  const clearLongPressTimer = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
+  const longPressRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (map) {
-      const mapContainer = map.getContainer();
-
-      const handlePointerDown = (e: PointerEvent) => {
-        if ((e.button === 0 || e.pointerType === 'touch') && e.isPrimary) {
-          const latlng = map.mouseEventToLatLng(e);
-          startLongPressTimer(latlng);
-        }
-      };
-
-      const handlePointerUp = () => clearLongPressTimer();
-      const handlePointerLeave = () => clearLongPressTimer();
-      const handlePointerCancel = () => clearLongPressTimer();
-
-
-      mapContainer.addEventListener('pointerdown', handlePointerDown);
-      mapContainer.addEventListener('pointerup', handlePointerUp);
-      mapContainer.addEventListener('pointerleave', handlePointerLeave);
-      mapContainer.addEventListener('pointercancel', handlePointerCancel);
-
-
-      return () => {
-        clearLongPressTimer();
-        mapContainer.removeEventListener('pointerdown', handlePointerDown);
-        mapContainer.removeEventListener('pointerup', handlePointerUp);
-        mapContainer.removeEventListener('pointerleave', handlePointerLeave);
-        mapContainer.removeEventListener('pointercancel', handlePointerCancel);
-      };
-    }
-  }, [map, handleMapLongPress]);
-
-
-  useEffect(() => {
-    const savedPlacesRaw = localStorage.getItem('userCustomPlaces');
-    if (savedPlacesRaw) {
-      try {
-        setCustomPlaces(JSON.parse(savedPlacesRaw));
-      } catch (e) {
-        loggerClient.error("Error al parsear lugares personalizados desde localStorage:", e);
-        setCustomPlaces([]);
-      }
-    }
+    try {
+      const raw = localStorage.getItem('userCustomPlaces');
+      if (raw) setCustomPlaces(JSON.parse(raw));
+    } catch {}
   }, []);
 
   useEffect(() => {
     localStorage.setItem('userCustomPlaces', JSON.stringify(customPlaces));
   }, [customPlaces]);
 
-  // Effect para centrar el mapa cuando se selecciona un lugar desde la lista
   useEffect(() => {
     if (selectedPlace && map && isMapReady) {
-      // Centrar el mapa en el lugar seleccionado
-      map.flyTo([selectedPlace.coordinates.lat, selectedPlace.coordinates.lng], 16);
-      
-      // Simular click en el marcador para abrir el popup
-      // Actualizamos el contador de clicks
+      map.flyTo([selectedPlace.coordinates.lat, selectedPlace.coordinates.lng], 16, { duration: 0.8 });
+      setActivePopup(selectedPlace);
       let clickMap: Record<string, number> = {};
-      try {
-        const raw = localStorage.getItem('placeClicks');
-        if (raw) clickMap = JSON.parse(raw);
-      } catch {}
+      try { const raw = localStorage.getItem('placeClicks'); if (raw) clickMap = JSON.parse(raw); } catch {}
       clickMap[selectedPlace.id] = (clickMap[selectedPlace.id] || 0) + 1;
       localStorage.setItem('placeClicks', JSON.stringify(clickMap));
       setHeatmapVersion(v => v + 1);
-      // Abrir el popup del marcador seleccionado (si existe)
-      try {
-        // Pequeño delay para asegurar que el Marker ya está montado en el DOM
-        setTimeout(() => {
-          if (selectedMarkerRef.current && typeof selectedMarkerRef.current.openPopup === 'function') {
-            selectedMarkerRef.current.openPopup();
-          } else if (selectedMarkerRef.current && selectedMarkerRef.current.getPopup) {
-            const popup = selectedMarkerRef.current.getPopup();
-            if (popup && popup.openOn) {
-              popup.openOn(map);
-            }
-          }
-        }, 180);
-      } catch (e) {
-        // no bloquear en caso de error
-        loggerClient.warn('No se pudo abrir el popup programáticamente', e);
-      }
     }
   }, [selectedPlace, map, isMapReady]);
 
-
-  const handleSearch = async () => {
-    if (!searchQuery || !map) return;
-    
-    const bbox = "-6.1,37.3,-5.8,37.5";
-    
-    try {
-      const response = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${apiKey}&bbox=${bbox}`);
-      const data = await response.json();
-      
-      if (data.features && data.features.length > 0) {
-        const [lon, lat] = data.features[0].center;
-        const newPosition = new LatLng(lat, lon);
-        map.flyTo(newPosition, 15);
-      } else {
-        alert('No se encontraron resultados para tu búsqueda en el área de Sevilla.');
-      }
-    } catch (error) {
-      loggerClient.error("Error en la búsqueda:", error);
-      alert('Ocurrió un error al realizar la búsqueda.');
-    }
+  const handleMarkerClick = (place: Place) => {
+    setActivePopup(place);
+    let clickMap: Record<string, number> = {};
+    try { const raw = localStorage.getItem('placeClicks'); if (raw) clickMap = JSON.parse(raw); } catch {}
+    clickMap[place.id] = (clickMap[place.id] || 0) + 1;
+    localStorage.setItem('placeClicks', JSON.stringify(clickMap));
+    setHeatmapVersion(v => v + 1);
   };
 
-  const handleAddPlaceSubmit = (newPlace: Place) => {
-    setCustomPlaces((prevPlaces) => [...prevPlaces, newPlace]);
-    setShowAddPlaceModal(false);
-    setCoordsToAddPlace(null);
-    alert('¡Lugar personalizado añadido con éxito!');
-  };
-
-  const handleCloseAddPlaceModal = () => {
-    setShowAddPlaceModal(false);
-    setCoordsToAddPlace(null);
-  };
+  const filteredPlaces = placesData.filter(
+    p => selectedCategories.length === 0 || selectedCategories.includes(p.category)
+  );
+  const filteredCustom = customPlaces.filter(
+    p => selectedCategories.length === 0 ||
+      (selectedCategories.includes('Personalizado') && !placesData.some(dp => dp.id === p.id)) ||
+      selectedCategories.includes(p.category)
+  );
 
   return (
     <Box>
@@ -473,312 +415,112 @@ export default function InteractiveMap({ selectedPlace, compact = false, height 
         />
       )}
 
-      <Box sx={{ position: 'relative' }}>
-        {!markersOnly && <HeatmapToggleButton />}
-      <MapContainer 
-        key="interactive-map-container"
-        center={defaultPosition} 
-        zoom={14} 
-        style={{ 
-          height: compact ? (typeof height === 'number' ? `${height}px` : '260px') : height,
-          width: '100%', 
-          borderRadius: '16px', 
-          position: 'relative', 
-          zIndex: 0 
-        }}
-      >
-        <TileLayer
-            url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${apiKey}`}
-            attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>'
-        />
-        
-  {/* Marcadores de ubicaciones predefinidas (siempre visibles, no filtradas por categoría) */}
-  {/* Usamos el icono por defecto para estas ubicaciones generales */}
-  {!markersOnly && locations.map((loc) => {
-            const [lat, lng] = Array.isArray(loc.position) ? loc.position : [loc.position.lat, loc.position.lng];
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`;
-            const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${lat},${lng}`;
-            return (
-              <Marker key={loc.name} position={loc.position} icon={getCategoryIcon('Oficina')}>
-                  <Popup>
-                      <Box>
-                          <Typography variant="subtitle2" component="div" fontWeight="bold">{loc.name}</Typography>
-                          <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>{loc.description}</Typography>
-                          <Stack direction="row" spacing={1}>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              startIcon={<DirectionsIcon />}
-                              href={directionsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Cómo llegar
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              href={streetViewUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Street View
-                            </Button>
-                          </Stack>
-                      </Box>
+      <Box sx={{ position: 'relative', borderRadius: 3, overflow: 'hidden' }}>
+        <MapContainer
+          center={[37.385, -5.9925]}
+          zoom={14}
+          style={{
+            height: compact ? (typeof height === 'number' ? `${height}px` : '260px') : height,
+            width: '100%',
+            zIndex: 0,
+          }}
+        >
+          <TileLayer
+            url={`https://api.maptiler.com/maps/dark/{z}/{x}/{y}.png?key=${API_KEY}`}
+            attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a>'
+          />
+
+          {!markersOnly && (
+            <MarkerClusterGroup chunkedLoading maxClusterRadius={50} spiderfyOnMaxZoom>
+              {filteredPlaces.map(place => (
+                <Marker
+                  key={place.id}
+                  position={place.coordinates}
+                  icon={createCategoryIcon(place.category, activePopup?.id === place.id)}
+                  eventHandlers={{ click: () => handleMarkerClick(place) }}
+                >
+                  <Popup maxWidth={320} closeButton={false}>
+                    <GlassPopup place={place} />
                   </Popup>
-              </Marker>
-            );
-        })}
-
-  {/* Marcadores de Lugares de Interés predefinidos (FILTRADOS Y CON ICONO PERSONALIZADO) */}
-  {!markersOnly && placesData.filter(place => selectedCategories.length === 0 || selectedCategories.includes(place.category)).map((place) => {
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
-            const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
-            // Handler para contar clicks en el marcador
-            const handleMarkerClick = () => {
-              let clickMap: Record<string, number> = {};
-              try {
-                const raw = localStorage.getItem('placeClicks');
-                if (raw) clickMap = JSON.parse(raw);
-              } catch {}
-              clickMap[place.id] = (clickMap[place.id] || 0) + 1;
-              localStorage.setItem('placeClicks', JSON.stringify(clickMap));
-              setHeatmapVersion(v => v + 1); // Forzar actualización
-            };
-            return (
-              <Marker key={place.id} position={place.coordinates} icon={getCategoryIcon(place.category)} eventHandlers={{ click: handleMarkerClick }}>
-                  <Popup>
-                      <Box sx={{ maxWidth: 200 }}>
-                          {place.imageUrl && (
-                            <Image
-                                src={place.imageUrl}
-                                alt={place.name}
-                                width={180}
-                                height={100}
-                                objectFit="cover"
-                                style={{ borderRadius: '8px', marginBottom: 8 }}
-                            />
-                          )}
-                          <Typography variant="subtitle1" component="div" fontWeight="bold">{place.name}</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            Categoría: {place.category}
-                          </Typography>
-                          {place.address && (
-                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                              {place.address}
-                            </Typography>
-                          )}
-                          <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
-                            {place.description}
-                          </Typography>
-                          {place.link && (
-                            <Button
-                                variant="text"
-                                size="small"
-                                href={place.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                sx={{ textTransform: 'none', mb: 0.5 }}
-                            >
-                                Más info
-                            </Button>
-                          )}
-                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              startIcon={<DirectionsIcon />}
-                              href={directionsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              fullWidth
-                            >
-                              Cómo llegar
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              href={streetViewUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              fullWidth
-                            >
-                              Street View
-                            </Button>
-                          </Stack>
-                      </Box>
+                </Marker>
+              ))}
+              {filteredCustom.map(place => (
+                <Marker
+                  key={place.id}
+                  position={place.coordinates}
+                  icon={createCategoryIcon('Personalizado')}
+                  eventHandlers={{ click: () => handleMarkerClick(place) }}
+                >
+                  <Popup maxWidth={320} closeButton={false}>
+                    <GlassPopup place={place} />
                   </Popup>
-              </Marker>
-            );
-        })}
+                </Marker>
+              ))}
+            </MarkerClusterGroup>
+          )}
 
-  {/* Marcadores de Puntos de Interés Personalizados por el Usuario (FILTRADOS Y CON ICONO PERSONALIZADO) */}
-  {!markersOnly && customPlaces.filter(place => {
-          // Si no hay categorías seleccionadas, mostrar todos
-          if (selectedCategories.length === 0) return true;
-          
-          // Si 'Personalizado' está seleccionado, mostrar lugares personalizados únicos
-          if (selectedCategories.includes('Personalizado') && !placesData.some(p => p.id === place.id)) return true;
-          
-          // Si la categoría del lugar está seleccionada
-          return selectedCategories.includes(place.category);
-        }).map((place) => {
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.coordinates.lat},${place.coordinates.lng}&travelmode=transit`;
-            const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${place.coordinates.lat},${place.coordinates.lng}`;
-            // La lógica de filtrado ya está en el `.filter` de arriba.
-            // Aquí solo nos aseguramos de que se muestre con el icono correcto.
-            return (
-              <Marker key={place.id} position={place.coordinates} icon={getCategoryIcon('Personalizado')}>
-                  <Popup>
-                      <Box sx={{ maxWidth: 200 }}>
-                          {place.imageUrl && place.imageUrl.startsWith('http') && (
-                            <Image
-                                src={place.imageUrl}
-                                alt={place.name}
-                                width={180}
-                                height={100}
-                                objectFit="cover"
-                                style={{ borderRadius: '8px', marginBottom: 8 }}
-                            />
-                          )}
-                          <Typography variant="subtitle1" component="div" fontWeight="bold">{place.name} (Personalizado)</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            Categoría: {place.category}
-                          </Typography>
-                          {place.address && (
-                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                              {place.address}
-                            </Typography>
-                          )}
-                          <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
-                            {place.description}
-                          </Typography>
-                          {place.link && (
-                            <Button
-                                variant="text"
-                                size="small"
-                                href={place.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                sx={{ textTransform: 'none', mb: 0.5 }}
-                            >
-                                Más info
-                            </Button>
-                          )}
-                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              startIcon={<DirectionsIcon />}
-                              href={directionsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              fullWidth
-                            >
-                              Cómo llegar
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              href={streetViewUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              fullWidth
-                            >
-                              Street View
-                            </Button>
-                          </Stack>
-                      </Box>
-                  </Popup>
-              </Marker>
-            );
-        })}
-
-        {/* Si nos pasan un selectedPlace explícito (ej. vista compacta de residencia), mostrar su marcador siempre */}
-        {selectedPlace && (
-          <Marker ref={selectedMarkerRef} position={selectedPlace.coordinates} icon={getCategoryIcon(selectedPlace.category || 'Residencia')}>
-            <Popup>
-              <Box sx={{ maxWidth: 200, width: '100%' }}>
-                <Card elevation={0} sx={{
-                  borderRadius: 3,
-                  overflow: 'hidden',
-                  px: 0,
-                  bgcolor: alpha(theme.palette.background.paper, 0.72),
-                  color: theme.palette.text.primary,
-                  boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
-                  border: `1px solid ${alpha(theme.palette.common.white, 0.06)}`,
-                  backdropFilter: 'blur(6px)'
-                }}>
-                  <CardContent sx={{ pb: 0.25, pt: 0.6, px: 1 }}>
-                    <Typography variant="subtitle2" fontWeight={800} gutterBottom noWrap sx={{ color: theme.palette.text.primary }}>
-                      {selectedPlace.name}
-                    </Typography>
-                    {selectedPlace.address && (
-                      <Typography variant="caption" sx={{ display: 'block', mb: 0.2, color: alpha(theme.palette.text.primary, 0.78) }} noWrap>
-                        {selectedPlace.address}
-                      </Typography>
-                    )}
-                    <Typography variant="caption" sx={{ mb: 0.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', color: theme.palette.text.secondary }}>
-                      {selectedPlace.description}
-                    </Typography>
-                  </CardContent>
-                  <CardActions sx={{ display: 'flex', gap: 0.5, p: 0.4 }}>
-                    {selectedPlace.link && (
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        size="small"
-                        href={selectedPlace.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        startIcon={<LanguageIcon sx={{ fontSize: 16 }} />}
-                        sx={{ textTransform: 'none', fontSize: 12, py: 0.4, px: 1 }}
-                      >
-                        Más info
-                      </Button>
-                    )}
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<DirectionsIcon sx={{ fontSize: 16 }} />}
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.coordinates.lat},${selectedPlace.coordinates.lng}&travelmode=transit`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{ ml: 'auto', textTransform: 'none', fontSize: 12, py: 0.4, px: 1, borderColor: alpha(theme.palette.common.white, 0.12), color: alpha(theme.palette.text.primary, 0.92) }}
-                    >
-                      Cómo llegar
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Box>
-            </Popup>
-          </Marker>
-        )}
-
-
-  {!markersOnly && userPosition && (
+          {selectedPlace && (
             <Marker
-              position={userPosition}
-              icon={userLocationIcon}
+              ref={selectedMarkerRef}
+              position={selectedPlace.coordinates}
+              icon={createCategoryIcon(selectedPlace.category || 'Residencia', true)}
             >
-                <Popup>📍 Tu ubicación actual</Popup>
+              <Popup maxWidth={320} closeButton={false}>
+                <GlassPopup place={selectedPlace} />
+              </Popup>
             </Marker>
-        )}
+          )}
 
-  <MapController setMap={setMap} setIsMapReady={setIsMapReady} />
-  {!markersOnly && <LocationButton setUserPosition={setUserPosition} />}
-  <MapResizer />
-  {/* Capa de heatmap */}
-  {!markersOnly && <HeatmapLayer points={getHeatmapPointsFromClicks(placesData)} visible={showHeatmap} key={heatmapVersion} />}
-  </MapContainer>
-  </Box>
+          {userPosition && (
+            <Marker position={userPosition} icon={createUserLocationIcon(theme.palette.primary.main)}>
+              <Popup closeButton={false}>
+                <Box sx={{ textAlign: 'center', px: 1, py: 0.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>📍 Tu ubicación</Typography>
+                </Box>
+              </Popup>
+            </Marker>
+          )}
+
+          <MapController setMap={setMap} setIsMapReady={setIsMapReady} />
+          <MapResizer />
+          {!markersOnly && (
+            <HeatmapLayer
+              points={getHeatmapPointsFromClicks(placesData)}
+              visible={showHeatmap}
+              key={heatmapVersion}
+            />
+          )}
+        </MapContainer>
+
+        {!markersOnly && <SearchControl map={map} apiKey={API_KEY} />}
+
+        {!markersOnly && (
+          <Fab
+            size="small"
+            onClick={() => setShowHeatmap(v => !v)}
+            sx={{
+              position: 'absolute', top: showHeatmap ? 130 : 86, right: 12, zIndex: 1000,
+              bgcolor: showHeatmap ? '#ff1744' : muiAlpha(theme.palette.background.paper, 0.85),
+              backdropFilter: 'blur(8px)',
+              color: showHeatmap ? 'white' : theme.palette.text.primary,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+              '&:hover': { bgcolor: showHeatmap ? '#d50000' : muiAlpha(theme.palette.background.paper, 0.95) },
+            }}
+          >
+            <WhatshotIcon sx={{ fontSize: 20 }} />
+          </Fab>
+        )}
+      </Box>
 
       <AddPlaceModal
         open={showAddPlaceModal}
-        onClose={handleCloseAddPlaceModal}
-        onSubmit={handleAddPlaceSubmit}
-        coords={coordsToAddPlace}
+        onClose={() => { setShowAddPlaceModal(false); setCoordsToAdd(null); }}
+        onSubmit={(newPlace) => {
+          setCustomPlaces(prev => [...prev, newPlace]);
+          setShowAddPlaceModal(false);
+          setCoordsToAdd(null);
+        }}
+        coords={coordsToAdd}
       />
     </Box>
   );

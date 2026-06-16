@@ -107,10 +107,19 @@ export function middleware(request: NextRequest) {
   // El middleware permitirá acceso a páginas y dejará verificación al frontend
   // Solo protegerá APIs críticas que necesiten verificación del lado servidor
 
+  // VERIFICAR AUTENTICACIÓN PARA TODAS LAS PÁGINAS PROTEGIDAS
   const authToken = request.cookies.get('auth-token')?.value;
   const userData = request.cookies.get('user')?.value;
+  const hasSession = authToken || userData;
 
-  // PROTEGER SOLO APIs CRÍTICAS
+  // Si no hay sesión, redirigir al login
+  if (!hasSession) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // PROTEGER APIs CRÍTICAS
   if (pathname.startsWith('/api/admin/')) {
     console.log('🔍 MIDDLEWARE DEBUG - API Admin Request:', {
       path: pathname,
@@ -123,17 +132,9 @@ export function middleware(request: NextRequest) {
       )
     });
 
-    if (!authToken || !userData) {
-      console.log('🚨 API ADMIN BLOQUEADA - Sin autenticación:', pathname);
-      return NextResponse.json(
-        { error: 'Acceso denegado - Autenticación requerida' },
-        { status: 401 }
-      );
-    }
-
     try {
-      const user = JSON.parse(userData);
-      if (user.role !== 'admin') {
+      const user = userData ? JSON.parse(userData) : null;
+      if (!user || user.role !== 'admin') {
         console.log('🚨 API ADMIN BLOQUEADA - Usuario no admin');
         return NextResponse.json(
           { error: 'Acceso denegado - Se requieren permisos de administrador' },
@@ -176,10 +177,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder files (icons, manifest, etc.)
-     * - API routes (except specific ones we want to protect)
      */
-    '/((?!_next/static|_next/image|favicon.ico|icons/|manifest.json|robots.txt|sitemap.xml|service-worker.js|offline.html|api/).*)',
-    '/api/admin/:path*',
-    '/api/debug/:path*'
+    '/((?!_next/static|_next/image|favicon.ico|icons/|manifest.json|robots.txt|sitemap.xml|service-worker.js|offline.html).*)',
   ]
 };

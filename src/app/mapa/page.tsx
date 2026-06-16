@@ -1,31 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { Box, Container, Fab, Drawer, IconButton, Typography, InputBase, useTheme } from '@mui/material';
+import { useState, useRef } from 'react';
+import { Box, Fab, Drawer, IconButton, Typography, useTheme, alpha } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import GeolocalizacionDemo from '@/components/GeolocalizacionDemo';
 import dynamic from 'next/dynamic';
 import ListIcon from '@mui/icons-material/List';
 import CloseIcon from '@mui/icons-material/Close';
+import LayersClearIcon from '@mui/icons-material/LayersClear';
 
-const RoutePlanner = dynamic(() => import('@/components/mapa/RoutePlanner'), { ssr: false });
 const PlacesListSection = dynamic(() => import('@/components/mapa/PlacesListSection'), { ssr: false });
 import { Place } from '@/data/places';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-
-const MAP_FILTERS = ['Todos', 'Transporte', 'Comida', 'Salud', 'Residencia'] as const;
-type MapFilter = typeof MAP_FILTERS[number];
 
 export default function MapaPage() {
   const { t } = useTranslation();
   const theme = useTheme();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | undefined>();
-  const [mapFilter, setMapFilter] = useState<MapFilter>('Todos');
-  const [searchQuery, setSearchQuery] = useState('');
+  const clearTimer = useRef<NodeJS.Timeout | null>(null);
 
   const InteractiveMap = dynamic(
     () => import('@/components/mapa/InteractiveMap'),
@@ -37,123 +30,80 @@ export default function MapaPage() {
           subtitle={t('map.preparingPlaces')}
           size="large"
         />
-      )
+      ),
     }
   );
 
   const handlePlaceSelect = (place: Place) => {
+    if (clearTimer.current) clearTimeout(clearTimer.current);
     setSelectedPlace(place);
     setOpenDrawer(false);
-    setTimeout(() => {
+    clearTimer.current = setTimeout(() => {
       setSelectedPlace(undefined);
-    }, 3000);
+    }, 4000);
   };
 
   return (
-    <Container>
-      {/* Search bar + filter chips */}
-      <Box sx={{ pt: 1, pb: 0.5 }}>
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 1.5 }}>
-          <Box sx={{
-            flex: 1, height: 44,
-            background: theme.palette.background.paper,
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: '22px',
-            display: 'flex', alignItems: 'center', gap: 1.25, px: 2,
-          }}>
-            <SearchRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-            <InputBase
-              placeholder="Buscar en el mapa…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              sx={{ flex: 1, fontSize: '0.875rem', color: 'text.secondary' }}
-            />
-          </Box>
-          <Box sx={{
-            width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-            background: theme.palette.secondary.dark,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer',
-          }}
-            onClick={() => setOpenDrawer(true)}
-          >
-            <TuneRoundedIcon sx={{ color: theme.palette.secondary.light, fontSize: 20 }} />
-          </Box>
-        </Box>
-        {/* Filter chips */}
-        <Box sx={{
-          display: 'flex', gap: 1, overflowX: 'auto',
-          scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-          mb: 1,
-        }}>
-          {MAP_FILTERS.map(chip => {
-            const sel = mapFilter === chip;
-            return (
-              <Box
-                key={chip}
-                component="button"
-                onClick={() => setMapFilter(chip)}
-                sx={{
-                  flexShrink: 0, height: 32,
-                  px: sel ? '10px' : '14px',
-                  pl: sel ? '6px' : '14px',
-                  borderRadius: '8px',
-                  display: 'inline-flex', alignItems: 'center', gap: '4px',
-                  fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-                  userSelect: 'none', border: 'none', outline: 'none',
-                  background: sel ? theme.palette.secondary.dark : 'transparent',
-                  color: sel ? theme.palette.secondary.light : 'text.secondary',
-                  borderColor: sel ? 'transparent' : 'divider',
-                  borderStyle: 'solid', borderWidth: '1px',
-                  transition: 'all 150ms cubic-bezier(0.2,0,0,1)',
-                }}
-              >
-                {sel && <CheckRoundedIcon sx={{ fontSize: 16, color: theme.palette.secondary.light }} />}
-                {chip}
-              </Box>
-            );
-          })}
-        </Box>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      {/* Map takes full height */}
+      <Box sx={{ flex: 1, position: 'relative' }}>
+        <GeolocalizacionDemo />
+        <InteractiveMap selectedPlace={selectedPlace} />
       </Box>
 
-      {/* Global language switch removed from this page; language is chosen on first run and adjustable in Ajustes */}
-      <GeolocalizacionDemo />
-      <InteractiveMap selectedPlace={selectedPlace} />
-      <Box sx={{ mt: 4 }}>
-        <RoutePlanner />
-      </Box>
+      {/* Places list FAB */}
       <Fab
         color="secondary"
         aria-label={t('map.showPlacesList')}
         onClick={() => setOpenDrawer(true)}
         sx={{
           position: 'fixed',
-          bottom: (theme) => `calc(64px + ${theme.spacing(2)})`,
-          right: (theme) => theme.spacing(2),
+          bottom: theme => `calc(64px + ${theme.spacing(2)})`,
+          right: theme => theme.spacing(2),
+          background: 'linear-gradient(135deg, #7c4dff, #40c4ff)',
+          boxShadow: '0 8px 24px rgba(124,77,255,0.4)',
+          '&:hover': { boxShadow: '0 12px 32px rgba(124,77,255,0.6)' },
         }}
       >
         <ListIcon />
       </Fab>
+
+      {/* Bottom drawer for places list */}
       <Drawer
         anchor="bottom"
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}
         PaperProps={{
           sx: {
-            borderTopLeftRadius: '16px',
-            borderTopRightRadius: '16px',
-            maxHeight: '85vh',
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            maxHeight: '88vh',
+            bgcolor: theme.palette.background.default,
+            backgroundImage: 'none',
           },
         }}
       >
-        <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end' }}>
-          <IconButton onClick={() => setOpenDrawer(false)}>
+        <Box sx={{
+          position: 'sticky', top: 0, zIndex: 10,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          px: 2, pt: 1.5, pb: 0.5,
+          bgcolor: theme.palette.background.default,
+          borderBottom: `1px solid ${alpha(theme.palette.common.white, 0.06)}`,
+        }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
+              Lugares
+            </Typography>
+            <Typography variant="caption" sx={{ color: alpha(theme.palette.text.primary, 0.45) }}>
+              {t('map.placesCount') || 'Encuentra todo lo que necesitas'}
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setOpenDrawer(false)} sx={{ color: alpha(theme.palette.text.primary, 0.5) }}>
             <CloseIcon />
           </IconButton>
         </Box>
         <PlacesListSection onPlaceSelect={handlePlaceSelect} />
       </Drawer>
-    </Container>
+    </Box>
   );
 }

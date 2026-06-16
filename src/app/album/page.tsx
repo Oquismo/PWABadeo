@@ -70,6 +70,7 @@ export default function AlbumPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -87,6 +88,7 @@ export default function AlbumPage() {
       if (userCookie) {
         const userData = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
         setCurrentUserId(userData.id);
+        setIsAdmin(userData.role === 'admin');
       }
     } catch (e) {
       console.error('Error reading user cookie:', e);
@@ -270,7 +272,7 @@ export default function AlbumPage() {
                   }}
                 >
                   {/* Delete button */}
-                  {currentUserId === photo.user.id && (
+                  {(currentUserId === photo.user.id || isAdmin) && (
                     <IconButton
                       size="small"
                       sx={{
