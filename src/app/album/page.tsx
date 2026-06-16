@@ -192,6 +192,11 @@ export default function AlbumPage() {
   return (
     <PageTransition>
       <Box sx={{ p: 2, maxWidth: 1200, mx: 'auto', pb: 10 }}>
+        {/* DEBUG TEMPORAL */}
+        <Box sx={{ mb: 2, p: 1, bgcolor: 'rgba(255,255,0,0.15)', borderRadius: 2, fontSize: '0.7rem', fontFamily: 'monospace' }}>
+          user.id: {user?.id ?? 'null'} | role: {user?.role ?? 'null'} | isLoading: {isLoading ? 'true' : 'false'}
+        </Box>
+
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Box>
