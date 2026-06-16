@@ -243,7 +243,10 @@ export default function InteractiveMap({ selectedPlace, compact = false, height 
           zoom={14}
           style={{ height: '100%', width: '100%', zIndex: 0 }}
         >
-          <TileLayer url={`https://api.maptiler.com/maps/dark/{z}/{x}/{y}.png?key=${API_KEY}`} attribution="© MapTiler © OpenStreetMap" />
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            attribution="© OpenStreetMap © CARTO"
+          />
 
           {!markersOnly && (
             <MarkerClusterGroup chunkedLoading maxClusterRadius={50} spiderfyOnMaxZoom>
