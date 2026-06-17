@@ -166,7 +166,7 @@ const PerformanceDemoPage: React.FC = () => {
         </Typography>
         
         <Typography variant="h6" color="text.secondary" align="center" sx={{ mb: 4 }}>
-          Todas las mejoras implementadas en tu PWA Badeo
+          Todas las mejoras implementadas en tu Mi Erasmus App
         </Typography>
 
         {/* Métricas Generales */}

@@ -3,17 +3,17 @@ import React from 'react';
 export default function Head() {
   return (
     <>
-      <title>PWABadeo | Plataforma colaborativa</title>
-      <meta name="description" content="PWABadeo es una plataforma colaborativa para gestión de proyectos, información y servicios del barrio." />
-      <meta property="og:title" content="PWABadeo | Plataforma colaborativa" />
-      <meta property="og:description" content="PWABadeo es una plataforma colaborativa para gestión de proyectos, información y servicios del barrio." />
+      <title>Mi Erasmus App | Tu experiencia Erasmus en Sevilla</title>
+      <meta name="description" content="Mi Erasmus App es la app complementaria para estudiantes Erasmus. Descubre Sevilla, gestiona tus tareas y conecta con la comunidad." />
+      <meta property="og:title" content="Mi Erasmus App | Tu experiencia Erasmus en Sevilla" />
+      <meta property="og:description" content="Mi Erasmus App es la app complementaria para estudiantes Erasmus. Descubre Sevilla, gestiona tus tareas y conecta con la comunidad." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://pwabadeo.com/" />
-      <meta property="og:image" content="/img/logo.png" />
+      <meta property="og:url" content="https://badeo.es/" />
+      <meta property="og:image" content="/img/erasmus-plus.svg" />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="PWABadeo | Plataforma colaborativa" />
-      <meta name="twitter:description" content="PWABadeo es una plataforma colaborativa para gestión de proyectos, información y servicios del barrio." />
-      <meta name="twitter:image" content="/img/logo.png" />
+      <meta name="twitter:title" content="Mi Erasmus App | Tu experiencia Erasmus en Sevilla" />
+      <meta name="twitter:description" content="Mi Erasmus App es la app complementaria para estudiantes Erasmus. Descubre Sevilla, gestiona tus tareas y conecta con la comunidad." />
+      <meta name="twitter:image" content="/img/erasmus-plus.svg" />
     </>
   );
 }

@@ -65,11 +65,11 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
     
     const mailOptions = {
       from: {
-        name: 'Badeo - Barrio de Oportunidades',
+        name: 'Mi Erasmus App',
         address: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@badeo.com'
       },
       to: email,
-      subject: '🔐 Recuperación de contraseña - Badeo',
+      subject: '🔐 Recuperación de contraseña - Mi Erasmus App',
       html: `
         <!DOCTYPE html>
         <html>
@@ -91,14 +91,14 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
         </head>
         <body>
           <div class="header">
-            <div class="logo">🏘️ Badeo</div>
-            <div>Barrio de Oportunidades</div>
+            <div class="logo">Mi Erasmus App</div>
+            <div>Tu experiencia Erasmus en Sevilla</div>
           </div>
           
           <div class="content">
             <h2>🔐 Recuperación de contraseña</h2>
             <p>Hola,</p>
-            <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en <strong>Badeo</strong>.</p>
+            <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en <strong>Mi Erasmus App</strong>.</p>
             
             <div class="security-info">
               <strong>🛡️ Información de seguridad:</strong><br>
@@ -136,14 +136,14 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
             <p>Si tienes problemas para acceder a tu cuenta, no dudes en contactarnos.</p>
             
             <p>Saludos cordiales,<br>
-            <strong>El equipo de Badeo</strong> 🏘️</p>
+            <strong>El equipo de Mi Erasmus App</strong></p>
           </div>
           
           <div class="footer">
-            <p>Este email fue enviado desde <strong>Badeo - Barrio de Oportunidades</strong></p>
+            <p>Este email fue enviado desde <strong>Mi Erasmus App</strong></p>
             <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
             <p style="margin-top: 15px;">
-              🌐 <a href="${baseUrl}" style="color: #667eea;">Visitar Badeo</a> | 
+              🌐 <a href="${baseUrl}" style="color: #667eea;">Visitar Mi Erasmus App</a> | 
               📧 <a href="mailto:soporte@badeo.com" style="color: #667eea;">Contactar soporte</a>
             </p>
           </div>
@@ -218,11 +218,11 @@ export async function sendTestEmail(toEmail: string) {
     
     const mailOptions = {
       from: {
-        name: 'Badeo - Test',
+        name: 'Mi Erasmus App - Test',
         address: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@badeo.com'
       },
       to: toEmail,
-      subject: '✅ Email de prueba - Badeo',
+      subject: '✅ Email de prueba - Mi Erasmus App',
       html: `
         <!DOCTYPE html>
         <html>
@@ -237,8 +237,8 @@ export async function sendTestEmail(toEmail: string) {
         </head>
         <body>
           <div class="header">
-            <h1>🏘️ Badeo - Email Test</h1>
-            <p>Barrio de Oportunidades</p>
+            <h1>Mi Erasmus App - Email Test</h1>
+            <p>Tu experiencia Erasmus en Sevilla</p>
           </div>
           
           <div class="content">
@@ -257,7 +257,7 @@ export async function sendTestEmail(toEmail: string) {
             
             <p>Tu sistema de recuperación de contraseñas está listo para funcionar.</p>
             
-            <p>Saludos,<br><strong>El equipo de Badeo</strong> 🏘️</p>
+            <p>Saludos,<br><strong>El equipo de Mi Erasmus App</strong></p>
           </div>
         </body>
         </html>

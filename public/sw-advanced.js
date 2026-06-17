@@ -1,9 +1,9 @@
 /**
- * Service Worker Avanzado para PWA Badeo
+ * Service Worker Avanzado para Mi Erasmus App
  * Cache estratégico, sincronización offline y optimización de performance
  */
 
-const CACHE_NAME = 'pwa-badeo-v1.0.0';
+const CACHE_NAME = 'pwa-mierasmus-v1.0.0';
 const STATIC_CACHE = 'static-v1.0.0';
 const DYNAMIC_CACHE = 'dynamic-v1.0.0';
 const IMAGE_CACHE = 'images-v1.0.0';
@@ -397,7 +397,7 @@ self.addEventListener('push', (event) => {
   };
   
   event.waitUntil(
-    self.registration.showNotification('PWA Badeo', options)
+    self.registration.showNotification('Mi Erasmus App', options)
   );
 });
 

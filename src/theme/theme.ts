@@ -2,7 +2,7 @@
 import { createTheme } from '@mui/material/styles';
 
 // ============================================================
-// Material Design 3 — Dark Theme for Badeo
+// Material Design 3 — Dark Theme for Mi Erasmus App
 // Seed primary: #BEF264 (brand lime)
 // ============================================================
 

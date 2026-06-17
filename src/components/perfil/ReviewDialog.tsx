@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box } from '@mui/material';
 import { useTranslation } from '@/hooks/useTranslation';
 
-const GOOGLE_PLACE_ID = 'ChIJvwFmR2JtEg0Rsj7IpWyGayQ'; // Barrio de Oportunidades (BaDeO)
+const GOOGLE_PLACE_ID = 'ChIJvwFmR2JtEg0Rsj7IpWyGayQ'; // Mi Erasmus App
 
 export default function ReviewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [rating, setRating] = useState<number | null>(5);

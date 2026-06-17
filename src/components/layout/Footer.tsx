@@ -31,7 +31,7 @@ export default function Footer() {
           {/* Columna de Copyright */}
           <Grid item xs={12} sm={4} sx={{ textAlign: { xs: 'left', sm: 'center' } }}>
             <Typography variant="body2">
-              © {new Date().getFullYear()} Barrio de Oportunidades
+              © {new Date().getFullYear()} Mi Erasmus App
             </Typography>
             <Typography variant="caption">
               Todos los derechos reservados.

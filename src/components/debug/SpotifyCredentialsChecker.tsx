@@ -138,7 +138,7 @@ export default function SpotifyCredentialsChecker() {
         <Typography variant="body2" component="div" sx={{ mb: 2 }}>
           2. Crea una nueva aplicación con estos datos:
           <Box component="ul" sx={{ pl: 3, mt: 1 }}>
-            <li><strong>App name:</strong> Badeo PWA</li>
+            <li><strong>App name:</strong> Mi Erasmus App</li>
             <li><strong>App description:</strong> Recomendaciones musicales basadas en clima</li>
             <li><strong>Redirect URI:</strong> <code>{redirectUri}</code></li>
           </Box>

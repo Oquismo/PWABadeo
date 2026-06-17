@@ -20,38 +20,38 @@ const bricolage = Bricolage_Grotesque({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Badeo — Barrio de Oportunidades',
-    template: '%s | Badeo',
+    default: 'Mi Erasmus App',
+    template: '%s | Mi Erasmus App',
   },
   description:
-    'App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades. Descubre Sevilla, gestiona tus tareas, conecta con la comunidad y vive tu experiencia al máximo.',
-  keywords: ['Erasmus', 'Sevilla', 'Barrio de Oportunidades', 'Badeo', 'estudiantes', 'app'],
-  authors: [{ name: 'Badeo Team' }],
-  creator: 'Badeo',
-  publisher: 'Badeo',
+    'App complementaria para estudiantes Erasmus. Descubre Sevilla, gestiona tus tareas, conecta con la comunidad y vive tu experiencia al máximo.',
+  keywords: ['Erasmus', 'Sevilla', 'Mi Erasmus App', 'estudiantes', 'app'],
+  authors: [{ name: 'Mi Erasmus App Team' }],
+  creator: 'Mi Erasmus App',
+  publisher: 'Mi Erasmus App',
   robots: 'index, follow',
   openGraph: {
     type: 'website',
     locale: 'es_ES',
     url: 'https://badeo.es',
-    siteName: 'Badeo',
-    title: 'Badeo — Barrio de Oportunidades',
+    siteName: 'Mi Erasmus App',
+    title: 'Mi Erasmus App',
     description:
-      'App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.',
+      'App complementaria para estudiantes Erasmus.',
     images: [
       {
         url: '/icons/icon_512x512.png',
         width: 512,
         height: 512,
-        alt: 'Badeo App Icon',
+        alt: 'Mi Erasmus App Icon',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Badeo — Barrio de Oportunidades',
+    title: 'Mi Erasmus App',
     description:
-      'App complementaria para estudiantes Erasmus del programa Barrio de Oportunidades.',
+      'App complementaria para estudiantes Erasmus.',
     images: ['/icons/icon_512x512.png'],
   },
   icons: {
@@ -64,12 +64,12 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    title: 'Badeo',
+    title: 'Mi Erasmus App',
     statusBarStyle: 'black-translucent',
   },
   other: {
     'mobile-web-app-capable': 'yes',
-    'application-name': 'Badeo',
+    'application-name': 'Mi Erasmus App',
     'msapplication-tap-highlight': 'no',
     ' HandheldFriendly': 'true',
   },

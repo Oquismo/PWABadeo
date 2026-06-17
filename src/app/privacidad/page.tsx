@@ -9,7 +9,7 @@ export default function PrivacyPolicyApp() {
           Política de Privacidad
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          Esta política de privacidad describe cómo la app <strong>Barrio de Oportunidades</strong> recopila, utiliza y protege la información de los usuarios.
+          Esta política de privacidad describe cómo la app <strong>Mi Erasmus App</strong> recopila, utiliza y protege la información de los usuarios.
         </Typography>
         <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>1. Información que recopilamos</Typography>
         <ul>

@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Barrio de Oportunidades',
-  description: 'Una nueva app para el barrio',
+  title: 'Mi Erasmus App',
+  description: 'App complementaria para estudiantes Erasmus',
 };
 
 export default function RootLayout({
@@ -21,7 +21,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Badeo PWA" />
+        <meta name="apple-mobile-web-app-title" content="Mi Erasmus App" />
       </head>
       <body>
         {children}

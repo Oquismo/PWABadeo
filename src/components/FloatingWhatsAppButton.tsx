@@ -54,7 +54,7 @@ export default function FloatingWhatsAppButton({ phone = '+34649347760', message
   return (
     <Fab
       color="success"
-      aria-label={t('pages.phones.neighborhoodEmergency') || 'Badeo'}
+      aria-label={t('pages.phones.neighborhoodEmergency') || 'Mi Erasmus App'}
       sx={{
         position: 'fixed',
         // Place above the feedback Fab: same right offset, larger bottom offset

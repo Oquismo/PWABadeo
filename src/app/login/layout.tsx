@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Login - Barrio de Oportunidades',
+  title: 'Login - Mi Erasmus App',
 };
 
 export default function LoginLayout({

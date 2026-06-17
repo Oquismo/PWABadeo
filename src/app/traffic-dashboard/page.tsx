@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Dashboard de Tráfico - PWABadeo',
-  description: 'Monitoreo en tiempo real del tráfico y actividad de PWABadeo',
+  title: 'Dashboard de Tráfico - Mi Erasmus App',
+  description: 'Monitoreo en tiempo real del tráfico y actividad de Mi Erasmus App',
 };
 
 export default function TrafficDashboardPage() {

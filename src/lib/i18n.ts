@@ -6,7 +6,7 @@ export const translations = {
       textLabel: "Tu reseña",
       placeholder: "Cuéntanos qué tal tu experiencia...",
       motivationTitle: "¡Tu opinión nos ayuda a mejorar!",
-      motivationText: "Cuéntanos qué tal tu experiencia en Barrio de Oportunidades. Cada reseña nos ayuda a crecer y ofrecerte un mejor servicio.",
+      motivationText: "Cuéntanos qué tal tu experiencia en Mi Erasmus App. Cada reseña nos ayuda a crecer y ofrecerte un mejor servicio.",
       copyInfo: "Al continuar, tu reseña se copiará automáticamente y se abrirá Google para que la pegues y la publiques."
     },
     map: {
@@ -189,7 +189,7 @@ export const translations = {
     // Páginas principales
     pages: {
       home: {
-        title: "Barrio de Oportunidades",
+        title: "Mi Erasmus App",
         subtitle: "Tu comunidad digital",
         welcomeMessage: "¡Bienvenido a tu barrio!",
         exploreServices: "Explora nuestros servicios",
@@ -309,8 +309,8 @@ export const translations = {
         description: "Residencia moderna con todas las comodidades para estudiantes internacionales. WiFi, cocina equipada, salas de estudio."
       },
       oficinaBarrio: {
-        name: "Oficina Barrio de Oportunidades",
-        description: "Oficina principal del programa Barrio de Oportunidades. Punto de encuentro y gestiones."
+        name: "Oficina Mi Erasmus App",
+        description: "Oficina principal del programa Mi Erasmus App. Punto de encuentro y gestiones."
       },
       plazaEspana: {
         name: "Plaza de España",
@@ -369,7 +369,7 @@ export const translations = {
       textLabel: "Your review",
       placeholder: "Tell us about your experience...",
       motivationTitle: "Your feedback helps us improve!",
-      motivationText: "Tell us about your experience in Barrio de Oportunidades. Every review helps us grow and offer you a better service.",
+      motivationText: "Tell us about your experience in Mi Erasmus App. Every review helps us grow and offer you a better service.",
       copyInfo: "When you continue, your review will be copied automatically and Google will open so you can paste and publish it."
     },
     map: {
@@ -538,7 +538,7 @@ export const translations = {
     // Main pages
     pages: {
       home: {
-        title: "Barrio de oportunidades",
+        title: "Mi Erasmus App",
         subtitle: "Your digital community",
         welcomeMessage: "",
         exploreServices: "Explore our services",
@@ -683,8 +683,8 @@ export const translations = {
         description: "Residencia moderna con todas las comodidades para estudiantes internacionales. WiFi, cocina equipada, salas de estudio."
       },
       oficinaBarrio: {
-        name: "Barrio de Oportunidades Office",
-        description: "Main office of the Barrio de Oportunidades program. Meeting point and administrative procedures."
+        name: "Mi Erasmus App Office",
+        description: "Main office of the Mi Erasmus App program. Meeting point and administrative procedures."
       },
       plazaEspana: {
         name: "Plaza de España",
@@ -743,7 +743,7 @@ export const translations = {
       textLabel: "La tua recensione",
       placeholder: "Raccontaci com'è stata la tua esperienza...",
       motivationTitle: "La tua opinione ci aiuta a migliorare!",
-      motivationText: "Raccontaci com'è stata la tua esperienza a Barrio de Oportunidades. Ogni recensione ci aiuta a crescere e offrirti un servizio migliore.",
+      motivationText: "Raccontaci com'è stata la tua esperienza a Mi Erasmus App. Ogni recensione ci aiuta a crescere e offrirti un servizio migliore.",
       copyInfo: "Continuando, la tua recensione verrà copiata automaticamente e si aprirà Google per incollarla e pubblicarla."
     },
     map: {
@@ -902,7 +902,7 @@ export const translations = {
     // Pagine principali
     pages: {
       home: {
-        title: "Quartiere delle Opportunità",
+        title: "Mi Erasmus App",
         subtitle: "La tua comunità digitale",
         welcomeMessage: "Benvenuto nel tuo quartiere!",
         exploreServices: "Esplora i nostri servizi",

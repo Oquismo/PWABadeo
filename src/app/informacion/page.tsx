@@ -8,7 +8,7 @@ export default function InformacionPage() {
     <Container>
       <Box sx={{ py: 6, textAlign: 'center' }}>
         <Typography variant="h2" component="h1" fontWeight="bold">
-          Barrio de Oportunidades
+          Mi Erasmus App
         </Typography>
         <Typography variant="h5" color="text.secondary" sx={{ mt: 2 }}>
           Un programa de movilidad internacional que impulsa el talento joven, conectando barrios con Europa.

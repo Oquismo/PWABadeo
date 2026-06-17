@@ -59,8 +59,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         >
           <Box
             component="img"
-            src="/img/logo.png"
-            alt="Barrio de Oportunidades"
+            src="/img/erasmus-plus.svg"
+            alt="Mi Erasmus App"
             sx={{
               width: { xs: 180, sm: 200 },
               height: { xs: 180, sm: 200 },
@@ -87,7 +87,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               letterSpacing: '-0.02em',
             }}
           >
-            Barrio de Oportunidades
+            Mi Erasmus App
           </Typography>
         </motion.div>
 

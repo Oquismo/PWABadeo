@@ -124,7 +124,7 @@ function LoginForm() {
           width: 72, height: 72, borderRadius: '22px', overflow: 'hidden',
           mb: 2.5, boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
         }}>
-          <Box component="img" src="/icons/icon_192x192.png" alt="Badeo" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Box component="img" src="/img/erasmus-plus.svg" alt="Mi Erasmus App" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </Box>
         <Typography
           component="h1"
@@ -133,7 +133,7 @@ function LoginForm() {
             fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
           }}
         >
-          Barrio de Oportunidades
+          Mi Erasmus App
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, textAlign: 'center' }}>
           {isAdminOnly ? t('login.adminOnly') : (t('login.subtitle') || 'Inicia sesión para continuar')}

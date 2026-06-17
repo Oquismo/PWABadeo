@@ -47,8 +47,8 @@ export const placesData: Place[] = [
   // === OFICINAS Y SERVICIOS ===
   {
     id: 'oficina-barrio-oportunidades',
-    name: 'Oficina Barrio de Oportunidades',
-    description: 'Oficina principal del programa Barrio de Oportunidades. Punto de encuentro y gestiones.',
+    name: 'Oficina Mi Erasmus App',
+    description: 'Oficina principal del programa Mi Erasmus App. Punto de encuentro y gestiones.',
     category: 'Servicios',
     coordinates: { lat: 37.3895687188777, lng: -5.9916432331313185 }, // Coordenadas exactas de Google Maps
     address: 'Cta. del Rosario, 8, Casa 1, 4F, Casco Antiguo, 41004 Sevilla',
