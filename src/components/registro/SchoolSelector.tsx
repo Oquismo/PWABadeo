@@ -48,7 +48,7 @@ export default function SchoolSelector({
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    country: 'Italia',
+    country: '',
     city: '',
     town: ''
   });
@@ -88,7 +88,6 @@ export default function SchoolSelector({
   useEffect(() => {
     if (filters.country && countryCities[filters.country]) {
       setAvailableCities(countryCities[filters.country]);
-      // Resetear ciudad y pueblo si el país cambió
       if (!countryCities[filters.country].includes(filters.city)) {
         setFilters(prev => ({ ...prev, city: '', town: '' }));
       }
@@ -181,6 +180,7 @@ export default function SchoolSelector({
             label="País"
             onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
           >
+            <MenuItem value="">Todos</MenuItem>
             <MenuItem value="Italia">Italia</MenuItem>
             <MenuItem value="España">España</MenuItem>
           </Select>

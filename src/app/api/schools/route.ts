@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const search = url.searchParams.get('search') || '';
     const city = url.searchParams.get('city') || '';
+    const country = url.searchParams.get('country') || '';
     const type = url.searchParams.get('type') || '';
     const level = url.searchParams.get('level') || '';
     const id = url.searchParams.get('id');
@@ -40,6 +41,10 @@ export async function GET(request: Request) {
 
       if (city) {
         where.city = { contains: city, mode: 'insensitive' };
+      }
+
+      if (country) {
+        where.country = { contains: country, mode: 'insensitive' };
       }
 
       if (type && type !== 'all') {
