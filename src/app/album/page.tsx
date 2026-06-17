@@ -41,6 +41,11 @@ import PageTransition from '@/components/layout/PageTransition';
 
 import { useAuth } from '@/context/AuthContext';
 
+interface School {
+  id: number;
+  name: string;
+}
+
 interface Photo {
   id: number;
   url: string;
@@ -49,6 +54,7 @@ interface Photo {
   width: number | null;
   height: number | null;
   createdAt: string;
+  schoolId: number | null;
   user: {
     id: number;
     firstName: string;
@@ -81,9 +87,41 @@ export default function AlbumPage() {
   const swiperRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // School filter state
+  const [schools, setSchools] = useState<School[]>([]);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<number | 'all'>('all');
+  const [schoolsLoading, setSchoolsLoading] = useState(false);
+
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
+  // Fetch schools for admin filter
   useEffect(() => {
-    fetchPhotos();
-  }, []);
+    if (isAdmin && user) {
+      fetchSchools();
+    }
+  }, [isAdmin, user]);
+
+  // Fetch photos when school filter changes
+  useEffect(() => {
+    if (!isLoading) {
+      fetchPhotos();
+    }
+  }, [selectedSchoolId, isLoading]);
+
+  const fetchSchools = async () => {
+    try {
+      setSchoolsLoading(true);
+      const res = await fetch('/api/schools');
+      const data = await res.json();
+      if (res.ok) {
+        setSchools(data.schools || []);
+      }
+    } catch (error) {
+      console.error('Error fetching schools:', error);
+    } finally {
+      setSchoolsLoading(false);
+    }
+  };
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
     setSnackbar({ open: true, message, severity });
@@ -91,7 +129,14 @@ export default function AlbumPage() {
 
   const fetchPhotos = async () => {
     try {
-      const res = await fetch(`/api/photos?t=${Date.now()}`, {
+      let url = `/api/photos?t=${Date.now()}`;
+      
+      // Only admins can filter by school; regular users see their own school
+      if (isAdmin && selectedSchoolId !== 'all') {
+        url += `&schoolId=${selectedSchoolId}`;
+      }
+
+      const res = await fetch(url, {
         cache: 'no-store',
         credentials: 'include',
       });
@@ -192,7 +237,7 @@ export default function AlbumPage() {
     <PageTransition>
       <Box sx={{ p: 2, maxWidth: 1200, mx: 'auto', pb: 10 }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box>
             <Typography
               variant="h4"
@@ -203,12 +248,47 @@ export default function AlbumPage() {
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {photos.length} {photos.length === 1 ? 'foto' : 'fotos'}
+              {isAdmin && selectedSchoolId !== 'all' && schools.find(s => s.id === selectedSchoolId) && (
+                <> · {schools.find(s => s.id === selectedSchoolId)?.name}</>
+              )}
+              {isAdmin && selectedSchoolId === 'all' && <> · Todas las escuelas</>}
+              {!isAdmin && user?.schoolId && photos[0]?.user?.school && <> · {photos[0]?.user?.school?.name}</>}
             </Typography>
           </Box>
-          <IconButton onClick={fetchPhotos} sx={{ color: 'text.secondary' }}>
-            <RefreshIcon />
-          </IconButton>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <IconButton onClick={fetchPhotos} sx={{ color: 'text.secondary' }}>
+              <RefreshIcon />
+            </IconButton>
+          </Box>
         </Box>
+
+        {/* School Filter Chips (Admin only) */}
+        {isAdmin && (
+          <Box sx={{ display: 'flex', gap: 1, mb: 3, overflowX: 'auto', pb: 1, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+            <Chip
+              label="Todas"
+              onClick={() => setSelectedSchoolId('all')}
+              color={selectedSchoolId === 'all' ? 'primary' : 'default'}
+              variant={selectedSchoolId === 'all' ? 'filled' : 'outlined'}
+              size="small"
+              sx={{ flexShrink: 0 }}
+            />
+            {schoolsLoading && (
+              <CircularProgress size={20} sx={{ alignSelf: 'center' }} />
+            )}
+            {schools.map((school) => (
+              <Chip
+                key={school.id}
+                label={school.name}
+                onClick={() => setSelectedSchoolId(school.id)}
+                color={selectedSchoolId === school.id ? 'primary' : 'default'}
+                variant={selectedSchoolId === school.id ? 'filled' : 'outlined'}
+                size="small"
+                sx={{ flexShrink: 0 }}
+              />
+            ))}
+          </Box>
+        )}
 
         {/* Masonry Grid */}
         {loading ? (
@@ -329,6 +409,11 @@ export default function AlbumPage() {
                   </Avatar>
                   <Typography variant="caption" color="text.secondary" sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {photo.user.firstName}
+                    {isAdmin && selectedSchoolId === 'all' && photo.user.school && (
+                      <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
+                        · {photo.user.school.name}
+                      </Box>
+                    )}
                   </Typography>
                   <Typography variant="caption" color="text.disabled">
                     {formatDate(photo.createdAt)}
@@ -537,6 +622,9 @@ export default function AlbumPage() {
                           </Typography>
                           <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
                             {formatDate(photo.createdAt)}
+                            {isAdmin && selectedSchoolId === 'all' && photo.user.school && (
+                              <> · {photo.user.school.name}</>
+                            )}
                           </Typography>
                         </Box>
                       </Box>
