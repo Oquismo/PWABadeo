@@ -65,7 +65,7 @@ export default function FabMenu({ phone = '+34649347760', message = '', onOpenFe
   ];
 
   return (
-    <Box sx={{ position: 'fixed', right: 18, bottom: 8, zIndex: 1400 }}>
+    <Box sx={{ position: 'fixed', right: 18, bottom: 88, zIndex: 1400 }}>
       <AnimatePresence>
         {open && (
           <motion.div

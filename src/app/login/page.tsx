@@ -1,13 +1,6 @@
-/**
- * Login Page - Versión Refactorizada
- * 
- * Ejemplo de cómo usar las nuevas utilidades para simplificar componentes
- */
-
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import dynamic from 'next/dynamic';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Container,
@@ -23,22 +16,16 @@ import Link from 'next/link';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// Hooks y utilidades refactorizadas
 import { useAuth } from '@/context/AuthContext';
 import { useForm } from '@/hooks/useForm';
 import { useToggle } from '@/hooks/useForm';
 import { validateLoginForm, LoginFormData } from '@/utils/validation.utils';
 import { apiClient } from '@/utils/api-client.utils';
-import { LocalStorage } from '@/utils/storage.utils';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useTranslation } from '@/hooks/useTranslation';
 import loggerClient from '@/lib/loggerClient';
 
-// Tipos
 import { UserBase } from '@/types/api.types';
-
-// Importación dinámica del tour
-const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ssr: false });
 
 function LoginForm() {
   const router = useRouter();
@@ -47,7 +34,6 @@ function LoginForm() {
   const { t } = useTranslation();
   const { success: hapticSuccess, error: hapticError } = useHaptics();
   
-  const [showTour, setShowTour] = useState(false);
   const { value: showPassword, toggle: toggleShowPassword } = useToggle(false);
 
   const {
@@ -65,18 +51,6 @@ function LoginForm() {
     validate: validateLoginForm,
     onSubmit: handleLogin,
   });
-
-  useEffect(() => {
-    const tourDone = LocalStorage.has('onboardingTourDone');
-    if (!tourDone) {
-      setShowTour(true);
-    }
-  }, []);
-
-  const handleFinishTour = () => {
-    setShowTour(false);
-    LocalStorage.set('onboardingTourDone', 'true');
-  };
 
   async function handleLogin(formData: LoginFormData) {
     try {
@@ -117,8 +91,6 @@ function LoginForm() {
       maxWidth="xs"
       sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 4 }}
     >
-      {showTour && <OnboardingTour run={showTour} onFinish={handleFinishTour} />}
-
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pb: 4 }}>
         <Box component="img" src="/img/Erasmus+_Logo.svg" alt="Mi Erasmus App" sx={{
           width: 200, height: 'auto', mb: 2.5,

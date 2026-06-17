@@ -92,14 +92,15 @@ const MaterialFilterChips = React.memo(function MaterialFilterChips({
             onClick={() => handleChipClick(category)}
             style={{
               flexShrink: 0,
-              padding: '6px 14px',
+              padding: '12px 16px',
               borderRadius: '20px',
               border: '1px solid',
               backgroundColor: isSelected ? alpha(color, 0.2) : 'transparent',
               color: isSelected ? color : alpha(theme.palette.text.primary, 0.65),
               borderColor: isSelected ? alpha(color, 0.4) : alpha(theme.palette.common.white, 0.1),
               cursor: 'pointer',
-              fontSize: '13px',
+              fontSize: '14px',
+              lineHeight: '24px',
               fontWeight: isSelected ? 700 : 500,
               fontFamily: 'system-ui, -apple-system, sans-serif',
               transition: 'all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)',

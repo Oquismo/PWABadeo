@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Card,
@@ -10,9 +11,11 @@ import {
   Grid,
   Stack,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/context/AuthContext';
 
 type TutorialVideo = {
   title: string;
@@ -24,7 +27,6 @@ type TutorialVideo = {
   duration?: string;
 };
 
-// TODO: Sustituye fallbackSearch por videoId cuando se definan tutoriales oficiales.
 const tutorialVideos: TutorialVideo[] = [
   {
     title: 'Como hacer la maleta para tu Erasmus',
@@ -61,11 +63,27 @@ const tutorialVideos: TutorialVideo[] = [
 ];
 
 export default function TutorialesPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { t, language } = useTranslation();
 
-  const localizedVideos = useMemo(() => {
-    return tutorialVideos.filter((video) => video.language === (language === 'en' ? 'EN' : 'ES'));
-  }, [language]);
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || user?.role !== 'admin')) {
+      router.replace('/');
+    }
+  }, [isLoading, isAuthenticated, user, router]);
+
+  if (isLoading || !isAuthenticated || user?.role !== 'admin') {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  const localizedVideos = tutorialVideos.filter(
+    (video) => video.language === (language === 'en' ? 'EN' : 'ES')
+  );
 
   const videosToRender = localizedVideos.length > 0 ? localizedVideos : tutorialVideos;
 

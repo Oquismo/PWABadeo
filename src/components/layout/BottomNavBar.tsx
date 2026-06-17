@@ -60,7 +60,9 @@ export default function BottomNavBar() {
     { value: "/programa", icon: <ExploreRoundedIcon />, label: 'Programa' },
     { value: "/recomendaciones", icon: <RestaurantRoundedIcon />, label: t('nav.recommendations') },
     { value: "/residencia", icon: <HotelRoundedIcon />, label: t('nav.residence') },
-    { value: "/tutoriales", icon: <VideoLibraryRoundedIcon />, label: t('nav.tutorials') },
+    ...(user?.role === 'admin'
+      ? [{ value: "/tutoriales", icon: <VideoLibraryRoundedIcon />, label: t('nav.tutorials') }]
+      : []),
   ];
 
   return (
@@ -202,9 +204,9 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
           backgroundColor: open ? '#E8DEF8' : 'transparent',
           borderRadius: '50%',
           margin: '0 1px',
-          padding: '8px',
-          minWidth: '40px',
-          height: '40px',
+          padding: '12px',
+          minWidth: '48px',
+          height: '48px',
           transition: 'all 0.15s cubic-bezier(0.2, 0, 0, 1)',
           '&:hover': {
             backgroundColor: theme => theme.palette.mode === 'dark'
