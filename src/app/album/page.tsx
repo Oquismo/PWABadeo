@@ -184,13 +184,23 @@ export default function AlbumPage() {
         selectedFiles.forEach(() => formData.append('captions', caption));
       }
 
-      const res = await fetch('/api/photos/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
+      let res: Response;
+      try {
+        res = await fetch('/api/photos/upload', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+      } catch (fetchError) {
+        const msg = fetchError instanceof Error ? fetchError.message : 'No se pudo conectar al servidor';
+        showSnackbar(`Error de red: ${msg}`, 'error');
+        return;
+      }
+
+      const responseText = await res.text();
 
       if (res.ok) {
+        const data = JSON.parse(responseText);
         const hasVideos = selectedFiles.some(f => f.type.startsWith('video/'));
         const hasImages = selectedFiles.some(f => f.type.startsWith('image/'));
         let msg = '';
@@ -206,11 +216,17 @@ export default function AlbumPage() {
         setPreviewUrls([]);
         setPreviewTypes([]);
       } else {
-        const errorData = await res.json();
-        showSnackbar(errorData.error || 'Error al subir', 'error');
+        let errorMsg = `Error del servidor (${res.status})`;
+        try {
+          const errorData = JSON.parse(responseText);
+          if (errorData.error) errorMsg = errorData.error;
+          if (errorData.details) errorMsg += ` - ${errorData.details}`;
+        } catch {}
+        showSnackbar(errorMsg, 'error');
       }
     } catch (error) {
-      showSnackbar('Error de conexión', 'error');
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      showSnackbar(`Error inesperado: ${message}`, 'error');
     } finally {
       setUploading(false);
       setUploadProgress(0);
