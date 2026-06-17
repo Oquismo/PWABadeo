@@ -30,6 +30,8 @@ import {
   Refresh as RefreshIcon,
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
+  PlayArrow as PlayIcon,
+  Videocam as VideoIcon,
 } from '@mui/icons-material';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Zoom } from 'swiper/modules';
@@ -51,6 +53,8 @@ interface Photo {
   url: string;
   thumbnailUrl: string | null;
   caption: string | null;
+  type: 'image' | 'video';
+  duration: number | null;
   width: number | null;
   height: number | null;
   createdAt: string;
@@ -67,6 +71,13 @@ interface Photo {
   };
 }
 
+function formatDuration(seconds: number | null): string {
+  if (!seconds) return '';
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 export default function AlbumPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +87,7 @@ export default function AlbumPage() {
   const [caption, setCaption] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [previewTypes, setPreviewTypes] = useState<('image' | 'video')[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const { user, isLoading } = useAuth();
@@ -86,22 +98,20 @@ export default function AlbumPage() {
   });
   const swiperRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
-  // School filter state
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
   const [schools, setSchools] = useState<School[]>([]);
   const [selectedSchoolId, setSelectedSchoolId] = useState<number | 'all'>('all');
   const [schoolsLoading, setSchoolsLoading] = useState(false);
 
-  const isAdmin = user?.role?.toLowerCase() === 'admin';
-
-  // Fetch schools for admin filter
   useEffect(() => {
     if (isAdmin && user) {
       fetchSchools();
     }
   }, [isAdmin, user]);
 
-  // Fetch photos when school filter changes
   useEffect(() => {
     if (!isLoading) {
       fetchPhotos();
@@ -131,7 +141,6 @@ export default function AlbumPage() {
     try {
       let url = `/api/photos?t=${Date.now()}`;
       
-      // Only admins can filter by school; regular users see their own school
       if (isAdmin && selectedSchoolId !== 'all') {
         url += `&schoolId=${selectedSchoolId}`;
       }
@@ -142,7 +151,7 @@ export default function AlbumPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        showSnackbar(data.error || 'Error al cargar fotos', 'error');
+        showSnackbar(data.error || 'Error al cargar', 'error');
         return;
       }
       setPhotos(data.photos);
@@ -159,6 +168,7 @@ export default function AlbumPage() {
       setSelectedFiles(files);
       previewUrls.forEach(url => URL.revokeObjectURL(url));
       setPreviewUrls(files.map(file => URL.createObjectURL(file)));
+      setPreviewTypes(files.map(file => file.type.startsWith('video/') ? 'video' : 'image'));
     }
   };
 
@@ -181,13 +191,20 @@ export default function AlbumPage() {
       });
 
       if (res.ok) {
-        showSnackbar(`${selectedFiles.length} foto${selectedFiles.length > 1 ? 's' : ''} subida${selectedFiles.length > 1 ? 's' : ''} correctamente`, 'success');
+        const hasVideos = selectedFiles.some(f => f.type.startsWith('video/'));
+        const hasImages = selectedFiles.some(f => f.type.startsWith('image/'));
+        let msg = '';
+        if (hasImages && hasVideos) msg = `${selectedFiles.length} archivo${selectedFiles.length > 1 ? 's' : ''} subido${selectedFiles.length > 1 ? 's' : ''}`;
+        else if (hasVideos) msg = `${selectedFiles.length} video${selectedFiles.length > 1 ? 's' : ''} subido${selectedFiles.length > 1 ? 's' : ''}`;
+        else msg = `${selectedFiles.length} foto${selectedFiles.length > 1 ? 's' : ''} subida${selectedFiles.length > 1 ? 's' : ''}`;
+        showSnackbar(msg, 'success');
         fetchPhotos();
         setOpenUploadDialog(false);
         setSelectedFiles([]);
         setCaption('');
         previewUrls.forEach(url => URL.revokeObjectURL(url));
         setPreviewUrls([]);
+        setPreviewTypes([]);
       } else {
         const errorData = await res.json();
         showSnackbar(errorData.error || 'Error al subir', 'error');
@@ -211,7 +228,7 @@ export default function AlbumPage() {
         fetchPhotos();
         showSnackbar('Error al eliminar', 'error');
       } else {
-        showSnackbar('Foto eliminada', 'success');
+        showSnackbar('Eliminado correctamente', 'success');
       }
     } catch (error) {
       fetchPhotos();
@@ -231,6 +248,9 @@ export default function AlbumPage() {
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   };
 
+  const photoCount = photos.filter(p => p.type === 'image').length;
+  const videoCount = photos.filter(p => p.type === 'video').length;
+
   const skeletonHeights = [180, 220, 160, 200, 240, 170, 190, 210];
 
   return (
@@ -247,7 +267,12 @@ export default function AlbumPage() {
               Álbum
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {photos.length} {photos.length === 1 ? 'foto' : 'fotos'}
+              {photos.length} {photos.length === 1 ? 'archivo' : 'archivos'}
+              {photoCount > 0 && videoCount > 0 && <> · {photoCount} fotos, {videoCount} videos</>}
+              {photoCount > 0 && videoCount === 0 && photos.length === 1 && <> · foto</>}
+              {photoCount > 0 && videoCount === 0 && photos.length > 1 && <> · fotos</>}
+              {photoCount === 0 && videoCount > 0 && photos.length === 1 && <> · video</>}
+              {photoCount === 0 && videoCount > 0 && photos.length > 1 && <> · videos</>}
               {isAdmin && selectedSchoolId !== 'all' && schools.find(s => s.id === selectedSchoolId) && (
                 <> · {schools.find(s => s.id === selectedSchoolId)?.name}</>
               )}
@@ -310,10 +335,10 @@ export default function AlbumPage() {
             <CardContent>
               <PhotoIcon sx={{ fontSize: 72, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6" gutterBottom fontWeight="medium">
-                Aún no hay fotos
+                Aún no hay contenido
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Toca + para compartir tu primer momento
+                Toca + para compartir fotos o videos
               </Typography>
             </CardContent>
           </Card>
@@ -367,15 +392,72 @@ export default function AlbumPage() {
                     </IconButton>
                   )}
 
-                  {/* Image */}
+                  {/* Media */}
                   <Box sx={{ position: 'relative', width: '100%', paddingTop: photo.width && photo.height ? `${(photo.height / photo.width) * 100}%` : '100%' }}>
-                    <Image
-                      src={photo.thumbnailUrl || photo.url}
-                      alt={photo.caption || ''}
-                      fill
-                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
-                      style={{ objectFit: 'cover' }}
-                    />
+                    {photo.type === 'video' ? (
+                      <>
+                        <Image
+                          src={photo.thumbnailUrl || photo.url}
+                          alt={photo.caption || ''}
+                          fill
+                          sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                        {/* Play overlay */}
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'rgba(0,0,0,0.25)',
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: '50%',
+                              bgcolor: 'rgba(255,255,255,0.9)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            }}
+                          >
+                            <PlayIcon sx={{ fontSize: 32, color: '#1a1a1a', ml: 0.5 }} />
+                          </Box>
+                        </Box>
+                        {/* Duration badge */}
+                        {photo.duration && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              bottom: 6,
+                              left: 6,
+                              bgcolor: 'rgba(0,0,0,0.7)',
+                              color: 'white',
+                              px: 1,
+                              py: 0.25,
+                              borderRadius: 1,
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {formatDuration(photo.duration)}
+                          </Box>
+                        )}
+                      </>
+                    ) : (
+                      <Image
+                        src={photo.thumbnailUrl || photo.url}
+                        alt={photo.caption || ''}
+                        fill
+                        sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    )}
                   </Box>
 
                   {/* Caption overlay */}
@@ -429,7 +511,7 @@ export default function AlbumPage() {
           color="primary"
           sx={{
             position: 'fixed',
-            bottom: 80,
+            bottom: 88,
             right: 16,
             boxShadow: '0 4px 12px rgba(196, 242, 120, 0.4)',
           }}
@@ -446,19 +528,20 @@ export default function AlbumPage() {
             setSelectedFiles([]);
             previewUrls.forEach(url => URL.revokeObjectURL(url));
             setPreviewUrls([]);
+            setPreviewTypes([]);
           }}
           fullWidth
           maxWidth="sm"
           PaperProps={{ sx: { borderRadius: 4 } }}
         >
           <DialogTitle sx={{ pb: 1 }}>
-            Subir {selectedFiles.length > 0 ? `${selectedFiles.length} fotos` : 'fotos'}
+            Subir {selectedFiles.length > 0 ? `${selectedFiles.length} archivo${selectedFiles.length > 1 ? 's' : ''}` : 'fotos y videos'}
           </DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 1 }}>
               <input
                 ref={fileInputRef}
-                accept="image/*"
+                accept="image/*,video/*"
                 type="file"
                 multiple
                 hidden
@@ -483,24 +566,49 @@ export default function AlbumPage() {
                     <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
                       {previewUrls.map((url, i) => (
                         <Box key={i} sx={{ position: 'relative', width: 80, height: 80, flexShrink: 0, borderRadius: 2, overflow: 'hidden' }}>
-                          <Image
-                            src={url}
-                            alt={`preview-${i}`}
-                            fill
-                            style={{ objectFit: 'cover' }}
-                          />
+                          {previewTypes[i] === 'video' ? (
+                            <video
+                              src={url}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              muted
+                            />
+                          ) : (
+                            <Image
+                              src={url}
+                              alt={`preview-${i}`}
+                              fill
+                              style={{ objectFit: 'cover' }}
+                            />
+                          )}
+                          {previewTypes[i] === 'video' && (
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                inset: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'rgba(0,0,0,0.3)',
+                              }}
+                            >
+                              <PlayIcon sx={{ color: 'white', fontSize: 24 }} />
+                            </Box>
+                          )}
                         </Box>
                       ))}
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                      {selectedFiles.length} foto{selectedFiles.length > 1 ? 's' : ''} seleccionada{selectedFiles.length > 1 ? 's' : ''}
+                      {selectedFiles.length} archivo{selectedFiles.length > 1 ? 's' : ''} seleccionado{selectedFiles.length > 1 ? 's' : ''}
                     </Typography>
                   </Box>
                 ) : (
                   <>
-                    <AddIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
+                    <VideoIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
                     <Typography variant="body2" color="text.secondary">
-                      Toca para seleccionar (máx. 10)
+                      Toca para seleccionar fotos o videos (máx. 10)
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      Videos máx. 50MB
                     </Typography>
                   </>
                 )}
@@ -531,7 +639,13 @@ export default function AlbumPage() {
         {/* Lightbox with Swiper */}
         <Dialog
           open={lightboxOpen}
-          onClose={() => setLightboxOpen(false)}
+          onClose={() => {
+            setLightboxOpen(false);
+            // Pause any playing videos
+            Object.values(videoRefs.current).forEach(v => {
+              if (v) v.pause();
+            });
+          }}
           fullScreen
           sx={{
             '& .MuiDialog-paper': {
@@ -550,7 +664,12 @@ export default function AlbumPage() {
               bgcolor: 'rgba(255,255,255,0.15)',
               '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
             }}
-            onClick={() => setLightboxOpen(false)}
+            onClick={() => {
+              setLightboxOpen(false);
+              Object.values(videoRefs.current).forEach(v => {
+                if (v) v.pause();
+              });
+            }}
           >
             <CloseIcon />
           </IconButton>
@@ -564,7 +683,13 @@ export default function AlbumPage() {
                 el: '.swiper-pagination-custom',
               }}
               initialSlide={lightboxIndex}
-              onSlideChange={(swiper) => setLightboxIndex(swiper.activeIndex)}
+              onSlideChange={(swiper) => {
+                setLightboxIndex(swiper.activeIndex);
+                // Pause videos when sliding away
+                Object.values(videoRefs.current).forEach(v => {
+                  if (v) v.pause();
+                });
+              }}
               onSwiper={(swiper) => {
                 swiperRef.current = swiper;
               }}
@@ -584,13 +709,28 @@ export default function AlbumPage() {
                   >
                     <div className="swiper-zoom-container" style={{ width: '100%', height: '75vh' }}>
                       <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                        <Image
-                          src={photo.url}
-                          alt={photo.caption || ''}
-                          fill
-                          style={{ objectFit: 'contain' }}
-                          sizes="100vw"
-                        />
+                        {photo.type === 'video' ? (
+                          <video
+                            ref={el => { videoRefs.current[photo.id] = el; }}
+                            src={photo.url}
+                            controls
+                            playsInline
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              background: '#000',
+                            }}
+                          />
+                        ) : (
+                          <Image
+                            src={photo.url}
+                            alt={photo.caption || ''}
+                            fill
+                            style={{ objectFit: 'contain' }}
+                            sizes="100vw"
+                          />
+                        )}
                       </Box>
                     </div>
 
@@ -622,6 +762,9 @@ export default function AlbumPage() {
                           </Typography>
                           <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
                             {formatDate(photo.createdAt)}
+                            {photo.type === 'video' && photo.duration && (
+                              <> · {formatDuration(photo.duration)}</>
+                            )}
                             {isAdmin && selectedSchoolId === 'all' && photo.user.school && (
                               <> · {photo.user.school.name}</>
                             )}

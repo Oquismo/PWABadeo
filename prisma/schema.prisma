@@ -274,6 +274,9 @@ model Photo {
   url         String       // URL original en Cloudinary
   thumbnailUrl String?     // URL optimizada para thumbnails
   caption     String?
+  type        String       @default("image") // "image" o "video"
+  duration    Int?         // Duración en segundos (solo videos)
+  publicId    String?      // Cloudinary public_id para transformaciones
   userId      Int
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   schoolId    Int?

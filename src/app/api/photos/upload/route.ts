@@ -3,10 +3,15 @@ import { prisma } from '@/lib/db';
 import { authMiddleware } from '@/lib/auth';
 import cloudinary from '@/lib/cloudinary';
 
-async function uploadSingleFile(file: File, caption: string | null, user: any) {
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+
+function isVideoFile(file: File): boolean {
+  return file.type.startsWith('video/');
+}
+
+async function uploadImageFile(file: File, caption: string | null, user: any) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-
   const base64 = buffer.toString('base64');
   const dataUri = `data:${file.type};base64,${base64}`;
 
@@ -27,6 +32,72 @@ async function uploadSingleFile(file: File, caption: string | null, user: any) {
       url: result.secure_url,
       thumbnailUrl,
       caption: caption || null,
+      type: 'image',
+      publicId: result.public_id,
+      userId: user.id,
+      schoolId: user.schoolId,
+      width: result.width,
+      height: result.height,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+        },
+      },
+    },
+  });
+
+  return photo;
+}
+
+async function uploadVideoFile(file: File, caption: string | null, user: any) {
+  if (file.size > MAX_VIDEO_SIZE) {
+    throw new Error(`Video demasiado grande (máx ${MAX_VIDEO_SIZE / 1024 / 1024}MB)`);
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  const base64 = buffer.toString('base64');
+  const dataUri = `data:${file.type};base64,${base64}`;
+
+  const result = await cloudinary.uploader.upload(dataUri, {
+    folder: 'badeo/album',
+    resource_type: 'video',
+    transformation: [
+      { quality: 'auto:good', fetch_format: 'auto' },
+    ],
+  });
+
+  const thumbnailUrl = cloudinary.url(result.public_id, {
+    resource_type: 'video',
+    transformation: [
+      { width: 400, height: 400, crop: 'fill' },
+      { quality: 'auto:good' },
+      { fetch_format: 'auto' },
+    ],
+  });
+
+  const videoUrl = cloudinary.url(result.public_id, {
+    resource_type: 'video',
+    transformation: [
+      { quality: 'auto:good', fetch_format: 'auto' },
+    ],
+  });
+
+  const duration = result.duration ? Math.round(result.duration) : null;
+
+  const photo = await prisma.photo.create({
+    data: {
+      url: videoUrl,
+      thumbnailUrl,
+      caption: caption || null,
+      type: 'video',
+      publicId: result.public_id,
+      duration,
       userId: user.id,
       schoolId: user.schoolId,
       width: result.width,
@@ -66,15 +137,22 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const caption = captions[i] || null;
-      const photo = await uploadSingleFile(file, caption, user);
-      photos.push(photo);
+
+      if (isVideoFile(file)) {
+        const photo = await uploadVideoFile(file, caption, user);
+        photos.push(photo);
+      } else {
+        const photo = await uploadImageFile(file, caption, user);
+        photos.push(photo);
+      }
     }
 
     return NextResponse.json({ photos }, { status: 201 });
   } catch (error) {
     console.error('Error uploading photos:', error);
+    const message = error instanceof Error ? error.message : 'Error al subir los archivos';
     return NextResponse.json(
-      { error: 'Error al subir las fotos' },
+      { error: message },
       { status: 500 }
     );
   }
