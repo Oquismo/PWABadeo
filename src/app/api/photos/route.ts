@@ -16,9 +16,18 @@ export async function GET(req: NextRequest) {
           where = { schoolId: parseInt(schoolIdParam) };
         }
       } else if (user.schoolId) {
-        where = { schoolId: user.schoolId };
+        // Usuarios normales: fotos de su escuela + contenido admin (schoolId null)
+        where = {
+          OR: [
+            { schoolId: user.schoolId },
+            { schoolId: null },
+          ],
+        };
       } else if (schoolIdParam) {
         where = { schoolId: parseInt(schoolIdParam) };
+      } else {
+        // Sin escuela: solo contenido admin
+        where = { schoolId: null };
       }
     }
 

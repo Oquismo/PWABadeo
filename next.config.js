@@ -90,6 +90,9 @@ const nextConfigBase = {
   
   // Configuración para App Router
   output: 'standalone',
+
+  // Límite de body para uploads de videos (50MB)
+  serverExternalPackages: ['@prisma/client', 'bcrypt'],
   
   // Optimizaciones de webpack
   webpack: (config, { isServer, dev }) => {
