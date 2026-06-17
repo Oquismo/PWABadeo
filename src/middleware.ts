@@ -57,9 +57,8 @@ const publicPaths = [
   '/api/auth/reset-password',
   '/api/auth/validate-reset-token',
   '/api/auth/logout',
-  // '/api/schools', // Ahora requiere login
-  // '/api/admin/schools', // Ahora requiere login
-  // '/api/announcement/sse', // Ahora requiere login
+  '/api/schools', // Necesario para registro sin login
+  '/api/health', // Health check público
   '/api/tasks' // API pública para tareas (si es necesario)
 ];
 
