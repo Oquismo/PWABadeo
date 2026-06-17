@@ -2,22 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authMiddleware } from '@/lib/auth';
 import cloudinary from '@/lib/cloudinary';
+import busboy from 'busboy';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60; // 60 segundos para uploads grandes
+export const maxDuration = 60;
 
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 
-function isVideoFile(file: File): boolean {
-  return file.type.startsWith('video/');
+function isVideoFile(mimeType: string): boolean {
+  return mimeType.startsWith('video/');
 }
 
 function uploadToCloudinaryStream(
-  file: File,
+  buffer: Buffer,
+  mimeType: string,
   options: { resource_type?: 'image' | 'video'; folder: string; transformation?: any[] }
 ): Promise<any> {
   return new Promise((resolve, reject) => {
-    console.log('🔄 Starting Cloudinary upload stream, resource_type:', options.resource_type);
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         resource_type: options.resource_type || 'image',
@@ -25,40 +26,23 @@ function uploadToCloudinaryStream(
         transformation: options.transformation,
       },
       (error, result) => {
-        if (error) {
-          console.error('❌ Cloudinary upload error:', error);
-          reject(error);
-        } else {
-          console.log('✅ Cloudinary upload success:', result?.secure_url?.substring(0, 60));
-          resolve(result);
-        }
+        if (error) reject(error);
+        else resolve(result);
       }
     );
-
-    file.arrayBuffer().then(buffer => {
-      console.log('📦 File buffer size:', (buffer.byteLength / 1024 / 1024).toFixed(2), 'MB');
-      uploadStream.end(Buffer.from(buffer));
-    }).catch(err => {
-      console.error('❌ Error reading file buffer:', err);
-      reject(err);
-    });
+    uploadStream.end(buffer);
   });
 }
 
-async function uploadImageFile(file: File, caption: string | null, user: any) {
-  const result = await uploadToCloudinaryStream(file, {
+async function uploadImageFile(buffer: Buffer, mimeType: string, caption: string | null, user: any) {
+  const result = await uploadToCloudinaryStream(buffer, mimeType, {
     folder: 'badeo/album',
-    transformation: [
-      { quality: 'auto:good', fetch_format: 'auto' },
-    ],
+    transformation: [{ quality: 'auto:good', fetch_format: 'auto' }],
   });
 
-  const thumbnailUrl = result.secure_url.replace(
-    '/upload/',
-    '/upload/c_fill,f_auto,h_400,q_auto:good,w_400/'
-  );
+  const thumbnailUrl = result.secure_url.replace('/upload/', '/upload/c_fill,f_auto,h_400,q_auto:good,w_400/');
 
-  const photo = await prisma.photo.create({
+  return prisma.photo.create({
     data: {
       url: result.secure_url,
       thumbnailUrl,
@@ -71,34 +55,21 @@ async function uploadImageFile(file: File, caption: string | null, user: any) {
       height: result.height,
     },
     include: {
-      user: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          avatarUrl: true,
-        },
-      },
+      user: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
     },
   });
-
-  return photo;
 }
 
-async function uploadVideoFile(file: File, caption: string | null, user: any) {
-  if (file.size > MAX_VIDEO_SIZE) {
+async function uploadVideoFile(buffer: Buffer, mimeType: string, caption: string | null, user: any) {
+  if (buffer.length > MAX_VIDEO_SIZE) {
     throw new Error(`Video demasiado grande (máx ${MAX_VIDEO_SIZE / 1024 / 1024}MB)`);
   }
 
-  console.log('🎬 Uploading video to Cloudinary via stream...');
-  const result = await uploadToCloudinaryStream(file, {
+  const result = await uploadToCloudinaryStream(buffer, mimeType, {
     resource_type: 'video',
     folder: 'badeo/album',
-    transformation: [
-      { quality: 'auto:good', fetch_format: 'auto' },
-    ],
+    transformation: [{ quality: 'auto:good', fetch_format: 'auto' }],
   });
-  console.log('☁️ Cloudinary video result:', result.public_id, 'duration:', result.duration);
 
   const thumbnailUrl = cloudinary.url(result.public_id, {
     resource_type: 'video',
@@ -111,14 +82,12 @@ async function uploadVideoFile(file: File, caption: string | null, user: any) {
 
   const videoUrl = cloudinary.url(result.public_id, {
     resource_type: 'video',
-    transformation: [
-      { quality: 'auto:good', fetch_format: 'auto' },
-    ],
+    transformation: [{ quality: 'auto:good', fetch_format: 'auto' }],
   });
 
   const duration = result.duration ? Math.round(result.duration) : null;
 
-  const photo = await prisma.photo.create({
+  return prisma.photo.create({
     data: {
       url: videoUrl,
       thumbnailUrl,
@@ -132,38 +101,74 @@ async function uploadVideoFile(file: File, caption: string | null, user: any) {
       height: result.height,
     },
     include: {
-      user: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          avatarUrl: true,
-        },
-      },
+      user: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
     },
   });
-
-  return photo;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('📤 Upload request received');
     const user = await authMiddleware(req);
     if (!user) {
-      console.log('❌ No autorizado');
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    console.log('👤 User:', user.email, 'role:', user.role);
 
-    const formData = await req.formData();
-    const files = formData.getAll('files') as File[];
-    const captions = formData.getAll('captions') as string[];
+    const contentType = req.headers.get('content-type') || '';
+    if (!contentType.includes('multipart/')) {
+      return NextResponse.json({ error: 'Content-Type debe ser multipart/form-data' }, { status: 400 });
+    }
 
-    console.log('📁 Files received:', files.length);
-    files.forEach((f, i) => console.log(`  [${i}] ${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB, ${f.type})`));
+    const bb = busboy({ headers: { 'content-type': contentType } });
+    const files: { buffer: Buffer; filename: string; mimeType: string }[] = [];
+    const captions: string[] = [];
 
-    if (!files || files.length === 0) {
+    bb.on('file', (name, file, info) => {
+      const chunks: Buffer[] = [];
+      file.on('data', (d: Buffer) => chunks.push(d));
+      file.on('end', () => {
+        files.push({
+          buffer: Buffer.concat(chunks),
+          filename: info.filename || 'unknown',
+          mimeType: info.mimeType,
+        });
+      });
+    });
+
+    bb.on('field', (name, value) => {
+      if (name === 'captions') {
+        captions.push(value);
+      }
+    });
+
+    const uploadPromise = new Promise<void>((resolve, reject) => {
+      bb.on('finish', () => resolve());
+      bb.on('error', reject);
+    });
+
+    // Pipe the request body to busboy
+    const bodyStream = req.body;
+    if (!bodyStream) {
+      return NextResponse.json({ error: 'No body' }, { status: 400 });
+    }
+
+    const reader = bodyStream.getReader();
+    const pump = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          bb.end();
+          break;
+        }
+        bb.write(value);
+      }
+    };
+
+    await Promise.all([pump(), uploadPromise]);
+
+    console.log(`📁 Files parsed: ${files.length}`);
+    files.forEach((f, i) => console.log(`  [${i}] ${f.filename} (${(f.buffer.length / 1024 / 1024).toFixed(1)}MB, ${f.mimeType})`));
+
+    if (files.length === 0) {
       return NextResponse.json({ error: 'No se proporcionó archivo' }, { status: 400 });
     }
 
@@ -171,14 +176,14 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const caption = captions[i] || null;
-      console.log(`⬆️ Uploading file ${i + 1}/${files.length}: ${file.name}`);
+      console.log(`⬆️ Uploading ${i + 1}/${files.length}: ${file.filename}`);
 
-      if (isVideoFile(file)) {
-        const photo = await uploadVideoFile(file, caption, user);
+      if (isVideoFile(file.mimeType)) {
+        const photo = await uploadVideoFile(file.buffer, file.mimeType, caption, user);
         photos.push(photo);
         console.log('✅ Video uploaded:', photo.id);
       } else {
-        const photo = await uploadImageFile(file, caption, user);
+        const photo = await uploadImageFile(file.buffer, file.mimeType, caption, user);
         photos.push(photo);
         console.log('✅ Image uploaded:', photo.id);
       }
@@ -188,9 +193,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('❌ Error uploading photos:', error);
     const message = error instanceof Error ? error.message : 'Error al subir los archivos';
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
