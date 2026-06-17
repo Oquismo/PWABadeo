@@ -59,7 +59,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         >
           <Box
             component="img"
-            src="/img/erasmus-plus.svg"
+            src="/img/Erasmus+_Logo.svg"
             alt="Mi Erasmus App"
             sx={{
               width: { xs: 180, sm: 200 },

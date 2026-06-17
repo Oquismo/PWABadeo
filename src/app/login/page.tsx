@@ -120,12 +120,10 @@ function LoginForm() {
       {showTour && <OnboardingTour run={showTour} onFinish={handleFinishTour} />}
 
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pb: 4 }}>
-        <Box sx={{
-          width: 72, height: 72, borderRadius: '22px', overflow: 'hidden',
-          mb: 2.5, boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-        }}>
-          <Box component="img" src="/img/erasmus-plus.svg" alt="Mi Erasmus App" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </Box>
+        <Box component="img" src="/img/Erasmus+_Logo.svg" alt="Mi Erasmus App" sx={{
+          width: 200, height: 'auto', mb: 2.5,
+          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))',
+        }} />
         <Typography
           component="h1"
           sx={{
