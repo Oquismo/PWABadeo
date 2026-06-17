@@ -146,7 +146,6 @@ export async function POST(request: Request) {
         city: (user as any).city ?? null,
         town: (user as any).town ?? null,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
       };
 
       // Crear respuesta con cookies para autenticación automática
