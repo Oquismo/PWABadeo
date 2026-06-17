@@ -127,7 +127,53 @@ export async function POST(request: Request) {
       }
 
       console.log('🎉 User created successfully:', email);
-  return NextResponse.json({ user, message: 'Usuario registrado exitosamente', firstAdmin: assignedRole === 'admin' });
+
+      // Preparar usuario sin password para la respuesta (consistente con login)
+      const userWithoutPassword = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        age: user.age,
+        schoolId: user.schoolId,
+        residence: (user as any).residence ?? null,
+        avatarUrl: user.avatarUrl ?? null,
+        arrivalDate: user.arrivalDate,
+        departureDate: user.departureDate,
+        country: (user as any).country ?? null,
+        city: (user as any).city ?? null,
+        town: (user as any).town ?? null,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      // Crear respuesta con cookies para autenticación automática
+      const response = NextResponse.json({
+        user: userWithoutPassword,
+        message: 'Usuario registrado exitosamente',
+        firstAdmin: assignedRole === 'admin'
+      });
+
+      // Establecer cookies para el middleware (auto-login)
+      const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
+
+      response.cookies.set('auth-token', authToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 días
+      });
+
+      response.cookies.set('user', JSON.stringify(userWithoutPassword), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 días
+      });
+
+      return response;
 
     } finally {
       console.log('🔌 Disconnecting from database...');
