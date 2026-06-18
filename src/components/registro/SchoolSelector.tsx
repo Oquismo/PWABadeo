@@ -36,6 +36,7 @@ interface SchoolSelectorProps {
   error?: boolean;
   helperText?: string;
   required?: boolean;
+  enableFlux?: boolean;
 }
 
 export default function SchoolSelector({ 
@@ -43,7 +44,8 @@ export default function SchoolSelector({
   onChange, 
   error, 
   helperText, 
-  required = false 
+  required = false,
+  enableFlux = false,
 }: SchoolSelectorProps) {
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,6 +55,8 @@ export default function SchoolSelector({
     town: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const [fluxOptions, setFluxOptions] = useState<string[]>([]);
+  const [selectedFlux, setSelectedFlux] = useState<string>('');
 
   // Ciudades por país
   const countryCities: Record<string, string[]> = {
@@ -147,6 +151,26 @@ export default function SchoolSelector({
     loadSchools();
   }, [searchTerm, filters]);
 
+  // Sync flux state when schools load or value changes externally
+  useEffect(() => {
+    if (!value || !enableFlux || schools.length === 0) return;
+
+    const base = schools.find(s => s.id !== value.id && value.name.startsWith(s.name + ' '));
+    if (base) {
+      const flux = value.name.slice(base.name.length + 1);
+      const allFlux = schools
+        .filter(s => s.id !== base.id && s.name.startsWith(base.name + ' '))
+        .map(s => s.name.slice(base.name.length + 1));
+      setFluxOptions(allFlux);
+      setSelectedFlux(flux);
+    } else {
+      const variants = schools.filter(s => s.id !== value.id && s.name.startsWith(value.name + ' '));
+      if (variants.length > 0) {
+        setFluxOptions(variants.map(s => s.name.slice(value.name.length + 1)));
+      }
+    }
+  }, [value?.id, enableFlux, schools.length]);
+
   // Función para filtrar escuelas en tiempo real
   const filterOptions = (options: School[], { inputValue }: any) => {
     if (!inputValue) return options;
@@ -228,7 +252,22 @@ export default function SchoolSelector({
       {/* Selector de escuela */}
       <Autocomplete
         value={value}
-        onChange={(event, newValue) => onChange(newValue)}
+        onChange={(event, newValue) => {
+          setSelectedFlux('');
+          if (newValue && enableFlux) {
+            // Find flux variants for this school
+            const variants = schools.filter(
+              s => s.id !== newValue.id && s.name.startsWith(newValue.name + ' ')
+            );
+            if (variants.length > 0) {
+              setFluxOptions(variants.map(s => s.name.slice(newValue.name.length + 1)));
+              // Don't fire onChange yet — wait for flux selection
+              return;
+            }
+          }
+          setFluxOptions([]);
+          onChange(newValue);
+        }}
         options={schools}
         filterOptions={filterOptions}
         getOptionLabel={(option) => option.name}
@@ -277,6 +316,33 @@ export default function SchoolSelector({
         noOptionsText={loading ? "Cargando escuelas..." : "No se encontraron escuelas"}
         loadingText="Buscando escuelas..."
       />
+
+      {/* Flux selector for schools with program variants */}
+      {enableFlux && fluxOptions.length > 0 && (
+        <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+          <InputLabel>Flux / Programa</InputLabel>
+          <Select
+            value={selectedFlux}
+            label="Flux / Programa"
+            onChange={(e) => {
+              const flux = e.target.value;
+              setSelectedFlux(flux);
+              // Find the flux-specific school in the list
+              const fluxSchool = value && schools.find(
+                s => s.name === `${value.name} ${flux}`
+              );
+              onChange(fluxSchool || value);
+            }}
+          >
+            <MenuItem value="">
+              <em>Selecciona flux</em>
+            </MenuItem>
+            {fluxOptions.map((flux) => (
+              <MenuItem key={flux} value={flux}>{flux}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
 
       {/* Información adicional */}
       {value && (

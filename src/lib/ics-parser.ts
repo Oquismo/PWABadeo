@@ -392,6 +392,20 @@ function getProgramType(summary: string): { name: string; matched: boolean } {
   return { name: '', matched: false };
 }
 
+// Flux codes distinguish different groups/flows within a school (e.g., "Minzoni V" vs "Minzoni VI").
+// Keyed by base school name (lowercase), each entry has ordered regex patterns (longer match first).
+// When a flux code is found, it replaces the generic program type as the differentiator.
+const SCHOOL_FLUX_PATTERNS: Record<string, RegExp[]> = {
+  'minzoni': [
+    /\b(VI)\b/,
+    /\b(V)\b/,
+    /\b(IV)\b/,
+    /\b(III)\b/,
+    /\b(II)\b/,
+    /\b(I)\b/,
+  ],
+};
+
 // Extract canonical school name from event summary
 export function extractSchoolName(summary: string): string | null {
   const lowerSummary = summary.toLowerCase();
@@ -401,11 +415,30 @@ export function extractSchoolName(summary: string): string | null {
     const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedPattern, 'i');
     if (regex.test(lowerSummary)) {
-      // Detect program type to create more specific school names
+      const baseLower = baseName.toLowerCase();
+
+      // For schools with flux-based separation, flux takes priority
+      const fluxPatterns = SCHOOL_FLUX_PATTERNS[baseLower];
+      if (fluxPatterns) {
+        for (const fp of fluxPatterns) {
+          const m = summary.match(fp);
+          if (m) {
+            const flux = m[1].toUpperCase();
+            // Avoid duplicates (e.g., report "Minzoni V" if already "Minzoni V")
+            if (!baseLower.includes(flux.toLowerCase())) {
+              return `${baseName} ${flux}`;
+            }
+            return baseName;
+          }
+        }
+        // Flux school but no specific code matched — still create base school
+        return baseName;
+      }
+
+      // Standard program type logic
       const type = getProgramType(summary);
       if (!type.matched) return baseName;
 
-      const baseLower = baseName.toLowerCase();
       const typeLower = type.name.toLowerCase();
 
       // Check if the type should replace part of the base name

@@ -410,6 +410,7 @@ export default function RegistroPageRefactored() {
                             error={!!errors.school}
                             helperText={errors.school}
                             required
+                            enableFlux
                           />
                         </div>
                       )}
