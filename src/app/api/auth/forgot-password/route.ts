@@ -69,11 +69,9 @@ export async function POST(req: Request) {
       }
 
       // Enviar email de recuperación
-      try {
-        await sendPasswordResetEmail(email, resetToken);
-        console.log(`📧 Email de recuperación enviado a: ${email}`);
-      } catch (emailError) {
-        console.error('❌ Error enviando email:', emailError);
+      const emailResult = await sendPasswordResetEmail(email, resetToken);
+      if (!emailResult.success) {
+        console.error('❌ Error enviando email:', emailResult.error);
         
         // En desarrollo, continuamos aunque falle el email
         if (process.env.NODE_ENV === 'development') {
@@ -85,6 +83,8 @@ export async function POST(req: Request) {
             { status: 500 }
           );
         }
+      } else {
+        console.log(`📧 Email de recuperación enviado a: ${email}`);
       }
 
       return NextResponse.json({

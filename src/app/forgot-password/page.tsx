@@ -37,7 +37,7 @@ interface ForgotPasswordFormData extends Record<string, unknown> {
 const validateForgotPasswordForm = (data: ForgotPasswordFormData): FormErrors => {
   const errors: FormErrors = {};
 
-  const emailError = validators.required(data.email, 'Email') || validators.email(data.email);
+  const emailError = validators.required(data.email, 'email') || validators.email(data.email);
   if (emailError) errors[emailError.field] = emailError.message;
 
   return errors;
