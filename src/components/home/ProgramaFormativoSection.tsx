@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Typography, Skeleton, FormControl, Select, MenuItem, Chip } from '@mui/material';
-import { EventNote as EventNoteIcon } from '@mui/icons-material';
+import { EventNote as EventNoteIcon, School as SchoolIcon } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
@@ -60,6 +60,13 @@ export default function ProgramaFormativoSection() {
   const [loading, setLoading] = useState(true);
 
   const isAdmin = user?.role === 'admin';
+  const [now, setNow] = useState(new Date());
+
+  // Update time every 60s for class progress bar
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(id);
+  }, []);
 
   // Load schools for admin selector
   useEffect(() => {
@@ -181,6 +188,53 @@ export default function ProgramaFormativoSection() {
             </Typography>
           </Link>
         </Box>
+      </Box>
+
+      {/* Clase hoy: barra de progreso 9:30 - 13:00 */}
+      <Box sx={{ px: 2, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <SchoolIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+          <Typography variant="body2" fontWeight={600}>
+            Clases hoy
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            9:30 — 13:00
+          </Typography>
+        </Box>
+        {(() => {
+          const minutes = now.getHours() * 60 + now.getMinutes();
+          const start = 9 * 60 + 30;
+          const end = 13 * 60;
+          const total = end - start;
+          const elapsed = Math.max(0, Math.min(total, minutes - start));
+          const pct = total > 0 ? Math.round((elapsed / total) * 100) : 0;
+          const label = minutes < start ? '9:30' :
+                        minutes >= end ? '13:00 ✓' :
+                        `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+          return (
+            <Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                  {label}
+                </Typography>
+                <Typography variant="caption" fontWeight="bold" sx={{ fontSize: '0.65rem', color: 'primary.main' }}>
+                  {minutes < start ? '—' : minutes >= end ? '100%' : `${pct}%`}
+                </Typography>
+              </Box>
+              <Box sx={{ height: 8, bgcolor: 'action.hover', borderRadius: 4, overflow: 'hidden' }}>
+                <Box
+                  sx={{
+                    height: '100%',
+                    width: `${pct}%`,
+                    bgcolor: minutes >= end ? 'success.main' : 'primary.main',
+                    borderRadius: 4,
+                    transition: 'width 1s ease',
+                  }}
+                />
+              </Box>
+            </Box>
+          );
+        })()}
       </Box>
 
       {/* Horizontal scroll cards */}
