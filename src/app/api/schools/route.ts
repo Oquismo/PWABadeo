@@ -59,10 +59,9 @@ export async function GET(request: Request) {
       const schools = await prisma.school.findMany({
         where,
         orderBy: [
-          { city: 'asc' },
           { name: 'asc' }
         ],
-        take: 50 // Limitar resultados
+        take: 200
       });
 
       // Obtener estadísticas
