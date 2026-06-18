@@ -284,36 +284,28 @@ const SCHOOL_MAP: Array<[string, string]> = [
 ];
 
 // Patterns that indicate internal/non-school events (should be skipped)
+// IMPORTANT: School matching runs FIRST, so these only apply to events without a school name
 const INTERNAL_PATTERNS = [
   'vacaciones', 'no est', 'sale a las', 'esce alle', 'vuelve',
   'llegada', 'arriv', 'smart', 'teletrabajo', 'oficina cerrada',
-  'cerramos', 'cena de empresa', 'riunione', 'reunion', 'reuni',
+  'cerramos', 'cena de empresa', 'riunione', 'reunion',
   'concierto', 'tussam', 'app barrio', 'svb y desa',
   'acompa', 'manos abiertas', 'horario intensivo',
   'institutos cerrados', 'todo el mundo',
   'viene veronica', 'viene al',
   'fuori ',
   'primer d',
-  'vien',
-  'van',
   'llamada ',
   'videochiamata',
   'parlare con',
   'chiamare ',
-  'visita empresa',
-  'visitas empresa',
-  'alcazar',
-  'madrid',
+  'visita empresa', 'visitas empresa',
   'pcto ',
   'ia en el aula',
   'ice breaking',
   'cv & linkedin',
   'social dilemma',
   'english class',
-  'goodbye session',
-  'goodbye ',
-  'welcome session',
-  'welcome ',
   'goodbye',
 ];
 
@@ -366,31 +358,90 @@ function isInternalEvent(summary: string): boolean {
   return false;
 }
 
+// Program type keywords extracted from event summaries (priority order)
+const PROGRAM_TYPES = [
+  // SHORT, PCTO, VET define distinct programs - higher priority
+  { pattern: /\bSHORT\b/i, name: 'Short' },
+  { pattern: /\bPCTO\b/i, name: 'PCTO' },
+  { pattern: /\bVET\b/i, name: 'VET' },
+  // Job Shadowing is often an activity within another program, so lower priority
+  { pattern: /\bJOB\s*SHADOW(ING)?\b/i, name: 'Job Shadowing' },
+  { pattern: /\bJOB\b/i, name: 'Job Shadowing' },
+  { pattern: /\bJS\b/i, name: 'Job Shadowing' },
+  // ADU is the most generic type, lowest priority
+  { pattern: /\bADU\b/i, name: 'ADU' },
+];
+
+// When a school base name includes a program type but the event is a different type,
+// replace the type in the name rather than appending (e.g., "Marea ADU" + VET → "Marea VET")
+type TypeReplacement = { include: string; type: string; replace: string };
+
+const TYPE_REPLACEMENTS: TypeReplacement[] = [
+  // Base contains "ADU" but event is VET → replace ADU with VET
+  { include: 'adu', type: 'vet', replace: 'VET' },
+  // Base contains "ADU" but event is Job Shadowing → append
+  // (no replacement needed, just append)
+];
+
+function getProgramType(summary: string): { name: string; matched: boolean } {
+  for (const pt of PROGRAM_TYPES) {
+    if (pt.pattern.test(summary)) {
+      return { name: pt.name, matched: true };
+    }
+  }
+  return { name: '', matched: false };
+}
+
 // Extract canonical school name from event summary
 export function extractSchoolName(summary: string): string | null {
-  if (isInternalEvent(summary)) {
-    return null;
-  }
-
   const lowerSummary = summary.toLowerCase();
 
   // Find the first matching school pattern
-  for (const [pattern, canonicalName] of SCHOOL_MAP) {
-    // Convert pattern to regex-like matching (handle special chars)
+  for (const [pattern, baseName] of SCHOOL_MAP) {
     const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedPattern, 'i');
     if (regex.test(lowerSummary)) {
-      return canonicalName;
+      // Detect program type to create more specific school names
+      const type = getProgramType(summary);
+      if (!type.matched) return baseName;
+
+      const baseLower = baseName.toLowerCase();
+      const typeLower = type.name.toLowerCase();
+
+      // Check if the type should replace part of the base name
+      for (const tr of TYPE_REPLACEMENTS) {
+        if (baseLower.includes(tr.include) && typeLower === tr.type) {
+          // Replace the matched keyword in the base name with the replacement
+          return baseName.replace(new RegExp(tr.include, 'i'), tr.replace);
+        }
+      }
+
+      // Append the type if not already present in the base name
+      if (!baseLower.includes(typeLower)) {
+        return `${baseName} ${type.name}`;
+      }
+      return baseName;
     }
+  }
+
+  // If no school matched, filter internal/personal events
+  if (isInternalEvent(summary)) {
+    return null;
   }
 
   return null;
 }
 
+// Unfold ICS continuation lines (RFC 5545: lines starting with space/tab)
+function unfoldICS(content: string): string {
+  return content.replace(/\r?\n[ \t]/g, '');
+}
+
 // Parse ICS content into events
 export function parseICS(content: string): ParsedEvent[] {
   const events: ParsedEvent[] = [];
-  const vevents = content.split('BEGIN:VEVENT');
+  const unfolded = unfoldICS(content);
+  const vevents = unfolded.split('BEGIN:VEVENT');
 
   for (let i = 1; i < vevents.length; i++) {
     const vevent = vevents[i];

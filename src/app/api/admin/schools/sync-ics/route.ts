@@ -63,24 +63,26 @@ export async function POST(request: Request) {
     const parsedEvents = parseICS(icsContent);
     console.log(`[sync-ics] Parsed ${parsedEvents.length} raw events`);
 
-    // SOLO eventos futuros o de hoy
+    // SOLO eventos de la próxima semana (7 días)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(today);
+    weekEnd.setDate(weekEnd.getDate() + 7);
     
-    const futureEvents = parsedEvents.filter(ev => {
+    const weekEvents = parsedEvents.filter(ev => {
       const eventDate = new Date(ev.dtStart);
-      return eventDate >= today;
+      return eventDate >= today && eventDate < weekEnd;
     });
     
-    console.log(`[sync-ics] Filtered to ${futureEvents.length} future events`);
+    console.log(`[sync-ics] Filtered to ${weekEvents.length} events in next 7 days`);
 
     // Get all existing schools
     const allSchools = await (prisma as any).school.findMany();
     console.log(`[sync-ics] Found ${allSchools.length} schools in DB`);
 
     // Group events by school name
-    const eventsBySchool = new Map<string, typeof futureEvents>();
-    for (const event of futureEvents) {
+    const eventsBySchool = new Map<string, typeof weekEvents>();
+    for (const event of weekEvents) {
       if (!eventsBySchool.has(event.schoolName)) {
         eventsBySchool.set(event.schoolName, []);
       }
@@ -101,7 +103,7 @@ export async function POST(request: Request) {
     };
 
     // Track all UIDs from current ICS
-    const currentUids = new Set(futureEvents.map(e => e.uid));
+    const currentUids = new Set(weekEvents.map(e => e.uid));
 
     // 1. BORRAR eventos pasados y eventos obsoletos (no están en el ICS actual)
     console.log('[sync-ics] Cleaning old and obsolete events...');

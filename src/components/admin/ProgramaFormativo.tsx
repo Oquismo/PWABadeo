@@ -34,6 +34,7 @@ import {
   Today as TodayIcon,
   AutoFixHigh as AutoIcon,
   Schedule as ScheduleIcon,
+  DeleteSweep as DeleteSweepIcon,
 } from '@mui/icons-material';
 import AutoSyncHelp from './AutoSyncHelp';
 
@@ -60,6 +61,7 @@ export default function ProgramaFormativo() {
   const [data, setData] = useState<SchoolWithEvents[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,6 +107,32 @@ export default function ProgramaFormativo() {
         // Auto-sync not configured
       });
   }, []);
+
+  const handleClear = async () => {
+    if (!window.confirm('¿Estás seguro? Se eliminarán TODOS los eventos del calendario. Esta acción no se puede deshacer.')) return;
+
+    setClearing(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await fetch('/api/admin/schools/clear-events', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const json = await res.json();
+
+      if (res.ok) {
+        setSuccess(json.message || 'Todos los eventos eliminados');
+        loadData();
+      } else {
+        setError(json.error || 'Error al limpiar');
+      }
+    } catch (err) {
+      setError('Error de conexión al limpiar');
+    } finally {
+      setClearing(false);
+    }
+  };
 
   const handleSync = async () => {
     setSyncing(true);
@@ -188,7 +216,7 @@ export default function ProgramaFormativo() {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Typography variant="body2" color="text.secondary">
-              {activeSchools} escuelas activas · {totalEvents} eventos futuros
+              {activeSchools} escuelas activas · {totalEvents} eventos (próximos 7 días)
             </Typography>
             {lastSync && (
               <Chip
@@ -212,6 +240,16 @@ export default function ProgramaFormativo() {
           </Box>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={clearing ? <CircularProgress size={20} color="inherit" /> : <DeleteSweepIcon />}
+            onClick={handleClear}
+            disabled={clearing || syncing}
+            sx={{ borderRadius: 2, borderColor: 'error.main' }}
+          >
+            {clearing ? 'Limpiando...' : 'Limpiar todo'}
+          </Button>
           <AutoSyncHelp />
           <Button
             variant="contained"
