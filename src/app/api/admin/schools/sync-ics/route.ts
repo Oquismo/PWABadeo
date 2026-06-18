@@ -10,25 +10,8 @@ const ICS_URL = 'https://ics.teamup.com/feed/ksampdkmv21a529vhx/0.ics';
 function findSchoolInDB(schoolName: string, allSchools: any[]): any {
   const target = schoolName.toLowerCase();
 
-  const exact = allSchools.find((s: any) => s.name.toLowerCase() === target);
-  if (exact) return exact;
-
-  const contains = allSchools.find((s: any) => {
-    const dbName = s.name.toLowerCase();
-    return target.includes(dbName) || dbName.includes(target);
-  });
-  if (contains) return contains;
-
-  const targetWords = target.split(/\s+/).filter(w => w.length > 2);
-  if (targetWords.length > 0) {
-    const byWord = allSchools.find((s: any) => {
-      const dbName = s.name.toLowerCase();
-      return dbName.includes(targetWords[0]);
-    });
-    if (byWord) return byWord;
-  }
-
-  return null;
+  // Only exact match — the ICS parser already normalizes names
+  return allSchools.find((s: any) => s.name.toLowerCase() === target) || null;
 }
 
 export async function POST(request: Request) {
