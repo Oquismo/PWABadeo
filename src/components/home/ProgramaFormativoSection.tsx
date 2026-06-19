@@ -98,8 +98,10 @@ export default function ProgramaFormativoSection() {
     const fetchEvents = async () => {
       setLoading(true);
       try {
-        const now = new Date().toISOString();
-        const res = await fetch(`/api/schools/${selectedSchoolId}/events?from=${now}`);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const from = today.toISOString();
+        const res = await fetch(`/api/schools/${selectedSchoolId}/events?from=${from}`);
         if (res.ok) {
           const data = await res.json();
           setEvents((data.events ?? []).slice(0, 6));
