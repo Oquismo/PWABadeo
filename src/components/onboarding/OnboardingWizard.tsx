@@ -19,12 +19,14 @@ import {
   NotificationsActive as NotifIcon,
   CheckCircle as DoneIcon,
 } from '@mui/icons-material';
+import { useAuth } from '@/context/AuthContext';
 
 const STEPS = ['Bienvenido', 'Notificaciones', '¡Listo!'];
 
 const STEP_ICONS = [WelcomeIcon, NotifIcon, DoneIcon];
 
 export default function OnboardingWizard({ open, onComplete }: { open: boolean; onComplete: () => void }) {
+  const { user, refreshUser } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -46,8 +48,9 @@ export default function OnboardingWizard({ open, onComplete }: { open: boolean; 
       await fetch('/api/user/onboarded', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ userId: user?.id }),
       });
+      await refreshUser();
     } catch {
       // fallback: complete anyway so user isn't stuck
     } finally {
