@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
 import { TasksProvider } from '@/context/TasksContext';
 import { LanguageProvider } from '@/hooks/useLanguage';
@@ -16,7 +16,7 @@ import AnnouncementBanner from '@/components/home/AnnouncementBanner';
 import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 import { ConnectionMonitor } from '@/components/ConnectionMonitor';
 import OfflineNotice from '@/components/ui/OfflineNotice';
-import OnboardingWizard from '@/components/onboarding/OnboardingWizard';
+
 import WarmupInitializer from '@/components/WarmupInitializer';
 import InitialLanguageDialog from '@/components/InitialLanguageDialog';
 import StandaloneModeDetector from '@/components/layout/StandaloneModeDetector';
@@ -85,25 +85,6 @@ function PrivacyDialog({ open, onAccept }: { open: boolean; onAccept: () => void
   );
 }
 
-function OnboardingGate() {
-  const { user, isAuthenticated } = useAuth();
-  const [open, setOpen] = useState(false);
-  const [pathname, setPathname] = useState('');
-
-  useEffect(() => {
-    setPathname(window.location.pathname);
-  }, []);
-
-  useEffect(() => {
-    if (isAuthenticated && user && !user.onboarded && !pathname.startsWith('/login') && !pathname.startsWith('/registro')) {
-      setOpen(true);
-    }
-  }, [isAuthenticated, user, pathname]);
-
-  if (!open) return null;
-  return <OnboardingWizard open={open} onComplete={() => setOpen(false)} />;
-}
-
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
@@ -143,7 +124,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <StandaloneModeDetector />
               <InstallPrompt />
               <WarmupInitializer />
-              <OnboardingGate />
 
               <ServiceWorkerProvider>
                 <Box sx={{

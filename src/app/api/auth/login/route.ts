@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { logActionServer } from '@/lib/logger';
 import { prisma } from '@/lib/db';
+import { signAccessToken } from '@/lib/auth-tokens';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
       });
 
       // Establecer cookies para el middleware
-      const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
+      const authToken = signAccessToken(user.id, user.role);
       
       console.log('🍪 Estableciendo cookies de autenticación:', {
         authToken: authToken.substring(0, 20) + '...',
@@ -126,14 +127,8 @@ export async function POST(request: Request) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 días
-      });
-
-      response.cookies.set('user', JSON.stringify(userProfile), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 días
+        path: '/',
+        maxAge: 15 * 60,
       });
 
       return response;

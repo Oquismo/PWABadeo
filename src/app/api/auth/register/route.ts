@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { signAccessToken } from '@/lib/auth-tokens';
 
 export const dynamic = 'force-dynamic';
 
@@ -155,20 +156,14 @@ export async function POST(request: Request) {
       });
 
       // Establecer cookies para el middleware (auto-login)
-      const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
+      const authToken = signAccessToken(user.id, assignedRole);
 
       response.cookies.set('auth-token', authToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 días
-      });
-
-      response.cookies.set('user', JSON.stringify(userWithoutPassword), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 días
+        path: '/',
+        maxAge: 15 * 60,
       });
 
       return response;
