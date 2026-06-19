@@ -397,6 +397,10 @@ function getProgramType(summary: string): { name: string; matched: boolean } {
 // When a flux code is found, it replaces the generic program type as the differentiator.
 const SCHOOL_FLUX_PATTERNS: Record<string, RegExp[]> = {
   'minzoni': [
+    // Primary: match roman numeral associated with FLUSSO keyword
+    /\b(VI|V|IV|III|II|I)\s+FLUSSO\b/i,
+    /\bFLUSSO\s+[-]?\s*(VI|V|IV|III|II|I)\b/i,
+    // Fallback: match standalone roman numeral
     /\b(VI)\b/,
     /\b(V)\b/,
     /\b(IV)\b/,

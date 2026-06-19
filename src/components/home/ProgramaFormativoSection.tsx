@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Typography, Skeleton, FormControl, Select, MenuItem, Chip } from '@mui/material';
-import { EventNote as EventNoteIcon } from '@mui/icons-material';
+import { EventNote as EventNoteIcon, LocationOn as LocationIcon, Schedule as ScheduleIcon } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
@@ -25,11 +25,21 @@ interface SchoolEvent {
 }
 
 const EVENT_COLORS = [
-  '#667eea', '#84fab0', '#f093fb', '#ffecd2',
-  '#a8edea', '#fa709a', '#667eea', '#ff9a9e',
+  '#4f6ef7', '#e8596f', '#20c997', '#f59f00',
+  '#748ffc', '#fab005', '#7950f2', '#12b886',
 ];
 
-function formatDate(raw: string): string {
+function formatTime(raw: string): string {
+  try {
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+function formatDateShort(raw: string): string {
   try {
     const d = new Date(raw);
     if (isNaN(d.getTime())) return '';
@@ -39,16 +49,37 @@ function formatDate(raw: string): string {
   }
 }
 
+function getDayStart(raw: string): number {
+  const d = new Date(raw);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
+function getTodayStart(): number {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+}
+
 function daysUntil(raw: string): number {
   try {
-    const d = new Date(raw);
-    if (isNaN(d.getTime())) return 0;
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    d.setHours(0, 0, 0, 0);
-    return Math.max(0, Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    const eventStart = getDayStart(raw);
+    const todayStart = getTodayStart();
+    return Math.max(0, Math.round((eventStart - todayStart) / (1000 * 60 * 60 * 24)));
   } catch {
     return 0;
+  }
+}
+
+function getProgress(ev: SchoolEvent, now: Date): { pct: number; elapsed: number; total: number } {
+  try {
+    const start = new Date(ev.date).getTime();
+    const end = new Date(ev.endDate).getTime();
+    const current = now.getTime();
+    const total = end - start;
+    if (total <= 0) return { pct: 0, elapsed: 0, total: 0 };
+    const elapsed = Math.max(0, Math.min(total, current - start));
+    return { pct: Math.round((elapsed / total) * 100), elapsed, total };
+  } catch {
+    return { pct: 0, elapsed: 0, total: 0 };
   }
 }
 
@@ -62,13 +93,11 @@ export default function ProgramaFormativoSection() {
   const isAdmin = user?.role === 'admin';
   const [now, setNow] = useState(new Date());
 
-  // Update time every 60s for class progress bar
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(id);
   }, []);
 
-  // Load schools for admin selector
   useEffect(() => {
     if (!isAdmin) return;
     fetch('/api/schools')
@@ -79,7 +108,6 @@ export default function ProgramaFormativoSection() {
       .catch(console.error);
   }, [isAdmin]);
 
-  // Set default school
   useEffect(() => {
     if (isAdmin) {
       setSelectedSchoolId(schools[0]?.id ?? null);
@@ -88,7 +116,6 @@ export default function ProgramaFormativoSection() {
     }
   }, [isAdmin, user?.schoolId, schools]);
 
-  // Fetch events
   useEffect(() => {
     if (!selectedSchoolId) {
       setLoading(false);
@@ -129,51 +156,33 @@ export default function ProgramaFormativoSection() {
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, overflow: 'hidden', px: 2 }}>
           {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} variant="rectangular" width={220} height={140} sx={{ borderRadius: 3, flexShrink: 0 }} animation="wave" />
+            <Skeleton key={i} variant="rectangular" width={240} height={160} sx={{ borderRadius: 3, flexShrink: 0 }} animation="wave" />
           ))}
         </Box>
       </Box>
     );
   }
 
-  if (!selectedSchoolId) {
-    return null;
-  }
+  if (!selectedSchoolId) return null;
 
-  // Si no hay eventos futuros, no mostrar nada (salvo admin con selector)
   const hasEvents = events.length > 0;
-  if (!hasEvents && !isAdmin) {
-    return null;
-  }
+  if (!hasEvents && !isAdmin) return null;
 
   return (
     <Box sx={{ py: 3 }}>
-      {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, px: 2, flexWrap: 'wrap', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           <EventNoteIcon sx={{ color: 'primary.main' }} />
           <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
-          {selectedSchool && (
-            <Chip
-              label={selectedSchool.name}
-              size="small"
-              sx={{ height: 22, fontSize: '0.7rem', bgcolor: 'primary.main', color: 'primary.contrastText' }}
-            />
-          )}
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Admin school selector - siempre visible para admin */}
           {isAdmin && schools.length > 0 && (
             <FormControl size="small" sx={{ minWidth: 160 }}>
               <Select
                 value={selectedSchoolId}
                 onChange={(e) => setSelectedSchoolId(e.target.value as number)}
-                sx={{
-                  fontSize: '0.8rem',
-                  height: 32,
-                  '& .MuiSelect-select': { py: 0.5 },
-                }}
+                sx={{ fontSize: '0.8rem', height: 32, '& .MuiSelect-select': { py: 0.5 } }}
               >
                 {schools.map(s => (
                   <MenuItem key={s.id} value={s.id} sx={{ fontSize: '0.8rem' }}>
@@ -192,7 +201,6 @@ export default function ProgramaFormativoSection() {
         </Box>
       </Box>
 
-      {/* Horizontal scroll cards */}
       {hasEvents && (
         <Box
           sx={{
@@ -200,6 +208,7 @@ export default function ProgramaFormativoSection() {
             gap: 1.5,
             overflowX: 'auto',
             pb: 1,
+            px: 2,
             scrollSnapType: 'x mandatory',
             '&::-webkit-scrollbar': { display: 'none' },
             msOverflowStyle: 'none',
@@ -210,72 +219,119 @@ export default function ProgramaFormativoSection() {
             const color = EVENT_COLORS[i % EVENT_COLORS.length];
             const days = daysUntil(ev.date);
             const isToday = days === 0;
-
-            // Class progress (9:30-13:00) for today's events
-            const minutes = now.getHours() * 60 + now.getMinutes();
-            const start = 9 * 60 + 30;
-            const end = 13 * 60;
-            const total = end - start;
-            const elapsed = Math.max(0, Math.min(total, minutes - start));
-            const classPct = total > 0 ? Math.round((elapsed / total) * 100) : 0;
+            const progress = getProgress(ev, now);
+            const isFinished = progress.pct >= 100;
+            const isInProgress = progress.pct > 0 && progress.pct < 100;
+            const eventStart = formatTime(ev.date);
+            const eventEnd = formatTime(ev.endDate);
 
             return (
               <Box
                 key={ev.id}
                 sx={{
                   flexShrink: 0,
-                  width: 220,
-                  background: 'background.paper',
+                  width: 240,
                   borderRadius: 3,
                   border: '1px solid',
                   borderColor: 'divider',
-                  p: 2,
+                  overflow: 'hidden',
                   scrollSnapAlign: 'start',
-                  transition: 'transform 0.15s ease',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                  '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
                   '&:active': { transform: 'scale(0.97)' },
                 }}
               >
-                <Box sx={{ width: 32, height: 4, borderRadius: 2, bgcolor: color, mb: 1.5 }} />
-
-                <Typography variant="body2" fontWeight={700} sx={{ mb: 0.5, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {ev.title}
-                </Typography>
-
-                {ev.location && (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {ev.location}
-                  </Typography>
-                )}
-
-                <Box sx={{ mb: 1.5 }}>
-                  {isToday ? (
-                    <>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
-                          {minutes < start ? '9:30' : minutes >= end ? '13:00 ✓' : `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`}
-                        </Typography>
-                        <Typography variant="caption" fontWeight="bold" sx={{ fontSize: '0.65rem', color: minutes >= end ? 'success.main' : color }}>
-                          {minutes < start ? '—' : minutes >= end ? '100%' : `${classPct}%`}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ height: 4, bgcolor: 'action.hover', borderRadius: 2, overflow: 'hidden' }}>
-                        <Box sx={{ height: '100%', width: `${classPct}%`, bgcolor: minutes >= end ? 'success.main' : color, borderRadius: 2, transition: 'width 1s ease' }} />
-                      </Box>
-                    </>
-                  ) : (
-                    <>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
-                          {days === 1 ? 'Mañana' : `En ${days} días`}
-                        </Typography>
-                      </Box>
-                    </>
-                  )}
+                {/* Time header */}
+                <Box
+                  sx={{
+                    px: 2,
+                    py: 1.25,
+                    bgcolor: color,
+                    color: '#fff',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <ScheduleIcon sx={{ fontSize: 14 }} />
+                    <Typography variant="caption" fontWeight={700}>
+                      {eventStart} — {eventEnd}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={isToday ? 'Hoy' : days === 1 ? 'Mañana' : `En ${days} d`}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: '0.6rem',
+                      fontWeight: 700,
+                      bgcolor: 'rgba(255,255,255,0.25)',
+                      color: '#fff',
+                      backdropFilter: 'blur(4px)',
+                    }}
+                  />
                 </Box>
 
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
-                  {isToday ? 'Hoy' : formatDate(ev.date)}
-                </Typography>
+                {/* Content */}
+                <Box sx={{ p: 1.5 }}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    sx={{
+                      lineHeight: 1.3,
+                      mb: 0.5,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {ev.title}
+                  </Typography>
+
+                  {ev.location && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, mb: 1 }}>
+                      <LocationIcon sx={{ fontSize: 13, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {ev.location}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Progress bar for today */}
+                  {isToday && (
+                    <Box sx={{ mt: 1 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                        <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 600, color: isFinished ? 'success.main' : isInProgress ? 'warning.main' : 'text.secondary' }}>
+                          {isFinished ? 'Completado' : isInProgress ? 'En curso' : 'Programado'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 700, color: isFinished ? 'success.main' : color }}>
+                          {progress.pct}%
+                        </Typography>
+                      </Box>
+                      <Box sx={{ height: 3, bgcolor: 'action.hover', borderRadius: 2, overflow: 'hidden' }}>
+                        <Box
+                          sx={{
+                            height: '100%',
+                            width: `${progress.pct}%`,
+                            bgcolor: isFinished ? 'success.main' : color,
+                            borderRadius: 2,
+                            transition: 'width 1s ease',
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Future event date */}
+                  {!isToday && (
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                      {formatDateShort(ev.date)}
+                    </Typography>
+                  )}
+                </Box>
               </Box>
             );
           })}
