@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, Skeleton, FormControl, Select, MenuItem, Chip } from '@mui/material';
 import { EventNote as EventNoteIcon, LocationOn as LocationIcon, Schedule as ScheduleIcon } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
+import { ErrorMessage, EmptyState } from '@/components/ui/DataStates';
 import Link from 'next/link';
 
 interface School {
@@ -89,6 +90,7 @@ export default function ProgramaFormativoSection() {
   const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
   const [events, setEvents] = useState<SchoolEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const isAdmin = user?.role === 'admin';
   const [now, setNow] = useState(new Date());
@@ -105,7 +107,7 @@ export default function ProgramaFormativoSection() {
       .then(data => {
         if (data.success) setSchools(data.schools || []);
       })
-      .catch(console.error);
+      .catch(() => setError('No se pudieron cargar las escuelas'));
   }, [isAdmin]);
 
   useEffect(() => {
@@ -124,6 +126,7 @@ export default function ProgramaFormativoSection() {
 
     const fetchEvents = async () => {
       setLoading(true);
+      setError(null);
       try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -132,9 +135,11 @@ export default function ProgramaFormativoSection() {
         if (res.ok) {
           const data = await res.json();
           setEvents((data.events ?? []).slice(0, 6));
+        } else {
+          setError('Error al cargar los eventos');
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
+        setError('Error de conexión al cargar el programa');
       } finally {
         setLoading(false);
       }
@@ -163,10 +168,40 @@ export default function ProgramaFormativoSection() {
     );
   }
 
-  if (!selectedSchoolId) return null;
+  if (!selectedSchoolId) {
+    return (
+      <Box sx={{ py: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 2 }}>
+          <EventNoteIcon sx={{ color: 'primary.main' }} />
+          <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
+        </Box>
+        <EmptyState message="Selecciona una escuela para ver tu programa formativo" />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ py: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 2 }}>
+          <EventNoteIcon sx={{ color: 'primary.main' }} />
+          <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
+        </Box>
+        <ErrorMessage message={error} />
+      </Box>
+    );
+  }
 
   const hasEvents = events.length > 0;
-  if (!hasEvents && !isAdmin) return null;
+  if (!hasEvents && !isAdmin) return (
+    <Box sx={{ py: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 2 }}>
+        <EventNoteIcon sx={{ color: 'primary.main' }} />
+        <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
+      </Box>
+      <EmptyState message="No hay eventos programados para hoy" />
+    </Box>
+  );
 
   return (
     <Box sx={{ py: 3 }}>

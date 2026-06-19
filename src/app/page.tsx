@@ -9,6 +9,7 @@ import Material3Dialog from '@/components/ui/Material3Dialog';
 import FabMenu from '@/components/ui/FabMenu';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useEventReminders } from '@/hooks/useEventReminders';
 import loggerClient from '@/lib/loggerClient';
 
 // Importaciones estáticas (críticas, se renderizan inmediatamente)
@@ -69,6 +70,8 @@ export default function Home() {
   const [feedbackSent, setFeedbackSent] = useState(false);
   const { t } = useTranslation();
   const { language } = useLanguage();
+
+  useEventReminders();
 
   const handleSendFeedback = async () => {
     if (!feedback.trim()) return;

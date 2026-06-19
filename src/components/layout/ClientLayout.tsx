@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { CustomThemeProvider } from '@/context/ThemeContext';
-import { SpotifyAuthProvider } from '@/context/SpotifyAuthContext';
 import { TasksProvider } from '@/context/TasksContext';
 import { LanguageProvider } from '@/hooks/useLanguage';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -13,10 +12,11 @@ import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import BottomNavBar from '@/components/layout/BottomNavBar';
 import PageTransition from '@/components/layout/PageTransition';
-import DebugInitializer from '@/components/debug/DebugInitializer';
 import AnnouncementBanner from '@/components/home/AnnouncementBanner';
 import ServiceWorkerProvider from '@/components/layout/ServiceWorkerProvider';
 import { ConnectionMonitor } from '@/components/ConnectionMonitor';
+import OfflineNotice from '@/components/ui/OfflineNotice';
+import OnboardingWizard from '@/components/onboarding/OnboardingWizard';
 import WarmupInitializer from '@/components/WarmupInitializer';
 import InitialLanguageDialog from '@/components/InitialLanguageDialog';
 import StandaloneModeDetector from '@/components/layout/StandaloneModeDetector';
@@ -85,6 +85,20 @@ function PrivacyDialog({ open, onAccept }: { open: boolean; onAccept: () => void
   );
 }
 
+function OnboardingGate() {
+  const { user, isAuthenticated } = useAuth();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user && !user.onboarded) {
+      setOpen(true);
+    }
+  }, [isAuthenticated, user]);
+
+  if (!open) return null;
+  return <OnboardingWizard open={open} onComplete={() => setOpen(false)} />;
+}
+
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
@@ -117,42 +131,41 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <AuthProvider>
           <CustomThemeProvider>
             <TasksProvider>
-              <SpotifyAuthProvider>
-                <CssBaseline />
+              <CssBaseline />
 
-                {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-                <InitialLanguageDialog />
-                <StandaloneModeDetector />
-                <InstallPrompt />
-                <DebugInitializer />
-                <WarmupInitializer />
+              {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+              <InitialLanguageDialog />
+              <StandaloneModeDetector />
+              <InstallPrompt />
+              <WarmupInitializer />
+              <OnboardingGate />
 
-                <ServiceWorkerProvider>
-                  <Box sx={{
+              <ServiceWorkerProvider>
+                <Box sx={{
+                  width: '100%',
+                  bgcolor: 'background.default',
+                  position: 'relative'
+                }}>
+                  <ScrollProgress />
+                  <ClientTopBarWrapper />
+
+                  <PrivacyDialog open={showPrivacy} onAccept={handleAcceptPrivacy} />
+
+                  <Box component="main" sx={{
+                    pb: '90px',
                     width: '100%',
-                    bgcolor: 'background.default',
-                    position: 'relative'
+                    overflow: 'visible'
                   }}>
-                    <ScrollProgress />
-                    <ClientTopBarWrapper />
-
-                    <PrivacyDialog open={showPrivacy} onAccept={handleAcceptPrivacy} />
-
-                    <Box component="main" sx={{
-                      pb: '90px',
-                      width: '100%',
-                      overflow: 'visible'
-                    }}>
-                      <PageTransition>
-                        {children}
-                      </PageTransition>
-                    </Box>
-
-                    <BottomNavBar />
-                    <ConnectionMonitor />
+                    <PageTransition>
+                      {children}
+                    </PageTransition>
                   </Box>
-                </ServiceWorkerProvider>
-              </SpotifyAuthProvider>
+
+                  <BottomNavBar />
+                  <ConnectionMonitor />
+                  <OfflineNotice />
+                </Box>
+              </ServiceWorkerProvider>
             </TasksProvider>
           </CustomThemeProvider>
         </AuthProvider>

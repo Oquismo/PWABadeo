@@ -38,7 +38,7 @@ export default function BottomNavBar() {
     return null;
   }
 
-  if (pathname === '/login' || pathname === '/login-simple' || pathname === '/registro') {
+  if (pathname === '/login' || pathname === '/registro') {
     return null;
   }
 

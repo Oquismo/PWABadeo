@@ -31,7 +31,10 @@ self.addEventListener('push', async (event) => {
   processedNotifications.add(contentHash);
   setTimeout(() => processedNotifications.delete(contentHash), 5 * 60 * 1000);
 
-  const existingNotifications = await self.registration.getNotifications({ tag: 'announcement' });
+  const isEvent = data.tag === 'event-reminder';
+  const notifTag = isEvent ? 'event-reminder' : 'announcement';
+
+  const existingNotifications = await self.registration.getNotifications({ tag: notifTag });
   for (const notification of existingNotifications) {
     if (notification.title === (data.title || 'Nuevo Anuncio') &&
         notification.body === (data.body || 'Nuevo anuncio disponible')) {
@@ -45,19 +48,26 @@ self.addEventListener('push', async (event) => {
     icon: '/icons/icon_192x192.png',
     badge: '/icons/icon_192x192.png',
     image: data.image || null,
-    tag: 'announcement',
+    tag: notifTag,
     renotify: false,
-    requireInteraction: true,
-    vibrate: [200, 100, 200],
-    actions: [
-      { action: 'view', title: 'Ver anuncio', icon: '/icons/icon_192x192.png' },
-      { action: 'dismiss', title: 'Descartar' }
-    ],
+    requireInteraction: !isEvent,
+    vibrate: isEvent ? [100, 50, 100, 50, 100] : [200, 100, 200],
+    actions: isEvent
+      ? [
+          { action: 'view', title: 'Ver evento' },
+          { action: 'dismiss', title: 'Descartar' }
+        ]
+      : [
+          { action: 'view', title: 'Ver anuncio', icon: '/icons/icon_192x192.png' },
+          { action: 'dismiss', title: 'Descartar' }
+        ],
     data: {
       url: data.url || '/',
       announcementId: data.announcementId,
       notificationId: notificationId,
-      contentHash: contentHash
+      contentHash: contentHash,
+      isEvent: isEvent,
+      eventId: data.eventId,
     }
   };
 

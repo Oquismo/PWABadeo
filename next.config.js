@@ -47,15 +47,43 @@ const withPWA = withPWAInit({
         },
       },
       {
+        urlPattern: /\/api\/schools\/\d+\/events/i,
+        method: 'GET',
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'programa-eventos',
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 60 * 60 * 24 * 7,
+          },
+          networkTimeoutSeconds: 5,
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
+        urlPattern: /\/api\/schools$/i,
+        method: 'GET',
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'programa-escuelas',
+          expiration: {
+            maxEntries: 10,
+            maxAgeSeconds: 60 * 60 * 24 * 7,
+          },
+          networkTimeoutSeconds: 5,
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
+      {
         urlPattern: /^https?.*\/api\/.*/i,
         method: 'GET',
         handler: 'NetworkOnly',
         options: {
           cacheName: 'api-cache',
-          expiration: {
-            maxEntries: 0,
-            maxAgeSeconds: 0,
-          },
         },
       },
       {

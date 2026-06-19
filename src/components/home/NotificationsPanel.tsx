@@ -4,6 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
 import { useAuth } from '@/context/AuthContext';
 import loggerClient from '@/lib/loggerClient';
+import { ErrorMessage } from '@/components/ui/DataStates';
 
 export default function NotificationsPanel() {
   // Estados
@@ -12,6 +13,7 @@ export default function NotificationsPanel() {
   const [hiddenAnnouncements, setHiddenAnnouncements] = useState<Set<string>>(new Set());
   const [seenAnnouncements, setSeenAnnouncements] = useState<Set<string>>(new Set());
   const [localStorageLoaded, setLocalStorageLoaded] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { user } = useAuth();
 
   // Cargar hidden/seen desde localStorage una vez
@@ -40,8 +42,10 @@ export default function NotificationsPanel() {
 
     const fetchAnnouncements = async () => {
       setLoading(true);
+      setFetchError(null);
       try {
         const res = await fetch('/api/announcement/all');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         let allAnnouncements = data.announcements || [];
 
@@ -55,7 +59,10 @@ export default function NotificationsPanel() {
         if (!cancelled) setAnnouncements(allAnnouncements);
       } catch (error) {
         loggerClient.error('Error cargando anuncios:', error);
-        if (!cancelled) setAnnouncements([]);
+        if (!cancelled) {
+          setAnnouncements([]);
+          setFetchError('Error al cargar las notificaciones');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -219,6 +226,8 @@ export default function NotificationsPanel() {
         <Box sx={{ px: 2.5, pb: 3, pt: 0 }}>
           {loading ? (
             <Box sx={{ textAlign: 'center', py: 4 }}><CircularProgress /></Box>
+          ) : fetchError ? (
+            <Box sx={{ py: 2 }}><ErrorMessage message={fetchError} onRetry={() => window.location.reload()} /></Box>
           ) : announcements.length === 0 ? (
             <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>No hay notificaciones.</Typography>
           ) : (

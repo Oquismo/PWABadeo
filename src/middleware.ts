@@ -1,182 +1,65 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth-tokens';
 
-// Variables para gestión de cold starts
-let isWarmingUp = false;
-let lastWarmupTime = 0;
-const WARMUP_INTERVAL = 5 * 60 * 1000; // 5 minutos
-
-// Función para pre-calentar la conexión de base de datos
-async function warmupDatabase() {
-  if (isWarmingUp || Date.now() - lastWarmupTime < WARMUP_INTERVAL) {
-    return;
-  }
-  
-  isWarmingUp = true;
-  lastWarmupTime = Date.now();
-  
-  try {
-    // Ping rápido a la base de datos en background
-    fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/health`, {
-      method: 'GET',
-      headers: { 'x-warmup': 'true' }
-    }).catch(() => {}); // Silenciar errores del warmup
-  } catch (error) {
-    console.warn('Database warmup failed:', error);
-  } finally {
-    isWarmingUp = false;
-  }
-}
-
-// Rutas públicas que no requieren autenticación
 const publicRoutes = [
-  '/login',
-  '/login-simple',
-  '/registro',
-  '/forgot-password',
-  '/reset-password',
-  '/test-auth',
-  '/test-login',
-  '/test-email',
-  '/unauthorized',
-  '/create-school',
-  '/politica-privacidad', // ✅ Política de privacidad pública
-  '/privacy-policy', // ✅ Alias en inglés
-  '/cuenta-eliminada' // ✅ Página de confirmación de eliminación
-  // '/' // Página principal ahora protegida, solo con login
+  '/login', '/registro', '/forgot-password', '/reset-password',
+  '/test-auth', '/test-login', '/test-email', '/unauthorized',
+  '/create-school', '/politica-privacidad', '/privacy-policy',
+  '/cuenta-eliminada',
 ];
 
-// Rutas públicas adicionales que pueden ser accedidas sin login
 const publicPaths = [
-  '/api/auth/login',
-  '/api/auth/login-retry',
-  '/api/auth/login-simple',
-  '/api/auth/login-test',
-  '/api/auth/register',
-  '/api/auth/forgot-password',
-  '/api/auth/reset-password',
-  '/api/auth/validate-reset-token',
-  '/api/auth/logout',
-  '/api/schools', // Necesario para registro sin login
-  '/api/health', // Health check público
-  '/api/tasks' // API pública para tareas (si es necesario)
+  '/api/auth/login', '/api/auth/login-retry', '/api/auth/register',
+  '/api/auth/forgot-password', '/api/auth/reset-password',
+  '/api/auth/validate-reset-token', '/api/auth/logout',
+  '/api/auth/refresh',
+  '/api/schools', '/api/health', '/api/tasks',
 ];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Activar warmup en background para APIs críticas
-  if (pathname.startsWith('/api/') && !pathname.includes('warmup')) {
-    warmupDatabase();
-  }
-
-  // EXCEPCIÓN: Permitir acceso a rutas públicas
   if (publicRoutes.includes(pathname) || publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // EXCEPCIÓN: Permitir acceso a archivos estáticos y API públicas
   if (
-    pathname.startsWith('/_next/') ||
-    pathname.startsWith('/api/public/') ||
-    pathname.startsWith('/icons/') ||
-    pathname === '/manifest.json' ||
-    pathname === '/robots.txt' ||
-    pathname === '/sitemap.xml' ||
-    pathname === '/service-worker.js' ||
-    pathname === '/offline.html' ||
-    pathname.includes('.') // archivos con extensión
+    pathname.startsWith('/_next/') || pathname.startsWith('/api/public/') ||
+    pathname.startsWith('/icons/') || pathname === '/manifest.json' ||
+    pathname === '/robots.txt' || pathname === '/sitemap.xml' ||
+    pathname === '/offline.html' || pathname.includes('.')
   ) {
     return NextResponse.next();
   }
 
-  // EXCEPCIÓN: Permitir acceso a la página de diagnóstico de email (con auth interna)
-  if (request.nextUrl.pathname === '/email-config') {
-    console.log('✅ Permitiendo acceso a página de diagnóstico de email (requiere auth interna)');
-    return NextResponse.next();
-  }
-
-  // EXCEPCIÓN: Permitir acceso a documentación de admin (solo lectura)
-  if (request.nextUrl.pathname === '/admin-docs') {
-    console.log('✅ Permitiendo acceso a documentación de admin');
-    return NextResponse.next();
-  }
-
-  // ESTRATEGIA SIMPLIFICADA: Sistema actual usa localStorage
-  // El middleware permitirá acceso a páginas y dejará verificación al frontend
-  // Solo protegerá APIs críticas que necesiten verificación del lado servidor
-
-  // VERIFICAR AUTENTICACIÓN PARA TODAS LAS PÁGINAS PROTEGIDAS
   const authToken = request.cookies.get('auth-token')?.value;
-  const userData = request.cookies.get('user')?.value;
-  const hasSession = authToken || userData;
 
-  // Si no hay sesión, redirigir al login
-  if (!hasSession) {
+  if (!authToken) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // PROTEGER APIs CRÍTICAS
-  if (pathname.startsWith('/api/admin/')) {
-    console.log('🔍 MIDDLEWARE DEBUG - API Admin Request:', {
-      path: pathname,
-      hasAuthToken: !!authToken,
-      hasUserData: !!userData,
-      authTokenPreview: authToken ? authToken.substring(0, 20) + '...' : 'NONE',
-      userDataPreview: userData ? userData.substring(0, 50) + '...' : 'NONE',
-      allCookies: Object.fromEntries(
-        Array.from(request.cookies.getAll()).map(cookie => [cookie.name, cookie.value.substring(0, 30) + '...'])
-      )
-    });
-
-    try {
-      const user = userData ? JSON.parse(userData) : null;
-      if (!user || user.role !== 'admin') {
-        console.log('🚨 API ADMIN BLOQUEADA - Usuario no admin');
-        return NextResponse.json(
-          { error: 'Acceso denegado - Se requieren permisos de administrador' },
-          { status: 403 }
-        );
-      }
-    } catch (error) {
-      console.log('🚨 API ADMIN BLOQUEADA - Datos inválidos');
-      return NextResponse.json(
-        { error: 'Acceso denegado - Sesión inválida' },
-        { status: 401 }
-      );
+  const payload = verifyAccessToken(authToken);
+  if (!payload) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 401 });
     }
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // PROTEGER APIs DE DEBUG (solo en producción)
-  if (pathname.startsWith('/api/debug/')) {
-    if (process.env.NODE_ENV === 'production') {
-      if (!authToken || !userData) {
-        console.log('🚨 API DEBUG BLOQUEADA - Producción sin auth');
-        return NextResponse.json(
-          { error: 'Acceso denegado - Ambiente de desarrollo requerido' },
-          { status: 403 }
-        );
-      }
-    }
+  if (pathname.startsWith('/api/admin/') && payload.role !== 'admin') {
+    return NextResponse.json({ error: 'Se requieren permisos de administrador' }, { status: 403 });
   }
 
-  // PERMITIR ACCESO A TODAS LAS DEMÁS RUTAS
-  // El frontend (localStorage) manejará la autenticación de páginas
   return NextResponse.next();
 }
 
-// Configurar qué rutas debe interceptar el middleware
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files (icons, manifest, etc.)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|icons/|manifest.json|robots.txt|sitemap.xml|service-worker.js|offline.html).*)',
-  ]
+    '/((?!_next/static|_next/image|favicon.ico|icons/|manifest.json|robots.txt|sitemap.xml|offline.html).*)',
+  ],
 };

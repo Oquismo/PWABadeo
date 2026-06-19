@@ -25,16 +25,12 @@ import PeopleIcon from '@mui/icons-material/People';
 import ArticleIcon from '@mui/icons-material/Article';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import SchoolIcon from '@mui/icons-material/School';
-import BuildIcon from '@mui/icons-material/Build';
-import BugReportIcon from '@mui/icons-material/BugReport';
 import TelemetryPanel from '@/components/admin/TelemetryPanel';
 import UserManagement from '@/components/admin/UserManagement';
-import LogViewer from '@/components/admin/LogViewer';
 import AnnouncementManager from '@/components/admin/AnnouncementManager';
 import SchoolManagement from '@/components/admin/SchoolManagement';
 import ProgramaFormativo from '@/components/admin/ProgramaFormativo';
-import AdminDevTools from '@/components/admin/AdminDevTools';
-import AuthDebugPanel from '@/components/admin/AuthDebugPanel';
+import AdminActivityPanel from '@/components/admin/activity/AdminActivityPanel';
 
 export default function AdminPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -69,12 +65,10 @@ export default function AdminPage() {
   const tabs = [
     { label: 'Telemetría', icon: <InsightsIcon />, component: <TelemetryPanel /> },
     { label: 'Usuarios', icon: <PeopleIcon />, component: <UserManagement /> },
-    { label: 'Logs', icon: <ArticleIcon />, component: <LogViewer /> },
+    { label: 'Actividad', icon: <ArticleIcon />, component: <AdminActivityPanel /> },
     { label: 'Anuncios', icon: <CampaignIcon />, component: <AnnouncementManager /> },
     { label: 'Escuelas', icon: <SchoolIcon />, component: <SchoolManagement /> },
     { label: 'Programa', icon: <EventIcon />, component: <ProgramaFormativo /> },
-    { label: 'Dev Tools', icon: <BuildIcon />, component: <AdminDevTools /> },
-    { label: 'Auth Debug', icon: <BugReportIcon />, component: <AuthDebugPanel /> },
   ];
 
   return (

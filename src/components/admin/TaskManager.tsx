@@ -27,11 +27,13 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Task as TaskIcon
 } from '@mui/icons-material';
 import { useTasks } from '@/context/TasksContext';
 import { useAuth } from '@/context/AuthContext';
 import { TaskData } from '@/data/tasks';
+import { EmptyState } from '@/components/ui/DataStates';
 
 
 interface TaskFormData {
@@ -49,6 +51,8 @@ export default function TaskManager() {
   
   // Estados para escuelas
   const [schools, setSchools] = useState<any[]>([]);
+  const [schoolsLoading, setSchoolsLoading] = useState(false);
+  const [schoolsError, setSchoolsError] = useState<string | null>(null);
   const [selectedSchoolIds, setSelectedSchoolIds] = useState<number[]>([]);
   const [isCommonTask, setIsCommonTask] = useState(false);
 
@@ -62,14 +66,20 @@ export default function TaskManager() {
   // Cargar escuelas al montar el componente
   useEffect(() => {
     const fetchSchools = async () => {
+      setSchoolsLoading(true);
+      setSchoolsError(null);
       try {
         const response = await fetch('/api/schools');
         const data = await response.json();
         if (response.ok && data.success) {
           setSchools(data.schools);
+        } else {
+          setSchoolsError('Error al cargar escuelas');
         }
-      } catch (error) {
-        console.error('Error cargando escuelas:', error);
+      } catch {
+        setSchoolsError('Error de conexión al cargar escuelas');
+      } finally {
+        setSchoolsLoading(false);
       }
     };
     fetchSchools();
@@ -205,7 +215,11 @@ export default function TaskManager() {
       )}
 
       <Grid container spacing={2}>
-        {tasks.map((task) => (
+        {tasks.length === 0 ? (
+          <Grid item xs={12}>
+            <EmptyState message="No hay tareas disponibles" icon={<TaskIcon />} />
+          </Grid>
+        ) : tasks.map((task) => (
           <Grid item xs={12} sm={6} md={4} key={task.id}>
             <Card sx={{ 
               background: task.color,
@@ -321,7 +335,11 @@ export default function TaskManager() {
 
             {!isCommonTask && (
               <>
-                {user && user.role !== 'admin' ? null : (
+                {user && user.role !== 'admin' ? null : schoolsError ? (
+                  <Typography variant="caption" color="error">{schoolsError}</Typography>
+                ) : schoolsLoading ? (
+                  <Typography variant="caption" color="text.secondary">Cargando escuelas...</Typography>
+                ) : (
                   <FormControl fullWidth>
                     <InputLabel>Escuelas asignadas</InputLabel>
                     <Select

@@ -1,178 +1,77 @@
 'use client';
 
-
 import { useState, useEffect, useRef } from 'react';
-import { Snackbar, Alert, CircularProgress, Slide } from '@mui/material';
+import { Snackbar, Alert, Slide } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
-import loggerClient from '@/lib/loggerClient';
+
+const SEEN_KEY = 'announcement-seen';
+
+function getSeen(): Set<number> {
+  try {
+    const raw = localStorage.getItem(SEEN_KEY);
+    return new Set<number>(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set<number>();
+  }
+}
+
+function saveSeen(ids: Set<number>) {
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...ids]));
+  } catch {
+    // localStorage may be full or unavailable
+  }
+}
 
 export default function AnnouncementBanner() {
-  const [announcement, setAnnouncement] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [seenAnnouncements, setSeenAnnouncements] = useState<Set<string>>(new Set());
-  const [hiddenAnnouncements, setHiddenAnnouncements] = useState<Set<string>>(new Set());
-  const [isLoaded, setIsLoaded] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [message, setMessage] = useState('');
+  const [id, setId] = useState<number | null>(null);
+  const seenRef = useRef<Set<number>>(getSeen());
 
-  const { sendNotification, permission } = usePushNotifications();
-
-  // Función para enviar notificación push al servidor
-  const sendPushNotification = async (title: string, body: string, url?: string) => {
-    try {
-      const response = await fetch('/api/send-notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          body,
-          icon: '/icons/icon_192x192.png',
-          url: url || '/'
-        })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        loggerClient.info('Notificación push enviada:', result);
-        return true;
-      } else {
-        loggerClient.error('Error enviando notificación push:', response.statusText);
-        return false;
-      }
-    } catch (error) {
-      loggerClient.error('Error enviando notificación push:', error);
-      return false;
-    }
-  };
-
-  // Cargar anuncios vistos y ocultos desde localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('seenAnnouncements');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSeenAnnouncements(new Set(parsed));
-      } catch (error) {
-        loggerClient.error('Error parsing seenAnnouncements:', error);
-        setSeenAnnouncements(new Set());
-      }
-    }
+    let mounted = true;
+    let lastId: number | null = null;
 
-    const hidden = localStorage.getItem('hiddenAnnouncements');
-    if (hidden) {
+    const poll = async () => {
       try {
-        const parsed = JSON.parse(hidden);
-        setHiddenAnnouncements(new Set(parsed));
-      } catch (error) {
-        loggerClient.error('Error parsing hiddenAnnouncements:', error);
-        setHiddenAnnouncements(new Set());
-      }
-    }
+        const res = await fetch('/api/announcement');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.message || !mounted) return;
 
-    setIsLoaded(true);
+        const newId = data.id;
+        if (newId === lastId) return;
+        lastId = newId;
+
+        if (seenRef.current.has(newId)) return;
+
+        setId(newId);
+        setMessage(data.message);
+        setOpen(true);
+      } catch {
+        // silent — banner is non-critical
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, 30000);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
-
-  // Guardar anuncios vistos en localStorage
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('seenAnnouncements', JSON.stringify([...seenAnnouncements]));
-    }
-  }, [seenAnnouncements, isLoaded]);
-
-  // Actualización en tiempo real usando EventSource (Server-Sent Events) o polling rápido
-  useEffect(() => {
-    if (typeof window === 'undefined' || !isLoaded) return;
-    
-    let eventSource: EventSource | null = null;
-    eventSource = new EventSource('/api/announcement/sse');
-    eventSource.onmessage = async (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        const message = data.message;
-        
-        // Verificaciones adicionales
-        if (message && message.trim() && !seenAnnouncements.has(message.trim()) && !hiddenAnnouncements.has(message.trim())) {
-          const trimmedMessage = message.trim();
-
-          // Intentar enviar notificación push
-          const pushSent = await sendPushNotification(
-            'Nuevo Anuncio',
-            trimmedMessage,
-            '/'
-          );
-
-          if (pushSent) {
-            loggerClient.info('Notificación push enviada:', trimmedMessage);
-            // Marcar como visto inmediatamente después de enviar push
-            setSeenAnnouncements(prev => new Set([...prev, trimmedMessage]));
-          } else {
-            // Fallback: mostrar banner si no se pudo enviar push
-            loggerClient.debug('Fallback: mostrando banner para:', trimmedMessage);
-            setAnnouncement(trimmedMessage);
-            setOpen(true);
-          }
-        } else if (message) {
-          loggerClient.debug('Anuncio ya visto u oculto:', message);
-        }
-      } catch (error) {
-        loggerClient.error('Error parsing announcement:', error);
-      }
-    };
-    eventSource.onerror = (error) => {
-      loggerClient.error('EventSource error:', error);
-      eventSource?.close();
-    };
-    return () => {
-      eventSource?.close();
-    };
-  }, [seenAnnouncements, hiddenAnnouncements, isLoaded]);
-
-  // Auto-cierre a los 3 segundos
-  useEffect(() => {
-    if (open && announcement) {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        handleClose();
-      }, 3000);
-    }
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [open, announcement]);
 
   const handleClose = () => {
     setOpen(false);
-    // Marcar como visto cuando se cierra
-    if (announcement) {
-      const trimmedMessage = announcement.trim();
-      loggerClient.debug('Marcando como visto:', trimmedMessage);
-      setSeenAnnouncements(prev => new Set([...prev, trimmedMessage]));
+    if (id !== null) {
+      seenRef.current = new Set([...seenRef.current, id]);
+      saveSeen(seenRef.current);
     }
   };
 
-  // Función de debug - Para testing: limpia el historial de anuncios vistos
-  // Abre la consola del navegador (F12) y ejecuta: window.clearSeenAnnouncements()
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as any).clearSeenAnnouncements = clearSeenAnnouncements;
-    }
-  }, []);
-
-  // Función de debug (puedes quitar esto después)
-  const clearSeenAnnouncements = () => {
-    setSeenAnnouncements(new Set());
-    localStorage.removeItem('seenAnnouncements');
-    loggerClient.info('Historial de anuncios vistos limpiado');
-  };
-
-  // Debug: mostrar en consola
-  useEffect(() => {
-    loggerClient.debug('Anuncios vistos actualmente:', [...seenAnnouncements]);
-  }, [seenAnnouncements]);
-
-  if (!announcement) return null;
+  if (!message) return null;
 
   return (
     <Snackbar
@@ -183,54 +82,27 @@ export default function AnnouncementBanner() {
       sx={{ zIndex: 1400 }}
     >
       <Alert
-        icon={<InfoIcon sx={{ fontSize: 36, color: 'primary.main', mr: 1 }} />}
+        icon={<InfoIcon sx={{ fontSize: 28 }} />}
         severity="info"
         variant="filled"
         onClose={handleClose}
         sx={{
-          bgcolor: (theme) => theme.palette.background.paper,
-          color: (theme) => theme.palette.text.primary,
+          bgcolor: 'background.paper',
+          color: 'text.primary',
           boxShadow: 6,
-          borderRadius: 6,
-          fontWeight: 'bold',
-          fontSize: '1.15rem',
+          borderRadius: 3,
+          fontWeight: 600,
+          fontSize: '1rem',
           alignItems: 'center',
-          minWidth: 340,
+          minWidth: 300,
           maxWidth: 500,
-          margin: 'auto',
-          px: 3,
-          py: 2.5,
-          display: 'flex',
-          gap: 2,
-          border: (theme) => `2px solid ${theme.palette.primary.main}22`,
-          backgroundImage: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light}11 0%, ${theme.palette.secondary.light}11 100%)`,
+          px: 2.5,
+          py: 1.5,
+          border: '1px solid',
+          borderColor: 'primary.main',
         }}
-        action={
-          <>
-            <button
-              onClick={handleClose}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'inherit',
-                fontWeight: 600,
-                fontSize: '1rem',
-                padding: '6px 16px',
-                borderRadius: 24,
-                cursor: 'pointer',
-                backgroundColor: 'rgba(255,255,255,0.08)',
-                marginLeft: 12,
-                transition: 'background 0.2s',
-              }}
-              onMouseOver={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.16)')}
-              onMouseOut={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)')}
-            >
-              Cerrar
-            </button>
-          </>
-        }
       >
-        {announcement}
+        {message}
       </Alert>
     </Snackbar>
   );

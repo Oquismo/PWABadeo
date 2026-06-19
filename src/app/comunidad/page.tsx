@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/layout/PageTransition';
+import { ErrorMessage } from '@/components/ui/DataStates';
 
 interface Question {
   id: number;
@@ -54,6 +55,7 @@ export default function ComunidadPage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [newQuestion, setNewQuestion] = useState({ title: '', content: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -63,14 +65,18 @@ export default function ComunidadPage() {
   }, []);
 
   const fetchQuestions = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/community/questions');
       if (res.ok) {
         const data = await res.json();
         setQuestions(data.questions);
+      } else {
+        setError('Error al cargar las preguntas');
       }
-    } catch (error) {
-      console.error('Error fetching questions:', error);
+    } catch {
+      setError('Error de conexión al cargar las preguntas');
     } finally {
       setLoading(false);
     }
@@ -182,6 +188,8 @@ export default function ComunidadPage() {
                 </CardContent>
               </Card>
             ))
+          ) : error ? (
+            <ErrorMessage message={error} onRetry={fetchQuestions} />
           ) : questions.length === 0 ? (
             // Empty state
             <Card sx={{ textAlign: 'center', py: 6 }}>

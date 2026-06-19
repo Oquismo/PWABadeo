@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { logActionServer } from '@/lib/logger';
 import { prisma } from '@/lib/db';
 import loggerClient from '@/lib/loggerClient';
+import { signAccessToken, generateRefreshToken, REFRESH_TOKEN_EXPIRY } from '@/lib/auth-tokens';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Estrategia de reintentos para consultas de base de datos
     let queryAttempts = 0;
     const maxAttempts = 3;
     
@@ -42,7 +42,6 @@ export async function POST(request: Request) {
         
         const bcrypt = await import('bcrypt');
         
-        // Timeout de 10 segundos para la consulta
         const queryPromise = prisma.user.findUnique({
           where: { email },
           select: {
@@ -51,7 +50,7 @@ export async function POST(request: Request) {
             name: true,
             password: true,
             role: true,
-            schoolId: true, // Incluir schoolId para filtrar escuelas
+            schoolId: true,
           }
         });
         
@@ -83,7 +82,6 @@ export async function POST(request: Request) {
           );
         }
 
-        // Solo restringir si flag activo
         if (onlyAdmins && user.role !== 'admin') {
           loggerClient.warn('❌ Acceso denegado - usuario no es admin, role:', user.role);
           return NextResponse.json(
@@ -100,33 +98,40 @@ export async function POST(request: Request) {
     loggerClient.warn('No se pudo registrar log de login (retry)', e);
         }
 
-        // Crear respuesta con cookies para autenticación
+        // Generar tokens firmados
+        const accessToken = signAccessToken(user.id, user.role);
+        const refreshTokenStr = generateRefreshToken();
+
         const response = NextResponse.json({
           user: userWithoutPassword,
+          accessToken,
           message: 'Login exitoso'
         });
 
-        // Establecer cookies para el middleware
-        const authToken = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString('base64');
-        
-  loggerClient.debug('🍪 [RETRY] Estableciendo cookies de autenticación:', {
-          authToken: authToken.substring(0, 20) + '...',
-          userRole: userWithoutPassword.role,
-          userId: user.id
-        });
-        
-        response.cookies.set('auth-token', authToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7 // 7 días
+        // Guardar refresh token en BD
+        await prisma.refreshToken.create({
+          data: {
+            token: refreshTokenStr,
+            userId: user.id,
+            expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY),
+          },
         });
 
-        response.cookies.set('user', JSON.stringify(userWithoutPassword), {
+        // Access token: HTTP-only, 15 min
+        response.cookies.set('auth-token', accessToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7 // 7 días
+          maxAge: 15 * 60,
+        });
+
+        // Refresh token: HTTP-only, 7 días
+        response.cookies.set('refresh-token', refreshTokenStr, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/api/auth/refresh',
+          maxAge: 7 * 24 * 60 * 60,
         });
 
   return response;
@@ -136,7 +141,6 @@ export async function POST(request: Request) {
   loggerClient.error(`❌ Error en intento ${queryAttempts}:`, queryError);
         
         if (queryAttempts >= maxAttempts) {
-          // Si fallaron todos los intentos, devolver error específico
           return NextResponse.json(
             { 
               error: 'Error de conexión a base de datos',
@@ -148,7 +152,6 @@ export async function POST(request: Request) {
           );
         }
         
-        // Esperar antes del siguiente intento
         await new Promise(resolve => setTimeout(resolve, 1000 * queryAttempts));
       }
     }

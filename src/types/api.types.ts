@@ -50,6 +50,7 @@ export interface UserBase {
   avatarUrl?: string | null;
   arrivalDate?: string | null;
   departureDate?: string | null;
+  onboarded?: boolean;
   country?: string | null;
   city?: string | null;
   town?: string | null;

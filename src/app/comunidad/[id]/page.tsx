@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '@/components/layout/PageTransition';
+import { ErrorMessage } from '@/components/ui/DataStates';
 
 interface Answer {
   id: number;
@@ -69,24 +70,34 @@ export default function QuestionDetailPage() {
 
   const [question, setQuestion] = useState<Question | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newAnswer, setNewAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!isNaN(questionId)) {
       fetchQuestion();
+    } else {
+      setLoading(false);
+      setError('ID de pregunta inválido');
     }
   }, [questionId]);
 
   const fetchQuestion = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/community/questions/${questionId}`);
       if (res.ok) {
         const data = await res.json();
         setQuestion(data.question);
+      } else if (res.status === 404) {
+        setQuestion(null);
+      } else {
+        setError('Error al cargar la pregunta');
       }
-    } catch (error) {
-      console.error('Error fetching question:', error);
+    } catch {
+      setError('Error de conexión al cargar la pregunta');
     } finally {
       setLoading(false);
     }
@@ -138,6 +149,17 @@ export default function QuestionDetailPage() {
         <Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
           <Skeleton variant="text" width="30%" height={40} />
           <Skeleton variant="rectangular" height={200} sx={{ mt: 2 }} />
+        </Box>
+      </PageTransition>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageTransition>
+        <Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
+          <Button startIcon={<BackIcon />} onClick={() => router.push('/comunidad')} sx={{ mb: 2 }}>Volver</Button>
+          <ErrorMessage message={error} onRetry={fetchQuestion} />
         </Box>
       </PageTransition>
     );

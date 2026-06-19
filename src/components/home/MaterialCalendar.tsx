@@ -16,6 +16,7 @@ import MaterialTextField from '@/components/ui/MaterialTextField';
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import Material3LoadingIndicator from '@/components/ui/Material3LoadingIndicator';
 import { EventAvailable as EventIcon } from '@mui/icons-material';
+import { ErrorMessage, EmptyState } from '@/components/ui/DataStates';
 import { 
   ChevronLeft, 
   ChevronRight,
@@ -71,12 +72,16 @@ export default function MaterialCalendar() {
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventDate, setNewEventDate] = useState(new Date());
   const [loading, setLoading] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Cargar eventos del usuario
   useEffect(() => {
     const loadUserEvents = async () => {
       if (!user?.id) return;
       
+      setLoadingEvents(true);
+      setFetchError(null);
       try {
         const response = await fetch('/api/user-events', {
           headers: { 'x-user-id': user.id.toString() }
@@ -89,9 +94,13 @@ export default function MaterialCalendar() {
             date: new Date(event.date)
           }));
           setUserEvents(events);
+        } else {
+          setFetchError('Error al cargar eventos');
         }
-      } catch (error) {
-        console.error('Error loading events:', error);
+      } catch {
+        setFetchError('Error de conexión al cargar eventos');
+      } finally {
+        setLoadingEvents(false);
       }
     };
 
@@ -421,7 +430,14 @@ export default function MaterialCalendar() {
         </Stack>
 
         <Stack spacing={2}>
-          {upcomingEvents.map((event, index) => (
+          {loadingEvents ? (
+            <Material3LoadingIndicator text="Cargando eventos..." />
+          ) : fetchError ? (
+            <ErrorMessage message={fetchError} />
+          ) : upcomingEvents.length === 0 ? (
+            <EmptyState message="No hay eventos próximos" />
+          ) : (
+            upcomingEvents.map((event, index) => (
             <Box
               key={`${event.date.toISOString()}-${index}`}
               sx={{
@@ -485,7 +501,7 @@ export default function MaterialCalendar() {
                 />
               </Stack>
             </Box>
-          ))}
+          )))}
         </Stack>
       </Box>
 

@@ -29,6 +29,7 @@ model User {
   arrivalDate      String? // Fecha de llegada
   departureDate    String? // Fecha de salida
   avatarUrl        String? // URL del avatar
+  onboarded        Boolean           @default(false)
   // Campos de ubicación del usuario
   country          String?           @default("Italia") // País del usuario
   city             String? // Ciudad del usuario
@@ -42,8 +43,9 @@ model User {
   feedbacks        Feedback[]        // Relación con feedbacks
   questions        CommunityQuestion[] // Preguntas en la comunidad
   answers          CommunityAnswer[]   // Respuestas en la comunidad
-  photos           Photo[]             // Fotos del álbum
-  albums           PhotoAlbum[]        // Álbumes de fotos
+   photos           Photo[]             // Fotos del álbum
+   albums           PhotoAlbum[]        // Álbumes de fotos
+   refreshTokens    RefreshToken[]      // Refresh tokens
   
   @@index([schoolId])
 }
@@ -90,6 +92,19 @@ model Announcement {
   createdAt DateTime @default(now())
   createdBy Int?
   user      User?    @relation(fields: [createdBy], references: [id])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+
+  @@index([token])
+  @@index([userId])
 }
 
 model Log {
@@ -319,4 +334,16 @@ model SchoolEvent {
   @@index([date])
   @@index([category])
   @@index([uid])
+}
+
+// Recordatorios de eventos enviados (para evitar duplicados)
+model EventReminder {
+  id         Int      @id @default(autoincrement())
+  eventId    Int      // ID del SchoolEvent
+  userId     Int      // ID del usuario notificado
+  remindedAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@index([eventId])
 }

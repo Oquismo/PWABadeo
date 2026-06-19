@@ -25,6 +25,8 @@
     "prestart": "prisma migrate deploy",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:baseline": "prisma migrate resolve --applied",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
     "postinstall": "prisma generate",
@@ -70,6 +72,8 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.19",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/bcrypt": "^5.0.2",
     "@types/busboy": "^1.5.4",
     "@types/leaflet": "^1.9.21",
@@ -79,14 +83,15 @@
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-calendar": "^3.9.0",
     "@types/react-dom": "^18.3.7",
-    "@types/spotify-web-playback-sdk": "^0.1.19",
     "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
+    "jsdom": "^29.1.1",
     "prisma": "^5.22.0",
     "typescript": "^5",
+    "vitest": "^4.1.9",
     "web-push": "^3.6.7"
   }
 }
