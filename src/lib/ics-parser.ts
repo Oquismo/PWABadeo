@@ -533,8 +533,15 @@ function extractField(content: string, fieldName: string): string | null {
 }
 
 function extractRawField(content: string, fieldName: string): string | null {
-  const match = content.match(new RegExp(`${fieldName}[^:]*[:;]([^\\r\\n]+)`, 's'));
-  return match ? match[1].trim() : null;
+  const match = content.match(new RegExp(`${fieldName}[^:]*[:;]([^\\r\\n]+)`));
+  if (!match) return null;
+  const value = match[1].trim();
+  // Preserve TZID if present (e.g., DTSTART;TZID=Europe/Rome:20250619T150000)
+  const tzidMatch = content.match(new RegExp(`${fieldName};TZID=([^;:]+)`));
+  if (tzidMatch) {
+    return `TZID=${tzidMatch[1]}:${value}`;
+  }
+  return value;
 }
 
 function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
