@@ -236,7 +236,7 @@ export default function OnboardingWizard({ open, onComplete }: { open: boolean; 
   };
 
   return (
-    <Dialog open={open} maxWidth="sm" fullWidth disableEscapeKeyDown>
+    <Dialog open={open} maxWidth="sm" fullWidth onClose={handleSkip}>
       <DialogTitle sx={{ pb: 1 }}>
         <Stepper activeStep={activeStep} alternativeLabel>
           {STEPS.map((label, i) => {
