@@ -74,7 +74,7 @@ function LoginForm() {
         await hapticSuccess();
         
         const from = searchParams.get('from') || '/';
-        router.push(from);
+        window.location.href = from;
       }
     } catch (error) {
       loggerClient.error('❌ Error en login:', error);

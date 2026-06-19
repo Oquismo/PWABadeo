@@ -48,7 +48,6 @@ export async function POST(request: Request) {
     
     console.log('✅ Imports successful');
     
-    try {
       console.log('🔄 Connecting to database...');
       await prisma.$connect();
       console.log('✅ Database connected');
@@ -173,11 +172,6 @@ export async function POST(request: Request) {
       });
 
       return response;
-
-    } finally {
-      console.log('🔌 Disconnecting from database...');
-      await prisma.$disconnect();
-    }
 
   } catch (error) {
     console.error('❌ Detailed registration error (outer catch):', error);

@@ -125,7 +125,5 @@ export async function DELETE(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

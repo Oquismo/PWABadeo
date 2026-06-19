@@ -15,7 +15,10 @@ const publicPaths = [
   '/api/auth/validate-reset-token', '/api/auth/logout',
   '/api/auth/refresh',
   '/api/schools', '/api/health', '/api/tasks',
+  '/api/telemetry',
 ];
+
+const publicPathPrefixes = ['/api/user/', '/api/public/'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -24,8 +27,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (publicPathPrefixes.some(prefix => pathname.startsWith(prefix))) {
+    return NextResponse.next();
+  }
+
   if (
-    pathname.startsWith('/_next/') || pathname.startsWith('/api/public/') ||
+    pathname.startsWith('/_next/') ||
     pathname.startsWith('/icons/') || pathname === '/manifest.json' ||
     pathname === '/robots.txt' || pathname === '/sitemap.xml' ||
     pathname === '/offline.html' || pathname.includes('.')

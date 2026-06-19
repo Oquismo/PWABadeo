@@ -138,9 +138,6 @@ export async function POST(request: Request) {
 
       return response;
 
-    } finally {
-      console.log('🔌 Disconnecting from database...');
-      await prisma.$disconnect();
     }
 
   } catch (error) {

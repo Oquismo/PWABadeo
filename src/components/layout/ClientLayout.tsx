@@ -88,12 +88,17 @@ function PrivacyDialog({ open, onAccept }: { open: boolean; onAccept: () => void
 function OnboardingGate() {
   const { user, isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
+  const [pathname, setPathname] = useState('');
 
   useEffect(() => {
-    if (isAuthenticated && user && !user.onboarded) {
+    setPathname(window.location.pathname);
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && user && !user.onboarded && !pathname.startsWith('/login') && !pathname.startsWith('/registro')) {
       setOpen(true);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, pathname]);
 
   if (!open) return null;
   return <OnboardingWizard open={open} onComplete={() => setOpen(false)} />;
