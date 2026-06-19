@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth-tokens';
 
 const publicRoutes = [
   '/login', '/registro', '/forgot-password', '/reset-password',
@@ -19,7 +20,7 @@ const publicPaths = [
 
 const publicPathPrefixes = ['/api/user/', '/api/public/'];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (publicRoutes.includes(pathname) || publicPaths.includes(pathname)) {
@@ -45,6 +46,20 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  const payload = await verifyAccessToken(authToken);
+  if (!payload) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 401 });
+    }
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (pathname.startsWith('/api/admin/') && payload.role !== 'admin') {
+    return NextResponse.json({ error: 'Se requieren permisos de administrador' }, { status: 403 });
   }
 
   return NextResponse.next();

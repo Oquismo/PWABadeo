@@ -69,7 +69,7 @@ if (!self.define) {
 }
 define(['./workbox-1a3b2097'], (function (workbox) { 'use strict';
 
-  importScripts("/fallback-development.js", "/sw-push.js");
+  importScripts("/fallback-development.js", "/fallback-development.js", "/fallback-development.js", "/fallback-development.js", "/fallback-development.js", "/fallback-development.js", "/fallback-development.js", "/sw-push.js");
   workbox.setCacheNameDetails({
     prefix: "badeo-pwa"
   });

@@ -99,7 +99,7 @@ export async function POST(request: Request) {
         }
 
         // Generar tokens firmados
-        const accessToken = signAccessToken(user.id, user.role);
+        const accessToken = await signAccessToken(user.id, user.role);
         const refreshTokenStr = generateRefreshToken();
 
         const response = NextResponse.json({

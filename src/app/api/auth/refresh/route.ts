@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const accessToken = signAccessToken(user.id, user.role);
+    const accessToken = await signAccessToken(user.id, user.role);
 
     const response = NextResponse.json({ accessToken });
 
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
       maxAge: 15 * 60,
     });
 

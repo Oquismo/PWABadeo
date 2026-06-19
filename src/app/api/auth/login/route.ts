@@ -37,7 +37,6 @@ export async function POST(request: Request) {
     
     console.log('✅ Imports successful');
     
-    try {
       console.log('🔄 Connecting to database...');
       await prisma.$connect();
       console.log('✅ Database connected');
@@ -115,7 +114,7 @@ export async function POST(request: Request) {
       });
 
       // Establecer cookies para el middleware
-      const authToken = signAccessToken(user.id, user.role);
+      const authToken = await signAccessToken(user.id, user.role);
       
       console.log('🍪 Estableciendo cookies de autenticación:', {
         authToken: authToken.substring(0, 20) + '...',
@@ -132,8 +131,6 @@ export async function POST(request: Request) {
       });
 
       return response;
-
-    }
 
   } catch (error) {
     console.error('❌ Detailed login error:', error);

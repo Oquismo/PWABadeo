@@ -156,7 +156,7 @@ export async function POST(request: Request) {
       });
 
       // Establecer cookies para el middleware (auto-login)
-      const authToken = signAccessToken(user.id, assignedRole);
+      const authToken = await signAccessToken(user.id, assignedRole);
 
       response.cookies.set('auth-token', authToken, {
         httpOnly: true,
