@@ -1,14 +1,33 @@
 // Cleaned API route for /api/admin/schools/[id]
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { verifyAccessToken } from '@/lib/auth-tokens';
 
 export const dynamic = 'force-dynamic';
+
+async function requireAdmin(request: Request) {
+  const authToken = request.headers.get('cookie')?.match(/auth-token=([^;]+)/)?.[1];
+  if (!authToken) return null;
+
+  const payload = await verifyAccessToken(authToken);
+  if (!payload) return null;
+
+  return (prisma as any).user.findUnique({
+    where: { id: payload.userId },
+    select: { id: true, role: true }
+  });
+}
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await requireAdmin(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
     const schoolId = parseInt(params.id, 10);
     if (isNaN(schoolId)) {
       return NextResponse.json({ error: 'ID de escuela inválido' }, { status: 400 });
@@ -82,6 +101,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await requireAdmin(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
     const schoolId = parseInt(params.id, 10);
     if (isNaN(schoolId)) {
       return NextResponse.json({ error: 'ID de escuela inválido' }, { status: 400 });
