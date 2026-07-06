@@ -325,9 +325,15 @@ export default function SchoolManagement() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ p: { xs: 1, sm: 3 } }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', sm: 'center' }}
+        spacing={1}
+        sx={{ mb: 3 }}
+      >
+        <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: { xs: '1.25rem', sm: '2.125rem' } }}>
           <SchoolIcon />
           Gestión de Escuelas
         </Typography>
@@ -336,10 +342,12 @@ export default function SchoolManagement() {
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog()}
           disabled={loading}
+          fullWidth
+          sx={{ maxWidth: { sm: 250 } }}
         >
           Agregar Escuela
         </Button>
-      </Box>
+      </Stack>
 
       {/* Mensajes de estado */}
       {error && (
@@ -407,15 +415,15 @@ export default function SchoolManagement() {
 
       {/* Tabla de escuelas */}
       <TableContainer component={Paper}>
-        <Table>
+        <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell>Nombre</TableCell>
-              <TableCell>Ciudad</TableCell>
+              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Ciudad</TableCell>
               <TableCell>Tipo</TableCell>
-              <TableCell>Nivel</TableCell>
-              <TableCell>Usuarios</TableCell>
-              <TableCell>Contacto</TableCell>
+              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Nivel</TableCell>
+              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Usuarios</TableCell>
+              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Contacto</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -426,13 +434,13 @@ export default function SchoolManagement() {
                   <Box>
                     <Typography variant="subtitle2">{school.name}</Typography>
                     {school.address && (
-                      <Typography variant="caption" color="textSecondary">
+                      <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
                         {school.address}
                       </Typography>
                     )}
                   </Box>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                   {school.city && (
                     <Chip 
                       icon={<LocationIcon />} 
@@ -449,15 +457,15 @@ export default function SchoolManagement() {
                     size="small"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                   <Chip label={school.level} size="small" variant="outlined" />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                   <Typography variant="body2">
                     {school.users ? school.users.length : 0} usuario(s)
                   </Typography>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                   <Stack direction="row" spacing={1}>
                     {school.phoneNumber && (
                       <Tooltip title={school.phoneNumber}>
@@ -476,7 +484,7 @@ export default function SchoolManagement() {
                     )}
                   </Stack>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                   <Tooltip title="Editar">
                     <IconButton onClick={() => handleOpenDialog(school)} size="small">
                       <EditIcon />
