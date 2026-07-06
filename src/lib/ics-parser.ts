@@ -11,7 +11,7 @@ export interface ParsedEvent {
   dtEnd: Date;
   isAllDay: boolean;
   who: string | null;
-  schoolName: string; // Canonical school name
+  schoolNames: string[]; // Canonical school names extracted from the summary
 }
 
 // Each entry: [pattern to match in summary (lowercase), canonical school name]
@@ -62,6 +62,9 @@ const SCHOOL_MAP: Array<[string, string]> = [
 
   ['liceo segre', 'Liceo Segre'],
   ['segr', 'Liceo Segre'],
+
+  ['elena di savoia', 'Elena di Savoia'],
+  ['savoia', 'Elena di Savoia'],
 
   ['galvani', 'ITIS Galvani'],
   ['is galvani', 'ITIS Galvani'],
@@ -410,63 +413,65 @@ const SCHOOL_FLUX_PATTERNS: Record<string, RegExp[]> = {
   ],
 };
 
-// Extract canonical school name from event summary
-export function extractSchoolName(summary: string): string | null {
+export function extractSchoolNames(summary: string): string[] {
   const lowerSummary = summary.toLowerCase();
+  const found = new Set<string>();
 
-  // Find the first matching school pattern
   for (const [pattern, baseName] of SCHOOL_MAP) {
     const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedPattern, 'i');
-    if (regex.test(lowerSummary)) {
-      const baseLower = baseName.toLowerCase();
+    if (!regex.test(lowerSummary)) continue;
 
-      // For schools with flux-based separation, flux takes priority
-      const fluxPatterns = SCHOOL_FLUX_PATTERNS[baseLower];
-      if (fluxPatterns) {
-        for (const fp of fluxPatterns) {
-          const m = summary.match(fp);
-          if (m) {
-            const flux = m[1].toUpperCase();
-            // Avoid duplicates (e.g., report "Minzoni V" if already "Minzoni V")
-            if (!baseLower.includes(flux.toLowerCase())) {
-              return `${baseName} ${flux}`;
-            }
-            return baseName;
+    const baseLower = baseName.toLowerCase();
+    let resolved = baseName;
+
+    // For schools with flux-based separation, flux takes priority
+    const fluxPatterns = SCHOOL_FLUX_PATTERNS[baseLower];
+    if (fluxPatterns) {
+      for (const fp of fluxPatterns) {
+        const m = summary.match(fp);
+        if (m) {
+          const flux = m[1].toUpperCase();
+          // Avoid duplicates (e.g., report "Minzoni V" if already "Minzoni V")
+          if (!baseLower.includes(flux.toLowerCase())) {
+            resolved = `${baseName} ${flux}`;
           }
+          break;
         }
-        // Flux school but no specific code matched — still create base school
-        return baseName;
       }
-
+    } else {
       // Standard program type logic
       const type = getProgramType(summary);
-      if (!type.matched) return baseName;
-
-      const typeLower = type.name.toLowerCase();
-
-      // Check if the type should replace part of the base name
-      for (const tr of TYPE_REPLACEMENTS) {
-        if (baseLower.includes(tr.include) && typeLower === tr.type) {
-          // Replace the matched keyword in the base name with the replacement
-          return baseName.replace(new RegExp(tr.include, 'i'), tr.replace);
+      if (type.matched) {
+        const typeLower = type.name.toLowerCase();
+        let replaced = false;
+        for (const tr of TYPE_REPLACEMENTS) {
+          if (baseLower.includes(tr.include) && typeLower === tr.type) {
+            resolved = baseName.replace(new RegExp(tr.include, 'i'), tr.replace);
+            replaced = true;
+            break;
+          }
+        }
+        if (!replaced && !baseLower.includes(typeLower)) {
+          resolved = `${baseName} ${type.name}`;
         }
       }
-
-      // Append the type if not already present in the base name
-      if (!baseLower.includes(typeLower)) {
-        return `${baseName} ${type.name}`;
-      }
-      return baseName;
     }
+
+    found.add(resolved);
   }
 
   // If no school matched, filter internal/personal events
-  if (isInternalEvent(summary)) {
-    return null;
+  if (found.size === 0 && isInternalEvent(summary)) {
+    return [];
   }
 
-  return null;
+  return Array.from(found);
+}
+
+export function extractSchoolName(summary: string): string | null {
+  const names = extractSchoolNames(summary);
+  return names.length > 0 ? names[0] : null;
 }
 
 // Unfold ICS continuation lines (RFC 5545: lines starting with space/tab)
@@ -501,8 +506,8 @@ export function parseICS(content: string): ParsedEvent[] {
 
     if (!dtStart || isNaN(dtStart.getTime())) continue;
 
-    const schoolName = extractSchoolName(summary);
-    if (!schoolName) continue;
+    const schoolNames = extractSchoolNames(summary);
+    if (schoolNames.length === 0) continue;
 
     const categories = categoriesStr ? categoriesStr.split(',').map(c => c.trim()) : [];
 
@@ -516,7 +521,7 @@ export function parseICS(content: string): ParsedEvent[] {
       dtEnd: dtEnd || dtStart,
       isAllDay,
       who: who ? cleanICSText(who) : null,
-      schoolName,
+      schoolNames,
     });
   }
 

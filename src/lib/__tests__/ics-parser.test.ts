@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractSchoolName, parseICS, ParsedEvent } from '../ics-parser';
+import { extractSchoolName, extractSchoolNames, parseICS } from '../ics-parser';
 
 describe('extractSchoolName', () => {
   it('returns null for internal events', () => {
@@ -117,7 +117,7 @@ END:VCALENDAR`;
     expect(events).toHaveLength(1);
     expect(events[0].uid).toBe('test-1');
     expect(events[0].summary).toBe('Minzoni FLUSSO VI - Marketing');
-    expect(events[0].schoolName).toBe('Minzoni VI');
+    expect(events[0].schoolNames).toEqual(['Minzoni VI']);
     expect(events[0].description).toBe('Clase de marketing');
     expect(events[0].location).toBe('Aula 3');
   });
@@ -163,7 +163,25 @@ END:VCALENDAR`;
 
     const events = parseICS(icsWithTZ);
     expect(events).toHaveLength(1);
-    expect(events[0].schoolName).toBe('Minzoni');
+    expect(events[0].schoolNames).toEqual(['Minzoni']);
+  });
+});
+
+describe('extractSchoolNames', () => {
+  it('returns multiple schools from a combined event', () => {
+    const names = extractSchoolNames('(WELCOME) MARCONI COURSES 5 + LICEO CHRIS CAPPELL COLLEGE 2');
+    expect(names).toContain('Marconi');
+    expect(names).toContain('Liceo Chris Cappell');
+    expect(names).toHaveLength(2);
+  });
+
+  it('keeps internal events with no school match empty', () => {
+    expect(extractSchoolNames('Riunione Coordinamento')).toEqual([]);
+  });
+
+  it('includes Elena di Savoia when present', () => {
+    const names = extractSchoolNames('MARCONI II FLUX 5 + ELENA DI SAVOIA 4');
+    expect(names).toContain('Elena di Savoia');
   });
 });
 
@@ -201,8 +219,8 @@ END:VCALENDAR`;
   it('parses multiple events correctly', () => {
     const events = parseICS(sampleICS);
     expect(events).toHaveLength(2);
-    expect(events[0].schoolName).toBe('Minzoni VI');
-    expect(events[1].schoolName).toBe('Marea ADU');
+    expect(events[0].schoolNames).toEqual(['Minzoni VI']);
+    expect(events[1].schoolNames).toEqual(['Marea ADU']);
   });
 
   it('preserves TZID in parsed dates', () => {

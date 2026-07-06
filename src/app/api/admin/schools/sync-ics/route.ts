@@ -70,17 +70,6 @@ export async function POST(request: Request) {
     const allSchools = await (prisma as any).school.findMany();
     console.log(`[sync-ics] Found ${allSchools.length} schools in DB`);
 
-    // Group events by school name
-    const eventsBySchool = new Map<string, typeof weekEvents>();
-    for (const event of weekEvents) {
-      if (!eventsBySchool.has(event.schoolName)) {
-        eventsBySchool.set(event.schoolName, []);
-      }
-      eventsBySchool.get(event.schoolName)!.push(event);
-    }
-
-    console.log(`[sync-ics] ${eventsBySchool.size} active schools with future events`);
-
     const results = {
       schoolsCreated: 0,
       schoolsFound: 0,
@@ -89,66 +78,47 @@ export async function POST(request: Request) {
       eventsDeleted: 0,
       eventsObsolete: 0,
       schools: [] as Array<{ name: string; dbId: number | null; eventCount: number }>,
-      unmatched: [] as string[],
     };
 
-    // Track all UIDs from current ICS
-    const currentUids = new Set(weekEvents.map(e => e.uid));
+    const schoolEventCounts = new Map<number, number>();
 
-    // 1. BORRAR eventos pasados y eventos obsoletos (no están en el ICS actual)
-    console.log('[sync-ics] Cleaning old and obsolete events...');
-    
-    // Borrar eventos pasados
+    const currentUids = new Set<string>();
+
+    console.log('[sync-ics] Cleaning old events...');
+
     const deletedPast = await (prisma as any).schoolEvent.deleteMany({
       where: { date: { lt: today } },
     });
     results.eventsDeleted = deletedPast.count;
     console.log(`[sync-ics] Deleted ${deletedPast.count} past events`);
 
-    // Borrar eventos futuros que ya no están en el ICS
-    const dbFutureEvents = await (prisma as any).schoolEvent.findMany({
-      where: { date: { gte: today } },
-    });
+    for (const event of weekEvents) {
+      for (const schoolName of event.schoolNames) {
+        let school = findSchoolInDB(schoolName, allSchools);
 
-    for (const dbEvent of dbFutureEvents) {
-      if (!currentUids.has(dbEvent.uid)) {
-        await (prisma as any).schoolEvent.delete({
-          where: { id: dbEvent.id },
-        });
-        results.eventsObsolete++;
-      }
-    }
-    console.log(`[sync-ics] Deleted ${results.eventsObsolete} obsolete events (removed from ICS)`);
+        if (!school) {
+          school = await (prisma as any).school.create({
+            data: {
+              name: schoolName,
+              country: 'Italia',
+              type: 'pública',
+              level: 'secondaria_secondo',
+              description: 'Escuela activa en Teamup',
+            },
+          });
+          allSchools.push(school);
+          results.schoolsCreated++;
+          console.log(`[sync-ics] Created school: ${schoolName}`);
+        } else {
+          results.schoolsFound++;
+          console.log(`[sync-ics] Matched "${schoolName}" -> DB: "${school.name}"`);
+        }
 
-    // 2. Procesar cada escuela del ICS
-    for (const [schoolName, events] of eventsBySchool) {
-      // Find matching school in DB
-      let school = findSchoolInDB(schoolName, allSchools);
+        const perSchoolUid = `${event.uid}::${school.id}`;
+        currentUids.add(perSchoolUid);
 
-      if (!school) {
-        // Create school with minimal info
-        school = await (prisma as any).school.create({
-          data: {
-            name: schoolName,
-            country: 'Italia',
-            type: 'pública',
-            level: 'secondaria_secondo',
-            description: 'Escuela activa en Teamup',
-          },
-        });
-        allSchools.push(school);
-        results.schoolsCreated++;
-        console.log(`[sync-ics] Created school: ${schoolName}`);
-      } else {
-        results.schoolsFound++;
-        console.log(`[sync-ics] Matched "${schoolName}" -> DB: "${school.name}"`);
-      }
-
-      // Process events for this school
-      for (const event of events) {
-        // Check if event already exists (by UID)
         const existing = await (prisma as any).schoolEvent.findFirst({
-          where: { uid: event.uid },
+          where: { uid: perSchoolUid },
         });
 
         const eventData = {
@@ -174,17 +144,36 @@ export async function POST(request: Request) {
           await (prisma as any).schoolEvent.create({
             data: {
               ...eventData,
-              uid: event.uid,
+              uid: perSchoolUid,
             },
           });
           results.eventsCreated++;
         }
-      }
 
+        schoolEventCounts.set(school.id, (schoolEventCounts.get(school.id) || 0) + 1);
+      }
+    }
+
+    const dbFutureEvents = await (prisma as any).schoolEvent.findMany({
+      where: { date: { gte: today } },
+    });
+
+    for (const dbEvent of dbFutureEvents) {
+      if (!currentUids.has(dbEvent.uid)) {
+        await (prisma as any).schoolEvent.delete({
+          where: { id: dbEvent.id },
+        });
+        results.eventsObsolete++;
+      }
+    }
+    console.log(`[sync-ics] Deleted ${results.eventsObsolete} obsolete events (removed from ICS)`);
+
+    for (const [schoolId, count] of schoolEventCounts) {
+      const school = allSchools.find((s: any) => s.id === schoolId);
       results.schools.push({
-        name: schoolName,
-        dbId: school.id,
-        eventCount: events.length,
+        name: school?.name || '',
+        dbId: schoolId,
+        eventCount: count,
       });
     }
 
