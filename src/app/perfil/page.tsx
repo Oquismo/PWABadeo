@@ -68,16 +68,6 @@ export default function PerfilPage() {
   }, [isAuthenticated, user, router, isLoading]);
 
   useEffect(() => {
-    const loadAvatar = async () => {
-      if (user?.id) {
-        try { await refreshAvatar(); }
-        catch (error) { loggerClient.error('Error al cargar avatar:', error); }
-      }
-    };
-    loadAvatar();
-  }, [user?.id, refreshAvatar]);
-
-  useEffect(() => {
     const handleProfileImageChange = () => { if (user?.id) refreshAvatar(); };
     window.addEventListener('profileImageChanged', handleProfileImageChange);
     return () => window.removeEventListener('profileImageChanged', handleProfileImageChange);

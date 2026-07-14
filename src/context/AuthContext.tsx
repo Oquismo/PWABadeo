@@ -147,6 +147,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
   }, []);
 
+  useEffect(() => {
+    if (!user || isLoading) return;
+    const loaded = sessionStorage.getItem('avatarLoaded');
+    if (loaded) return;
+    refreshAvatar().catch(() => {});
+    sessionStorage.setItem('avatarLoaded', 'true');
+  }, [user?.id, isLoading]);
+
   // ===== Google Review Prompt =====
 
   useEffect(() => {

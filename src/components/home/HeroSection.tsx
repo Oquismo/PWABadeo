@@ -32,19 +32,6 @@ export default function HeroSection() {
   };
 
   useEffect(() => {
-    const loadAvatar = async () => {
-      if (isAuthenticated && user?.id) {
-        try {
-          await refreshAvatar();
-        } catch (error) {
-          console.error('Error al cargar avatar en hero:', error);
-        }
-      }
-    };
-    loadAvatar();
-  }, [isAuthenticated, user?.id]);
-
-  useEffect(() => {
     const handleAvatarChange = () => {
       if (isAuthenticated && user?.id) {
         refreshAvatar();
