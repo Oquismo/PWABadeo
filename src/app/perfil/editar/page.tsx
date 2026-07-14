@@ -31,7 +31,7 @@ import {
 import Material3Dialog from '@/components/ui/Material3Dialog';
 import Material3LoadingPage from '@/components/ui/Material3LoadingPage';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { PhotoCamera as PhotoCameraIcon, Face as FaceIcon, Person as PersonIcon, Save as SaveIcon, Edit as EditIcon } from '@mui/icons-material';
+import { PhotoCamera as PhotoCameraIcon, Face as FaceIcon, Person as PersonIcon, Save as SaveIcon } from '@mui/icons-material';
 import loggerClient from '@/lib/loggerClient';
 
 export default function EditarPerfilPage() {

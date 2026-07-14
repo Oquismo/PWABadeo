@@ -30,15 +30,12 @@ import {
 } from '@mui/material';
 import M3Button from '@/components/ui/M3Button';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import EuroRoundedIcon from '@mui/icons-material/EuroRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import DirectionsRoundedIcon from '@mui/icons-material/DirectionsRounded';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
-import LocalOfferRoundedIcon from '@mui/icons-material/LocalOfferRounded';
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
