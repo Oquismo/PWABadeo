@@ -135,11 +135,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
             position: snapshot ? 'relative' : 'relative',
             zIndex: 1,
             width: '100%',
-            willChange: isTransitioning ? 'opacity, transform, filter' : 'auto',
-            backfaceVisibility: 'hidden',
-            transformStyle: 'preserve-3d',
-            WebkitFontSmoothing: 'antialiased',
-            MozOsxFontSmoothing: 'grayscale',
+            willChange: 'auto',
           }}
         >
           {showSkeleton ? <PageSkeleton height={snapshot?.height || 220} /> : children}

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Box, Fab, Typography } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
@@ -37,49 +38,72 @@ function makeIcon(category: string) {
   });
 }
 
-export default function InteractiveMap({
-  selectedPlace,
-  compact = false,
-  height = '100dvh',
-  markersOnly = false,
-}: {
-  selectedPlace?: Place;
-  compact?: boolean;
-  height?: string | number;
-  markersOnly?: boolean;
-}) {
-  const [center] = useState<[number, number]>([37.385, -5.9925]);
-  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
+function MapResizer() {
+  const map = useMap();
 
-  const containerStyle = compact
-    ? { width: '100%', height: typeof height === 'number' ? `${height}px` : height }
-    : { position: 'fixed' as const, top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 };
-
-  const handleLocate = () => {
-    if (!mapInstance) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        mapInstance.flyTo([pos.coords.latitude, pos.coords.longitude], 16, { duration: 1 });
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 10000 }
+  useEffect(() => {
+    const timers = [400, 900, 2000].map(delay =>
+      setTimeout(() => { map.invalidateSize(); }, delay)
     );
-  };
+
+    const handleResize = () => map.invalidateSize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+
+  return null;
+}
+
+const TILE_SERVERS = [
+  { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 },
+  { url: 'https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap', maxZoom: 18 },
+];
+
+function TileLayerFallback() {
+  const [serverIndex, setServerIndex] = useState(0);
+  const server = TILE_SERVERS[serverIndex];
+
+  const handleError = useCallback(() => {
+    const next = (serverIndex + 1) % TILE_SERVERS.length;
+    if (next !== 0) {
+      setServerIndex(next);
+    }
+  }, [serverIndex]);
 
   return (
-    <Box sx={containerStyle}>
+    <TileLayer
+      key={serverIndex}
+      url={server.url}
+      attribution={server.attribution}
+      maxZoom={server.maxZoom}
+      eventHandlers={{ tileerror: handleError }}
+    />
+  );
+}
+
+function MapContent({
+  compact,
+  markersOnly,
+}: {
+  compact: boolean;
+  markersOnly: boolean;
+}) {
+  const [center] = useState<[number, number]>([37.385, -5.9925]);
+
+  return (
+    <>
       <MapContainer
         center={center}
         zoom={14}
         style={{ width: '100%', height: '100%' }}
         zoomControl={!compact}
-        ref={setMapInstance}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxZoom={19}
-        />
+        <MapResizer />
+        <TileLayerFallback />
         {placesData.map((place) => (
           <Marker
             key={place.id}
@@ -98,25 +122,83 @@ export default function InteractiveMap({
             </Popup>
           </Marker>
         ))}
+        {!markersOnly && <LocateButton />}
       </MapContainer>
-      {!markersOnly && (
-        <Fab
-          size="small"
-          onClick={handleLocate}
-          sx={{
-            position: 'absolute',
-            bottom: 24,
-            right: 16,
-            zIndex: 1000,
-            bgcolor: 'rgba(30,30,30,0.85)',
-            color: '#fff',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            '&:hover': { bgcolor: 'rgba(50,50,50,0.9)' },
-          }}
-        >
-          <MyLocationIcon />
-        </Fab>
-      )}
+    </>
+  );
+}
+
+function LocateButton() {
+  const map = useMap();
+
+  const handleLocate = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        map.flyTo([pos.coords.latitude, pos.coords.longitude], 16, { duration: 1 });
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  return (
+    <Fab
+      size="small"
+      onClick={handleLocate}
+      sx={{
+        position: 'absolute',
+        bottom: 24,
+        right: 16,
+        zIndex: 1000,
+        bgcolor: 'rgba(30,30,30,0.85)',
+        color: '#fff',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+        '&:hover': { bgcolor: 'rgba(50,50,50,0.9)' },
+      }}
+    >
+      <MyLocationIcon />
+    </Fab>
+  );
+}
+
+export default function InteractiveMap({
+  selectedPlace,
+  compact = false,
+  height = '100dvh',
+  markersOnly = false,
+}: {
+  selectedPlace?: Place;
+  compact?: boolean;
+  height?: string | number;
+  markersOnly?: boolean;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const containerStyle = compact
+    ? { width: '100%', height: typeof height === 'number' ? `${height}px` : height, position: 'relative' as const }
+    : { position: 'fixed' as const, top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 };
+
+  // SSR guard
+  if (!mounted) {
+    return <Box sx={{ width: '100%', height: '100dvh', bgcolor: '#1a1a2e' }} />;
+  }
+
+  const mapEl = (
+    <Box sx={containerStyle}>
+      <MapContent
+        compact={compact}
+        markersOnly={markersOnly}
+      />
     </Box>
   );
+
+  if (!compact) {
+    return createPortal(mapEl, document.body);
+  }
+
+  return mapEl;
 }
