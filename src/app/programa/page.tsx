@@ -14,6 +14,7 @@ interface SchoolEvent {
   endDate: string;
   location: string | null;
   category: string | null;
+  program: string | null;
   who: string | null;
   isAllDay: boolean;
   school?: {
@@ -244,15 +245,26 @@ export default function ProgramaPage() {
                         )}
                       </Box>
 
-                      {/* Category */}
-                      {ev.category && (
-                        <Chip
-                          label={ev.category}
-                          size="small"
-                          color={getCategoryColor(ev.category) as any}
-                          sx={{ height: 24, fontSize: '0.65rem', flexShrink: 0, alignSelf: 'flex-start' }}
-                        />
-                      )}
+                      {/* Program & Category */}
+                      <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0, alignSelf: 'flex-start' }}>
+                        {ev.program && (
+                          <Chip
+                            label={ev.program}
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            sx={{ height: 24, fontSize: '0.65rem', fontWeight: 600 }}
+                          />
+                        )}
+                        {ev.category && (
+                          <Chip
+                            label={ev.category}
+                            size="small"
+                            color={getCategoryColor(ev.category) as any}
+                            sx={{ height: 24, fontSize: '0.65rem' }}
+                          />
+                        )}
+                      </Box>
                     </Box>
                   </CardContent>
                 </Card>

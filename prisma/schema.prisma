@@ -322,6 +322,7 @@ model SchoolEvent {
   endDate     DateTime // Fecha y hora de fin
   location    String?  // Ubicación (aula, etc.)
   category    String?  // Categoría de Teamup (coordinador responsable)
+  program     String?  // Tipo de programa: VET, ADU, PCTO, Job Shadowing, Short
   who         String?  // Responsable asignado
   isAllDay    Boolean  @default(false) // Evento de todo el día
   rawSummary  String?  // Resumen original del ICS para referencia
@@ -333,6 +334,7 @@ model SchoolEvent {
   @@index([schoolId])
   @@index([date])
   @@index([category])
+  @@index([program])
   @@index([uid])
 }
 

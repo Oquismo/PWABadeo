@@ -12,6 +12,7 @@ export interface ParsedEvent {
   isAllDay: boolean;
   who: string | null;
   schoolNames: string[]; // Canonical school names extracted from the summary
+  program: string; // Program type: 'VET' | 'ADU' | 'PCTO' | 'Job Shadowing' | 'Short' | ''
 }
 
 // Each entry: [pattern to match in summary (lowercase), canonical school name]
@@ -284,6 +285,9 @@ const SCHOOL_MAP: Array<[string, string]> = [
 
   ['bulgaro', 'Bulgaros'],
   ['bulgari', 'Bulgaros'],
+
+  ['de sanctis lacedonia', 'DE SANCTIS LACEDONIA'],
+  ['lacedonia', 'DE SANCTIS LACEDONIA'],
 ];
 
 // Patterns that indicate internal/non-school events (should be skipped)
@@ -375,16 +379,7 @@ const PROGRAM_TYPES = [
   { pattern: /\bADU\b/i, name: 'ADU' },
 ];
 
-// When a school base name includes a program type but the event is a different type,
-// replace the type in the name rather than appending (e.g., "Marea ADU" + VET → "Marea VET")
-type TypeReplacement = { include: string; type: string; replace: string };
 
-const TYPE_REPLACEMENTS: TypeReplacement[] = [
-  // Base contains "ADU" but event is VET → replace ADU with VET
-  { include: 'adu', type: 'vet', replace: 'VET' },
-  // Base contains "ADU" but event is Job Shadowing → append
-  // (no replacement needed, just append)
-];
 
 function getProgramType(summary: string): { name: string; matched: boolean } {
   for (const pt of PROGRAM_TYPES) {
@@ -437,23 +432,6 @@ export function extractSchoolNames(summary: string): string[] {
             resolved = `${baseName} ${flux}`;
           }
           break;
-        }
-      }
-    } else {
-      // Standard program type logic
-      const type = getProgramType(summary);
-      if (type.matched) {
-        const typeLower = type.name.toLowerCase();
-        let replaced = false;
-        for (const tr of TYPE_REPLACEMENTS) {
-          if (baseLower.includes(tr.include) && typeLower === tr.type) {
-            resolved = baseName.replace(new RegExp(tr.include, 'i'), tr.replace);
-            replaced = true;
-            break;
-          }
-        }
-        if (!replaced && !baseLower.includes(typeLower)) {
-          resolved = `${baseName} ${type.name}`;
         }
       }
     }
@@ -509,6 +487,8 @@ export function parseICS(content: string): ParsedEvent[] {
     const schoolNames = extractSchoolNames(summary);
     if (schoolNames.length === 0) continue;
 
+    const programType = getProgramType(summary);
+
     const categories = categoriesStr ? categoriesStr.split(',').map(c => c.trim()) : [];
 
     events.push({
@@ -522,6 +502,7 @@ export function parseICS(content: string): ParsedEvent[] {
       isAllDay,
       who: who ? cleanICSText(who) : null,
       schoolNames,
+      program: programType.matched ? programType.name : '',
     });
   }
 

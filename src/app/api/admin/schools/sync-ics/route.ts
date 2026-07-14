@@ -8,11 +8,21 @@ export const revalidate = 0;
 
 const ICS_URL = 'https://ics.teamup.com/feed/ksampdkmv21a529vhx/0.ics';
 
+const PROGRAM_SUFFIXES = ['VET', 'ADU', 'PCTO', 'Job Shadowing', 'Short'];
+
 function findSchoolInDB(schoolName: string, allSchools: any[]): any {
   const target = schoolName.toLowerCase();
 
-  // Only exact match — the ICS parser already normalizes names
-  return allSchools.find((s: any) => s.name.toLowerCase() === target) || null;
+  let match = allSchools.find((s: any) => s.name.toLowerCase() === target);
+  if (match) return match;
+
+  for (const suffix of PROGRAM_SUFFIXES) {
+    const suffixed = `${schoolName} ${suffix}`.toLowerCase();
+    match = allSchools.find((s: any) => s.name.toLowerCase() === suffixed);
+    if (match) return match;
+  }
+
+  return null;
 }
 
 export async function POST(request: Request) {
@@ -128,6 +138,7 @@ export async function POST(request: Request) {
           endDate: event.dtEnd,
           location: event.location,
           category: event.categories.join(', '),
+          program: event.program || null,
           who: event.who,
           isAllDay: event.isAllDay,
           rawSummary: event.summary,

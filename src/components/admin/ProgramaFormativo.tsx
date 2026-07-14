@@ -47,6 +47,7 @@ interface SchoolEvent {
   endDate: string;
   location: string | null;
   category: string | null;
+  program: string | null;
   who: string | null;
   isAllDay: boolean;
   schoolId: number;
@@ -395,6 +396,9 @@ export default function ProgramaFormativo() {
                                         {event.who}
                                       </Typography>
                                     </Box>
+                                  )}
+                                  {event.program && (
+                                    <Chip label={event.program} size="small" color="primary" variant="outlined" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} />
                                   )}
                                   {event.category && (
                                     <Chip label={event.category} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
