@@ -58,7 +58,14 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   if (reduced) return <>{children}</>;
 
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+      }}
+    >
       <AnimatePresence>
         {exitingContent && (
           <motion.div
@@ -72,6 +79,8 @@ export default function PageTransition({ children }: { children: ReactNode }) {
               inset: 0,
               pointerEvents: 'none',
               zIndex: 1,
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
             }}
             aria-hidden
           >
@@ -85,10 +94,15 @@ export default function PageTransition({ children }: { children: ReactNode }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
-          duration: 0.25,
+          duration: 0.2,
           ease: EMPHASIZED_DECELERATE,
         }}
-        style={{ position: 'relative', zIndex: 2 }}
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+        }}
       >
         {children}
       </motion.div>

@@ -139,7 +139,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   <Box component="main" sx={{
                     pb: '90px',
                     width: '100%',
-                    overflow: 'visible'
+                    overflow: 'visible',
+                    contain: 'content',
+                    contentVisibility: 'auto',
+                    containIntrinsicSize: '0 500px',
                   }}>
                     <PageTransition>
                       {children}

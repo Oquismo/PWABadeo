@@ -157,8 +157,10 @@ export default function BottomNavBar() {
                         backgroundColor: '#E8DEF8',
                         borderRadius: '50%',
                         inset: 0,
+                        transform: 'translateZ(0)',
+                        backfaceVisibility: 'hidden',
                       }}
-                      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                      transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
                     />
                   )}
                 </BottomNavigationAction>
