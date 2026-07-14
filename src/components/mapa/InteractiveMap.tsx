@@ -3,17 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { Box, Fab, Typography } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { placesData, Place } from '@/data/places';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   Residencia: '🏠', Comida: '🍽️', Salud: '🏥', Transporte: '🚌', Metro: '🚇',
@@ -26,17 +20,84 @@ const CATEGORY_COLORS: Record<string, string> = {
   Estudio: '#00e676',
 };
 
-function makeIcon(category: string) {
+function makeSvgIcon(category: string): L.DivIcon {
   const color = CATEGORY_COLORS[category] || '#78909c';
   const emoji = CATEGORY_EMOJIS[category] || '📍';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+    <defs>
+      <filter id="shadow-${category.replace(/\s/g, '')}" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.35"/>
+      </filter>
+    </defs>
+    <path d="M18 2C10.82 2 5 7.82 5 15c0 9.75 13 27 13 27s13-17.25 13-27C31 7.82 25.18 2 18 2z" fill="${color}" filter="url(#shadow-${category.replace(/\s/g, '')})" stroke="#fff" stroke-width="1.5"/>
+    <circle cx="18" cy="16" r="9" fill="#fff" opacity="0.95"/>
+    <text x="18" y="19" text-anchor="middle" font-size="11">${emoji}</text>
+  </svg>`;
   return L.divIcon({
-    html: `<div style="width:36px;height:36px;background:${color};border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);font-size:16px">${emoji}</div>`,
+    html: svg,
     className: '',
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -18],
+    iconSize: [36, 44],
+    iconAnchor: [18, 42],
+    popupAnchor: [0, -44],
   });
 }
+
+const ZOOM_STYLES = `
+  .leaflet-control-zoom {
+    border: 1px solid #49454F !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  }
+  .leaflet-control-zoom a {
+    background: #2B2930 !important;
+    color: #E6E0E9 !important;
+    border-bottom: 1px solid #49454F !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 18px !important;
+    transition: background 150ms ease;
+  }
+  .leaflet-control-zoom a:hover {
+    background: #36343B !important;
+    color: #C4F278 !important;
+  }
+  .leaflet-control-zoom a.leaflet-disabled {
+    color: #49454F !important;
+    background: #1D1B20 !important;
+  }
+  .leaflet-popup-content-wrapper {
+    background: #211F26 !important;
+    border: 1px solid #49454F !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+    padding: 0 !important;
+  }
+  .leaflet-popup-tip {
+    background: #211F26 !important;
+    border: 1px solid #49454F !important;
+  }
+  .leaflet-popup-close-button {
+    color: #CAC4D0 !important;
+    top: 8px !important;
+    right: 8px !important;
+    font-size: 18px !important;
+  }
+  .leaflet-popup-close-button:hover {
+    color: #E6E0E9 !important;
+  }
+  .leaflet-control-attribution {
+    background: rgba(20,18,24,0.8) !important;
+    color: #938F99 !important;
+    font-size: 10px !important;
+    padding: 2px 8px !important;
+    border-radius: 8px 0 0 0 !important;
+  }
+  .leaflet-control-attribution a {
+    color: #CAC4D0 !important;
+  }
+`;
 
 function MapResizer() {
   const map = useMap();
@@ -45,10 +106,8 @@ function MapResizer() {
     const timers = [400, 900, 2000].map(delay =>
       setTimeout(() => { map.invalidateSize(); }, delay)
     );
-
     const handleResize = () => map.invalidateSize();
     window.addEventListener('resize', handleResize);
-
     return () => {
       timers.forEach(clearTimeout);
       window.removeEventListener('resize', handleResize);
@@ -59,8 +118,16 @@ function MapResizer() {
 }
 
 const TILE_SERVERS = [
-  { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 },
-  { url: 'https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap', maxZoom: 18 },
+  {
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxZoom: 19,
+  },
+  {
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
+  },
 ];
 
 function TileLayerFallback() {
@@ -96,6 +163,7 @@ function MapContent({
 
   return (
     <>
+      <style>{ZOOM_STYLES}</style>
       <MapContainer
         center={center}
         zoom={14}
@@ -104,27 +172,138 @@ function MapContent({
       >
         <MapResizer />
         <TileLayerFallback />
-        {placesData.map((place) => (
-          <Marker
-            key={place.id}
-            position={[place.coordinates.lat, place.coordinates.lng]}
-            icon={makeIcon(place.category)}
+        {markersOnly ? (
+          placesData.map((place) => (
+            <Marker
+              key={place.id}
+              position={[place.coordinates.lat, place.coordinates.lng]}
+              icon={makeSvgIcon(place.category)}
+            >
+              <Popup>
+                <PlacePopupContent place={place} />
+              </Popup>
+            </Marker>
+          ))
+        ) : (
+          <MarkerClusterGroup
+            chunkedLoading
+            spiderfyDistanceMultiplier={2}
+            maxClusterRadius={50}
+            polygonOptions={{
+              fillColor: '#C4F278',
+              color: '#C4F278',
+              weight: 2,
+              opacity: 0.6,
+              fillOpacity: 0.15,
+            }}
           >
-            <Popup>
-              <Box sx={{ minWidth: 180 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{place.name}</Typography>
-                {place.address && (
-                  <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', mt: 0.5 }}>
-                    {place.address}
-                  </Typography>
-                )}
-              </Box>
-            </Popup>
-          </Marker>
-        ))}
+            {placesData.map((place) => (
+              <Marker
+                key={place.id}
+                position={[place.coordinates.lat, place.coordinates.lng]}
+                icon={makeSvgIcon(place.category)}
+              >
+                <Popup>
+                  <PlacePopupContent place={place} />
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+        )}
         {!markersOnly && <LocateButton />}
       </MapContainer>
     </>
+  );
+}
+
+function PlacePopupContent({ place }: { place: Place }) {
+  const color = CATEGORY_COLORS[place.category] || '#78909c';
+  const emoji = CATEGORY_EMOJIS[place.category] || '📍';
+
+  return (
+    <Box sx={{ minWidth: 200, maxWidth: 260 }}>
+      <Box
+        sx={{
+          height: 4,
+          bgcolor: color,
+          borderRadius: '12px 12px 0 0',
+        }}
+      />
+      <Box sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              bgcolor: `${color}22`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+              flexShrink: 0,
+              border: `1px solid ${color}44`,
+            }}
+          >
+            {emoji}
+          </Box>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 700,
+              color: '#E6E0E9',
+              fontSize: '0.9rem',
+              lineHeight: 1.3,
+            }}
+          >
+            {place.name}
+          </Typography>
+        </Box>
+        {place.address && (
+          <Typography
+            variant="caption"
+            sx={{
+              display: 'block',
+              color: '#CAC4D0',
+              fontSize: '0.7rem',
+              mb: 0.5,
+            }}
+          >
+            {place.address}
+          </Typography>
+        )}
+        <Typography
+          variant="caption"
+          sx={{
+            display: 'block',
+            color: '#938F99',
+            fontSize: '0.7rem',
+            lineHeight: 1.4,
+          }}
+        >
+          {place.description}
+        </Typography>
+        {place.link && (
+          <Box
+            component="a"
+            href={place.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              mt: 1,
+              fontSize: '0.75rem',
+              color: '#C4F278',
+              textDecoration: 'none',
+              '&:hover': { textDecoration: 'underline' },
+            }}
+          >
+            Abrir en Google Maps →
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 }
 
@@ -150,10 +329,11 @@ function LocateButton() {
         bottom: 24,
         right: 16,
         zIndex: 1000,
-        bgcolor: 'rgba(30,30,30,0.85)',
-        color: '#fff',
+        bgcolor: '#2B2930',
+        color: '#E6E0E9',
+        border: '1px solid #49454F',
         boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-        '&:hover': { bgcolor: 'rgba(50,50,50,0.9)' },
+        '&:hover': { bgcolor: '#36343B' },
       }}
     >
       <MyLocationIcon />
@@ -179,12 +359,19 @@ export default function InteractiveMap({
   }, []);
 
   const containerStyle = compact
-    ? { width: '100%', height: typeof height === 'number' ? `${height}px` : height, position: 'relative' as const }
+    ? {
+        width: '100%',
+        height: typeof height === 'number' ? `${height}px` : height,
+        position: 'relative' as const,
+        borderRadius: 2,
+        overflow: 'hidden' as const,
+        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+        border: '1px solid #49454F',
+      }
     : { position: 'fixed' as const, top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 };
 
-  // SSR guard
   if (!mounted) {
-    return <Box sx={{ width: '100%', height: '100dvh', bgcolor: '#1a1a2e' }} />;
+    return <Box sx={{ width: '100%', height: '100dvh', bgcolor: '#141218' }} />;
   }
 
   const mapEl = (
