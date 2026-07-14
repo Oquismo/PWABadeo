@@ -72,7 +72,8 @@ export const translations = {
       hidePassword: "Ocultar contraseña",
       submit: "Entrar",
       forgotPassword: "¿Has olvidado tu contraseña?",
-      noAccount: "¿No tienes cuenta? Regístrate"
+      noAccount: "¿No tienes cuenta? Regístrate",
+      rememberMe: "Mantener sesión iniciada"
     },
     calendar: {
       welcomeWorkshop: "Taller de Bienvenida",
@@ -435,7 +436,8 @@ export const translations = {
       hidePassword: "Hide password",
       submit: "Sign In",
       forgotPassword: "Forgot your password?",
-      noAccount: "Don't have an account? Register"
+      noAccount: "Don't have an account? Register",
+      rememberMe: "Keep me signed in"
     },
     calendar: {
       welcomeWorkshop: "Welcome Workshop",
@@ -809,7 +811,8 @@ export const translations = {
       hidePassword: "Nascondi password",
       submit: "Accedi",
       forgotPassword: "Hai dimenticato la password?",
-      noAccount: "Non hai un account? Registrati"
+      noAccount: "Non hai un account? Registrati",
+      rememberMe: "Mantieni la sessione attiva"
     },
     calendar: {
       welcomeWorkshop: "Laboratorio di Benvenuto",

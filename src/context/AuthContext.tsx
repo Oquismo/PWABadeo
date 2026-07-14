@@ -8,7 +8,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 import telemetry from '@/lib/telemetry';
 import loggerClient from '@/lib/loggerClient';
 import { UserBase, UserUpdateData, UserStorageData } from '@/types/api.types';
-import { LocalStorage, saveUserToStorage, getUserFromStorage, logUserAction } from '@/utils/storage.utils';
+import { LocalStorage, SessionStorage, saveUserToStorage, getUserFromStorage, saveUserToSessionStorage, getUserFromSessionStorage, removeUserFromAllStorages, saveUserToActiveStorage, logUserAction } from '@/utils/storage.utils';
 import { apiClient } from '@/utils/api-client.utils';
 
 // ===== Types =====
@@ -19,7 +19,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User) => Promise<void>;
+  login: (userData: User, remember?: boolean) => Promise<void>;
   logout: () => void;
   updateUser: (data: UserUpdateData) => Promise<void>;
   updateAvatar: (avatarUrl: string) => Promise<void>;
@@ -92,6 +92,27 @@ async function fetchUserFromBackend(email: string): Promise<User | null> {
   }
 }
 
+// ===== Token Refresh =====
+
+/**
+ * Refresca el auth-token llamando al endpoint /api/auth/refresh
+ * Las cookies http-only se actualizan automáticamente con la respuesta
+ */
+async function refreshAuthToken(): Promise<boolean> {
+  try {
+    const response = await apiClient.post('/api/auth/refresh');
+    if (response.success) {
+      loggerClient.debug('✅ Token refrescado exitosamente');
+      return true;
+    }
+    loggerClient.warn('⚠️ Refresh token falló:', response.error);
+    return false;
+  } catch (error) {
+    loggerClient.error('Error refreshing auth token:', error);
+    return false;
+  }
+}
+
 // ===== AuthProvider Component =====
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -99,9 +120,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const userRef = useRef(user);
   userRef.current = user;
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const onlyAdmins =
     typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ONLY_ADMIN_LOGIN === 'true';
+
+  // ===== Iniciar refresh periódico =====
+
+  const startTokenRefresh = useCallback(() => {
+    if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+    // Refrescar cada 10 minutos (el token dura 15)
+    refreshIntervalRef.current = setInterval(async () => {
+      if (!userRef.current) return;
+      const ok = await refreshAuthToken();
+      if (!ok) {
+        loggerClient.warn('⚠️ Falló refresh periódico de token');
+      }
+    }, 10 * 60 * 1000);
+  }, []);
+
+  const stopTokenRefresh = useCallback(() => {
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current);
+      refreshIntervalRef.current = null;
+    }
+  }, []);
 
   // ===== Initialization =====
 
@@ -109,23 +152,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initializeAuth = async () => {
       loggerClient.debug('🔄 AuthContext: Inicializando...');
 
-      const storedUser = getUserFromStorage();
+      // 1. Buscar en localStorage (sesión recordada)
+      let storedUser = getUserFromStorage();
+      let isRemembered = !!storedUser;
+
+      // 2. Si no hay en localStorage, buscar en sessionStorage (sesión temporal)
+      if (!storedUser) {
+        storedUser = getUserFromSessionStorage();
+      }
 
       if (storedUser) {
-        loggerClient.debug('📦 Usuario encontrado en localStorage:', storedUser.email);
+        loggerClient.debug(`📦 Usuario encontrado en ${isRemembered ? 'localStorage' : 'sessionStorage'}:`, storedUser.email);
 
         // Refrescar datos desde backend
         const refreshedUser = await fetchUserFromBackend(storedUser.email);
 
         if (refreshedUser) {
           setUser(refreshedUser);
-          saveUserToStorage(userToStorageData(refreshedUser));
+          if (isRemembered) {
+            saveUserToStorage(userToStorageData(refreshedUser));
+          } else {
+            saveUserToSessionStorage(userToStorageData(refreshedUser));
+          }
           loggerClient.info('✅ Usuario actualizado desde backend');
+        } else if (isRemembered) {
+          setUser(storedUser as unknown as User);
+          loggerClient.warn('⚠️ No se pudo refrescar usuario recordado - manteniendo sesión');
         } else {
-          // Si falla, limpiar
           setUser(null);
-          LocalStorage.remove('user');
-          loggerClient.warn('⚠️ No se pudo refrescar usuario, limpiando localStorage');
+          removeUserFromAllStorages();
+          loggerClient.warn('⚠️ No se pudo refrescar usuario temporal, limpiando sesión');
+        }
+
+        // Refrescar token de autenticación para que el middleware no nos redirija
+        if (refreshedUser || isRemembered) {
+          const tokenOk = await refreshAuthToken();
+          if (tokenOk) {
+            loggerClient.info('✅ Token de sesión renovado en inicialización');
+            startTokenRefresh();
+          } else if (!isRemembered) {
+            // Sesión temporal sin refresh → limpiar
+            setUser(null);
+            removeUserFromAllStorages();
+            loggerClient.warn('⚠️ No se pudo renovar token, limpiando sesión temporal');
+          }
         }
       }
 
@@ -145,7 +215,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initializeAuth();
-  }, []);
+
+    return () => stopTokenRefresh();
+  }, [startTokenRefresh, stopTokenRefresh]);
+
+  // ===== Refresh token al volver a la app (mobile) =====
+
+  useEffect(() => {
+    if (!user || isLoading) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshAuthToken().then((ok) => {
+          if (ok) loggerClient.debug('✅ Token refrescado al volver a la app');
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user, isLoading]);
 
   useEffect(() => {
     if (!user || isLoading) return;
@@ -182,8 +271,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ===== Login =====
 
   const login = useCallback(
-    async (userData: User) => {
-      loggerClient.debug('🔐 Login iniciado para:', userData.email);
+    async (userData: User, remember: boolean = true) => {
+      loggerClient.debug('🔐 Login iniciado para:', userData.email, '| recordar:', remember);
 
       // Verificar restricción de solo admins
       if (onlyAdmins && userData.role !== 'admin') {
@@ -191,9 +280,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Acceso solo permitido para administradores');
       }
 
-      // Guardar usuario inicial
+      // Guardar usuario inicial en el storage correspondiente
       setUser(userData);
-      saveUserToStorage(userToStorageData(userData));
+      const storageData = userToStorageData(userData);
+      if (remember) {
+        saveUserToStorage(storageData);
+      } else {
+        saveUserToSessionStorage(storageData);
+      }
 
       if (userData.id) {
         LocalStorage.set('userId', userData.id.toString());
@@ -218,7 +312,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
 
           setUser(refreshedUser);
-          saveUserToStorage(userToStorageData(refreshedUser));
+          const refreshedStorageData = userToStorageData(refreshedUser);
+          if (remember) {
+            saveUserToStorage(refreshedStorageData);
+          } else {
+            saveUserToSessionStorage(refreshedStorageData);
+          }
 
           if (refreshedUser.id) {
             LocalStorage.set('userId', refreshedUser.id.toString());
@@ -230,15 +329,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loggerClient.error('Error refrescando usuario tras login:', error);
       }
 
+      // Refrescar token tras login exitoso
+      try {
+        const tokenOk = await refreshAuthToken();
+        if (tokenOk) {
+          loggerClient.info('✅ Token renovado tras login');
+          startTokenRefresh();
+        }
+      } catch (e) {
+        loggerClient.error('Error refrescando token tras login:', e);
+      }
+
       loggerClient.info('✅ Login completado exitosamente');
     },
-    [onlyAdmins]
+    [onlyAdmins, startTokenRefresh]
   );
 
   // ===== Logout =====
 
   const logout = useCallback(() => {
     const currentUser = user;
+
+    // Detener refresh periódico
+    stopTokenRefresh();
 
     if (currentUser) {
       logUserAction('logout', currentUser.email);
@@ -256,11 +369,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setUser(null);
-    LocalStorage.remove('user');
-    LocalStorage.remove('userId');
+    removeUserFromAllStorages();
 
     loggerClient.info('✅ Logout completado');
-  }, [user]);
+  }, [user, stopTokenRefresh]);
 
   // ===== Update User =====
 
@@ -279,7 +391,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser((prevUser) => {
             if (!prevUser) return null;
             const updatedUser = { ...prevUser, ...response.data?.user };
-            saveUserToStorage(userToStorageData(updatedUser));
+            saveUserToActiveStorage(userToStorageData(updatedUser));
             return updatedUser;
           });
 
@@ -315,7 +427,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser((prevUser) => {
           if (!prevUser) return null;
           const updatedUser = { ...prevUser, avatarUrl: response.data?.avatarUrl };
-          saveUserToStorage(userToStorageData(updatedUser));
+          saveUserToActiveStorage(userToStorageData(updatedUser));
           return updatedUser;
         });
 
@@ -344,7 +456,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser((prevUser) => {
         if (!prevUser) return null;
         const updatedUser = { ...prevUser, avatarUrl: null };
-        saveUserToStorage(userToStorageData(updatedUser));
+        saveUserToActiveStorage(userToStorageData(updatedUser));
         return updatedUser;
       });
 
@@ -373,7 +485,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser((prevUser) => {
         if (!prevUser) return null;
         const updatedUser = { ...prevUser, avatarUrl: response.data?.avatarUrl };
-        saveUserToStorage(userToStorageData(updatedUser));
+        saveUserToActiveStorage(userToStorageData(updatedUser));
         return updatedUser;
       });
 
@@ -395,7 +507,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (refreshedUser) {
         setUser(refreshedUser);
-        saveUserToStorage(userToStorageData(refreshedUser));
+        saveUserToActiveStorage(userToStorageData(refreshedUser));
         loggerClient.info('✅ Usuario refrescado');
       }
     } catch (error) {

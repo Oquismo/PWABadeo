@@ -11,6 +11,8 @@ import {
   IconButton,
   InputAdornment,
   Link as MuiLink,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import Link from 'next/link';
 import Visibility from '@mui/icons-material/Visibility';
@@ -35,6 +37,7 @@ function LoginForm() {
   const { success: hapticSuccess, error: hapticError } = useHaptics();
   
   const { value: showPassword, toggle: toggleShowPassword } = useToggle(false);
+  const [remember, setRemember] = useState(true);
 
   const {
     values,
@@ -70,7 +73,7 @@ function LoginForm() {
       if (response.data?.user) {
         loggerClient.info('✅ Login exitoso, usuario:', response.data.user);
         
-        await login(response.data.user);
+        await login(response.data.user, remember);
         await hapticSuccess();
         
         const from = searchParams.get('from') || '/';
@@ -181,7 +184,28 @@ function LoginForm() {
           </Box>
         </Box>
 
-        <Box sx={{ textAlign: 'right' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                size="small"
+                sx={{
+                  color: 'primary.main',
+                  '&.Mui-checked': { color: 'primary.main' },
+                  py: 0,
+                }}
+                disabled={isSubmitting}
+              />
+            }
+            label={
+              <Typography sx={{ fontSize: '0.8rem', fontWeight: 500, color: 'text.secondary', userSelect: 'none' }}>
+                {t('login.rememberMe') || 'Mantener sesión iniciada'}
+              </Typography>
+            }
+            sx={{ m: 0 }}
+          />
           <Link href="/forgot-password" passHref legacyBehavior>
             <MuiLink variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none' }}>
               {t('login.forgotPassword') || '¿Olvidaste tu contraseña?'}

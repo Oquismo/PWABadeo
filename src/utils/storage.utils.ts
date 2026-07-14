@@ -1,5 +1,5 @@
 /**
- * Utilidades para manejo seguro de localStorage con tipos
+ * Utilidades para manejo seguro de localStorage y sessionStorage con tipos
  */
 
 import loggerClient from '@/lib/loggerClient';
@@ -165,6 +165,66 @@ export class LocalStorage {
   }
 }
 
+/**
+ * Clase para gestionar sessionStorage de forma type-safe
+ * Los datos se borran automáticamente al cerrar la pestaña/navegador
+ */
+export class SessionStorage {
+  static get<T>(key: string, defaultValue?: T): T | null {
+    try {
+      if (typeof window === 'undefined') return defaultValue ?? null;
+      const item = sessionStorage.getItem(key);
+      if (item === null) return defaultValue ?? null;
+      return JSON.parse(item) as T;
+    } catch (error) {
+      loggerClient.error(`Error al leer de sessionStorage (key: ${key}):`, error);
+      return defaultValue ?? null;
+    }
+  }
+
+  static set<T>(key: string, value: T): boolean {
+    try {
+      if (typeof window === 'undefined') return false;
+      sessionStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (error) {
+      loggerClient.error(`Error al guardar en sessionStorage (key: ${key}):`, error);
+      return false;
+    }
+  }
+
+  static remove(key: string): boolean {
+    try {
+      if (typeof window === 'undefined') return false;
+      sessionStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      loggerClient.error(`Error al eliminar de sessionStorage (key: ${key}):`, error);
+      return false;
+    }
+  }
+
+  static has(key: string): boolean {
+    try {
+      if (typeof window === 'undefined') return false;
+      return sessionStorage.getItem(key) !== null;
+    } catch {
+      return false;
+    }
+  }
+
+  static clear(): boolean {
+    try {
+      if (typeof window === 'undefined') return false;
+      sessionStorage.clear();
+      return true;
+    } catch (error) {
+      loggerClient.error('Error al limpiar sessionStorage:', error);
+      return false;
+    }
+  }
+}
+
 // ===== Funciones auxiliares específicas del dominio =====
 
 export interface UserStorageData {
@@ -206,6 +266,27 @@ export const getUserFromStorage = (): UserStorageData | null => {
 };
 
 /**
+ * Guarda datos de usuario en sessionStorage (sesión temporal)
+ */
+export const saveUserToSessionStorage = (user: UserStorageData | null): boolean => {
+  if (!user) {
+    return SessionStorage.remove('user');
+  }
+  const safeUser: UserStorageData = {
+    ...user,
+    avatarUrl: user.avatarUrl && !user.avatarUrl.startsWith('data:') ? user.avatarUrl : null,
+  };
+  return SessionStorage.set('user', safeUser);
+};
+
+/**
+ * Obtiene datos de usuario desde sessionStorage
+ */
+export const getUserFromSessionStorage = (): UserStorageData | null => {
+  return SessionStorage.get<UserStorageData>('user');
+};
+
+/**
  * Guarda el idioma seleccionado
  */
 export const saveLanguage = (lang: string): boolean => {
@@ -217,6 +298,28 @@ export const saveLanguage = (lang: string): boolean => {
  */
 export const getLanguage = (): string | null => {
   return LocalStorage.get<string>('language', 'es');
+};
+
+/**
+ * Elimina datos de usuario de ambos storages (local y sesión)
+ */
+export const removeUserFromAllStorages = (): void => {
+  LocalStorage.remove('user');
+  LocalStorage.remove('userId');
+  SessionStorage.remove('user');
+};
+
+/**
+ * Guarda en el storage activo (localStorage si el usuario está recordado, sessionStorage si no)
+ */
+export const saveUserToActiveStorage = (data: UserStorageData | null): boolean => {
+  if (!data) {
+    return LocalStorage.remove('user') && SessionStorage.remove('user');
+  }
+  if (LocalStorage.has('user')) {
+    return saveUserToStorage(data);
+  }
+  return saveUserToSessionStorage(data);
 };
 
 /**
