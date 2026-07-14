@@ -17,51 +17,29 @@ import HeroSection from "@/components/home/HeroSection";
 import AnnouncementBanner from "@/components/home/AnnouncementBanner";
 import InlineBanner from '@/components/home/InlineBanner';
 
+function SectionSkeleton() {
+  return (
+    <Box sx={{ '& > div': { mb: 1.5 } }}>
+      <Skeleton variant="text" width={140} height={24} />
+      <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
+    </Box>
+  );
+}
+
 // Carga diferida para secciones pesadas
 const ProgramaFormativoSection = dynamic(
   () => import('@/components/home/ProgramaFormativoSection'),
-  {
-    loading: () => (
-      <Box sx={{ py: 3, px: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Skeleton variant="circular" width={24} height={24} />
-          <Skeleton variant="text" width={140} height={28} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1.5, overflow: 'hidden' }}>
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} variant="rectangular" width={220} height={140} sx={{ borderRadius: 3, flexShrink: 0 }} animation="wave" />
-          ))}
-        </Box>
-      </Box>
-    ),
-    ssr: false,
-  }
+  { loading: () => <SectionSkeleton />, ssr: false }
 );
 
 const CalendarSection = dynamic(
   () => import('@/components/home/CalendarSection/CalendarSection'),
-  {
-    loading: () => (
-      <Box sx={{ py: 3, px: 2 }}>
-        <Skeleton variant="text" width={120} height={28} sx={{ mb: 2 }} />
-        <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
-      </Box>
-    ),
-    ssr: false,
-  }
+  { loading: () => <SectionSkeleton />, ssr: false }
 );
 
 const ExternalInfoPanel = dynamic(
   () => import('@/components/home/ExternalInfoPanel'),
-  {
-    loading: () => (
-      <Box sx={{ py: 3, px: 2 }}>
-        <Skeleton variant="text" width={140} height={28} sx={{ mb: 2 }} />
-        <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
-      </Box>
-    ),
-    ssr: false,
-  }
+  { loading: () => <SectionSkeleton />, ssr: false }
 );
 
 export default function Home() {
