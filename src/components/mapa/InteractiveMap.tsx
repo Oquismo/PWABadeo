@@ -8,6 +8,7 @@ import L from 'leaflet';
 import { Box, Fab, Typography } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { placesData, Place } from '@/data/places';
+import MapHeader from './MapHeader';
 import { TILE_SERVERS } from './mapTiles';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
@@ -44,6 +45,13 @@ function makeSvgIcon(category: string): L.DivIcon {
 }
 
 const ZOOM_STYLES = `
+  .leaflet-tile {
+    filter: saturate(0.78) contrast(1.03);
+  }
+  .leaflet-map-fullscreen .leaflet-top.leaflet-left {
+    top: 166px;
+    left: 12px;
+  }
   .leaflet-control-zoom {
     border: 1px solid #49454F !important;
     border-radius: 12px !important;
@@ -98,6 +106,32 @@ const ZOOM_STYLES = `
   .leaflet-control-attribution a {
     color: #CAC4D0 !important;
   }
+  .map-cluster-icon {
+    background: transparent;
+    border: 0;
+  }
+  .map-cluster-count {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border: 4px solid rgba(196, 242, 120, 0.24);
+    border-radius: 50%;
+    background: #C4F278;
+    color: #1A2E00;
+    font: 800 14px/1 var(--font-sans, sans-serif);
+    box-shadow: 0 6px 18px rgba(9, 15, 5, 0.36);
+  }
+  .map-header-card {
+    animation: map-header-in 420ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  }
+  @keyframes map-header-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .map-header-card { animation: none; }
+  }
 `;
 
 function MapResizer() {
@@ -140,6 +174,14 @@ function TileLayerFallback() {
   );
 }
 
+function makeClusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
+  return L.divIcon({
+    html: `<span class="map-cluster-count">${cluster.getChildCount()}</span>`,
+    className: 'map-cluster-icon',
+    iconSize: [46, 46],
+  });
+}
+
 function MapContent({
   compact,
   markersOnly,
@@ -155,11 +197,13 @@ function MapContent({
       <MapContainer
         center={center}
         zoom={14}
+        className={compact ? 'leaflet-map-compact' : 'leaflet-map-fullscreen'}
         style={{ width: '100%', height: '100%' }}
         zoomControl={!compact}
       >
         <MapResizer />
         <TileLayerFallback />
+        {!compact && <MapHeader />}
         {markersOnly ? (
           placesData.map((place) => (
             <Marker
@@ -177,6 +221,7 @@ function MapContent({
             chunkedLoading
             spiderfyDistanceMultiplier={2}
             maxClusterRadius={50}
+            iconCreateFunction={makeClusterIcon}
             polygonOptions={{
               fillColor: '#C4F278',
               color: '#C4F278',
@@ -312,6 +357,8 @@ function LocateButton() {
     <Fab
       size="small"
       onClick={handleLocate}
+      aria-label="Centrar en mi ubicación"
+      title="Centrar en mi ubicación"
       sx={{
         position: 'absolute',
         bottom: 24,
@@ -321,7 +368,9 @@ function LocateButton() {
         color: '#E6E0E9',
         border: '1px solid #49454F',
         boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-        '&:hover': { bgcolor: '#36343B' },
+        transition: 'transform 180ms ease, background-color 180ms ease',
+        '&:hover': { bgcolor: '#36343B', transform: 'translateY(-2px)' },
+        '&:active': { transform: 'scale(0.96)' },
       }}
     >
       <MyLocationIcon />
