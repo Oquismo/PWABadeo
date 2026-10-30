@@ -83,3 +83,10 @@ MEJORAS_PWA_NATIVA.md
 
 # Ignore all markdown files by default (add explicit negations for docs you want tracked)
 *.md
+
+# PWA build artifacts (generated on each build)
+/public/sw.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+/public/fallback-*.js
+/public/swe-worker-*.js
