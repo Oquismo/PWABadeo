@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { TILE_SERVERS } from '../mapTiles';
+import { MAP_ATTRIBUTION, OPENFREEMAP_STYLE_URL } from '../mapTiles';
 
-describe('map tile providers', () => {
-  it('starts with the soft CARTO Voyager style without labels', () => {
-    expect(TILE_SERVERS[0].url).toContain('voyager_nolabels');
+describe('map style provider', () => {
+  it('uses the keyless OpenFreeMap Positron style', () => {
+    expect(OPENFREEMAP_STYLE_URL).toBe('https://tiles.openfreemap.org/styles/positron');
   });
 
-  it('keeps the keyless OpenStreetMap provider as a fallback', () => {
-    expect(TILE_SERVERS[1].url).toBe('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+  it('includes required OpenFreeMap, OpenMapTiles, and OpenStreetMap attribution', () => {
+    expect(MAP_ATTRIBUTION).toContain('openfreemap.org');
+    expect(MAP_ATTRIBUTION).toContain('openmaptiles.org');
+    expect(MAP_ATTRIBUTION).toContain('openstreetmap.org/copyright');
   });
 });

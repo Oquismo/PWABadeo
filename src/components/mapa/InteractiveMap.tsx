@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
+import { useState, useEffect, useMemo } from 'react';
+import { MapContainer, Marker, Popup, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { Box, Fab, IconButton, Typography } from '@mui/material';
@@ -10,7 +10,7 @@ import NavigationIcon from '@mui/icons-material/Navigation';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { placesData, Place } from '@/data/places';
 import MapHeader from './MapHeader';
-import { TILE_SERVERS, LABEL_TILES_URL, LABEL_TILES_MIN_ZOOM } from './mapTiles';
+import { MAP_ATTRIBUTION, OPENFREEMAP_STYLE_URL } from './mapTiles';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   Residencia: '🏠', Comida: '🍽️', Salud: '🏥', Transporte: '🚌', Metro: '🚇',
@@ -141,31 +141,39 @@ function MapResizer() {
   return null;
 }
 
-function TileLayerFallback() {
-  const [serverIndex, setServerIndex] = useState(0);
-  const server = TILE_SERVERS[serverIndex];
+function OpenFreeMapLayer() {
+  const map = useMap();
 
-  const handleError = useCallback(() => {
-    const next = (serverIndex + 1) % TILE_SERVERS.length;
-    if (next !== 0) {
-      setServerIndex(next);
-    }
-  }, [serverIndex]);
+  useEffect(() => {
+    let isMounted = true;
+    let layer: L.Layer | undefined;
 
-  return (
-    <>
-      <TileLayer
-        key={serverIndex}
-        url={server.url}
-        attribution={server.attribution}
-        maxZoom={server.maxZoom}
-        eventHandlers={{ tileerror: handleError }}
-      />
-      {serverIndex === 0 && (
-        <TileLayer url={LABEL_TILES_URL} minZoom={LABEL_TILES_MIN_ZOOM} maxZoom={server.maxZoom} opacity={0.85} />
-      )}
-    </>
-  );
+    const addLayer = async () => {
+      const [maplibre, { maplibreGL }] = await Promise.all([
+        import('maplibre-gl'),
+        import('@maplibre/maplibre-gl-leaflet'),
+      ]);
+
+      if (!isMounted) return;
+
+      maplibre.setWorkerUrl('/maplibre-gl-worker.mjs');
+      layer = maplibreGL({
+        style: OPENFREEMAP_STYLE_URL,
+        attributionControl: { customAttribution: MAP_ATTRIBUTION },
+      }).addTo(map);
+    };
+
+    void addLayer().catch((error: unknown) => {
+      if (isMounted) console.error('No se pudo cargar el mapa de OpenFreeMap.', error);
+    });
+
+    return () => {
+      isMounted = false;
+      if (layer) map.removeLayer(layer);
+    };
+  }, [map]);
+
+  return null;
 }
 
 function ZoomWatcher() {
@@ -223,7 +231,7 @@ function MapContent({ compact, markersOnly }: { compact: boolean; markersOnly: b
     >
       <MapResizer />
       <ZoomWatcher />
-      <TileLayerFallback />
+      <OpenFreeMapLayer />
       {!compact && <ZoomControl position="topright" />}
       {markersOnly ? (
         visible.map(renderMarker)

@@ -72,6 +72,7 @@ android-settings.json
 next-env.d.ts
 
 /src/generated/prisma
+/public/maplibre-gl-worker.mjs
 
 .env*.local
 
