@@ -8,6 +8,7 @@ import L from 'leaflet';
 import { Box, Fab, Typography } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { placesData, Place } from '@/data/places';
+import { TILE_SERVERS } from './mapTiles';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   Residencia: '🏠', Comida: '🍽️', Salud: '🏥', Transporte: '🚌', Metro: '🚇',
@@ -116,19 +117,6 @@ function MapResizer() {
 
   return null;
 }
-
-const TILE_SERVERS = [
-  {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    maxZoom: 19,
-  },
-  {
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19,
-  },
-];
 
 function TileLayerFallback() {
   const [serverIndex, setServerIndex] = useState(0);
