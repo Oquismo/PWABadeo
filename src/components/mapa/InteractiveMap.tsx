@@ -10,7 +10,7 @@ import NavigationIcon from '@mui/icons-material/Navigation';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { placesData, Place } from '@/data/places';
 import MapHeader from './MapHeader';
-import { MAP_ATTRIBUTION, OPENFREEMAP_STYLE_URL } from './mapTiles';
+import { MAP_ATTRIBUTION, MAP_MAX_ZOOM, MAP_MIN_ZOOM, OPENFREEMAP_STYLE_URL } from './mapTiles';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   Residencia: '🏠', Comida: '🍽️', Salud: '🏥', Transporte: '🚌', Metro: '🚇',
@@ -225,6 +225,8 @@ function MapContent({ compact, markersOnly }: { compact: boolean; markersOnly: b
     <MapContainer
       center={center}
       zoom={14}
+      minZoom={MAP_MIN_ZOOM}
+      maxZoom={MAP_MAX_ZOOM}
       className={compact ? 'leaflet-map-compact' : 'leaflet-map-fullscreen'}
       style={{ width: '100%', height: '100%' }}
       zoomControl={false}

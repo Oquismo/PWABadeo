@@ -129,45 +129,7 @@ const nextConfigBase = {
       config.externals.push('@prisma/client');
     }
 
-    // Optimizaciones de bundle splitting
     if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            // Chunk para MUI
-            mui: {
-              test: /[\\/]node_modules[\\/](@mui|@emotion)[\\/]/,
-              name: 'mui',
-              priority: 30,
-              reuseExistingChunk: true,
-            },
-            // Chunk para Framer Motion
-            framerMotion: {
-              test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
-              name: 'framer-motion',
-              priority: 25,
-              reuseExistingChunk: true,
-            },
-            // Chunk para React Leaflet y mapas
-            maps: {
-              test: /[\\/]node_modules[\\/](react-leaflet|leaflet|@vis\.gl)[\\/]/,
-              name: 'maps',
-              priority: 20,
-              reuseExistingChunk: true,
-            },
-            // Chunk para otras librerías pesadas
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-
       // Optimizaciones adicionales
       config.resolve.alias = {
         ...config.resolve.alias,
@@ -226,9 +188,10 @@ const nextConfigBase = {
     const cspHeader = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data: https:",
-      "font-src 'self'",
+      "font-src 'self' data:",
       "connect-src 'self' https:",
       "frame-ancestors 'none'",
       "base-uri 'self'",
