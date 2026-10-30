@@ -48,8 +48,8 @@ function mapsLink(place: Place): string {
 }
 
 const ZOOM_STYLES = `
-  .leaflet-container { background: #0F110C; font-family: var(--font-sans, Inter, sans-serif); }
-  .map-tiles-osm { filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55); }
+  .leaflet-container { background: #F3F5EC; font-family: var(--font-sans, Inter, sans-serif); }
+  .leaflet-tile { filter: saturate(0.82); }
   .leaflet-control-zoom {
     border: 1px solid var(--md-outline-variant) !important;
     border-radius: 9999px !important;
@@ -68,7 +68,7 @@ const ZOOM_STYLES = `
     font-size: 18px !important;
     transition: background 150ms ease;
   }
-  .leaflet-control-zoom a:hover { background: var(--md-surface-high) !important; color: var(--md-primary) !important; }
+  .leaflet-control-zoom a:hover { background: var(--md-surface-high) !important; color: var(--md-primary-text) !important; }
   .leaflet-control-zoom a.leaflet-disabled { color: var(--md-outline-variant) !important; }
   .leaflet-top.leaflet-right { top: calc(env(safe-area-inset-top, 0px) + 300px); right: 6px; }
   .leaflet-popup-content-wrapper {
@@ -159,7 +159,6 @@ function TileLayerFallback() {
       url={server.url}
       attribution={server.attribution}
       maxZoom={server.maxZoom}
-      className={serverIndex === 0 ? 'map-tiles-osm' : undefined}
       eventHandlers={{ tileerror: handleError }}
     />
   );
@@ -345,7 +344,7 @@ function PlacePopupContent({ place }: { place: Place }) {
           {place.description}
         </Typography>
         <Box component="a" href={mapsLink(place)} target="_blank" rel="noopener noreferrer"
-          sx={{ display: 'inline-flex', alignItems: 'center', mt: 1, fontSize: '0.75rem', color: 'var(--md-primary)', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+          sx={{ display: 'inline-flex', alignItems: 'center', mt: 1, fontSize: '0.75rem', color: 'var(--md-primary-text)', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
           Abrir en Google Maps →
         </Box>
       </Box>

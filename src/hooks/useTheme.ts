@@ -1,12 +1,12 @@
 /**
- * Hook para gestión de temas - Modo Oscuro Constante
- * Siempre retorna modo oscuro para experiencia consistente
+ * Hook para gestión de temas - Tema claro constante
+ * Siempre retorna modo claro para experiencia consistente
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useMediaQuery } from '@mui/material';
 
-export type ThemeMode = 'dark';
+export type ThemeMode = 'light';
 
 interface UseThemeReturn {
   mode: ThemeMode;
@@ -15,11 +15,11 @@ interface UseThemeReturn {
 }
 
 export function useTheme(): UseThemeReturn {
-  const [mode] = useState<ThemeMode>('dark');
+  const [mode] = useState<ThemeMode>('light');
   const systemPreference = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
 
-  // Siempre retorna modo oscuro
-  const isDark = true;
+  // Siempre retorna modo claro
+  const isDark = false;
 
   return {
     mode,
@@ -37,7 +37,7 @@ export function useThemeTransition(): UseThemeTransitionReturn {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const transitionTo = useCallback(async (newMode: ThemeMode) => {
-    // Como siempre usamos modo oscuro, no hay transición necesaria
+    // Como siempre usamos modo claro, no hay transición necesaria
     setIsTransitioning(false);
   }, []);
 

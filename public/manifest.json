@@ -12,8 +12,8 @@
   "description": "App complementaria para estudiantes Erasmus. Descubre Sevilla, gestiona tus tareas, conecta con la comunidad y vive tu experiencia al máximo.",
   "lang": "es-ES",
   "dir": "ltr",
-  "theme_color": "#18181B",
-  "background_color": "#18181B",
+  "theme_color": "#F3F5EC",
+  "background_color": "#F3F5EC",
   "orientation": "portrait-primary",
   "scope": "/",
   "categories": [

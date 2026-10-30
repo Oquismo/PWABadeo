@@ -64,7 +64,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Mi Erasmus App',
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
   },
   other: {
     'mobile-web-app-capable': 'yes',
@@ -83,7 +83,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#18181B',
+  themeColor: '#F3F5EC',
 };
 
 export default function RootLayout({

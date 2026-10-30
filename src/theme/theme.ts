@@ -2,40 +2,40 @@
 import { createTheme } from '@mui/material/styles';
 
 // ============================================================
-// Material Design 3 — Dark Theme for Mi Erasmus App
+// Material Design 3 — Tema claro de Mi Erasmus App
 // Seed primary: #BEF264 (brand lime)
 // ============================================================
 
 export const md3Tokens = {
-  primary: '#C4F278',
-  onPrimary: '#1A2E00',
-  primaryContainer: '#3A4F00',
-  onPrimaryContainer: '#DFF89E',
-  secondary: '#CCC2DC',
-  onSecondary: '#332D41',
-  secondaryContainer: '#4A4458',
-  onSecondaryContainer: '#E8DEF8',
-  tertiary: '#FF9B73',
-  onTertiary: '#2A0F00',
-  tertiaryContainer: '#7A3A22',
-  onTertiaryContainer: '#FFDBCB',
-  error: '#F2B8B5',
-  onError: '#601410',
-  errorContainer: '#8C1D18',
-  onErrorContainer: '#F9DEDC',
-  surface: '#0F110C',
-  onSurface: '#EEF1E4',
-  onSurfaceVariant: '#A9AF98',
-  surfaceContainerLowest: '#0A0C07',
-  surfaceContainerLow: '#151810',
-  surfaceContainer: '#1B1E15',
-  surfaceContainerHigh: '#262A1D',
-  surfaceContainerHighest: '#2F3426',
+  primary: '#2F5200',
+  onPrimary: '#E7FFB0',
+  primaryContainer: '#C4F278',
+  onPrimaryContainer: '#1A2E00',
+  secondary: '#5C6350',
+  onSecondary: '#FFFFFF',
+  secondaryContainer: '#E9EDDD',
+  onSecondaryContainer: '#14170E',
+  tertiary: '#B8461A',
+  onTertiary: '#FFFFFF',
+  tertiaryContainer: '#FFDBCB',
+  onTertiaryContainer: '#2A0F00',
+  error: '#B3261E',
+  onError: '#FFFFFF',
+  errorContainer: '#F9DEDC',
+  onErrorContainer: '#410E0B',
+  surface: '#F3F5EC',
+  onSurface: '#14170E',
+  onSurfaceVariant: '#555B47',
+  surfaceContainerLowest: '#FFFFFF',
+  surfaceContainerLow: '#F8FAF1',
+  surfaceContainer: '#FFFFFF',
+  surfaceContainerHigh: '#E9EDDD',
+  surfaceContainerHighest: '#DFE4D0',
   outline: '#8A9078',
-  outlineVariant: '#2F3424',
-  inverseSurface: '#EEF1E4',
-  inverseOnSurface: '#322F35',
-  inversePrimary: '#6750A4',
+  outlineVariant: '#D7DCC8',
+  inverseSurface: '#14170E',
+  inverseOnSurface: '#EEF1E4',
+  inversePrimary: '#C4F278',
 } as const;
 
 export const md3Shape = {
@@ -68,9 +68,9 @@ const md3Typography = {
   overline: { fontFamily: plainFont, fontSize: '0.6875rem', fontWeight: 500, lineHeight: '1rem', letterSpacing: '0.5px', textTransform: 'uppercase' as const },
 };
 
-export const darkTheme = createTheme({
+export const lightTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
       main: md3Tokens.primary,
       contrastText: md3Tokens.onPrimary,
@@ -124,7 +124,7 @@ export const darkTheme = createTheme({
           transition: 'background-color 200ms cubic-bezier(0.2,0,0,1), box-shadow 200ms cubic-bezier(0.2,0,0,1)',
           '&:hover': {
             backgroundColor: md3Tokens.surfaceContainer,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)',
+            boxShadow: '0 1px 2px rgba(30,45,0,0.14), 0 1px 3px 1px rgba(30,45,0,0.08)',
           },
         },
       },
@@ -152,7 +152,7 @@ export const darkTheme = createTheme({
           color: md3Tokens.onPrimary,
           '&:hover': {
             backgroundColor: md3Tokens.onPrimaryContainer,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)',
+            boxShadow: '0 1px 2px rgba(30,45,0,0.14), 0 1px 3px 1px rgba(30,45,0,0.08)',
           },
         },
         containedSecondary: {
@@ -161,14 +161,14 @@ export const darkTheme = createTheme({
           '&:hover': {
             backgroundColor: md3Tokens.onSecondaryContainer,
             color: md3Tokens.secondaryContainer,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)',
+            boxShadow: '0 1px 2px rgba(30,45,0,0.14), 0 1px 3px 1px rgba(30,45,0,0.08)',
           },
         },
         outlined: {
           borderColor: md3Tokens.outline,
           color: md3Tokens.primary,
           '&:hover': {
-            backgroundColor: 'rgba(196,242,120,0.08)',
+            backgroundColor: 'rgba(47,82,0,0.08)',
             borderColor: md3Tokens.onSurfaceVariant,
           },
         },
@@ -176,7 +176,7 @@ export const darkTheme = createTheme({
           color: md3Tokens.primary,
           padding: '10px 12px',
           '&:hover': {
-            backgroundColor: 'rgba(196,242,120,0.08)',
+            backgroundColor: 'rgba(47,82,0,0.08)',
           },
         },
         sizeSmall: {
@@ -198,13 +198,13 @@ export const darkTheme = createTheme({
           color: md3Tokens.onSurfaceVariant,
           transition: 'background-color 150ms cubic-bezier(0.2,0,0,1)',
           '&:hover': {
-            backgroundColor: 'rgba(230,224,233,0.08)',
+            backgroundColor: 'rgba(20,23,14,0.06)',
           },
         },
         colorPrimary: {
           color: md3Tokens.primary,
           '&:hover': {
-            backgroundColor: 'rgba(196,242,120,0.12)',
+            backgroundColor: 'rgba(47,82,0,0.12)',
           },
         },
       },
@@ -215,10 +215,10 @@ export const darkTheme = createTheme({
           borderRadius: md3Shape.large,
           backgroundColor: md3Tokens.primaryContainer,
           color: md3Tokens.onPrimaryContainer,
-          boxShadow: '0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3)',
+          boxShadow: '0 4px 8px 3px rgba(30,45,0,0.08), 0 1px 3px rgba(30,45,0,0.14)',
           transition: 'box-shadow 200ms cubic-bezier(0.2,0,0,1), transform 200ms cubic-bezier(0.2,0,0,1)',
           '&:hover': {
-            boxShadow: '0 6px 10px 4px rgba(0,0,0,0.15), 0 2px 3px rgba(0,0,0,0.3)',
+            boxShadow: '0 6px 10px 4px rgba(30,45,0,0.08), 0 2px 3px rgba(30,45,0,0.14)',
             transform: 'translateY(-1px)',
           },
         },
@@ -243,7 +243,7 @@ export const darkTheme = createTheme({
           borderRadius: md3Shape.extraLarge,
           backgroundColor: md3Tokens.surfaceContainerHigh,
           border: `1px solid ${md3Tokens.outlineVariant}`,
-          boxShadow: '0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3)',
+          boxShadow: '0 4px 8px 3px rgba(30,45,0,0.08), 0 1px 3px rgba(30,45,0,0.14)',
         },
       },
     },
@@ -336,105 +336,7 @@ export const darkTheme = createTheme({
           borderRadius: md3Shape.small,
           backgroundColor: md3Tokens.surfaceContainer,
           border: `1px solid ${md3Tokens.outlineVariant}`,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15)',
-        },
-      },
-    },
-  },
-});
-
-export const lightTheme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: { main: '#4A6700', contrastText: '#FFFFFF', dark: '#253600', light: '#DFF89E' },
-    secondary: { main: '#625B71', contrastText: '#FFFFFF', dark: '#4A4458', light: '#E8DEF8' },
-    error: { main: '#B3261E', contrastText: '#FFFFFF', dark: '#8C1D18', light: '#F9DEDC' },
-    background: { default: '#FEF7FF', paper: '#F3EDF7' },
-    text: { primary: '#1D1B20', secondary: '#49454F' },
-    divider: '#CAC4D0',
-  },
-  typography: md3Typography,
-  shape: {
-    borderRadius: md3Shape.medium,
-  },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          backgroundColor: '#F3EDF7',
-          border: '1px solid #E6E0E9',
-          boxShadow: 'none',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: md3Shape.medium,
-          backgroundColor: '#FFFFFF',
-          border: '1px solid #E6E0E9',
-          boxShadow: 'none',
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: md3Shape.full,
-          textTransform: 'none',
-          fontWeight: 500,
-          fontSize: '0.875rem',
-          lineHeight: '1.25rem',
-          letterSpacing: '0.1px',
-          padding: '10px 24px',
-          minHeight: 40,
-          boxShadow: 'none',
-        },
-        containedPrimary: {
-          backgroundColor: '#4A6700',
-          color: '#FFFFFF',
-          '&:hover': {
-            backgroundColor: '#253600',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)',
-          },
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#F3EDF7',
-          color: '#1D1B20',
-          boxShadow: 'none',
-          borderBottom: '1px solid #E6E0E9',
-        },
-      },
-    },
-    MuiDialog: {
-      styleOverrides: {
-        paper: {
-          borderRadius: md3Shape.extraLarge,
-          backgroundColor: '#ECE6F0',
-          border: '1px solid #E6E0E9',
-        },
-      },
-    },
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          borderRadius: md3Shape.small,
-          backgroundColor: '#FFFFFF',
-          '& fieldset': {
-            borderColor: '#79747E',
-          },
-          '&:hover fieldset': {
-            borderColor: '#49454F',
-          },
-          '&.Mui-focused fieldset': {
-            borderColor: '#4A6700',
-            borderWidth: 2,
-          },
+          boxShadow: '0 1px 2px rgba(30,45,0,0.14), 0 2px 6px 2px rgba(30,45,0,0.08)',
         },
       },
     },

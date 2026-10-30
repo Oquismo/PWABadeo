@@ -1,39 +1,41 @@
 /* Design system tokens — Mi Erasmus App */
 :root {
   --font-sans: var(--font-inter, 'Inter', system-ui, sans-serif);
+  color-scheme: light;
   --font-display: var(--font-bricolage, 'Bricolage Grotesque', 'Inter', sans-serif);
 
-  /* MD3 Color Roles — Dark Theme (Mi Erasmus App) */
+  /* Colores — tema claro (Mi Erasmus App) */
+  --md-primary-text: #2F5200;
   --md-primary: #C4F278;
   --md-on-primary: #1A2E00;
-  --md-primary-container: #3A4F00;
-  --md-on-primary-container: #DFF89E;
-  --md-secondary: #CCC2DC;
-  --md-on-secondary: #332D41;
-  --md-secondary-container: #4A4458;
-  --md-on-secondary-container: #E8DEF8;
-  --md-tertiary: #FF9B73;
+  --md-primary-container: #DFF89E;
+  --md-on-primary-container: #1A2E00;
+  --md-secondary: #5C6350;
+  --md-on-secondary: #FFFFFF;
+  --md-secondary-container: #E9EDDD;
+  --md-on-secondary-container: #14170E;
+  --md-tertiary: #FF8A5C;
   --md-on-tertiary: #2A0F00;
-  --md-tertiary-container: #7A3A22;
-  --md-on-tertiary-container: #FFDBCB;
-  --md-background: #0F110C;
-  --md-surface-lowest: #0A0C07;
-  --md-surface-low: #151810;
-  --md-surface: #1B1E15;
-  --md-surface-high: #262A1D;
-  --md-surface-highest: #2F3426;
-  --md-on-surface: #EEF1E4;
-  --md-on-surface-variant: #A9AF98;
+  --md-tertiary-container: #FFDBCB;
+  --md-on-tertiary-container: #2A0F00;
+  --md-background: #F3F5EC;
+  --md-surface-lowest: #FFFFFF;
+  --md-surface-low: #F8FAF1;
+  --md-surface: #FFFFFF;
+  --md-surface-high: #E9EDDD;
+  --md-surface-highest: #DFE4D0;
+  --md-on-surface: #14170E;
+  --md-on-surface-variant: #555B47;
   --md-outline: #8A9078;
-  --md-outline-variant: #2F3424;
-  --md-inverse-surface: #EEF1E4;
-  --md-inverse-on-surface: #322F35;
-  --md-correct: #00E676;
-  --md-error: #F2B8B5;
-  --md-azul: #8FAEFF;
-  --md-sun: #FF9B73;
-  --md-glass: rgba(34, 38, 26, 0.72);
-  --md-shadow-card: 0 14px 34px -14px rgba(0, 0, 0, 0.7);
+  --md-outline-variant: #D7DCC8;
+  --md-inverse-surface: #14170E;
+  --md-inverse-on-surface: #EEF1E4;
+  --md-correct: #1B8A4B;
+  --md-error: #B3261E;
+  --md-azul: #3D6BE0;
+  --md-sun: #FF8A5C;
+  --md-glass: rgba(255, 255, 255, 0.72);
+  --md-shadow-card: 0 10px 30px -12px rgba(30, 45, 0, 0.25);
 
   /* Spacing */
   --space-2: 8px;

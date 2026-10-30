@@ -189,14 +189,10 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
           height: '50px',
           transition: 'all 0.15s cubic-bezier(0.2, 0, 0, 1)',
           '&:hover': {
-            backgroundColor: theme => theme.palette.mode === 'dark'
-              ? 'rgba(196, 242, 120, 0.1)'
-              : 'rgba(90, 69, 112, 0.08)',
+            backgroundColor: 'rgba(47, 82, 0, 0.08)',
           },
           '&:active': {
-            backgroundColor: theme => theme.palette.mode === 'dark'
-              ? 'rgba(196, 242, 120, 0.16)'
-              : 'rgba(90, 69, 112, 0.12)',
+            backgroundColor: 'rgba(47, 82, 0, 0.14)',
           },
           userSelect: 'none',
           WebkitTapHighlightColor: 'transparent',
@@ -217,8 +213,8 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
             minWidth: 220,
             borderRadius: 3,
             bgcolor: 'background.paper',
-            border: theme => `1px solid rgba(0,0,0,${theme.palette.mode === 'dark' ? 0.24 : 0.08})`,
-            boxShadow: '0px 12px 40px rgba(0,0,0,0.28)',
+            border: '1px solid var(--md-outline-variant)',
+            boxShadow: 'var(--md-shadow-card)',
             px: 0.5,
           },
         }}
