@@ -10,7 +10,6 @@ import LocalHospitalRoundedIcon from '@mui/icons-material/LocalHospitalRounded';
 import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
 import DirectionsBusRoundedIcon from '@mui/icons-material/DirectionsBusRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import CallRoundedIcon from '@mui/icons-material/CallRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import useAuth from '@/context/AuthContext';
 
@@ -42,54 +41,67 @@ function PhoneCard({ phone, accentColor }: { phone: PhoneEntry; accentColor: str
   };
 
   return (
-    <Box sx={{
-      display: 'flex', alignItems: 'center', gap: 1.5,
-      background: theme => theme.palette.mode === 'dark' ? '#1E1E21' : '#F7F2FA',
-      borderRadius: '12px',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.15)',
-      padding: '12px 14px',
-    }}>
-      <Box sx={{
-        width: 36, height: 36, borderRadius: '8px', flexShrink: 0,
-        background: `${accentColor}18`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: accentColor,
-        '& .MuiSvgIcon-root': { fontSize: 18 },
-      }}>
+    <Box
+      component="a"
+      href={`tel:${normalizeTel(phone.num)}`}
+      aria-label={`Llamar a ${phone.name}`}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        p: '15px',
+        borderRadius: '24px',
+        bgcolor: 'var(--md-surface)',
+        border: '1px solid var(--md-outline-variant)',
+        textDecoration: 'none',
+        color: 'inherit',
+        '&:active': { transform: 'scale(0.99)' },
+      }}
+    >
+      <Box
+        sx={{
+          width: 48,
+          height: 48,
+          borderRadius: '16px',
+          flexShrink: 0,
+          display: 'grid',
+          placeItems: 'center',
+          bgcolor: `${accentColor}22`,
+          color: accentColor,
+          '& .MuiSvgIcon-root': { fontSize: 22 },
+        }}
+      >
         {phone.icon}
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="body2" fontWeight={600} sx={{ color: 'text.primary', fontSize: '0.8rem', lineHeight: 1.3 }}>
+        <Box component="b" sx={{ display: 'block', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {phone.name}
-        </Typography>
-        <Typography
-          component="a"
-          href={`tel:${normalizeTel(phone.num)}`}
-          sx={{ fontSize: '0.875rem', fontWeight: 700, color: accentColor, fontFamily: 'monospace', mt: 0.25, display: 'block', textDecoration: 'none' }}
+        </Box>
+        <Box
+          component="span"
+          sx={{
+            display: 'block',
+            mt: '2px',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: '0.95rem',
+            fontVariantNumeric: 'tabular-nums',
+            color: 'var(--md-on-surface)',
+          }}
         >
           {phone.num}
-        </Typography>
+        </Box>
       </Box>
-      <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
-        <Tooltip title="Copiar número">
-          <IconButton size="small" onClick={handleCopy} sx={{ color: 'text.secondary' }}>
-            <ContentCopyRoundedIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Tooltip>
+      <Tooltip title="Copiar número">
         <IconButton
-          component="a"
-          href={`tel:${normalizeTel(phone.num)}`}
           size="small"
-          sx={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: '#3A2C4A', color: '#E8DEF8',
-            '&:hover': { background: '#4A3C5A' },
-          }}
-          aria-label={`Llamar a ${phone.name}`}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCopy(); }}
+          sx={{ color: 'text.secondary', flexShrink: 0 }}
+          aria-label={`Copiar ${phone.name}`}
         >
-          <CallRoundedIcon sx={{ fontSize: 18 }} />
+          <ContentCopyRoundedIcon sx={{ fontSize: 16 }} />
         </IconButton>
-      </Box>
+      </Tooltip>
     </Box>
   );
 }
@@ -97,9 +109,8 @@ function PhoneCard({ phone, accentColor }: { phone: PhoneEntry; accentColor: str
 export default function PhoneList() {
   const { user } = useAuth();
 
-  const residenceKey = user && (user as any).residence
-    ? String((user as any).residence).trim().toUpperCase()
-    : null;
+  const residence = (user as { residence?: string | null } | null)?.residence;
+  const residenceKey = residence ? String(residence).trim().toUpperCase() : null;
 
   const residenceSection: PhoneCategory | null = residenceKey && residencePhoneMap[residenceKey]
     ? {
@@ -150,10 +161,10 @@ export default function PhoneList() {
           mb: 0.5,
         }}
       >
-        Teléfonos útiles
+        Teléfonos de ayuda
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3, fontSize: '0.8rem' }}>
-        Contactos de emergencia y del programa
+        Toca el número para copiarlo
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

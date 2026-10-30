@@ -32,7 +32,7 @@ function shortName(name: string): string {
 }
 
 function makePinIcon(place: Place, selected: boolean): L.DivIcon {
-  const color = CATEGORY_COLORS[place.category] || '#78909c';
+  const color = '#FF8A5C';
   return L.divIcon({
     html: `<div class="map-pin${selected ? ' map-pin--sel' : ''}" style="--pin:${color}"><span>${escapeHtml(shortName(place.name))}</span><i></i></div>`,
     className: 'map-pin-wrap',
@@ -56,9 +56,7 @@ const ZOOM_STYLES = `
     box-shadow: var(--md-shadow-card) !important;
   }
   .leaflet-control-zoom a {
-    background: var(--md-glass) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: var(--md-surface) !important;
     color: var(--md-on-surface) !important;
     border-bottom: 1px solid var(--md-outline-variant) !important;
     width: 40px !important;
@@ -82,11 +80,13 @@ const ZOOM_STYLES = `
   .leaflet-popup-tip { background: var(--md-surface) !important; border: 1px solid var(--md-outline-variant) !important; }
   .leaflet-popup-close-button { color: var(--md-on-surface-variant) !important; top: 8px !important; right: 8px !important; font-size: 18px !important; }
   .leaflet-control-attribution {
-    background: var(--md-glass) !important;
+    background: var(--md-surface) !important;
     color: var(--md-outline) !important;
-    font-size: 10px !important;
-    padding: 2px 8px !important;
+    font-size: 9.5px !important;
+    line-height: 1.35 !important;
+    padding: 1px 6px !important;
     border-radius: 8px 0 0 0 !important;
+    opacity: 0.9;
   }
   .leaflet-control-attribution a { color: var(--md-on-surface-variant) !important; }
   .map-pin-wrap { background: transparent; border: 0; }
@@ -184,6 +184,17 @@ function ZoomWatcher() {
   return null;
 }
 
+function AttributionPrefix() {
+  const map = useMap();
+
+  useEffect(() => {
+    // Leaflet no exige crédito visible; los datos sí (OSM/OpenMapTiles/OpenFreeMap).
+    map.attributionControl.setPrefix(false);
+  }, [map]);
+
+  return null;
+}
+
 function makeClusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
   return L.divIcon({
     html: `<span class="map-cluster-count">${cluster.getChildCount()}</span>`,
@@ -233,6 +244,7 @@ function MapContent({ compact, markersOnly }: { compact: boolean; markersOnly: b
     >
       <MapResizer />
       <ZoomWatcher />
+      <AttributionPrefix />
       <OpenFreeMapLayer />
       {!compact && <ZoomControl position="topright" />}
       {markersOnly ? (
@@ -419,10 +431,9 @@ function LocateButton() {
         bottom: 16,
         right: 16,
         zIndex: 1000,
-        bgcolor: 'var(--md-glass)',
+        bgcolor: 'var(--md-surface)',
         color: 'var(--md-on-surface)',
         border: '1px solid var(--md-outline-variant)',
-        backdropFilter: 'blur(16px)',
         boxShadow: 'var(--md-shadow-card)',
         transition: 'transform 180ms ease, bottom 200ms ease',
         '&:hover': { bgcolor: 'var(--md-surface-high)', transform: 'translateY(-2px)' },

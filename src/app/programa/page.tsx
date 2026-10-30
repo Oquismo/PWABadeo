@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip, CircularProgress, List, ListItem, ListItemText, ListItemIcon, Divider, Tabs, Tab, TextField, InputAdornment } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
-import { Today as TodayIcon, AccessTime as TimeIcon, LocationOn as LocationIcon, Person as PersonIcon, EventNote as EventNoteIcon, Search as SearchIcon } from '@mui/icons-material';
+import { EventNote as EventNoteIcon, Search as SearchIcon } from '@mui/icons-material';
 import PageTransition from '@/components/layout/PageTransition';
 
 interface SchoolEvent {
@@ -47,8 +47,10 @@ export default function ProgramaPage() {
           const res = await fetch('/api/admin/schools/sync-ics');
           if (res.ok) {
             const data = await res.json();
-            const all = (data.schools ?? []).flatMap((s: any) =>
-              (s.events ?? []).map((e: any) => ({ ...e, school: s.school }))
+            type AdminSchool = { school?: SchoolEvent['school']; events?: SchoolEvent[] };
+            const schools = (data.schools ?? []) as AdminSchool[];
+            const all = schools.flatMap((s) =>
+              (s.events ?? []).map((e) => ({ ...e, school: s.school }))
             );
             setAllEvents(all);
           }
@@ -92,21 +94,13 @@ export default function ProgramaPage() {
     setEvents(filtered);
   }, [allEvents, filter, search]);
 
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const formatDate = (d: string) => {
+    const label = new Date(d).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  };
 
   const formatTime = (d: string) =>
     new Date(d).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
-  const getCategoryColor = (category: string | null) => {
-    if (!category) return 'default';
-    const lower = category.toLowerCase();
-    if (lower.includes('visita') || lower.includes('tour')) return 'primary';
-    if (lower.includes('taller') || lower.includes('workshop')) return 'secondary';
-    if (lower.includes('charla') || lower.includes('conferencia')) return 'info';
-    if (lower.includes('evalu') || lower.includes('exam')) return 'warning';
-    return 'default';
-  };
 
   const groupByDate = (events: SchoolEvent[]) => {
     const groups: { date: string; events: SchoolEvent[] }[] = [];
@@ -125,149 +119,169 @@ export default function ProgramaPage() {
     return groups;
   };
 
+  const total = allEvents.length;
+  const done = allEvents.filter((e) => new Date(e.endDate ?? e.date) < new Date()).length;
+  const percent = total ? Math.round((done / total) * 100) : 0;
+
   return (
     <PageTransition>
-      <Box sx={{ p: 2, maxWidth: 800, mx: 'auto', pb: 10 }}>
-        {/* Header */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)' }}>
-            Programa Formativo
+      <Box sx={{ p: 2, maxWidth: 800, mx: 'auto', pb: 10, display: 'flex', flexDirection: 'column', gap: 1.75 }}>
+        <Box
+          sx={{
+            borderRadius: '28px',
+            bgcolor: 'var(--md-primary)',
+            color: 'var(--md-on-primary)',
+            p: 2.25,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1.5,
+          }}
+        >
+          <Box component="span" sx={{ fontSize: '11px', letterSpacing: '.09em', textTransform: 'uppercase', fontWeight: 600, color: 'rgba(26,46,0,.7)' }}>
+            {schoolId ? 'Tu programa' : 'Todos los programas'}
+          </Box>
+          <Typography component="h1" sx={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', lineHeight: 1.05, fontWeight: 700, m: 0, letterSpacing: '-0.02em' }}>
+            Tu programa Erasmus+
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {schoolId ? 'Tu programa de actividades' : 'Todos los programas'}
+          <Box sx={{ height: 12, borderRadius: '9px', bgcolor: 'rgba(26,46,0,.18)', overflow: 'hidden' }}>
+            <Box sx={{ height: '100%', width: `${percent}%`, bgcolor: 'var(--md-on-primary)', borderRadius: '9px' }} />
+          </Box>
+          <Typography component="p" sx={{ m: 0, fontSize: '13px' }}>
+            {done} de {total} actividades completadas
           </Typography>
         </Box>
 
-        {/* Filters */}
-        <Tabs value={filter} onChange={(_, v) => setFilter(v)} sx={{ mb: 2 }} variant="fullWidth">
-          <Tab label="Próximos" value="upcoming" />
-          <Tab label="Todos" value="all" />
-          <Tab label="Pasados" value="past" />
-        </Tabs>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {(['upcoming', 'all', 'past'] as const).map((value) => (
+            <Box
+              key={value}
+              component="button"
+              type="button"
+              aria-pressed={filter === value}
+              onClick={() => setFilter(value)}
+              sx={{
+                flex: 1,
+                height: 38,
+                borderRadius: '999px',
+                cursor: 'pointer',
+                font: 'inherit',
+                fontWeight: 600,
+                fontSize: '13px',
+                border: '1px solid',
+                borderColor: filter === value ? 'var(--md-on-surface)' : 'var(--md-outline-variant)',
+                bgcolor: filter === value ? 'var(--md-on-surface)' : 'var(--md-surface)',
+                color: filter === value ? 'var(--md-background)' : 'var(--md-on-surface)',
+              }}
+            >
+              {value === 'upcoming' ? 'Próximos' : value === 'all' ? 'Todos' : 'Pasados'}
+            </Box>
+          ))}
+        </Box>
 
-        {/* Search */}
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="Buscar evento, lugar, categoría..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ mb: 3 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.secondary' }} />
-              </InputAdornment>
-            ),
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.25,
+            height: 50,
+            px: 2,
+            borderRadius: '999px',
+            bgcolor: 'var(--md-surface)',
+            border: '1px solid var(--md-outline-variant)',
+            color: 'text.secondary',
+            '&:focus-within': { borderColor: 'var(--md-azul)' },
           }}
-        />
+        >
+          <SearchIcon sx={{ fontSize: 20 }} />
+          <Box
+            component="input"
+            type="search"
+            placeholder="Buscar evento, lugar, categoría..."
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+            sx={{ flex: 1, minWidth: 0, border: 0, outline: 0, bgcolor: 'transparent', color: 'text.primary', font: 'inherit', fontSize: '0.95rem' }}
+          />
+        </Box>
 
-        {/* Content */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress />
           </Box>
         ) : events.length === 0 ? (
-          <Card sx={{ textAlign: 'center', py: 6, border: '1px dashed', borderColor: 'divider' }}>
-            <CardContent>
-              <EventNoteIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                No hay eventos
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {search ? 'Prueba con otra búsqueda' : 'No hay eventos para este filtro'}
-              </Typography>
-            </CardContent>
-          </Card>
+          <Box sx={{ textAlign: 'center', py: 6, border: '1px dashed', borderColor: 'var(--md-outline-variant)', borderRadius: '22px', color: 'text.secondary' }}>
+            <EventNoteIcon sx={{ fontSize: 56, color: 'text.disabled', mb: 1 }} />
+            <Typography component="h2" sx={{ fontSize: '1rem', fontWeight: 700 }}>
+              No hay eventos
+            </Typography>
+            <Typography component="p" sx={{ fontSize: '0.85rem', m: 0 }}>
+              {search ? 'Prueba con otra búsqueda' : 'No hay eventos para este filtro'}
+            </Typography>
+          </Box>
         ) : (
           groupByDate(events).map((group) => (
-            <Box key={group.date} sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" color="primary.main" fontWeight="bold" sx={{ mb: 1, textTransform: 'capitalize' }}>
+            <Box key={group.date} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography component="h2" sx={{ fontSize: '0.9rem', fontWeight: 700, color: 'text.secondary', mt: 1 }}>
                 {formatDate(group.date)}
               </Typography>
               {group.events.map((ev) => (
-                <Card key={ev.id} sx={{ mb: 1.5, border: '1px solid', borderColor: 'divider' }}>
-                  <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      {/* Time badge */}
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: 56,
-                          height: 48,
-                          borderRadius: 2,
-                          bgcolor: 'primary.main',
-                          color: 'primary.contrastText',
-                        }}
-                      >
-                        {ev.isAllDay ? (
-                          <TodayIcon sx={{ fontSize: 20 }} />
-                        ) : (
-                          <>
-                            <Typography variant="caption" sx={{ fontWeight: 'bold', lineHeight: 1 }}>
-                              {formatTime(ev.date)}
-                            </Typography>
-                          </>
-                        )}
+                <Box
+                  key={ev.id}
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: '54px 1fr auto',
+                    gap: 1.5,
+                    alignItems: 'center',
+                    bgcolor: 'var(--md-surface)',
+                    border: '1px solid var(--md-outline-variant)',
+                    borderRadius: '22px',
+                    px: 1.75,
+                    py: 1.6,
+                  }}
+                >
+                  <Box component="time" sx={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '15px' }}>
+                    {ev.isAllDay ? 'Todo' : formatTime(ev.date)}
+                    {ev.endDate && !ev.isAllDay && (
+                      <Box component="small" sx={{ display: 'block', fontFamily: 'var(--font-sans)', fontWeight: 500, fontSize: '11px', color: 'text.secondary' }}>
+                        {formatTime(ev.endDate)}
                       </Box>
+                    )}
+                  </Box>
 
-                      {/* Event info */}
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="body1" fontWeight="medium">
-                          {ev.title}
-                        </Typography>
-                        {ev.school && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
-                            {ev.school.name}
-                          </Typography>
-                        )}
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 0.75 }}>
-                          {ev.location && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                              <LocationIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="caption" color="text.secondary">{ev.location}</Typography>
-                            </Box>
-                          )}
-                          {ev.who && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                              <PersonIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="caption" color="text.secondary">{ev.who}</Typography>
-                            </Box>
-                          )}
-                        </Box>
-                        {ev.description && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75, lineHeight: 1.4 }}>
-                            {ev.description.substring(0, 150)}{ev.description.length > 150 ? '...' : ''}
-                          </Typography>
-                        )}
-                      </Box>
-
-                      {/* Program & Category */}
-                      <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0, alignSelf: 'flex-start' }}>
-                        {ev.program && (
-                          <Chip
-                            label={ev.program}
-                            size="small"
-                            variant="outlined"
-                            color="primary"
-                            sx={{ height: 24, fontSize: '0.65rem', fontWeight: 600 }}
-                          />
-                        )}
-                        {ev.category && (
-                          <Chip
-                            label={ev.category}
-                            size="small"
-                            color={getCategoryColor(ev.category) as any}
-                            sx={{ height: 24, fontSize: '0.65rem' }}
-                          />
-                        )}
-                      </Box>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Box component="b" sx={{ display: 'block', fontWeight: 600, fontSize: '14px' }}>
+                      {ev.title}
                     </Box>
-                  </CardContent>
-                </Card>
+                    <Typography component="span" sx={{ fontSize: '12.5px', color: 'text.secondary', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {[ev.location, ev.who, ev.school?.name].filter(Boolean).join(' · ') || 'Sevilla'}
+                    </Typography>
+                    {ev.description && (
+                      <Typography component="span" sx={{ fontSize: '12px', color: 'text.secondary', display: 'block', mt: 0.5, lineHeight: 1.4 }}>
+                        {ev.description.substring(0, 120)}{ev.description.length > 120 ? '...' : ''}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {ev.category && (
+                    <Box
+                      component="span"
+                      sx={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        px: 1.25,
+                        py: 0.5,
+                        borderRadius: '99px',
+                        bgcolor: 'var(--md-surface-high)',
+                        color: 'var(--md-on-surface)',
+                        whiteSpace: 'nowrap',
+                        maxWidth: 96,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {ev.category}
+                    </Box>
+                  )}
+                </Box>
               ))}
             </Box>
           ))

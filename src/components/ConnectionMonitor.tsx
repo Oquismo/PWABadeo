@@ -68,7 +68,7 @@ export function ConnectionMonitor() {
   return (
     <Box sx={{ 
       position: 'fixed', 
-      bottom: 16, 
+      bottom: 92,
       right: 16, 
       zIndex: 1000,
       display: 'flex',

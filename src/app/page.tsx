@@ -16,7 +16,11 @@ import loggerClient from '@/lib/loggerClient';
 import HeroSection from "@/components/home/HeroSection";
 import AnnouncementBanner from "@/components/home/AnnouncementBanner";
 import InlineBanner from '@/components/home/InlineBanner';
-import QuickBento from '@/components/home/QuickBento';
+import NextEventHero from '@/components/home/design/NextEventHero';
+import WeekStrip from '@/components/home/design/WeekStrip';
+import BentoGrid from '@/components/home/design/BentoGrid';
+import TodayTimeline from '@/components/home/design/TodayTimeline';
+import ExploreRail from '@/components/home/design/ExploreRail';
 
 function SectionSkeleton() {
   return (
@@ -28,18 +32,8 @@ function SectionSkeleton() {
 }
 
 // Carga diferida para secciones pesadas
-const ProgramaFormativoSection = dynamic(
-  () => import('@/components/home/ProgramaFormativoSection'),
-  { loading: () => <SectionSkeleton />, ssr: false }
-);
-
 const CalendarSection = dynamic(
   () => import('@/components/home/CalendarSection/CalendarSection'),
-  { loading: () => <SectionSkeleton />, ssr: false }
-);
-
-const ExternalInfoPanel = dynamic(
-  () => import('@/components/home/ExternalInfoPanel'),
   { loading: () => <SectionSkeleton />, ssr: false }
 );
 
@@ -84,29 +78,23 @@ export default function Home() {
     <>
       <AnnouncementBanner />
       <Container>
-        <Box sx={{ pt: 2, pb: 2 }}>
-          {/* 1. Bienvenida (personal, inmediata) */}
+        <Box sx={{ pt: 2, pb: 2, display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <HeroSection />
 
-          {/* 2. Banner inline (info destacada) */}
+          <NextEventHero />
+
+          <WeekStrip />
+
+          <BentoGrid />
+
           <InlineBanner />
 
-          {/* 3. Programa formativo (estilo tarjetas con progreso) */}
-          <Suspense fallback={<Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2, my: 2 }} />}>
-            <ProgramaFormativoSection />
-          </Suspense>
+          <TodayTimeline />
 
-          {/* 4. Accesos rápidos (bento) */}
-          <QuickBento />
+          <ExploreRail />
 
-          {/* 5. Calendario (planificación) */}
-          <Suspense fallback={<Skeleton variant="rectangular" height={140} sx={{ borderRadius: 2, my: 2 }} />}>
+          <Suspense fallback={<Skeleton variant="rectangular" height={140} sx={{ borderRadius: 3 }} />}>
             <CalendarSection />
-          </Suspense>
-
-          {/* 6. Info externa (recursos, menos prioritario) */}
-          <Suspense fallback={<Skeleton variant="rectangular" height={160} sx={{ borderRadius: 2, my: 2 }} />}>
-            <ExternalInfoPanel />
           </Suspense>
         </Box>
       </Container>
