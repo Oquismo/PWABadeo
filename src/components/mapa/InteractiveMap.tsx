@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
-import { Box, Fab, Typography } from '@mui/material';
+import { Box, Fab, IconButton, Typography } from '@mui/material';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import NavigationIcon from '@mui/icons-material/Navigation';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { placesData, Place } from '@/data/places';
 import MapHeader from './MapHeader';
@@ -22,116 +24,104 @@ const CATEGORY_COLORS: Record<string, string> = {
   Estudio: '#00e676',
 };
 
-function makeSvgIcon(category: string): L.DivIcon {
-  const color = CATEGORY_COLORS[category] || '#78909c';
-  const emoji = CATEGORY_EMOJIS[category] || '📍';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
-    <defs>
-      <filter id="shadow-${category.replace(/\s/g, '')}" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.35"/>
-      </filter>
-    </defs>
-    <path d="M18 2C10.82 2 5 7.82 5 15c0 9.75 13 27 13 27s13-17.25 13-27C31 7.82 25.18 2 18 2z" fill="${color}" filter="url(#shadow-${category.replace(/\s/g, '')})" stroke="#fff" stroke-width="1.5"/>
-    <circle cx="18" cy="16" r="9" fill="#fff" opacity="0.95"/>
-    <text x="18" y="19" text-anchor="middle" font-size="11">${emoji}</text>
-  </svg>`;
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+}
+
+function shortName(name: string): string {
+  return name.length > 22 ? `${name.slice(0, 21)}…` : name;
+}
+
+function makePinIcon(place: Place, selected: boolean): L.DivIcon {
+  const color = CATEGORY_COLORS[place.category] || '#78909c';
   return L.divIcon({
-    html: svg,
-    className: '',
-    iconSize: [36, 44],
-    iconAnchor: [18, 42],
-    popupAnchor: [0, -44],
+    html: `<div class="map-pin${selected ? ' map-pin--sel' : ''}" style="--pin:${color}"><span>${escapeHtml(shortName(place.name))}</span><i></i></div>`,
+    className: 'map-pin-wrap',
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+    popupAnchor: [0, -14],
   });
 }
 
+function mapsLink(place: Place): string {
+  return place.link || `https://www.google.com/maps/search/?api=1&query=${place.coordinates.lat},${place.coordinates.lng}`;
+}
+
 const ZOOM_STYLES = `
-  .leaflet-tile {
-    filter: saturate(0.78) contrast(1.03);
-  }
-  .leaflet-map-fullscreen .leaflet-top.leaflet-left {
-    top: 166px;
-    left: 12px;
-  }
+  .leaflet-container { background: #0F110C; font-family: var(--font-sans, Inter, sans-serif); }
+  .map-tiles-osm { filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55); }
   .leaflet-control-zoom {
-    border: 1px solid #49454F !important;
-    border-radius: 12px !important;
+    border: 1px solid var(--md-outline-variant) !important;
+    border-radius: 9999px !important;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    box-shadow: var(--md-shadow-card) !important;
   }
   .leaflet-control-zoom a {
-    background: #2B2930 !important;
-    color: #E6E0E9 !important;
-    border-bottom: 1px solid #49454F !important;
-    width: 36px !important;
-    height: 36px !important;
-    line-height: 36px !important;
+    background: var(--md-glass) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--md-on-surface) !important;
+    border-bottom: 1px solid var(--md-outline-variant) !important;
+    width: 40px !important;
+    height: 40px !important;
+    line-height: 40px !important;
     font-size: 18px !important;
     transition: background 150ms ease;
   }
-  .leaflet-control-zoom a:hover {
-    background: #36343B !important;
-    color: #C4F278 !important;
-  }
-  .leaflet-control-zoom a.leaflet-disabled {
-    color: #49454F !important;
-    background: #1D1B20 !important;
-  }
+  .leaflet-control-zoom a:hover { background: var(--md-surface-high) !important; color: var(--md-primary) !important; }
+  .leaflet-control-zoom a.leaflet-disabled { color: var(--md-outline-variant) !important; }
+  .leaflet-top.leaflet-right { top: calc(env(safe-area-inset-top, 0px) + 300px); right: 6px; }
   .leaflet-popup-content-wrapper {
-    background: #211F26 !important;
-    border: 1px solid #49454F !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+    background: var(--md-surface) !important;
+    border: 1px solid var(--md-outline-variant) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--md-shadow-card) !important;
     padding: 0 !important;
+    overflow: hidden;
   }
-  .leaflet-popup-tip {
-    background: #211F26 !important;
-    border: 1px solid #49454F !important;
-  }
-  .leaflet-popup-close-button {
-    color: #CAC4D0 !important;
-    top: 8px !important;
-    right: 8px !important;
-    font-size: 18px !important;
-  }
-  .leaflet-popup-close-button:hover {
-    color: #E6E0E9 !important;
-  }
+  .leaflet-popup-content { margin: 0 !important; }
+  .leaflet-popup-tip { background: var(--md-surface) !important; border: 1px solid var(--md-outline-variant) !important; }
+  .leaflet-popup-close-button { color: var(--md-on-surface-variant) !important; top: 8px !important; right: 8px !important; font-size: 18px !important; }
   .leaflet-control-attribution {
-    background: rgba(20,18,24,0.8) !important;
-    color: #938F99 !important;
+    background: var(--md-glass) !important;
+    color: var(--md-outline) !important;
     font-size: 10px !important;
     padding: 2px 8px !important;
     border-radius: 8px 0 0 0 !important;
   }
-  .leaflet-control-attribution a {
-    color: #CAC4D0 !important;
+  .leaflet-control-attribution a { color: var(--md-on-surface-variant) !important; }
+  .map-pin-wrap { background: transparent; border: 0; }
+  .map-pin {
+    transform: translate(-50%, -100%);
+    display: flex; flex-direction: column; align-items: center; width: max-content;
+    cursor: pointer; transition: transform 160ms ease;
   }
-  .map-cluster-icon {
-    background: transparent;
-    border: 0;
+  .map-pin span {
+    background: var(--md-surface); color: var(--md-on-surface);
+    border: 1px solid var(--md-outline-variant); border-radius: 9999px;
+    padding: 5px 11px; font: 600 11.5px/1.2 var(--font-sans, Inter, sans-serif);
+    box-shadow: var(--md-shadow-card); white-space: nowrap;
   }
+  .map-pin i {
+    width: 12px; height: 12px; margin-top: 3px; border-radius: 50%;
+    background: var(--pin); border: 3px solid var(--md-surface);
+    box-sizing: content-box;
+  }
+  .map-pin--sel { transform: translate(-50%, -100%) scale(1.08); z-index: 5; }
+  .map-pin--sel span { background: var(--md-primary); color: var(--md-on-primary); border-color: transparent; }
+  .map-labels-off .map-pin span { display: none; }
+  .map-labels-off .map-pin--sel span { display: block; }
+  .map-cluster-icon { background: transparent; border: 0; }
   .map-cluster-count {
-    width: 46px;
-    height: 46px;
-    display: grid;
-    place-items: center;
-    border: 4px solid rgba(196, 242, 120, 0.24);
-    border-radius: 50%;
-    background: #C4F278;
-    color: #1A2E00;
+    width: 46px; height: 46px; display: grid; place-items: center;
+    border: 4px solid rgba(196, 242, 120, 0.24); border-radius: 50%;
+    background: #C4F278; color: #1A2E00;
     font: 800 14px/1 var(--font-sans, sans-serif);
     box-shadow: 0 6px 18px rgba(9, 15, 5, 0.36);
   }
-  .map-header-card {
-    animation: map-header-in 420ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
-  }
-  @keyframes map-header-in {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .map-header-card { animation: none; }
-  }
+  .map-header-card { animation: map-header-in 420ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+  @keyframes map-header-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .map-header-card { animation: none; } .map-pin { transition: none; } }
 `;
 
 function MapResizer() {
@@ -169,9 +159,18 @@ function TileLayerFallback() {
       url={server.url}
       attribution={server.attribution}
       maxZoom={server.maxZoom}
+      className={serverIndex === 0 ? 'map-tiles-osm' : undefined}
       eventHandlers={{ tileerror: handleError }}
     />
   );
+}
+
+function ZoomWatcher() {
+  const map = useMap();
+  useMapEvents({
+    zoomend: () => map.getContainer().classList.toggle('map-labels-off', map.getZoom() < 14),
+  });
+  return null;
 }
 
 function makeClusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
@@ -182,177 +181,187 @@ function makeClusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
   });
 }
 
-function MapContent({
-  compact,
-  markersOnly,
-}: {
-  compact: boolean;
-  markersOnly: boolean;
-}) {
+function MapContent({ compact, markersOnly }: { compact: boolean; markersOnly: boolean }) {
   const [center] = useState<[number, number]>([37.385, -5.9925]);
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('Todo');
+  const [selected, setSelected] = useState<Place | null>(null);
+
+  const categories = useMemo(() => Array.from(new Set(placesData.map((p) => p.category as string))), []);
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return placesData.filter(
+      (p) => (category === 'Todo' || p.category === category) && (!q || `${p.name} ${p.address ?? ''}`.toLowerCase().includes(q))
+    );
+  }, [query, category]);
+
+  const renderMarker = (place: Place) => (
+    <Marker
+      key={place.id}
+      position={[place.coordinates.lat, place.coordinates.lng]}
+      icon={makePinIcon(place, selected?.id === place.id)}
+      eventHandlers={compact ? undefined : { click: () => setSelected(place) }}
+    >
+      {compact && (
+        <Popup>
+          <PlacePopupContent place={place} />
+        </Popup>
+      )}
+    </Marker>
+  );
 
   return (
-    <>
+    <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
       <style>{ZOOM_STYLES}</style>
       <MapContainer
         center={center}
         zoom={14}
         className={compact ? 'leaflet-map-compact' : 'leaflet-map-fullscreen'}
         style={{ width: '100%', height: '100%' }}
-        zoomControl={!compact}
+        zoomControl={false}
       >
         <MapResizer />
+        <ZoomWatcher />
         <TileLayerFallback />
-        {!compact && <MapHeader />}
+        {!compact && <ZoomControl position="topright" />}
         {markersOnly ? (
-          placesData.map((place) => (
-            <Marker
-              key={place.id}
-              position={[place.coordinates.lat, place.coordinates.lng]}
-              icon={makeSvgIcon(place.category)}
-            >
-              <Popup>
-                <PlacePopupContent place={place} />
-              </Popup>
-            </Marker>
-          ))
+          visible.map(renderMarker)
         ) : (
           <MarkerClusterGroup
+            key={`${category}|${query}`}
             chunkedLoading
             spiderfyDistanceMultiplier={2}
             maxClusterRadius={50}
             iconCreateFunction={makeClusterIcon}
-            polygonOptions={{
-              fillColor: '#C4F278',
-              color: '#C4F278',
-              weight: 2,
-              opacity: 0.6,
-              fillOpacity: 0.15,
-            }}
+            polygonOptions={{ fillColor: '#C4F278', color: '#C4F278', weight: 2, opacity: 0.6, fillOpacity: 0.15 }}
           >
-            {placesData.map((place) => (
-              <Marker
-                key={place.id}
-                position={[place.coordinates.lat, place.coordinates.lng]}
-                icon={makeSvgIcon(place.category)}
-              >
-                <Popup>
-                  <PlacePopupContent place={place} />
-                </Popup>
-              </Marker>
-            ))}
+            {visible.map(renderMarker)}
           </MarkerClusterGroup>
         )}
-        {!markersOnly && <LocateButton />}
+        {!markersOnly && <LocateButton lifted={Boolean(selected)} />}
       </MapContainer>
-    </>
+
+      {!compact && (
+        <MapHeader
+          query={query}
+          onQueryChange={setQuery}
+          categories={categories}
+          activeCategory={category}
+          onCategoryChange={setCategory}
+          count={visible.length}
+        />
+      )}
+      {!compact && selected && <PlaceSheet place={selected} onClose={() => setSelected(null)} />}
+    </Box>
+  );
+}
+
+function PlaceSheet({ place, onClose }: { place: Place; onClose: () => void }) {
+  const color = CATEGORY_COLORS[place.category] || '#78909c';
+  const emoji = CATEGORY_EMOJIS[place.category] || '📍';
+  return (
+    <Box
+      role="dialog"
+      aria-label={place.name}
+      sx={{
+        position: 'absolute',
+        left: 14,
+        right: 14,
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 94px)',
+        mx: 'auto',
+        maxWidth: 400,
+        zIndex: 1100,
+        display: 'flex',
+        gap: 1.75,
+        alignItems: 'center',
+        p: 2,
+        borderRadius: '26px',
+        bgcolor: 'var(--md-surface)',
+        border: '1px solid var(--md-outline-variant)',
+        boxShadow: 'var(--md-shadow-card)',
+      }}
+    >
+      <Box
+        sx={{
+          width: 76, height: 76, flex: 'none', borderRadius: '20px', display: 'grid', placeItems: 'center', fontSize: 32,
+          bgcolor: `${color}26`, border: `1px solid ${color}55`,
+          ...(place.imageUrl && { background: `url("${place.imageUrl}") center/cover` }),
+        }}
+      >
+        {!place.imageUrl && emoji}
+      </Box>
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Typography component="h2" sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)', fontWeight: 700, fontSize: '1.1rem', lineHeight: 1.15, pr: 3 }}>
+          {place.name}
+        </Typography>
+        <Typography sx={{ fontSize: '0.78rem', color: 'text.secondary', mt: 0.25 }}>{place.category}</Typography>
+        {place.address && (
+          <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {place.address}
+          </Typography>
+        )}
+        <Box
+          component="a"
+          href={mapsLink(place)}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{
+            mt: 1, height: 36, px: 1.75, display: 'inline-flex', alignItems: 'center', gap: 0.75, borderRadius: '9999px',
+            fontWeight: 600, fontSize: '0.8rem', textDecoration: 'none', bgcolor: 'var(--md-primary)', color: 'var(--md-on-primary)',
+          }}
+        >
+          <NavigationIcon sx={{ fontSize: 16 }} />
+          Cómo llegar
+        </Box>
+      </Box>
+      <IconButton aria-label="Cerrar" onClick={onClose} size="small" sx={{ position: 'absolute', top: 10, right: 10, color: 'text.secondary' }}>
+        <CloseRoundedIcon fontSize="small" />
+      </IconButton>
+    </Box>
   );
 }
 
 function PlacePopupContent({ place }: { place: Place }) {
   const color = CATEGORY_COLORS[place.category] || '#78909c';
   const emoji = CATEGORY_EMOJIS[place.category] || '📍';
-
   return (
     <Box sx={{ minWidth: 200, maxWidth: 260 }}>
-      <Box
-        sx={{
-          height: 4,
-          bgcolor: color,
-          borderRadius: '12px 12px 0 0',
-        }}
-      />
+      <Box sx={{ height: 4, bgcolor: color }} />
       <Box sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              bgcolor: `${color}22`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16,
-              flexShrink: 0,
-              border: `1px solid ${color}44`,
-            }}
-          >
+          <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, border: `1px solid ${color}44` }}>
             {emoji}
           </Box>
-          <Typography
-            variant="subtitle2"
-            sx={{
-              fontWeight: 700,
-              color: '#E6E0E9',
-              fontSize: '0.9rem',
-              lineHeight: 1.3,
-            }}
-          >
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--md-on-surface)', fontSize: '0.9rem', lineHeight: 1.3 }}>
             {place.name}
           </Typography>
         </Box>
         {place.address && (
-          <Typography
-            variant="caption"
-            sx={{
-              display: 'block',
-              color: '#CAC4D0',
-              fontSize: '0.7rem',
-              mb: 0.5,
-            }}
-          >
+          <Typography variant="caption" sx={{ display: 'block', color: 'var(--md-on-surface-variant)', fontSize: '0.7rem', mb: 0.5 }}>
             {place.address}
           </Typography>
         )}
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            color: '#938F99',
-            fontSize: '0.7rem',
-            lineHeight: 1.4,
-          }}
-        >
+        <Typography variant="caption" sx={{ display: 'block', color: 'var(--md-outline)', fontSize: '0.7rem', lineHeight: 1.4 }}>
           {place.description}
         </Typography>
-        {place.link && (
-          <Box
-            component="a"
-            href={place.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              mt: 1,
-              fontSize: '0.75rem',
-              color: '#C4F278',
-              textDecoration: 'none',
-              '&:hover': { textDecoration: 'underline' },
-            }}
-          >
-            Abrir en Google Maps →
-          </Box>
-        )}
+        <Box component="a" href={mapsLink(place)} target="_blank" rel="noopener noreferrer"
+          sx={{ display: 'inline-flex', alignItems: 'center', mt: 1, fontSize: '0.75rem', color: 'var(--md-primary)', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+          Abrir en Google Maps →
+        </Box>
       </Box>
     </Box>
   );
 }
 
-function LocateButton() {
+function LocateButton({ lifted = false }: { lifted?: boolean }) {
   const map = useMap();
-
   const handleLocate = () => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        map.flyTo([pos.coords.latitude, pos.coords.longitude], 16, { duration: 1 });
-      },
+      (pos) => { map.flyTo([pos.coords.latitude, pos.coords.longitude], 16, { duration: 1 }); },
       () => {},
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
-
   return (
     <Fab
       size="small"
@@ -361,15 +370,16 @@ function LocateButton() {
       title="Centrar en mi ubicación"
       sx={{
         position: 'absolute',
-        bottom: 24,
+        bottom: lifted ? 'calc(env(safe-area-inset-bottom, 0px) + 214px)' : 'calc(env(safe-area-inset-bottom, 0px) + 94px)',
         right: 16,
         zIndex: 1000,
-        bgcolor: '#2B2930',
-        color: '#E6E0E9',
-        border: '1px solid #49454F',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-        transition: 'transform 180ms ease, background-color 180ms ease',
-        '&:hover': { bgcolor: '#36343B', transform: 'translateY(-2px)' },
+        bgcolor: 'var(--md-glass)',
+        color: 'var(--md-on-surface)',
+        border: '1px solid var(--md-outline-variant)',
+        backdropFilter: 'blur(16px)',
+        boxShadow: 'var(--md-shadow-card)',
+        transition: 'transform 180ms ease, bottom 200ms ease',
+        '&:hover': { bgcolor: 'var(--md-surface-high)', transform: 'translateY(-2px)' },
         '&:active': { transform: 'scale(0.96)' },
       }}
     >
@@ -403,12 +413,12 @@ export default function InteractiveMap({
         borderRadius: 2,
         overflow: 'hidden' as const,
         boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-        border: '1px solid #49454F',
+        border: '1px solid var(--md-outline-variant)',
       }
     : { position: 'fixed' as const, top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 };
 
   if (!mounted) {
-    return <Box sx={{ width: '100%', height: '100dvh', bgcolor: '#141218' }} />;
+    return <Box sx={{ width: '100%', height: '100dvh', bgcolor: 'var(--md-background)' }} />;
   }
 
   const mapEl = (

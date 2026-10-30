@@ -6,7 +6,6 @@ import NotificationsPanel from '@/components/home/NotificationsPanel';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import TuneIcon from '@mui/icons-material/Tune';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -43,87 +42,83 @@ export default function HeroSection() {
     };
   }, [isAuthenticated, user?.id]);
 
-  return (
-    <Box 
-      sx={{ 
-        py: { xs: 2, md: 3 },
-        position: 'relative'
-      }}
-    >
-      <Stack direction="row" spacing={2} alignItems="center">
-        {/* Parte Izquierda: Avatar, Campana y Saludo */}
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1, position: 'relative' }}>
-          <Box sx={{ position: 'relative', display: 'inline-block' }}>
-            <Link href={isAuthenticated ? "/perfil" : "/login"} passHref>
-              <Avatar
-                src={isAuthenticated ? user?.avatarUrl || defaultEggAvatar : undefined}
-                sx={{
-                  width: 48,
-                  height: 48,
-                  cursor: 'pointer',
-                  fontSize: user?.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? '1.5rem' : 'inherit',
-                  bgcolor: !isAuthenticated ? 'primary.main' : 'primary.light'
-                }}
-              >
-                {isAuthenticated && !user?.avatarUrl ? undefined :
-                 isAuthenticated && user?.avatarUrl && !user.avatarUrl.startsWith('data:') && user.avatarUrl !== defaultEggAvatar ? user.avatarUrl :
-                 !isAuthenticated ? undefined : null}
-              </Avatar>
-            </Link>
-            {/* Icono de campana sobre el avatar */}
-            {isAuthenticated && (
-              <IconButton
-                aria-label="notificaciones"
-                onClick={() => setModalOpen(true)}
-                sx={{
-                  position: 'absolute',
-                  top: -8,
-                  right: -8,
-                  bgcolor: 'background.paper',
-                  boxShadow: 2,
-                  zIndex: 2,
-                  p: 0.5,
-                }}
-                size="small"
-                title="Ver notificaciones"
-              >
-                <NotificationsOutlinedIcon color={modalOpen ? 'primary' : 'action'} fontSize="small" />
-              </IconButton>
-            )}
-            {/* Material 3 Dialog de notificaciones */}
-            <Material3Dialog
-              open={modalOpen}
-              onClose={() => setModalOpen(false)}
-              title="Notificaciones"
-              icon={<NotificationsOutlinedIcon />}
-              supportingText="Revisa tus notificaciones y actualizaciones importantes."
-              maxWidth="md"
-              fullWidth
-            >
-              <NotificationsPanel />
-            </Material3Dialog>
-          </Box>
-          <Box>
-            <Typography
-              component="h1"
-              variant="h4"
-              fontWeight={700}
-              sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)', lineHeight: 1.2 }}
-            >
-              {isAuthenticated && user ? `${getGreeting()}, ${user.name?.split(' ')[0] || 'estudiante'}` : getGreeting()}
-            </Typography>
-          </Box>
-        </Stack>
+  const firstName = isAuthenticated && user ? (user.name?.split(' ')[0] || 'estudiante') : '';
+  const dateLabel = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  const dateCap = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
 
-        {/* Parte Derecha: Iconos de Acción */}
+  const roundBtn = {
+    width: 44,
+    height: 44,
+    bgcolor: 'var(--md-surface)',
+    border: '1px solid var(--md-outline-variant)',
+    color: 'var(--md-on-surface)',
+    '&:hover': { bgcolor: 'var(--md-surface-high)' },
+  } as const;
+
+  return (
+    <Box component="header" sx={{ pt: 0.5, pb: 0.5 }}>
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        <Link href={isAuthenticated ? '/perfil' : '/login'} aria-label={isAuthenticated ? 'Ir a tu perfil' : 'Iniciar sesión'} style={{ display: 'inline-flex' }}>
+          <Avatar
+            src={isAuthenticated ? user?.avatarUrl || defaultEggAvatar : undefined}
+            variant="rounded"
+            sx={{
+              width: 46,
+              height: 46,
+              borderRadius: '16px',
+              bgcolor: 'var(--md-primary)',
+              color: 'var(--md-on-primary)',
+              fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
+              fontWeight: 800,
+              fontSize: 19,
+            }}
+          >
+            {firstName ? firstName.charAt(0).toUpperCase() : undefined}
+          </Avatar>
+        </Link>
+
+        <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+          <Typography
+            component="h1"
+            sx={{
+              fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
+              fontWeight: 700,
+              fontSize: '1.45rem',
+              lineHeight: 1.1,
+              letterSpacing: '-0.02em',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {firstName ? `${getGreeting()}, ${firstName}` : getGreeting()}
+          </Typography>
+          <Typography sx={{ mt: 0.25, fontSize: '0.8rem', color: 'text.secondary' }}>{dateCap}</Typography>
+        </Box>
+
         <Stack direction="row" spacing={1}>
-          <Link href="/ajustes" passHref>
-            <IconButton>
-              <TuneIcon sx={{ color: 'text.secondary' }} />
+          {isAuthenticated && (
+            <IconButton aria-label="Notificaciones" title="Ver notificaciones" onClick={() => setModalOpen(true)} sx={roundBtn}>
+              <NotificationsOutlinedIcon color={modalOpen ? 'primary' : 'inherit'} />
             </IconButton>
-          </Link>
+          )}
+          <IconButton component={Link} href="/ajustes" aria-label="Ajustes" sx={roundBtn}>
+            <TuneIcon />
+          </IconButton>
         </Stack>
       </Stack>
+
+      <Material3Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Notificaciones"
+        icon={<NotificationsOutlinedIcon />}
+        supportingText="Revisa tus notificaciones y actualizaciones importantes."
+        maxWidth="md"
+        fullWidth
+      >
+        <NotificationsPanel />
+      </Material3Dialog>
     </Box>
   );
 }

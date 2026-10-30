@@ -4,7 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useHaptics } from '@/hooks/useHaptics';
-import { Paper, BottomNavigation, BottomNavigationAction, Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import ExploreRoundedIcon from '@mui/icons-material/ExploreRounded';
@@ -66,114 +66,94 @@ export default function BottomNavBar() {
   ];
 
   return (
-    <Paper
-      elevation={0}
-      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
-      sx={{ 
-          position: 'fixed', 
-          bottom: 16, 
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'auto',
-          zIndex: 100,
-          borderRadius: '50px', // Fully rounded como en M3 Floating Toolbar
-          backgroundColor: theme => theme.palette.mode === 'dark' 
-            ? '#2D2D30' // Surface container color M3
-            : '#F3EDF7', // Surface container color M3
-          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08)', // Elevation 3 M3
-          // Deshabilitar selección de texto y arrastre en todo el navbar
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none',
-          WebkitTouchCallout: 'none',
-          WebkitTapHighlightColor: 'transparent',
-        }}
-      >
-        {/* 2. Usamos LayoutGroup para que Framer Motion pueda seguir la "burbuja" */}
-        <LayoutGroup>
-          <BottomNavigation
-            showLabels={false}
-            value={pathname}
-            sx={{ 
-              backgroundColor: 'transparent',
-              padding: '8px', // Padding interno M3 Floating Toolbar aumentado para más separación
-              position: 'relative',
-              minHeight: 48, // Altura compacta M3
-            }}
-          >
-            {navActions.map((action) => {
-              const isActive = pathname === action.value;
-              return (
-                <BottomNavigationAction
-                  key={action.value}
-                  component={Link}
-                  href={action.value}
-                  aria-label={action.label || action.value}
-                  value={action.value}
-                  icon={action.icon}
-                  onClick={() => tap()}
-                  sx={{
-                    position: 'relative',
-                    color: theme => isActive
-                      ? theme.palette.mode === 'dark' ? '#E8DEF8' : '#5A4570'
-                      : theme.palette.mode === 'dark' ? '#CAC4D0' : '#49454F',
-                    transition: 'all 0.15s cubic-bezier(0.2, 0, 0, 1)',
-                    zIndex: 2,
-                    minWidth: '48px',
-                    height: '48px',
-                    padding: '12px',
-                    borderRadius: '50%',
-                    margin: '0 4px',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      inset: '-4px',
-                      borderRadius: 'inherit',
-                    },
-                    '&:hover': {
-                      backgroundColor: theme => theme.palette.mode === 'dark'
-                        ? 'rgba(232, 222, 248, 0.08)'
-                        : 'rgba(90, 69, 112, 0.08)',
-                    },
-                    '&:active': {
-                      backgroundColor: theme => theme.palette.mode === 'dark'
-                        ? 'rgba(232, 222, 248, 0.12)'
-                        : 'rgba(90, 69, 112, 0.12)',
-                      transform: 'scale(0.95)',
-                    },
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    WebkitTapHighlightColor: 'transparent',
+    <Box
+      component="nav"
+      aria-label="Navegación principal"
+      onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); }}
+      sx={{
+        position: 'fixed',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        bottom: 'calc(14px + env(safe-area-inset-bottom, 0px))',
+        width: 'min(calc(100% - 32px), 400px)',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        p: '6px',
+        borderRadius: '9999px',
+        bgcolor: 'var(--md-glass)',
+        border: '1px solid var(--md-outline-variant)',
+        boxShadow: 'var(--md-shadow-card)',
+        backdropFilter: 'blur(22px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(22px) saturate(1.6)',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
+        WebkitTapHighlightColor: 'transparent',
+      }}
+    >
+      <LayoutGroup>
+        {navActions.map((action) => {
+          const isActive = pathname === action.value;
+          return (
+            <Box
+              key={action.value}
+              component={Link}
+              href={action.value}
+              aria-label={action.label || action.value}
+              aria-current={isActive ? 'page' : undefined}
+              onClick={() => tap()}
+              sx={{
+                position: 'relative',
+                flex: isActive ? 2.3 : 1,
+                height: 50,
+                minWidth: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                borderRadius: '9999px',
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '0.84rem',
+                whiteSpace: 'nowrap',
+                color: isActive ? 'var(--md-on-primary)' : 'var(--md-on-surface-variant)',
+                transition: 'flex 0.3s ease, color 0.2s ease',
+                WebkitTapHighlightColor: 'transparent',
+                '&:active': { transform: 'scale(0.96)' },
+                '&:focus-visible': { outline: '2px solid var(--md-azul)', outlineOffset: 2 },
+                '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+                '& svg': { position: 'relative', zIndex: 2, fontSize: 24 },
+              }}
+            >
+              {isActive && (
+                <motion.span
+                  layoutId="bubble"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    zIndex: 1,
+                    borderRadius: 9999,
+                    backgroundColor: 'var(--md-primary)',
                   }}
-                >
-                  {/* 3. Badge M3 Floating Toolbar - Estado activo */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="bubble"
-                      style={{
-                        position: 'absolute',
-                        zIndex: 1,
-                        backgroundColor: '#E8DEF8',
-                        borderRadius: '50%',
-                        inset: 0,
-                        transform: 'translateZ(0)',
-                        backfaceVisibility: 'hidden',
-                      }}
-                      transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
-                    />
-                  )}
-                </BottomNavigationAction>
-              );
-            })}
-
-            {/* Botón 'Más' para overflow */}
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
-              <MoreMenu overflowActions={overflowActions} tap={tap} pathname={pathname} />
+                  transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
+                />
+              )}
+              {action.icon}
+              {isActive && (
+                <Box component="span" sx={{ position: 'relative', zIndex: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {action.label}
+                </Box>
+              )}
             </Box>
-          </BottomNavigation>
-        </LayoutGroup>
-      </Paper>
+          );
+        })}
+        <Box sx={{ display: 'flex', alignItems: 'center', flex: '0 0 auto' }}>
+          <MoreMenu overflowActions={overflowActions} tap={tap} pathname={pathname} />
+        </Box>
+      </LayoutGroup>
+    </Box>
   );
 }
 
@@ -199,25 +179,23 @@ function MoreMenu({ overflowActions, tap, pathname }: { overflowActions: any[]; 
         onClick={handleOpen}
         size="medium"
         sx={{
-          color: theme => open
-            ? theme.palette.mode === 'dark' ? '#E8DEF8' : '#5A4570'
-            : theme.palette.mode === 'dark' ? '#CAC4D0' : '#49454F',
+          color: open ? 'var(--md-on-primary)' : 'var(--md-on-surface-variant)',
           zIndex: 2,
-          backgroundColor: open ? '#E8DEF8' : 'transparent',
+          backgroundColor: open ? 'var(--md-primary)' : 'transparent',
           borderRadius: '50%',
           margin: '0 1px',
           padding: '12px',
           minWidth: '48px',
-          height: '48px',
+          height: '50px',
           transition: 'all 0.15s cubic-bezier(0.2, 0, 0, 1)',
           '&:hover': {
             backgroundColor: theme => theme.palette.mode === 'dark'
-              ? 'rgba(232, 222, 248, 0.08)'
+              ? 'rgba(196, 242, 120, 0.1)'
               : 'rgba(90, 69, 112, 0.08)',
           },
           '&:active': {
             backgroundColor: theme => theme.palette.mode === 'dark'
-              ? 'rgba(232, 222, 248, 0.12)'
+              ? 'rgba(196, 242, 120, 0.16)'
               : 'rgba(90, 69, 112, 0.12)',
           },
           userSelect: 'none',

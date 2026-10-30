@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, Skeleton, FormControl, Select, MenuItem, Chip } from '@mui/material';
-import { EventNote as EventNoteIcon, LocationOn as LocationIcon, Schedule as ScheduleIcon } from '@mui/icons-material';
+import React from 'react';
+import { Box, Typography, Skeleton, FormControl, Select, MenuItem } from '@mui/material';
+import NavigationIcon from '@mui/icons-material/Navigation';
 import { useAuth } from '@/context/AuthContext';
 import { ErrorMessage, EmptyState } from '@/components/ui/DataStates';
 import Link from 'next/link';
@@ -24,11 +25,6 @@ interface SchoolEvent {
   who: string | null;
   isAllDay: boolean;
 }
-
-const EVENT_COLORS = [
-  '#4f6ef7', '#e8596f', '#20c997', '#f59f00',
-  '#748ffc', '#fab005', '#7950f2', '#12b886',
-];
 
 function formatTime(raw: string): string {
   try {
@@ -70,18 +66,19 @@ function daysUntil(raw: string): number {
   }
 }
 
-function getProgress(ev: SchoolEvent, now: Date): { pct: number; elapsed: number; total: number } {
-  try {
-    const start = new Date(ev.date).getTime();
-    const end = new Date(ev.endDate).getTime();
-    const current = now.getTime();
-    const total = end - start;
-    if (total <= 0) return { pct: 0, elapsed: 0, total: 0 };
-    const elapsed = Math.max(0, Math.min(total, current - start));
-    return { pct: Math.round((elapsed / total) * 100), elapsed, total };
-  } catch {
-    return { pct: 0, elapsed: 0, total: 0 };
-  }
+function photoFor(text: string): string | null {
+  const t = text.toLowerCase();
+  if (t.includes('alcázar') || t.includes('alcazar')) return encodeURI('/img/alcazar de sevilla.jpg');
+  if (t.includes('giralda') || t.includes('catedral')) return '/img/Giralda.jpg';
+  if (t.includes('plaza de españa') || t.includes('plaza espana')) return encodeURI('/img/plaza de españa.jpg');
+  return null;
+}
+
+function duration(ev: SchoolEvent): string {
+  const mins = Math.round((new Date(ev.endDate).getTime() - new Date(ev.date).getTime()) / 60000);
+  if (!isFinite(mins) || mins <= 0) return '';
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return h ? `${h} h${m ? ` ${m}` : ''}` : `${m} min`;
 }
 
 export default function ProgramaFormativoSection() {
@@ -148,33 +145,31 @@ export default function ProgramaFormativoSection() {
     fetchEvents();
   }, [selectedSchoolId]);
 
-  const selectedSchool = schools.find(s => s.id === selectedSchoolId);
+  const header = (title: string, right?: React.ReactNode) => (
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1.25, gap: 1, flexWrap: 'wrap' }}>
+      <Typography
+        component="h2"
+        sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)', fontWeight: 700, fontSize: '1.4rem', letterSpacing: '-0.02em' }}
+      >
+        {title}
+      </Typography>
+      {right}
+    </Box>
+  );
 
   if (loading) {
     return (
-      <Box sx={{ py: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, px: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <EventNoteIcon sx={{ color: 'primary.main' }} />
-            <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
-          </Box>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1.5, overflow: 'hidden', px: 2 }}>
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} variant="rectangular" width={240} height={160} sx={{ borderRadius: 3, flexShrink: 0 }} animation="wave" />
-          ))}
-        </Box>
+      <Box sx={{ py: 1.5 }}>
+        <Skeleton variant="rounded" height={250} sx={{ borderRadius: '28px' }} animation="wave" />
+        <Skeleton variant="rounded" height={64} sx={{ borderRadius: '22px', mt: 1.5 }} animation="wave" />
       </Box>
     );
   }
 
   if (!selectedSchoolId) {
     return (
-      <Box sx={{ py: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 2 }}>
-          <EventNoteIcon sx={{ color: 'primary.main' }} />
-          <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
-        </Box>
+      <Box sx={{ py: 1.5 }}>
+        {header('Programa formativo')}
         <EmptyState message="Selecciona una escuela para ver tu programa formativo" />
       </Box>
     );
@@ -182,194 +177,225 @@ export default function ProgramaFormativoSection() {
 
   if (error) {
     return (
-      <Box sx={{ py: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 2 }}>
-          <EventNoteIcon sx={{ color: 'primary.main' }} />
-          <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
-        </Box>
+      <Box sx={{ py: 1.5 }}>
+        {header('Programa formativo')}
         <ErrorMessage message={error} />
       </Box>
     );
   }
 
   const hasEvents = events.length > 0;
-  if (!hasEvents && !isAdmin) return (
-    <Box sx={{ py: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 2 }}>
-        <EventNoteIcon sx={{ color: 'primary.main' }} />
-        <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
+  if (!hasEvents && !isAdmin) {
+    return (
+      <Box sx={{ py: 1.5 }}>
+        {header('Programa formativo')}
+        <EmptyState message="No hay eventos programados para hoy" />
       </Box>
-      <EmptyState message="No hay eventos programados para hoy" />
-    </Box>
+    );
+  }
+
+  const adminSelect = isAdmin && schools.length > 0 && (
+    <FormControl size="small" sx={{ minWidth: 160, mb: 1.5 }}>
+      <Select
+        value={selectedSchoolId}
+        onChange={(e) => setSelectedSchoolId(e.target.value as number)}
+        sx={{ fontSize: '0.8rem', height: 36, borderRadius: '99px' }}
+      >
+        {schools.map(s => (
+          <MenuItem key={s.id} value={s.id} sx={{ fontSize: '0.8rem' }}>
+            {s.name}{s.city ? ` — ${s.city}` : ''}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 
+  const nowMs = now.getTime();
+  const statusOf = (ev: SchoolEvent): 'done' | 'live' | 'upcoming' => {
+    const start = new Date(ev.date).getTime();
+    const end = new Date(ev.endDate).getTime();
+    if (end <= nowMs) return 'done';
+    if (start <= nowMs) return 'live';
+    return 'upcoming';
+  };
+
+  const heroEvent = events.find(ev => statusOf(ev) !== 'done') ?? null;
+  const todayEvents = events.filter(ev => daysUntil(ev.date) === 0);
+  const listEvents = (todayEvents.length > 0 ? todayEvents : events.filter(ev => ev !== heroEvent)).slice(0, 5);
+  const listTitle = todayEvents.length > 0 ? 'Hoy' : 'Próximos';
+
+  let heroPill = '';
+  if (heroEvent) {
+    const st = statusOf(heroEvent);
+    if (st === 'live') heroPill = 'En curso ahora';
+    else {
+      const mins = Math.round((new Date(heroEvent.date).getTime() - nowMs) / 60000);
+      const d = daysUntil(heroEvent.date);
+      if (d === 0) heroPill = mins < 60 ? `Siguiente · en ${Math.max(mins, 1)} min` : `Siguiente · en ${Math.floor(mins / 60)} h ${mins % 60 ? `${mins % 60} min` : ''}`.trim();
+      else heroPill = d === 1 ? 'Mañana' : `En ${d} días`;
+    }
+  }
+  const heroPhoto = heroEvent ? photoFor(`${heroEvent.title} ${heroEvent.location ?? ''}`) : null;
+
+  const tagStyles = {
+    done: { label: 'Hecha', bg: 'var(--md-surface-high)', fg: 'var(--md-on-surface-variant)' },
+    live: { label: 'En curso', bg: 'var(--md-primary)', fg: 'var(--md-on-primary)' },
+    upcoming: { label: 'Próxima', bg: 'var(--md-surface-high)', fg: 'var(--md-on-surface)' },
+  } as const;
+
   return (
-    <Box sx={{ py: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, px: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-          <EventNoteIcon sx={{ color: 'primary.main' }} />
-          <Typography variant="h6" fontWeight="bold">Programa Formativo</Typography>
-        </Box>
+    <Box sx={{ py: 1.5, display: 'flex', flexDirection: 'column', gap: 1.75 }}>
+      {adminSelect}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {isAdmin && schools.length > 0 && (
-            <FormControl size="small" sx={{ minWidth: 160 }}>
-              <Select
-                value={selectedSchoolId}
-                onChange={(e) => setSelectedSchoolId(e.target.value as number)}
-                sx={{ fontSize: '0.8rem', height: 32, '& .MuiSelect-select': { py: 0.5 } }}
-              >
-                {schools.map(s => (
-                  <MenuItem key={s.id} value={s.id} sx={{ fontSize: '0.8rem' }}>
-                    {s.name}{s.city ? ` — ${s.city}` : ''}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-
-          <Link href="/programa" passHref style={{ textDecoration: 'none' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem' }}>
-              Ver todo
-            </Typography>
-          </Link>
-        </Box>
-      </Box>
-
-      {hasEvents && (
+      {heroEvent && (
         <Box
+          component="article"
           sx={{
+            position: 'relative',
+            overflow: 'hidden',
+            minHeight: 250,
+            borderRadius: '28px',
+            p: 2.25,
+            color: '#fff',
             display: 'flex',
-            gap: 1.5,
-            overflowX: 'auto',
-            pb: 1,
-            px: 2,
-            scrollSnapType: 'x mandatory',
-            '&::-webkit-scrollbar': { display: 'none' },
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            boxShadow: 'var(--md-shadow-card)',
+            background: heroPhoto
+              ? `#222 url("${heroPhoto}") center/cover`
+              : 'linear-gradient(135deg, #2F4A00, #5B7F1A 55%, #C4F278)',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(8,10,4,.88) 8%, rgba(8,10,4,.2) 62%, rgba(8,10,4,.05))',
+            },
+            '& > *': { position: 'relative' },
           }}
         >
-          {events.map((ev, i) => {
-            const color = EVENT_COLORS[i % EVENT_COLORS.length];
-            const days = daysUntil(ev.date);
-            const isToday = days === 0;
-            const progress = getProgress(ev, now);
-            const isFinished = progress.pct >= 100;
-            const isInProgress = progress.pct > 0 && progress.pct < 100;
-            const eventStart = formatTime(ev.date);
-            const eventEnd = formatTime(ev.endDate);
+          <Box
+            component="span"
+            sx={{
+              alignSelf: 'flex-start',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '7px',
+              px: 1.5,
+              py: 0.6,
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              borderRadius: '99px',
+              bgcolor: 'rgba(255,255,255,.2)',
+              border: '1px solid rgba(255,255,255,.28)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+          >
+            <Box component="b" sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'var(--md-primary)', boxShadow: '0 0 0 4px rgba(196,242,120,.3)' }} />
+            {heroPill}
+          </Box>
+          <Typography
+            component="h3"
+            sx={{
+              mt: 1.5,
+              mb: 0.75,
+              fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)',
+              fontWeight: 800,
+              fontSize: '1.9rem',
+              lineHeight: 1.04,
+              letterSpacing: '-0.02em',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {heroEvent.title}
+          </Typography>
+          <Typography sx={{ fontSize: '0.85rem', opacity: 0.9 }}>
+            {formatTime(heroEvent.date)}{heroEvent.endDate ? ` – ${formatTime(heroEvent.endDate)}` : ''}
+            {heroEvent.location ? ` · ${heroEvent.location}` : ''}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1.25, mt: 1.75 }}>
+            <Box
+              component={Link}
+              href="/mapa"
+              sx={{
+                height: 44, px: 2.25, display: 'inline-flex', alignItems: 'center', gap: 1,
+                borderRadius: '99px', fontWeight: 600, fontSize: '0.875rem', textDecoration: 'none',
+                bgcolor: 'var(--md-primary)', color: 'var(--md-on-primary)',
+              }}
+            >
+              <NavigationIcon sx={{ fontSize: 18 }} />
+              Cómo llegar
+            </Box>
+            <Box
+              component={Link}
+              href="/programa"
+              sx={{
+                height: 44, px: 2.25, display: 'inline-flex', alignItems: 'center',
+                borderRadius: '99px', fontWeight: 600, fontSize: '0.875rem', textDecoration: 'none', color: '#fff',
+                bgcolor: 'rgba(255,255,255,.18)', border: '1px solid rgba(255,255,255,.28)',
+                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+              }}
+            >
+              Detalles
+            </Box>
+          </Box>
+        </Box>
+      )}
 
-            return (
-              <Box
-                key={ev.id}
-                sx={{
-                  flexShrink: 0,
-                  width: 240,
-                  borderRadius: 3,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  overflow: 'hidden',
-                  scrollSnapAlign: 'start',
-                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                  '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
-                  '&:active': { transform: 'scale(0.97)' },
-                }}
-              >
-                {/* Time header */}
+      {listEvents.length > 0 && (
+        <Box>
+          {header(
+            listTitle,
+            <Link href="/programa" style={{ textDecoration: 'none' }}>
+              <Typography sx={{ fontWeight: 600, color: 'primary.main', fontSize: '0.8rem' }}>Ver programa</Typography>
+            </Link>
+          )}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {listEvents.map(ev => {
+              const st = statusOf(ev);
+              const tag = tagStyles[st];
+              const d = daysUntil(ev.date);
+              return (
                 <Box
+                  key={ev.id}
                   sx={{
-                    px: 2,
-                    py: 1.25,
-                    bgcolor: color,
-                    color: '#fff',
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    display: 'grid',
+                    gridTemplateColumns: '54px minmax(0,1fr) auto',
+                    gap: 1.5,
                     alignItems: 'center',
+                    p: '13px 14px',
+                    borderRadius: '22px',
+                    bgcolor: 'var(--md-surface)',
+                    border: '1px solid var(--md-outline-variant)',
+                    opacity: st === 'done' ? 0.65 : 1,
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                    <ScheduleIcon sx={{ fontSize: 14 }} />
-                    <Typography variant="caption" fontWeight={700}>
-                      {eventStart} — {eventEnd}
-                    </Typography>
+                  <Box sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)', fontWeight: 700, fontSize: '0.95rem', fontVariantNumeric: 'tabular-nums' }}>
+                    {ev.isAllDay ? 'Todo' : formatTime(ev.date)}
+                    <Box component="small" sx={{ display: 'block', fontFamily: 'var(--font-inter, Inter, sans-serif)', fontWeight: 500, fontSize: '0.68rem', color: 'text.secondary' }}>
+                      {d === 0 ? duration(ev) : formatDateShort(ev.date)}
+                    </Box>
                   </Box>
-                  <Chip
-                    label={isToday ? 'Hoy' : days === 1 ? 'Mañana' : `En ${days} d`}
-                    size="small"
-                    sx={{
-                      height: 20,
-                      fontSize: '0.6rem',
-                      fontWeight: 700,
-                      bgcolor: 'rgba(255,255,255,0.25)',
-                      color: '#fff',
-                      backdropFilter: 'blur(4px)',
-                    }}
-                  />
-                </Box>
-
-                {/* Content */}
-                <Box sx={{ p: 1.5 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight={700}
-                    sx={{
-                      lineHeight: 1.3,
-                      mb: 0.5,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {ev.title}
-                  </Typography>
-
-                  {ev.location && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, mb: 1 }}>
-                      <LocationIcon sx={{ fontSize: 13, color: 'text.secondary' }} />
-                      <Typography variant="caption" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: '0.92rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {ev.title}
+                    </Typography>
+                    {ev.location && (
+                      <Typography sx={{ fontSize: '0.78rem', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {ev.location}
                       </Typography>
-                    </Box>
-                  )}
-
-                  {/* Progress bar for today */}
-                  {isToday && (
-                    <Box sx={{ mt: 1 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 600, color: isFinished ? 'success.main' : isInProgress ? 'warning.main' : 'text.secondary' }}>
-                          {isFinished ? 'Completado' : isInProgress ? 'En curso' : 'Programado'}
-                        </Typography>
-                        <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 700, color: isFinished ? 'success.main' : color }}>
-                          {progress.pct}%
-                        </Typography>
-                      </Box>
-                      <Box sx={{ height: 3, bgcolor: 'action.hover', borderRadius: 2, overflow: 'hidden' }}>
-                        <Box
-                          sx={{
-                            height: '100%',
-                            width: `${progress.pct}%`,
-                            bgcolor: isFinished ? 'success.main' : color,
-                            borderRadius: 2,
-                            transition: 'width 1s ease',
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  )}
-
-                  {/* Future event date */}
-                  {!isToday && (
-                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
-                      {formatDateShort(ev.date)}
-                    </Typography>
-                  )}
+                    )}
+                  </Box>
+                  <Box component="span" sx={{ fontSize: '0.68rem', fontWeight: 600, px: 1.25, py: 0.5, borderRadius: '99px', bgcolor: tag.bg, color: tag.fg }}>
+                    {d === 0 || st !== 'upcoming' ? tag.label : d === 1 ? 'Mañana' : `En ${d} d`}
+                  </Box>
                 </Box>
-              </Box>
-            );
-          })}
+              );
+            })}
+          </Box>
         </Box>
       )}
     </Box>
