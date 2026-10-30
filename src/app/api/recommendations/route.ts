@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const lng = url.searchParams.get('lng');
     const query = url.searchParams.get('query') || 'restaurants';
     const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-    const category = url.searchParams.get('category') || '';
+    const categories = url.searchParams.get('categories') || url.searchParams.get('category') || 'restaurants';
 
     if (!lat || !lng) {
       return NextResponse.json({ ok: false, error: 'lat and lng query params are required' }, { status: 400 });
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const params = new URLSearchParams();
     params.set('latitude', lat);
     params.set('longitude', lng);
-    params.set('categories', category || 'restaurants');
+    params.set('categories', categories);
     params.set('limit', String(limit));
     if (query && query !== 'restaurants') {
       params.set('term', query);
