@@ -8,22 +8,25 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
 
 const DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-const EVENT_DAYS = [19, 22]; // days with event dots
-
-function buildWeekDays(today: number) {
-  const days: number[] = [];
-  const start = today - 3;
-  for (let i = 0; i < 7; i++) days.push(start + i);
-  return days;
+// Semana actual de lunes a domingo (usa fechas reales, también al cruzar de mes)
+function buildWeekDays(base: Date): Date[] {
+  const monday = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
 }
 
 export default function CalendarSection() {
   const theme = useTheme();
   const { t } = useTranslation();
-  const today = new Date().getDate();
+  const todayDate = new Date();
+  const today = todayDate.toDateString();
   const [selected, setSelected] = useState(today);
   const [expanded, setExpanded] = useState(false);
-  const days = buildWeekDays(today);
+  const days = buildWeekDays(todayDate);
 
   const monthLabel = new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
   const capitalised = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
@@ -56,51 +59,43 @@ export default function CalendarSection() {
         </Box>
       </Box>
 
-      {/* 7-day horizontal strip */}
-      <Box sx={{ display: 'flex', gap: '4px' }}>
-        {days.map((day, i) => {
-          const isSel = day === selected;
-          const isToday = day === today;
-          const hasEvent = EVENT_DAYS.includes(day);
+      {/* Tira de 7 días */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '6px' }}>
+        {days.map((date, i) => {
+          const key = date.toDateString();
+          const isSel = key === selected;
+          const isToday = key === today;
           return (
             <Box
-              key={day}
+              key={key}
               component="button"
-              onClick={() => setSelected(day)}
+              type="button"
+              aria-label={date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+              aria-pressed={isSel}
+              onClick={() => setSelected(key)}
               sx={{
-                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-                gap: '4px', py: 1, px: '2px',
-                borderRadius: '12px', cursor: 'pointer',
-                border: 'none', outline: 'none',
-                background: isSel
-                  ? 'primary.main'
-                  : 'transparent',
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: '2px', py: '9px', px: 0, minWidth: 0,
+                borderRadius: '18px', cursor: 'pointer',
+                border: '1px solid',
+                borderColor: isSel ? 'var(--md-on-surface)' : 'var(--md-outline-variant)',
+                bgcolor: isSel ? 'var(--md-on-surface)' : 'var(--md-surface)',
+                color: isSel ? 'var(--md-background)' : 'var(--md-on-surface)',
                 transition: 'background 150ms cubic-bezier(0.2,0,0,1)',
                 '&:active': { transform: 'scale(0.96)' },
+                '&:focus-visible': { outline: '2px solid var(--md-azul)', outlineOffset: 2 },
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: '0.65rem', fontWeight: 600, lineHeight: 1,
-                  color: isSel ? 'primary.contrastText' : 'text.secondary',
-                }}
-              >
+              <Typography component="span" sx={{ fontSize: '0.66rem', fontWeight: 600, lineHeight: 1.3, opacity: isSel ? 0.7 : 1, color: isSel ? 'inherit' : 'text.secondary' }}>
                 {DAY_LABELS[i]}
               </Typography>
               <Typography
-                variant="body2"
-                sx={{
-                  fontSize: '0.875rem', fontWeight: 700, lineHeight: 1,
-                  color: isSel ? 'primary.contrastText' : isToday ? 'primary.main' : 'text.primary',
-                }}
+                component="span"
+                sx={{ fontFamily: 'var(--font-bricolage, "Bricolage Grotesque", Inter, sans-serif)', fontSize: '1.05rem', fontWeight: 700, lineHeight: 1.2, color: 'inherit' }}
               >
-                {day}
+                {date.getDate()}
               </Typography>
-              <Box sx={{
-                width: 4, height: 4, borderRadius: '50%',
-                bgcolor: hasEvent ? (isSel ? 'primary.contrastText' : 'primary.main') : 'transparent',
-              }} />
+              <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: isToday ? 'var(--md-sun)' : 'transparent' }} />
             </Box>
           );
         })}

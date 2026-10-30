@@ -16,6 +16,7 @@ import loggerClient from '@/lib/loggerClient';
 import HeroSection from "@/components/home/HeroSection";
 import AnnouncementBanner from "@/components/home/AnnouncementBanner";
 import InlineBanner from '@/components/home/InlineBanner';
+import QuickBento from '@/components/home/QuickBento';
 
 function SectionSkeleton() {
   return (
@@ -95,12 +96,15 @@ export default function Home() {
             <ProgramaFormativoSection />
           </Suspense>
 
-          {/* 4. Calendario (planificación) */}
+          {/* 4. Accesos rápidos (bento) */}
+          <QuickBento />
+
+          {/* 5. Calendario (planificación) */}
           <Suspense fallback={<Skeleton variant="rectangular" height={140} sx={{ borderRadius: 2, my: 2 }} />}>
             <CalendarSection />
           </Suspense>
 
-          {/* 5. Info externa (recursos, menos prioritario) */}
+          {/* 6. Info externa (recursos, menos prioritario) */}
           <Suspense fallback={<Skeleton variant="rectangular" height={160} sx={{ borderRadius: 2, my: 2 }} />}>
             <ExternalInfoPanel />
           </Suspense>

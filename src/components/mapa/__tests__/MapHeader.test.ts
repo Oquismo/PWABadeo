@@ -9,7 +9,7 @@ describe('MapHeader', () => {
   it('introduces the city map and announces the available place count', () => {
     render(createElement(MapHeader));
 
-    expect(screen.getByRole('heading', { name: 'Descubre Sevilla' }).textContent).toBe('Descubre Sevilla');
+    expect(screen.getByRole('heading', { name: 'Explora Sevilla' }).textContent).toBe('Explora Sevilla');
     expect(screen.getByLabelText(`${placesData.length} lugares en el mapa`)).toBeDefined();
   });
 });
