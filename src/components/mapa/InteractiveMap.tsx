@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -11,7 +10,7 @@ import NavigationIcon from '@mui/icons-material/Navigation';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { placesData, Place } from '@/data/places';
 import MapHeader from './MapHeader';
-import { TILE_SERVERS } from './mapTiles';
+import { TILE_SERVERS, LABEL_TILES_URL, LABEL_TILES_MIN_ZOOM } from './mapTiles';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   Residencia: '🏠', Comida: '🍽️', Salud: '🏥', Transporte: '🚌', Metro: '🚇',
@@ -48,8 +47,8 @@ function mapsLink(place: Place): string {
 }
 
 const ZOOM_STYLES = `
-  .leaflet-container { background: #F3F5EC; font-family: var(--font-sans, Inter, sans-serif); }
-  .leaflet-tile { filter: saturate(0.82); }
+  .leaflet-container { background: #E9EDDD; font-family: var(--font-sans, Inter, sans-serif); }
+  .leaflet-tile { filter: saturate(0.8) contrast(0.96); }
   .leaflet-control-zoom {
     border: 1px solid var(--md-outline-variant) !important;
     border-radius: 9999px !important;
@@ -70,7 +69,7 @@ const ZOOM_STYLES = `
   }
   .leaflet-control-zoom a:hover { background: var(--md-surface-high) !important; color: var(--md-primary-text) !important; }
   .leaflet-control-zoom a.leaflet-disabled { color: var(--md-outline-variant) !important; }
-  .leaflet-top.leaflet-right { top: calc(env(safe-area-inset-top, 0px) + 300px); right: 6px; }
+  .leaflet-top.leaflet-right { top: 8px; right: 6px; }
   .leaflet-popup-content-wrapper {
     background: var(--md-surface) !important;
     border: 1px solid var(--md-outline-variant) !important;
@@ -154,13 +153,18 @@ function TileLayerFallback() {
   }, [serverIndex]);
 
   return (
-    <TileLayer
-      key={serverIndex}
-      url={server.url}
-      attribution={server.attribution}
-      maxZoom={server.maxZoom}
-      eventHandlers={{ tileerror: handleError }}
-    />
+    <>
+      <TileLayer
+        key={serverIndex}
+        url={server.url}
+        attribution={server.attribution}
+        maxZoom={server.maxZoom}
+        eventHandlers={{ tileerror: handleError }}
+      />
+      {serverIndex === 0 && (
+        <TileLayer url={LABEL_TILES_URL} minZoom={LABEL_TILES_MIN_ZOOM} maxZoom={server.maxZoom} opacity={0.85} />
+      )}
+    </>
   );
 }
 
@@ -209,48 +213,87 @@ function MapContent({ compact, markersOnly }: { compact: boolean; markersOnly: b
     </Marker>
   );
 
-  return (
-    <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-      <style>{ZOOM_STYLES}</style>
-      <MapContainer
-        center={center}
-        zoom={14}
-        className={compact ? 'leaflet-map-compact' : 'leaflet-map-fullscreen'}
-        style={{ width: '100%', height: '100%' }}
-        zoomControl={false}
-      >
-        <MapResizer />
-        <ZoomWatcher />
-        <TileLayerFallback />
-        {!compact && <ZoomControl position="topright" />}
-        {markersOnly ? (
-          visible.map(renderMarker)
-        ) : (
-          <MarkerClusterGroup
-            key={`${category}|${query}`}
-            chunkedLoading
-            spiderfyDistanceMultiplier={2}
-            maxClusterRadius={50}
-            iconCreateFunction={makeClusterIcon}
-            polygonOptions={{ fillColor: '#C4F278', color: '#C4F278', weight: 2, opacity: 0.6, fillOpacity: 0.15 }}
-          >
-            {visible.map(renderMarker)}
-          </MarkerClusterGroup>
-        )}
-        {!markersOnly && <LocateButton lifted={Boolean(selected)} />}
-      </MapContainer>
-
-      {!compact && (
-        <MapHeader
-          query={query}
-          onQueryChange={setQuery}
-          categories={categories}
-          activeCategory={category}
-          onCategoryChange={setCategory}
-          count={visible.length}
-        />
+  const mapView = (
+    <MapContainer
+      center={center}
+      zoom={14}
+      className={compact ? 'leaflet-map-compact' : 'leaflet-map-fullscreen'}
+      style={{ width: '100%', height: '100%' }}
+      zoomControl={false}
+    >
+      <MapResizer />
+      <ZoomWatcher />
+      <TileLayerFallback />
+      {!compact && <ZoomControl position="topright" />}
+      {markersOnly ? (
+        visible.map(renderMarker)
+      ) : (
+        <MarkerClusterGroup
+          key={`${category}|${query}`}
+          chunkedLoading
+          spiderfyDistanceMultiplier={2}
+          maxClusterRadius={50}
+          iconCreateFunction={makeClusterIcon}
+          polygonOptions={{ fillColor: '#C4F278', color: '#C4F278', weight: 2, opacity: 0.6, fillOpacity: 0.15 }}
+        >
+          {visible.map(renderMarker)}
+        </MarkerClusterGroup>
       )}
-      {!compact && selected && <PlaceSheet place={selected} onClose={() => setSelected(null)} />}
+      {!markersOnly && <LocateButton />}
+    </MapContainer>
+  );
+
+  if (compact) {
+    return (
+      <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+        <style>{ZOOM_STYLES}</style>
+        {mapView}
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        maxWidth: 560,
+        mx: 'auto',
+        px: 2,
+        pt: 1,
+        pb: 'calc(env(safe-area-inset-bottom, 0px) + 110px)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.75,
+      }}
+    >
+      <style>{ZOOM_STYLES}</style>
+      <MapHeader
+        query={query}
+        onQueryChange={setQuery}
+        categories={categories}
+        activeCategory={category}
+        onCategoryChange={setCategory}
+        count={visible.length}
+      />
+      <Box
+        sx={{
+          position: 'relative',
+          isolation: 'isolate',
+          height: 'clamp(320px, 56dvh, 560px)',
+          borderRadius: '30px',
+          overflow: 'hidden',
+          border: '1px solid var(--md-outline-variant)',
+          boxShadow: 'var(--md-shadow-card)',
+        }}
+      >
+        {mapView}
+      </Box>
+      {selected ? (
+        <PlaceSheet place={selected} onClose={() => setSelected(null)} />
+      ) : (
+        <Typography sx={{ textAlign: 'center', fontSize: '0.85rem', color: 'text.secondary' }}>
+          Toca un lugar del mapa para ver los detalles.
+        </Typography>
+      )}
     </Box>
   );
 }
@@ -263,13 +306,7 @@ function PlaceSheet({ place, onClose }: { place: Place; onClose: () => void }) {
       role="dialog"
       aria-label={place.name}
       sx={{
-        position: 'absolute',
-        left: 14,
-        right: 14,
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 94px)',
-        mx: 'auto',
-        maxWidth: 400,
-        zIndex: 1100,
+        position: 'relative',
         display: 'flex',
         gap: 1.75,
         alignItems: 'center',
@@ -352,7 +389,7 @@ function PlacePopupContent({ place }: { place: Place }) {
   );
 }
 
-function LocateButton({ lifted = false }: { lifted?: boolean }) {
+function LocateButton() {
   const map = useMap();
   const handleLocate = () => {
     navigator.geolocation.getCurrentPosition(
@@ -369,7 +406,7 @@ function LocateButton({ lifted = false }: { lifted?: boolean }) {
       title="Centrar en mi ubicación"
       sx={{
         position: 'absolute',
-        bottom: lifted ? 'calc(env(safe-area-inset-bottom, 0px) + 214px)' : 'calc(env(safe-area-inset-bottom, 0px) + 94px)',
+        bottom: 16,
         right: 16,
         zIndex: 1000,
         bgcolor: 'var(--md-glass)',
@@ -388,7 +425,6 @@ function LocateButton({ lifted = false }: { lifted?: boolean }) {
 }
 
 export default function InteractiveMap({
-  selectedPlace,
   compact = false,
   height = '100dvh',
   markersOnly = false,
@@ -404,34 +440,27 @@ export default function InteractiveMap({
     setMounted(true);
   }, []);
 
-  const containerStyle = compact
-    ? {
+  if (!compact) {
+    return mounted ? (
+      <MapContent compact={false} markersOnly={markersOnly} />
+    ) : (
+      <Box sx={{ width: '100%', height: 420 }} />
+    );
+  }
+
+  return (
+    <Box
+      sx={{
         width: '100%',
         height: typeof height === 'number' ? `${height}px` : height,
-        position: 'relative' as const,
+        position: 'relative',
         borderRadius: 2,
-        overflow: 'hidden' as const,
-        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+        overflow: 'hidden',
+        boxShadow: 'var(--md-shadow-card)',
         border: '1px solid var(--md-outline-variant)',
-      }
-    : { position: 'fixed' as const, top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 };
-
-  if (!mounted) {
-    return <Box sx={{ width: '100%', height: '100dvh', bgcolor: 'var(--md-background)' }} />;
-  }
-
-  const mapEl = (
-    <Box sx={containerStyle}>
-      <MapContent
-        compact={compact}
-        markersOnly={markersOnly}
-      />
+      }}
+    >
+      {mounted && <MapContent compact markersOnly={markersOnly} />}
     </Box>
   );
-
-  if (!compact) {
-    return createPortal(mapEl, document.body);
-  }
-
-  return mapEl;
 }

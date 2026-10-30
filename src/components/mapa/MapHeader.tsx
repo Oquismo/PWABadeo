@@ -25,77 +25,26 @@ export default function MapHeader({
   count = placesData.length,
 }: MapHeaderProps) {
   return (
-    <Box
-      component="section"
-      aria-label="Mapa de Sevilla"
-      sx={{
-        position: 'absolute',
-        top: 'calc(env(safe-area-inset-top, 0px) + 76px)',
-        left: { xs: 14, sm: 24 },
-        right: { xs: 14, sm: 'auto' },
-        width: { xs: 'auto', sm: 400 },
-        zIndex: 1000,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.25,
-        pointerEvents: 'none',
-      }}
-    >
-      <Box
-        className="map-header-card"
-        sx={{
-          pointerEvents: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          p: 1.25,
-          pl: 2,
-          borderRadius: '9999px',
-          bgcolor: 'var(--md-glass)',
-          border: '1px solid var(--md-outline-variant)',
-          boxShadow: 'var(--md-shadow-card)',
-          backdropFilter: 'blur(22px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(22px) saturate(1.6)',
-        }}
-      >
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography component="p" sx={{ m: 0, color: 'primary.main', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.16em', lineHeight: 1.4 }}>
-            MI ERASMUS · SEVILLA
-          </Typography>
-          <Typography component="h1" sx={{ m: 0, fontFamily: display, fontWeight: 700, fontSize: '1.2rem', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
-            Explora Sevilla
-          </Typography>
-        </Box>
-        <Box
-          component="span"
-          aria-label={`${count} lugares en el mapa`}
-          sx={{
-            flex: '0 0 auto',
-            minWidth: 56,
-            height: 44,
-            px: 1.5,
-            display: 'grid',
-            placeItems: 'center',
-            borderRadius: '9999px',
-            bgcolor: 'var(--md-primary)',
-            color: 'var(--md-on-primary)',
-            fontWeight: 800,
-            fontSize: '0.9rem',
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {count}
-        </Box>
+    <Box component="section" aria-label="Mapa de Sevilla" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Box className="map-header-card">
+        <Typography component="h1" sx={{ m: 0, fontFamily: display, fontWeight: 700, fontSize: '1.45rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+          Explora Sevilla
+        </Typography>
+        <Typography component="p" sx={{ m: 0, mt: 0.25, fontSize: '0.8rem', color: 'text.secondary' }}>
+          <Box component="span" aria-label={`${count} lugares en el mapa`} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+            {count} lugares
+          </Box>
+          {' · Todo cerca de tu residencia'}
+        </Typography>
       </Box>
 
       {onQueryChange && (
         <Box
           sx={{
-            pointerEvents: 'auto',
             display: 'flex',
             alignItems: 'center',
             gap: 1.25,
-            height: 48,
+            height: 50,
             px: 2,
             borderRadius: '9999px',
             bgcolor: 'var(--md-surface)',
@@ -123,7 +72,6 @@ export default function MapHeader({
           role="group"
           aria-label="Filtrar por categoría"
           sx={{
-            pointerEvents: 'auto',
             display: 'flex',
             gap: 1,
             overflowX: 'auto',
