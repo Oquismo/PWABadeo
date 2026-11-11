@@ -263,9 +263,20 @@ describe('revisión Teamup nov. 2026', () => {
     expect(extractSchoolName('Visita IES HÍSPALIS')).toBe('IES Hispalis');
   });
 
-  it('distingue Unitre Santa Lucia de Unitre Fossano', () => {
-    expect(extractSchoolNames('UNITRÉ SANTA LUCIA GROUP 1')).toEqual(['Unitre Santa Lucia']);
-    expect(extractSchoolNames('UNITRE ARCHEOLOGIA (CARLOS)')).toEqual(['Unitre Fossano']);
+  it('todos los grupos Unitre van a la escuela Unitre', () => {
+    expect(extractSchoolNames('UNITRÉ SANTA LUCIA GROUP 1')).toEqual(['Unitre']);
+    expect(extractSchoolNames('UNITRE ARCHEOLOGIA (CARLOS)')).toEqual(['Unitre']);
+    expect(extractSchoolNames('TOUR ALCÁZAR+CATEDRAL UNITRÉ (IRENE)')).toEqual(['Unitre']);
+  });
+
+  it('aprende etiquetas de proyecto del propio feed', () => {
+    const ev = (uid: string, summary: string) => `BEGIN:VEVENT\r\nUID:${uid}\r\nSUMMARY:${summary}\r\nDTSTART;VALUE=DATE:20261110\r\nDTEND;VALUE=DATE:20261111\r\nEND:VEVENT\r\n`;
+    const ics = `BEGIN:VCALENDAR\r\n${ev('w', 'WELCOME BÚLGAROS (MUSIC WITHOUT BORDERS)')}${ev('m', '[MUSIC WITHOUT BORDERS] MUSIC LAB')}`
+      + `${ev('t', 'TOUR BÚLGAROS (IRE)')}${ev('x', 'Reunión equipo (IRE)')}END:VCALENDAR\r\n`;
+    const byUid = Object.fromEntries(parseICS(ics).map((e) => [e.uid, e.schoolNames]));
+    expect(byUid.m).toEqual(['Bulgaros']);
+    // Las etiquetas de una sola palabra son personas del equipo: no se aprenden
+    expect(byUid.x).toBeUndefined();
   });
 
   it('mapea las escuelas nuevas', () => {

@@ -244,9 +244,8 @@ const SCHOOL_MAP: Array<[string, string, string[]?]> = [
 
   ['celleti', 'Celleti'],
 
-  ['unitre santa lucia', 'Unitre Santa Lucia'],
-  ['unitre', 'Unitre Fossano', ['santa lucia']],
-  ['unitre fossano', 'Unitre Fossano'],
+  // Todos los grupos Unitre (Santa Lucia, Archeologia, Fossano…) van a una sola escuela
+  ['unitre', 'Unitre'],
 
   ['conservatorio', 'Conservatorio Guerrero'],
   ['guerrero', 'Conservatorio Guerrero'],
@@ -521,7 +520,6 @@ export function parseICS(content: string): ParsedEvent[] {
     if (!dtStart || isNaN(dtStart.getTime())) continue;
 
     const schoolNames = extractSchoolNames(summary);
-    if (schoolNames.length === 0) continue;
 
     const programType = getProgramType(summary);
 
@@ -542,7 +540,47 @@ export function parseICS(content: string): ParsedEvent[] {
     });
   }
 
-  return events;
+  // Segunda pasada: eventos sin escuela que llevan una etiqueta ya vista junto a una escuela.
+  const learned = learnTagSchools(events);
+  for (const ev of events) {
+    if (ev.schoolNames.length > 0 || isCallOrInterview(ev.summary)) continue;
+    const school = extractTags(ev.summary).map((t) => learned.get(t)).find(Boolean);
+    if (school) ev.schoolNames = [school];
+  }
+
+  return events.filter((ev) => ev.schoolNames.length > 0);
+}
+
+/**
+ * Etiquetas entre [] o () de un título, normalizadas.
+ * Solo cuentan las de 2+ palabras: "(IRE)", "(CARLOS)" o "(MG)" son personas del equipo.
+ */
+export function extractTags(summary: string): string[] {
+  const tags: string[] = [];
+  for (const m of normalizeText(summary).matchAll(/[[(]([^\])]+)[\])]/g)) {
+    const tag = m[1].replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (tag.split(' ').length >= 2 && tag.replace(/ /g, '').length >= 6) tags.push(tag);
+  }
+  return tags;
+}
+
+/**
+ * Aprende del propio feed qué etiqueta corresponde a qué escuela: p. ej.
+ * "WELCOME BÚLGAROS (MUSIC WITHOUT BORDERS)" enseña que "[MUSIC WITHOUT BORDERS] MUSIC LAB"
+ * es de Bulgaros. Una etiqueta que aparece con varias escuelas distintas se descarta.
+ */
+function learnTagSchools(events: ParsedEvent[]): Map<string, string> {
+  const seen = new Map<string, Set<string>>();
+  for (const ev of events) {
+    if (ev.schoolNames.length !== 1) continue;
+    for (const tag of extractTags(ev.summary)) {
+      if (!seen.has(tag)) seen.set(tag, new Set());
+      seen.get(tag)!.add(ev.schoolNames[0]);
+    }
+  }
+  const learned = new Map<string, string>();
+  for (const [tag, schools] of seen) if (schools.size === 1) learned.set(tag, [...schools][0]);
+  return learned;
 }
 
 function cleanICSText(text: string): string {

@@ -256,13 +256,13 @@ object Api {
         LogItem(it.optString("action"), it.optJSONObject("user")?.str("email"), parseDate(it.str("createdAt")))
     } ?: emptyList()
 
-    /** Lee el ICS de Teamup en el servidor (60 días atrás y 120 adelante). Puede tardar: timeout de 3 min. */
+    /** Lee el ICS de Teamup en el servidor (próximos 7 días). Puede tardar: timeout de 3 min. */
     suspend fun syncCalendar(): String {
         val r = call("POST", "/api/admin/schools/sync-ics", JSONObject(), timeoutMs = 180_000)
         val res = r.optJSONObject("results") ?: return r.optString("message", "Sincronización completada")
         val schools = res.optJSONArray("schools")?.length() ?: 0
         return "Calendario sincronizado con Teamup: $schools escuelas · ${res.optInt("eventsCreated")} eventos nuevos, " +
-            "${res.optInt("eventsUpdated")} actualizados, ${res.optInt("eventsDeleted")} antiguos eliminados" +
+            "${res.optInt("eventsUpdated")} actualizados, ${res.optInt("eventsDeleted")} pasados eliminados" +
             (if (res.optInt("schoolsCreated") > 0) " · ${res.optInt("schoolsCreated")} escuelas nuevas" else "")
     }
 

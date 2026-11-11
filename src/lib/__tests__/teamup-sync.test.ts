@@ -17,8 +17,8 @@ vi.mock('@/lib/db', () => ({
       }),
     },
     schoolEvent: {
-      findMany: vi.fn(async ({ where }: { where: { endDate: { gte: Date } } }) =>
-        db.events.filter((e) => (e.endDate as Date) >= where.endDate.gte)),
+      findMany: vi.fn(async ({ where }: { where: { endDate: { gt: Date } } }) =>
+        db.events.filter((e) => (e.endDate as Date) > where.endDate.gt)),
       update: vi.fn(async ({ where, data }: { where: { id: number }; data: Record<string, unknown> }) => {
         const e = db.events.find((x) => x.id === where.id)!;
         Object.assign(e, data);
@@ -28,10 +28,10 @@ vi.mock('@/lib/db', () => ({
         data.forEach((d) => db.events.push({ ...d, id: db.nextId++ }));
         return { count: data.length };
       }),
-      deleteMany: vi.fn(async ({ where }: { where: { id?: { in: number[] }; endDate?: { lt: Date } } }) => {
+      deleteMany: vi.fn(async ({ where }: { where: { id?: { in: number[] }; endDate?: { lte: Date } } }) => {
         const before = db.events.length;
         db.events = db.events.filter((e) =>
-          where.id ? !where.id.in.includes(e.id as number) : !((e.endDate as Date) < where.endDate!.lt));
+          where.id ? !where.id.in.includes(e.id as number) : !((e.endDate as Date) <= where.endDate!.lte));
         return { count: before - db.events.length };
       }),
     },
@@ -63,16 +63,26 @@ describe('syncTeamupEvents', () => {
     db.events = [];
   });
 
-  it('importa pasado reciente, futuro lejano y eventos de varios días en curso', async () => {
+  it('solo guarda los próximos 7 días (más lo que sigue en curso)', async () => {
     mockFeed(feed([
       { uid: 'past', summary: 'Minzoni - clase', start: day(-30), end: day(-29) },
-      { uid: 'future', summary: 'Minzoni - clase', start: day(90), end: day(91) },
+      { uid: 'yesterday', summary: 'Minzoni - clase', start: day(-1), end: day(0) },
+      { uid: 'week', summary: 'Minzoni - clase', start: day(3), end: day(4) },
+      { uid: 'later', summary: 'Minzoni - clase', start: day(10), end: day(11) },
       { uid: 'ongoing', summary: 'Minzoni - movilidad', start: day(-3), end: day(4) },
-      { uid: 'tooold', summary: 'Minzoni - clase', start: day(-200), end: day(-199) },
     ]));
     const r = await syncTeamupEvents(() => {});
-    expect(db.events.map((e) => e.uid).sort()).toEqual(['future::1', 'ongoing::1', 'past::1']);
-    expect(r.eventsCreated).toBe(3);
+    expect(db.events.map((e) => e.uid).sort()).toEqual(['ongoing::1', 'week::1']);
+    expect(r.eventsCreated).toBe(2);
+  });
+
+  it('una semana sin eventos vacía el calendario', async () => {
+    mockFeed(feed([{ uid: 'a', summary: 'Minzoni - clase', start: day(1), end: day(2) }]));
+    await syncTeamupEvents(() => {});
+    mockFeed(feed([{ uid: 'b', summary: 'Minzoni - clase', start: day(20), end: day(21) }]));
+    const r = await syncTeamupEvents(() => {});
+    expect(r.eventsObsolete).toBe(1);
+    expect(db.events).toHaveLength(0);
   });
 
   it('no reescribe lo que no ha cambiado, actualiza lo cambiado y borra lo que desaparece', async () => {

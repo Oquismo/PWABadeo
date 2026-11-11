@@ -6,10 +6,8 @@ import { parseICS, type ParsedEvent } from '@/lib/ics-parser';
 
 export const TEAMUP_ICS_URL = 'https://ics.teamup.com/feed/ksampdkmv21a529vhx/0.ics';
 
-/** Días hacia atrás que se conservan (progreso del programa, filtro "Pasados"). */
-export const SYNC_PAST_DAYS = 60;
-/** Días hacia delante que se importan. */
-export const SYNC_FUTURE_DAYS = 120;
+/** Solo se muestra la semana: de hoy a 7 días. Lo anterior y lo posterior no se guarda. */
+export const SYNC_DAYS = 7;
 
 const PROGRAM_SUFFIXES = ['VET', 'ADU', 'PCTO', 'Job Shadowing', 'Short'];
 
@@ -21,9 +19,9 @@ export interface SyncResults {
   eventsCreated: number;
   eventsUpdated: number;
   eventsUnchanged: number;
-  /** Eventos anteriores a la ventana (más de SYNC_PAST_DAYS días) eliminados. */
+  /** Eventos ya terminados (antes de hoy) eliminados. */
   eventsDeleted: number;
-  /** Eventos dentro de la ventana que ya no están en Teamup, eliminados. */
+  /** Eventos que ya no están en Teamup o quedan fuera de los 7 días, eliminados. */
   eventsObsolete: number;
   totalEvents: number;
   window: { from: string; to: string };
@@ -81,23 +79,26 @@ export async function syncTeamupEvents(log: (msg: string) => void = console.log)
   }
   const parsedEvents = parseICS(icsContent);
   log(`[teamup-sync] ${parsedEvents.length} eventos de escuelas en el feed`);
+  // Un feed sin ningún evento (Teamup caído o vacío) borraría todo: mejor no tocar nada.
+  // Una semana sin eventos (vacaciones) sí es válida y deja el calendario vacío.
+  if (parsedEvents.length === 0) {
+    throw new SyncError('El feed de Teamup no tiene eventos; no se toca nada', 502);
+  }
 
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
-  const windowStart = new Date(today.getTime() - SYNC_PAST_DAYS * 86_400_000);
-  const windowEnd = new Date(today.getTime() + SYNC_FUTURE_DAYS * 86_400_000);
+  const windowStart = today;
+  const windowEnd = new Date(today.getTime() + SYNC_DAYS * 86_400_000);
 
-  // Incluye eventos de varios días que empezaron antes de la ventana pero siguen en ella.
-  const windowEvents = parsedEvents.filter((ev) => ev.dtEnd >= windowStart && ev.dtStart < windowEnd);
+  // Incluye eventos de varios días que empezaron antes de hoy pero siguen en curso.
+  // (DTEND de un evento de día entero es exclusivo: el de ayer termina hoy a las 00:00 y no cuenta.)
+  const windowEvents = parsedEvents.filter((ev) => ev.dtEnd > windowStart && ev.dtStart < windowEnd);
   log(`[teamup-sync] ${windowEvents.length} eventos entre ${windowStart.toISOString()} y ${windowEnd.toISOString()}`);
 
-  // Un feed sin eventos borraría todo el calendario: mejor no tocar nada.
-  if (windowEvents.length === 0) {
-    throw new SyncError('El feed de Teamup no tiene eventos en la ventana; no se toca nada', 502);
-  }
+
 
   const allSchools: School[] = await prisma.school.findMany({ select: { id: true, name: true } });
-  const existing = await prisma.schoolEvent.findMany({ where: { endDate: { gte: windowStart } } });
+  const existing = await prisma.schoolEvent.findMany({ where: { endDate: { gt: windowStart } } });
   const existingByUid = new Map(existing.map((e) => [e.uid, e]));
 
   const results: SyncResults = {
@@ -170,8 +171,8 @@ export async function syncTeamupEvents(log: (msg: string) => void = console.log)
     results.eventsObsolete = del.count;
   }
 
-  // Lo que ya terminó hace más de SYNC_PAST_DAYS días sale de la base de datos.
-  const old = await prisma.schoolEvent.deleteMany({ where: { endDate: { lt: windowStart } } });
+  // Lo que ya terminó sale de la base de datos.
+  const old = await prisma.schoolEvent.deleteMany({ where: { endDate: { lte: windowStart } } });
   results.eventsDeleted = old.count;
 
   for (const [schoolId, count] of schoolEventCounts) {
