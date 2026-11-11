@@ -217,7 +217,7 @@ export default function ProgramaFormativo() {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Typography variant="body2" color="text.secondary">
-              {activeSchools} escuelas activas · {totalEvents} eventos (próximos 7 días)
+              {activeSchools} escuelas activas · {totalEvents} eventos próximos (se sincroniza a diario: 60 días atrás y 120 adelante)
             </Typography>
             {lastSync && (
               <Chip

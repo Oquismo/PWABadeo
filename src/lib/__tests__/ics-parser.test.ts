@@ -250,3 +250,37 @@ END:VCALENDAR`;
     expect(events[0].description).toBe('Clase de marketing digital\nTema: Redes sociales');
   });
 });
+
+describe('revisión Teamup nov. 2026', () => {
+  it('convierte TZID=Europe/Madrid a UTC con horario de invierno y verano', () => {
+    const ics = (dt: string) => `BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:tz-${dt}\r\nSUMMARY:Minzoni - Clase\r\nDTSTART;TZID=Europe/Madrid:${dt}\r\nDTEND;TZID=Europe/Madrid:${dt}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n`;
+    expect(parseICS(ics('20261111T093000'))[0].dtStart.toISOString()).toBe('2026-11-11T08:30:00.000Z');
+    expect(parseICS(ics('20260615T093000'))[0].dtStart.toISOString()).toBe('2026-06-15T07:30:00.000Z');
+  });
+
+  it('ignora acentos al buscar la escuela', () => {
+    expect(extractSchoolName('WELCOME + TOUR BÚLGAROS CENTRO HISTÓRICO')).toBe('Bulgaros');
+    expect(extractSchoolName('Visita IES HÍSPALIS')).toBe('IES Hispalis');
+  });
+
+  it('distingue Unitre Santa Lucia de Unitre Fossano', () => {
+    expect(extractSchoolNames('UNITRÉ SANTA LUCIA GROUP 1')).toEqual(['Unitre Santa Lucia']);
+    expect(extractSchoolNames('UNITRE ARCHEOLOGIA (CARLOS)')).toEqual(['Unitre Fossano']);
+  });
+
+  it('mapea las escuelas nuevas', () => {
+    expect(extractSchoolName('IC MONSIGNOR PASQUALE GUERRIERO- SCH 2026 - JS*10')).toBe('IC Mons. Pasquale Guerriero');
+    expect(extractSchoolName('Welcome session Righi short *2')).toBe('Liceo Scientifico Statale Augusto Righi');
+    expect(extractSchoolName('RUSOLILLO  SCH 2026 - GROUP 18')).toBe('Russolillo');
+  });
+
+  it('separa los flujos de Leopardi (también el I)', () => {
+    expect(extractSchoolName('IC LEOPARDI - SCH 2026 - Job Shadowing - I FLUSSO')).toBe('IC Leopardi I');
+    expect(extractSchoolName('IC LEOPARDI - SCH 2026 - III FLUSSO')).toBe('IC Leopardi III');
+  });
+
+  it('no importa llamadas ni entrevistas aunque nombren una escuela', () => {
+    expect(extractSchoolNames('Call pre partenza Righi')).toEqual([]);
+    expect(extractSchoolNames('Entrevista Filangieri')).toEqual([]);
+  });
+});

@@ -15,9 +15,11 @@ export interface ParsedEvent {
   program: string; // Program type: 'VET' | 'ADU' | 'PCTO' | 'Job Shadowing' | 'Short' | ''
 }
 
-// Each entry: [pattern to match in summary (lowercase), canonical school name]
+// Each entry: [pattern to match in summary (lowercase, sin acentos), canonical school name, exclusions?]
+// Patterns and summaries are compared without accents ("UNITRÉ" == "unitre").
+// An entry is ignored when the summary contains any of its exclusions.
 // Order matters: more specific patterns first
-const SCHOOL_MAP: Array<[string, string]> = [
+const SCHOOL_MAP: Array<[string, string, string[]?]> = [
   // Multi-school events - match the first school
   ['giovanni cena', 'Giovanni Cena'],
   ['gobetti', 'Maristas Gobetti'],
@@ -242,7 +244,8 @@ const SCHOOL_MAP: Array<[string, string]> = [
 
   ['celleti', 'Celleti'],
 
-  ['unitre', 'Unitre Fossano'],
+  ['unitre santa lucia', 'Unitre Santa Lucia'],
+  ['unitre', 'Unitre Fossano', ['santa lucia']],
   ['unitre fossano', 'Unitre Fossano'],
 
   ['conservatorio', 'Conservatorio Guerrero'],
@@ -288,7 +291,33 @@ const SCHOOL_MAP: Array<[string, string]> = [
 
   ['de sanctis lacedonia', 'DE SANCTIS LACEDONIA'],
   ['lacedonia', 'DE SANCTIS LACEDONIA'],
+
+  // Escuelas 2026/27 que no estaban mapeadas (revisión del feed de nov. 2026)
+  ['mazzacolamarino', 'IC Mazzacolamarino'],
+  ['pasquale guerriero', 'IC Mons. Pasquale Guerriero'],
+  ['guerriero', 'IC Mons. Pasquale Guerriero', ['conservatorio']],
+  ['galileo galilei', 'Liceo Galileo Galilei'],
+  ['liceo de carlo', 'Liceo De Carlo'],
+  ['de carlo', 'Liceo De Carlo'],
+  ['seneca', 'Seneca'],
+  ['righi', 'Liceo Scientifico Statale Augusto Righi'],
+  ['caporale', 'Gaetano Caporale'],
+  ['leopardi', 'IC Leopardi'],
+  ['pertini', 'IS Pertini Lioni Caposele'],
+  ['volta nopli', 'Volta Nopli'],
+  ['rusolillo', 'Russolillo'],
 ];
+
+/** Minúsculas y sin acentos/diacríticos, para comparar títulos de Teamup. */
+export function normalizeText(text: string): string {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+/** Llamadas y entrevistas son tareas internas del equipo aunque nombren una escuela. */
+function isCallOrInterview(summary: string): boolean {
+  const lower = normalizeText(summary).trim().replace(/^\[fatto\]\s*/, '');
+  return /^(call|llamada|videochiamata)\b/.test(lower) || lower.includes('entrevista') || lower.includes('intervista');
+}
 
 // Patterns that indicate internal/non-school events (should be skipped)
 // IMPORTANT: School matching runs FIRST, so these only apply to events without a school name
@@ -318,7 +347,7 @@ const INTERNAL_PATTERNS = [
 
 // Check if event is internal (not a school event)
 function isInternalEvent(summary: string): boolean {
-  const lower = summary.toLowerCase();
+  const lower = normalizeText(summary);
 
   // Skip calls
   if (lower.startsWith('call ') || lower.includes('[fatto] call')) {
@@ -394,6 +423,11 @@ function getProgramType(summary: string): { name: string; matched: boolean } {
 // Keyed by base school name (lowercase), each entry has ordered regex patterns (longer match first).
 // When a flux code is found, it replaces the generic program type as the differentiator.
 const SCHOOL_FLUX_PATTERNS: Record<string, RegExp[]> = {
+  // Leopardi: solo cuando el título dice explícitamente "I/II/III FLUSSO"
+  'ic leopardi': [
+    /\b(VI|V|IV|III|II|I)\s+FLUSSO\b/i,
+    /\bFLUSSO\s+[-]?\s*(VI|V|IV|III|II|I)\b/i,
+  ],
   'minzoni': [
     // Primary: match roman numeral associated with FLUSSO keyword
     /\b(VI|V|IV|III|II|I)\s+FLUSSO\b/i,
@@ -409,11 +443,13 @@ const SCHOOL_FLUX_PATTERNS: Record<string, RegExp[]> = {
 };
 
 export function extractSchoolNames(summary: string): string[] {
-  const lowerSummary = summary.toLowerCase();
+  if (isCallOrInterview(summary)) return [];
+  const lowerSummary = normalizeText(summary);
   const found = new Set<string>();
 
-  for (const [pattern, baseName] of SCHOOL_MAP) {
-    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const [pattern, baseName, exclusions] of SCHOOL_MAP) {
+    if (exclusions?.some(x => lowerSummary.includes(x))) continue;
+    const escapedPattern = normalizeText(pattern).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedPattern, 'i');
     if (!regex.test(lowerSummary)) continue;
 
@@ -428,7 +464,7 @@ export function extractSchoolNames(summary: string): string[] {
         if (m) {
           const flux = m[1].toUpperCase();
           // Avoid duplicates (e.g., report "Minzoni V" if already "Minzoni V")
-          if (!baseLower.includes(flux.toLowerCase())) {
+          if (!new RegExp(`\\b${flux}\\b`, 'i').test(baseName)) {
             resolved = `${baseName} ${flux}`;
           }
           break;
@@ -543,7 +579,7 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const year = parseInt(datePart.substring(0, 4));
     const month = parseInt(datePart.substring(4, 6)) - 1;
     const day = parseInt(datePart.substring(6, 8));
-    return new Date(year, month, day);
+    return new Date(Date.UTC(year, month, day));
   }
 
   // Handle TZID format: DTSTART;TZID=Europe/Madrid:20251211T093000
@@ -560,20 +596,7 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const tzMatch = dateStr.match(/TZID=([^;:]+)/);
     const tzid = tzMatch ? tzMatch[1] : 'Europe/Madrid';
     
-    // Build ISO string and parse with timezone
-    const isoStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
-    
-    try {
-      // Try to parse with timezone info
-      const date = new Date(`${isoStr} ${tzid}`);
-      if (!isNaN(date.getTime())) {
-        return date;
-      }
-    } catch {
-      // Fallback to local time
-    }
-    
-    return new Date(year, month, day, hour, minute, second);
+    return zonedTimeToUtc(year, month, day, hour, minute, second, tzid);
   }
 
   // Handle simple format: YYYYMMDDTHHMMSS
@@ -592,8 +615,32 @@ function parseICSDate(dateStr: string, isAllDay: boolean): Date | null {
     const year = parseInt(dateStr.substring(0, 4));
     const month = parseInt(dateStr.substring(4, 6)) - 1;
     const day = parseInt(dateStr.substring(6, 8));
-    return new Date(year, month, day);
+    return new Date(Date.UTC(year, month, day));
   }
 
   return null;
+}
+
+/** Diferencia (ms) entre la hora de pared en `timeZone` y UTC en el instante `ts`. */
+function tzOffsetMs(ts: number, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone, hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).formatToParts(new Date(ts));
+  const get = (t: string) => Number(parts.find(p => p.type === t)?.value);
+  return Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second')) - ts;
+}
+
+/**
+ * Convierte una hora local de `timeZone` (p. ej. 09:30 en Europe/Madrid) al instante UTC correcto,
+ * respetando horario de verano. Si la zona no es válida, se usa Europe/Madrid.
+ */
+export function zonedTimeToUtc(year: number, month: number, day: number, hour: number, minute: number, second: number, timeZone: string): Date {
+  let tz = timeZone;
+  try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); } catch { tz = 'Europe/Madrid'; }
+  const wall = Date.UTC(year, month, day, hour, minute, second);
+  let ts = wall - tzOffsetMs(wall, tz);
+  // Segunda pasada por si el primer cálculo cae al otro lado de un cambio de hora
+  ts = wall - tzOffsetMs(ts, tz);
+  return new Date(ts);
 }
