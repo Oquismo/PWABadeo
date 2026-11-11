@@ -96,7 +96,7 @@ private fun ProgramaAdmin() {
     var open by rememberSaveable { mutableStateOf<String?>(null) }
     val overview = rememberLoad { Api.calendarOverview() }
     val run = runAction { msg = it; busy = false; overview.reload() }
-    Text("Lee el calendario de Teamup y actualiza los eventos de los próximos 7 días de todas las escuelas. Puede tardar hasta un minuto.", style = AppType.Body, color = Palette.Muted)
+    Text("Lee el calendario de Teamup y actualiza los eventos de todas las escuelas (60 días atrás y 120 adelante). Se hace solo cada mañana. Puede tardar hasta un minuto.", style = AppType.Body, color = Palette.Muted)
     LimeButton(if (busy) "Sincronizando con Teamup…" else "Refrescar calendario", Icons.Rounded.Sync) {
         if (!busy) { busy = true; msg = null; run { Api.syncCalendar() } }
     }

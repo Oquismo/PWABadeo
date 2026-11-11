@@ -216,11 +216,16 @@ object Api {
         School(it.getInt("id"), it.getString("name"), it.str("country"))
     }?.sortedBy { it.name } ?: emptyList()
 
-    suspend fun register(firstName: String, lastName: String, email: String, password: String, age: String, schoolId: Int?, residence: String?, country: String, city: String): User {
+    /** Mismo código que la web (src/app/registro/page.tsx y /api/auth/register). */
+    const val ADMIN_CODE = "ADMIN2025"
+
+    suspend fun register(firstName: String, lastName: String, email: String, password: String, age: String, schoolId: Int?, residence: String?, country: String, city: String, adminCode: String? = null): User {
         val b = JSONObject().put("firstName", firstName).put("lastName", lastName).put("name", "$firstName $lastName".trim())
             .put("email", email.trim()).put("password", password).put("country", country).put("city", city)
         if (age.isNotBlank()) b.put("age", age)
-        schoolId?.let { b.put("schoolId", it) }
+        val isAdmin = adminCode == ADMIN_CODE
+        if (isAdmin) b.put("isAdmin", true).put("adminCode", adminCode)
+        else schoolId?.let { b.put("schoolId", it) }
         residence?.let { b.put("residence", it) }
         val r = withContext(Dispatchers.IO) { raw("POST", "/api/auth/register", b) }
         if (r.first >= 400) throw ApiError(runCatching { JSONObject(r.second).optString("error") }.getOrNull()?.ifBlank { null } ?: "Error ${r.first}")
@@ -251,13 +256,13 @@ object Api {
         LogItem(it.optString("action"), it.optJSONObject("user")?.str("email"), parseDate(it.str("createdAt")))
     } ?: emptyList()
 
-    /** Lee el ICS de Teamup en el servidor (próximos 7 días). Puede tardar: timeout de 3 min. */
+    /** Lee el ICS de Teamup en el servidor (60 días atrás y 120 adelante). Puede tardar: timeout de 3 min. */
     suspend fun syncCalendar(): String {
         val r = call("POST", "/api/admin/schools/sync-ics", JSONObject(), timeoutMs = 180_000)
         val res = r.optJSONObject("results") ?: return r.optString("message", "Sincronización completada")
         val schools = res.optJSONArray("schools")?.length() ?: 0
         return "Calendario sincronizado con Teamup: $schools escuelas · ${res.optInt("eventsCreated")} eventos nuevos, " +
-            "${res.optInt("eventsUpdated")} actualizados, ${res.optInt("eventsDeleted")} pasados eliminados" +
+            "${res.optInt("eventsUpdated")} actualizados, ${res.optInt("eventsDeleted")} antiguos eliminados" +
             (if (res.optInt("schoolsCreated") > 0) " · ${res.optInt("schoolsCreated")} escuelas nuevas" else "")
     }
 

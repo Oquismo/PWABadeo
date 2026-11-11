@@ -163,6 +163,8 @@ private fun RegisterScreen(onBack: () -> Unit) {
     var city by rememberSaveable { mutableStateOf("") }
     var schoolId by rememberSaveable { mutableStateOf<Int?>(null) }
     var residence by rememberSaveable { mutableStateOf<String?>(null) }
+    var adminCode by rememberSaveable { mutableStateOf("") }
+    val isAdmin = adminCode == Api.ADMIN_CODE
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val schools = es.almaaura.mierasmus.ui.components.rememberLoad { Api.schools() }
@@ -176,6 +178,9 @@ private fun RegisterScreen(onBack: () -> Unit) {
         Field(country, { country = it }, "País")
         Field(city, { city = it }, "Ciudad")
 
+        if (isAdmin) {
+            Text("🔐 Modo administrador: no hace falta elegir escuela", style = AppType.Body, color = Palette.Lime)
+        } else {
         Text("ESCUELA", style = AppType.Overline, color = Palette.Muted)
         es.almaaura.mierasmus.ui.components.LoadView(schools) { list ->
             var expanded by remember { mutableStateOf(false) }
@@ -191,6 +196,7 @@ private fun RegisterScreen(onBack: () -> Unit) {
                 }
             }
         }
+        }
 
         Text("RESIDENCIA", style = AppType.Overline, color = Palette.Muted)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -202,12 +208,18 @@ private fun RegisterScreen(onBack: () -> Unit) {
             }
         }
 
+        Field(adminCode, { adminCode = it.trim() }, "Código de administrador (opcional)")
+        Text(
+            if (isAdmin) "✅ Registro como admin activado" else "Déjalo vacío para un registro normal",
+            style = AppType.Caption, color = if (isAdmin) Palette.Lime else Palette.Muted,
+        )
+
         error?.let { Text(it, style = AppType.Body, color = Palette.Danger) }
         val ok = first.isNotBlank() && email.contains("@") && pass.length >= 6
         PrimaryButton("Crear cuenta", ok, loading) {
             loading = true; error = null
             scope.launch {
-                try { Session.user = Api.register(first.trim(), last.trim(), email, pass, age, schoolId, residence, country.trim(), city.trim()) }
+                try { Session.user = Api.register(first.trim(), last.trim(), email, pass, age, schoolId, residence, country.trim(), city.trim(), adminCode.ifBlank { null }) }
                 catch (e: Exception) { error = e.message ?: "Sin conexión" }
                 loading = false
             }
