@@ -39,7 +39,7 @@ export interface School {
 export interface UserBase {
   id: number;
   email: string;
-  role: 'admin' | 'user' | 'USER' | 'ADMIN';
+  role: 'admin' | 'user' | 'USER' | 'ADMIN' | 'demo';
   firstName?: string;
   lastName?: string;
   name?: string;

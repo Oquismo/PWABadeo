@@ -28,6 +28,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import loggerClient from '@/lib/loggerClient';
 
 import { UserBase } from '@/types/api.types';
+import { useDemoLogin, isDemoUiEnabled } from '@/components/demo/useDemoLogin';
 
 function LoginForm() {
   const router = useRouter();
@@ -38,6 +39,17 @@ function LoginForm() {
   
   const { value: showPassword, toggle: toggleShowPassword } = useToggle(false);
   const [remember, setRemember] = useState(true);
+  const { startDemo, loading: demoLoading, error: demoError } = useDemoLogin();
+
+  async function handleDemo() {
+    const ok = await startDemo();
+    if (ok) {
+      await hapticSuccess();
+      router.push('/');
+    } else {
+      await hapticError();
+    }
+  }
 
   const {
     values,
@@ -239,6 +251,30 @@ function LoginForm() {
         >
           {isSubmitting ? 'Iniciando sesión...' : (t('login.submit') || 'Iniciar sesión')}
         </Button>
+
+        {isDemoUiEnabled && !isAdminOnly && (
+          <>
+            <Button
+              type="button"
+              fullWidth
+              variant="outlined"
+              onClick={handleDemo}
+              disabled={demoLoading || isSubmitting}
+              sx={{
+                height: 48, borderRadius: '9999px', fontWeight: 700, fontSize: '0.95rem',
+                textTransform: 'none', borderWidth: 1.5,
+                '&:hover': { borderWidth: 1.5 },
+              }}
+            >
+              {demoLoading ? 'Preparando la demo...' : 'Probar la demo sin registrarse'}
+            </Button>
+            {demoError && (
+              <Typography color="error" variant="body2" sx={{ textAlign: 'center' }}>
+                {demoError}
+              </Typography>
+            )}
+          </>
+        )}
 
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 1, fontSize: '0.8rem' }}>
           ¿No tienes cuenta?{' '}

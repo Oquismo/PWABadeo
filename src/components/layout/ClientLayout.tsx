@@ -24,6 +24,7 @@ import SplashScreen from '@/components/layout/SplashScreen';
 import InstallPrompt from '@/components/layout/InstallPrompt';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import ClientTopBarWrapper from '@/components/layout/ClientTopBarWrapper';
+import DemoBanner from '@/components/demo/DemoBanner';
 
 function PrivacyDialog({ open, onAccept }: { open: boolean; onAccept: () => void }) {
   const theme = useTheme();
@@ -150,6 +151,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   </Box>
 
                   <BottomNavBar />
+                  <DemoBanner />
                   <ConnectionMonitor />
                   <OfflineNotice />
                 </Box>

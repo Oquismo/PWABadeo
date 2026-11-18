@@ -98,7 +98,8 @@ export async function syncTeamupEvents(log: (msg: string) => void = console.log)
 
 
   const allSchools: School[] = await prisma.school.findMany({ select: { id: true, name: true } });
-  const existing = await prisma.schoolEvent.findMany({ where: { endDate: { gt: windowStart } } });
+  // Los eventos del modo demo (uid 'demo-…') no vienen de Teamup: se excluyen del espejo.
+  const existing = await prisma.schoolEvent.findMany({ where: { endDate: { gt: windowStart }, NOT: { uid: { startsWith: 'demo-' } } } });
   const existingByUid = new Map(existing.map((e) => [e.uid, e]));
 
   const results: SyncResults = {
